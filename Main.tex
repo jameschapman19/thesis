@@ -1,0 +1,187 @@
+
+% ------------------ DOCUMENT SETUP ------------------ 
+% The document class defines the document type (report) and sets the font size (10pt)
+\documentclass{report}
+\author{James Chapman}
+
+% Inputs the Document Packages
+\input{_Packages}
+
+% Controls how many subsections the document can take
+%  and how many of those will get put into the contents pages.
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+
+% Places a dot after Chapter/Section/Subsection number in Table of Contents
+\renewcommand{\cftchapaftersnum}{.}
+\renewcommand{\cftsecaftersnum}{.}
+\renewcommand{\cftsubsecaftersnum}{.}
+
+%  Customize Dot spacing in Table of Contents/List of Figures/Tables
+\renewcommand{\cftdotsep}{0.3}
+
+% Numeration Type for Chapters and Sections (Roman I, II, II / Arabic 1, 2, 3)
+\renewcommand\thechapter{\Roman{chapter}}
+\renewcommand\thesection{\arabic{section}}
+
+% Formatting Table of Contents/Lists titles
+\renewcommand{\contentsname}{\normalfont\bfseries\LARGE{CONTENTS}}
+\renewcommand{\listfigurename}{\normalfont\bfseries\LARGE{LIST OF FIGURES}}
+\renewcommand{\listtablename}{\normalfont\bfseries\LARGE{LIST OF TABLES}}
+
+
+% Title Formatting customization
+\titleformat{\chapter}{\normalfont\bfseries\LARGE}{\thechapter.}{1em}{\MakeUppercase}
+
+\titleformat{\section}{\normalfont\bfseries\large}{\thesection.}{1em}{\MakeUppercase}
+\titlespacing*{\section} {0pt} {15pt} {15pt} % left, before, after
+
+\titleformat{\subsection}{\normalfont\bfseries\large}{\thesubsection.}{1em}{}
+\titlespacing*{\subsection} {0pt} {10pt} {10pt}
+
+\titleformat{\subsubsection}{\normalfont\bfseries\large}{}{1em}{}
+\titlespacing*{\subsubsection} {0pt} {10pt} {10pt}
+
+
+% HEADER AND FOOTER
+\pagestyle{fancy}  % Set Page Style (Header and Footer Style)
+\fancyhf{}  % Clears the header and footer (from the default info)
+
+% Header
+\renewcommand{\headrulewidth}{0pt}  % Removes the default Horizontal Line in Header
+\fancyhead[L]{James Chapman}
+\fancyhead[R]{January 2022}
+
+% Footer
+\fancyfoot[C]{\thepage} % Page Number
+
+% Change figure numbering per section
+\numberwithin{figure}{chapter}
+\numberwithin{table}{section}
+
+
+
+
+
+
+%  -------------------------------------------------
+%  --------- The document starts from here --------- 
+%  -------------------------------------------------
+
+\begin{document}
+
+% ------------------  TITLE PAGE -------------------
+\begin{titlepage}
+\begin{center}
+    % Title
+    {\LARGE\textbf{Towards Scalable, Flexible, and Interpretable Self-Supervised Learning from Multiview Biomedical Data}
+\author{James Chapman\\
+    % Subtitle
+    \\}}
+
+    \vspace{0.8cm}
+    by\\
+    \vspace{0.8cm}
+
+    % Author
+    {\LARGE\textbf{James Chapman\\}}
+    % Date
+    \vspace{1.5cm}
+    {\LARGE\textbf{January 2022}}
+
+    \vfill
+
+    \textbf{\setstretch{2.0}       
+    Upgrade Report\\
+    \vspace{1cm}
+    i4health CDT\\
+    University College London\\}
+
+    \vspace{2cm}
+\end{center}
+\end{titlepage}
+
+
+% ----------------------  ABSTRACT -----------------------
+\newpage
+\chapter*{Abstract} % the Asterix (*) indicates that this section will be added to the table of contents but no number will be present beside it.
+% \addcontentsline{toc}{chapter}{Abstract}
+
+Biomedical data are essential for advancing our knowledge and practice of medicine and healthcare. However, biomedical data are also challenging to analyze due to their complexity, heterogeneity, high-dimensionality, and scarcity of labels. To overcome these challenges, self-supervised learning (SSL) has emerged as a promising paradigm for learning from unlabeled data by leveraging inherent structures or patterns in the data. SSL methods can exploit different forms of supervision signals derived from the data itself, such as contrastive learning, reconstruction, prediction, or clustering. SSL methods can also benefit from deep neural networks that can learn expressive and flexible representations from complex and high-dimensional data.
+
+In this thesis, we focus on a specific type of SSL problem, namely multiview SSL, where data are represented by multiple distinct feature groups or modalities that describe the same phenomenon or entity. Each feature group or modality is referred to as a view, and different views may provide complementary or redundant information. Multiview SSL aims to learn useful representations from multiview data by exploiting the inherent structures or patterns across views. Multiview SSL has a wide range of applications in biomedical domains, such as integrating multiple types of genomic data for disease diagnosis or prognosis, generating natural language descriptions from brain images, and understanding human behaviors during social interactions based on multimodal signals.
+
+In this thesis, we propose novel approaches to multiview SSL that are scalable, flexible, and interpretable. We address the following research questions:How can we reformulate classical subspace learning methods as unconstrained optimization problems that can be solved by gradient descent? How can we extend classical subspace learning methods to nonlinear functions using deep neural networks? How can we incorporate different forms of regularization or prior knowledge into subspace learning methods to improve their quality or robustness?
+
+To answer these questions, we develop novel methods for multiview subspace learning that leverage mathematical optimization techniques, deep neural networks, regularization techniques. We evaluate our methods on various real-world biomedical datasets and demonstrate their effectiveness and advantages over existing methods.
+
+% ----------------------  IMPACT STATEMENT -----------------------
+\newpage
+\chapter*{Impact Statement} % the Asterix (*) indicates that this section will be added to the table of contents but no number will be present beside it.
+% \addcontentsline{toc}{chapter}{Impact}
+
+This thesis contributes to the advancement of machine learning and biomedical data analysis by developing novel methods for multiview self-supervised learning that are scalable, flexible, and interpretable. The proposed methods can help researchers and practitioners to analyze complex and high-dimensional biomedical data more efficiently and effectively, and to discover new insights and opportunities for improving health outcomes. The proposed methods can also be applied to other domains where multiview data are available or desirable, such as natural language processing, computer vision, multimedia analysis, and social network analysis. This thesis also provides a valuable reference for future research on multiview self-supervised learning and related topics.
+
+% -----------------  ACKNOWLEDGEMENTS  -------------------
+\newpage
+\include{chapters/acknowledgements}
+
+
+% -------------------  LIST OF Publication ---------------------
+\newpage
+\include{chapters/publications/publications}
+
+% -------------------  LIST OF FIGURES --------------------
+\newpage 
+% {\let\oldnumberline\numberline       % Uncomment to add the word 'Figure' to figure number in List of Figures
+%\renewcommand{\numberline}{\figurename~\oldnumberline}  
+\listoffigures%
+% \addcontentsline{toc}{chapter}{List of Figures} % Add List of figures into contents without any numeration 
+
+% -------------------  LIST OF TABLES ---------------------
+\newpage
+\listoftables 
+% \addcontentsline{toc}{chapter}{List of Tables} % Add List of tables into contents without any numeration 
+
+% -------------------  ACRONYMS ---------------------
+\newpage
+
+% -------------------  NOTATION ---------------------
+\newpage
+
+
+% ------------------  TABLE OF CONTENTS --------------------
+\tableofcontents 
+
+
+%\textbf{Keywords:} Machine Learning, Neuroimaging, Canonical Correlation Analysis
+
+
+
+% ------------------  CHAPTER START  --------------------
+\include{chapters/introduction/introduction}
+
+\include{chapters/background/background}
+
+\include{chapters/gradientgep/gradientgep}
+
+\include{chapters/regularised/regularised}
+
+\include{chapters/deep/deep}
+
+\include{chapters/sampleselection/sampleselection}
+
+\include{chapters/conclusion}
+
+\include{chapters/software/software}
+
+% -------------------  BIBLIOGRAPHY ---------------------
+\newpage
+\addcontentsline{toc}{chapter}{References} % Adds References Section to Table of Contents
+\printbibliography[title = {References}]
+
+
+\end{document}
+%  -------------------------------------------------
+%  --------- The document ends from here ----------- 
+%  -------------------------------------------------
