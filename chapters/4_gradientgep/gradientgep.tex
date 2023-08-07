@@ -1,18 +1,38 @@
-\chapter{Gradient Descent Based Formulations of Generalized Eigenvalue Problems for Multiview Subspace Learning: A Novel and Efficient Approach to Multiview Dimensionality Reduction}
-\label{gradient descent}
+\chapter{Gradient Descent Based Formulations of Generalized Eigenvalue Problems for Multiview Subspace Learning: A Novel and Efficient Approach to Multiview Dimensionality Reduction}\label{gradient descent}
 
 The content of this chapter is based on a preprint paper where I am first author. I have extensively rewritten here in order to focus on the stochastic solution of Generalized Eigenvalue Problems. I initiated the project based on heuristic arguments and contacted coauthors Ana Lawry Aguila (who provided and analysed the UK Biobank data) and Lennie Wells (who provided extensive mathematical proofs which are in the appenix of this PhD thesis for the interest of the reader). Both of my coauthors helped me to revise the manuscript.
 
-\section{Introduction}
+\section{Introduction} %Introduce the problem statement and its importance
 
-using standard full batch algorithms to solve GEPs becomes very expensive with large-scale data, both in terms of memory and compute. This limits their applicability to many interesting modern datasets.
-Therefore, there has been great interest in approximating the solution to these problems in the stochastic or data-streaming setting \cite{arora2012stochastic}.
+\textit{How can we effectively implement Canonical Correlation Analysis (CCA) using gradient descent and subsequently enhance its performance and scalability via stochastic gradient descent, laying a foundation for the application of proximal gradient descent in regularisation?}
 
-\section{Background and Related Work}
+Subspace learning methodologies, such as Principal Component Analysis (PCA) \cite{hotelling1933analysis}, Partial Least Squares (PLS) \cite{haenlein2004beginner}, Linear Discriminant Analysis (LDA), and Canonical Correlation Analysis (CCA) \cite{hotelling1992relations}, have been cornerstones in various fields including computer vision, neuroimaging \cite{Krishnan2011}, finance \cite{cassel2000measurement}, and imaging genetics \cite{Hansen2021}. These techniques all essentially operate as generalized eigenvalue problems (GEPs), seeking low-dimensional linear transformations of data to maximize certain objectives.
 
-\textbf{Stochastic GEPs}
-Several methods have been proposed for solving GEPs with SGD.
-\cite{arora2017stochastic} developed a Matrix Stochastic Gradient (MSG) method for finding the top-k CCA subspace, however its tractability relies on using minibatches of size 1. \cite{chen2019constrained} proposed a subspace Generalized Hebbian Algorithm (SGHA) which requires Lagrange multipliers. \cite{xie2015scale} propose a similar class of algorithms, but which estimate directions sequentially rather than as a subspace; \cite{chapman2022generalized} show there are also pseudo-objective based methods corresponding to this class of algorithms. More recently, the EigenGame line of work \cite{gemp20,gemp2021} has reframed the top-k subspace problem as a competitive game between components and recently extended the work to GEPs \cite{gemp2022generalized}. To our knowledge these are the state-of-the-art. However, there has been extensive other work tackling the top-1 problem in the stochastic CCA as well as stochastic PCA and PLS \cite{arora2012stochastic,arora2016stochastic,arora2017stochastic}.
+The caveat, however, is the computational intensity and high memory demands when employing standard full batch algorithms to solve GEPs in the context of large-scale data. This constraint has fueled the interest towards developing approximations to these solutions in stochastic or data-streaming settings \cite{arora2012stochastic}.
+
+Within the gamut of subspace learning techniques, CCA stands out as the most intricate, converting a pair of data views into highly correlated representations. Recent developments such as Deep CCA (DCCA) \cite{andrew2013deep} have demonstrated efficacy in extracting non-linear representations from multiview data, but their training is challenging in a stochastic setting \cite{wang2015stochastic}.
+
+Addressing these challenges, this chapter aims to answer two key research questions. First, we explore how CCA can be effectively solved using gradient descent. This paves the way for the introduction of regularisation in the subsequent chapters, where we will adopt proximal gradient descent as a method to build regularised CCA models. Second, we aim to scale our CCA method for large-scale medical datasets using stochastic gradient descent. This approach becomes critical in situations where it's infeasible to load all the data into memory or when the associated calculations are prohibitively slow.
+
+To this end, we propose a principled framework for subspace learning and Self-Supervised Learning (SSL), grounded on an innovative unconstrained characterization of the optimal subspaces of GEPs, proposition \ref{prop:EY-charac}. The subsequent sections of this chapter will validate the effectiveness and scalability of our proposed framework across a variety of tasks and datasets, demonstrating faster convergence and better correlation performance on stochastic CCA benchmarks. Furthermore, we will present a unique real-world application through a stochastic PLS analysis on an extremely high-dimensional biomedical dataset.
+
+Ultimately, this chapter prepares the groundwork for later chapters that delve into regularized CCA models using proximal gradient descent, hence creating a coherent narrative that intertwines the principles of gradient descent, CCA, and advanced learning paradigms such as DCCA and SSL.
+
+
+\section{Data}
+\subsection{MediaMill}
+The MediaMill dataset \cite{feng2004context} is a benchmark dataset for multilabel classification. It consists of 1200 video clips from the TRECVID 2003 conference, each annotated with 101 labels. The original goal of the dataset was to predict the labels of the videos from the visual and audio features. It has since become a benchmark dataset for CCA and other multiview learning methods. We use the same features as \cite{gemp2022generalized} which are 128-dimensional bag-of-visual-words features and 13-dimensional bag-of-audio-words features. We split the data into 80\% train and 20\% test and use cross-validation within the training data in order to tune hyperparameters.
+
+\subsection{Split CIFAR}
+The CIFAR-10 dataset \cite{krizhevsky2009learning} consists of 60,000 32x32 colour images in 10 classes, with 6000 images per class. There are 50,000 training images and 10,000 test images. We split the images into two halves.
+
+\subsection{UK Biobank}
+The UK Biobank (UKBB) is arguably the largest scale biomedical database in the world with around half a million total participants. The goal is to have imaging data for the brain, heart, and body for 100,000 participants. The UK Biobank combines these images with genetics, biomarkers, electronic health record, and online questionnaires making it a rich dataset for broad studies of health.
+
+For the GEP-EY PLS analysis on biomedical data, we used 33,333 subjects from the UK Biobank \cite{sudlow2015uk}. We used pre-processed (using FreeSurfer \cite{Fischl2012}) grey-matter volumes for 66 cortical (Desikan-Killiany atlas) and 16 subcortical brain regions and 582,565 autosomal genetic variants. The affects of age, age squared, intracranial volume, sex, and the first 20 genetic principal components for population structure were removed from the brain features using linear regression to account for any confounding effects. Each brain ROI was normalised by removing the mean and dividing the standard deviation. We processed the genetics data using PLINK \cite{Purcell2007} keeping genetic variants with a minor allele frequency of at least 1\%  and a maximum missingness rate of 2\%. We used mean imputation to fill in missing values and centered each variant. 
+
+To generate measures of genetic disease risk, we calculated polygenic risk scores using PRSice \cite{PRSice2014}. We calculated scores, with a p-value threshold of 0.05, using GWAS summary statistics for the following diseases; Alzheimer's \cite{Lambert2013}, Schizophrenia \cite{Trubetskoy2022}, Bipolar \cite{Mullins2021}, ADHD \cite{Demontis2023}, ALS \cite{Van_Rheenen2021}, Parkinson's \cite{Nalls2019}, and Epilepsy \cite{International_League_Against_Epilepsy_Consortium_on_Complex_Epilepsies2018}, using the referenced GWAS studies.
+
 
 \section{Method}
 
@@ -124,6 +144,36 @@ Figure \ref{fig:ccaiter} shows that both of our methods outperform SGHA and $\ga
         \caption{PCC with respect to Scipy ground truth by GEP-EY and CCA-SVD vs prior work for (a) MediaMill and (b) Split CIFAR data. The maximum value is 1.0 and shading represents $\pm$ 1 standard deviation.}
         \label{fig:ccaiter}
     \label{fig: stochasticcca}
+\end{figure}
+
+\subsection{Stochastic CCA Minibatch Size}
+
+\subsection{Exploration of Stochastic CCA Minibatch Size}
+
+\subsection{Stochastic CCA Minibatch Size Examination}
+
+In this section, we take a closer look at how minibatch sizes impact the performance of our method in the stochastic CCA setting. We maintain a constraint of single epoch training. This means that when we use smaller minibatches, the number of training steps increases correspondingly. 
+
+Our experiments, as displayed in Figure \ref{fig:minibatch size ablation}, show that our method performs well across a range of minibatch sizes. Notably, it achieves high performance even when the minibatch size is nearly equivalent to the number of components. 
+
+This indicates that our method can learn effectively from a limited number of samples. It suggests the possibility of applying our method to analyse large datasets on devices with restricted memory, by processing small minibatches of data sequentially. This robustness to minibatch size could potentially make our method a viable solution for large-scale data analysis where computational resources are limited.
+
+\begin{figure}[h]
+\centering
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+          \includegraphics[width=\textwidth]{figures/CCA/cifar_minibatch_size_ablation.png}
+          \caption{}
+          \label{fig:cifar_minibatch_ablation}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+          \includegraphics[width=\textwidth]{figures/CCA/mediamill_minibatch_size_ablation.png}
+          \caption{}
+          \label{fig:mediamill_minibatch_ablation}
+     \end{subfigure}
+\caption{Ablation study on minibatch size for stochastic CCA for (a) cifar and (b) mediamill datasets for minibatch sizes 100, 20, and 5}
+\label{fig:minibatch size ablation}
 \end{figure}
 
 %Stochastic PLS UKBB

@@ -1,15 +1,16 @@
-\chapter{Flexible, Scalable Regularization for Generalized Eigenvalue Problems for Multiview Subspace Learning}
-\label{Regularised}
+\chapter{Literature Review}\label{Literature Review}
 
-The content relating to regularised alternating least squares as a method for optimizing regularised CCA is based on an abstract which I presented in poster form at OHBM. The work benefitted from extensive theoretical discussions with John Shawe-Taylor and Janaina Mourao-Miranda as well as Janaina and Rick Adams' help interpreting the results.
+In this chapter we will build on the background in the previous chapter to give a critical review of previous work applying subspace learning algorithms and the existing problems.
 
-\section{Introduction}
+\section{Applications of Subspace Learning Algorithms in Biomedical Data} 
+section{Applications to Neuroimaging}
+
+There have been a number of applications of CCA and related methods to multiview problems in neuroimaging. Using resting state fMRI data, modes of correlation have been found that relate to differences in sex and age relating to drug and alcohol abuse, depression and self harm \cite{mihalik2019brain}. A similar mode relating to `positive-negative' wellbeing has been found across studies \cite{smith2015positive} suggesting that mental wellbeing has a relationship (though not necessarily causally) with functional connectivity between networks in the brain. Later in this dissertation we will replicate and build on the findings from this paper by using regularised and non-linear CCA methods.
+
+CCA has also been used as a preprocessing step in order to identify groups of subjects in the latent variable space. In particular, CCA and clustering have been used to identify depression using fMRI data \cite{dinga2019evaluating} \cite{drysdale2017resting}. CCA has also been used in the manner we described to denoise two views of a dataset such as separate measures of neuroimaging data \cite{zhuang2020technical} to remove artefacts. Deep CCA has recently been used to extract features for the diagnosis of schizophrenia \cite{qi2016deep}.
 
 
-\section{Background and Related Work}
-
-\section{Related Work}
-
+\section{Regularized CCA, PLS, and PCA}
 In this section we review some existing regularised CCA methods including some of the existing extensions to data with more than two views. Since almost all of the existing work considers sparsity inducing regularisation this is the main focus.
 
 There have been many different proposals in the literature for finding sparse regularised solutions. In this section, we describe the penalized matrix decomposition method (arguably the most common in applied sparse CCA) as well as some of the methods based on least squares formulations. Like the unregularised CCA and PLS formulations, they can broadly be grouped into penalized SVD based methods and penalised iterative methods.
@@ -189,60 +190,65 @@ In neuroimaging applications, we typically encounter highly correlated variables
 Where $\bold{\hat{w}}$ denotes unnormalized weights which are normalized in the same way as \ref{eq:SAR}. While the algorithm produces good results in practice, it has no theoretical guarantee of convergence or optimality and cannot simply be written as an optimization problem. In particular, as we showed in the previous section, normalizing the solutions to the unconstrained update equations in order to fulfil the projection-length constraint does not guarantee that we find a global optimum for the constrained optimization. 
 
 
-\section{Contributions}
+\section{Large scale CCA, PLS, and PCA}
 
-\subsection{Simulated Data for Comparing Sparse CCA Models}
+\textbf{Stochastic GEPs}
+Several methods have been proposed for solving GEPs with SGD.
+\cite{arora2017stochastic} developed a Matrix Stochastic Gradient (MSG) method for finding the top-k CCA subspace, however its tractability relies on using minibatches of size 1. \cite{chen2019constrained} proposed a subspace Generalized Hebbian Algorithm (SGHA) which requires Lagrange multipliers. \cite{xie2015scale} propose a similar class of algorithms, but which estimate directions sequentially rather than as a subspace; \cite{chapman2022generalized} show there are also pseudo-objective based methods corresponding to this class of algorithms. More recently, the EigenGame line of work \cite{gemp20,gemp2021} has reframed the top-k subspace problem as a competitive game between components and recently extended the work to GEPs \cite{gemp2022generalized}. To our knowledge these are the state-of-the-art. However, there has been extensive other work tackling the top-1 problem in the stochastic CCA as well as stochastic PCA and PLS \cite{arora2012stochastic,arora2016stochastic,arora2017stochastic}.
 
-A necessary 
+\section{Deep CCA, PLS, and PCA}
 
-\subsection{Flexible Regularised ALS}
+\subsection{Deep Learning}
 
-We can solve CCA by alternating minimisation over each view, based on the alternating least squares form. This form finds a variable $\bold{T}$ that is close to the latent variables $\bold{X}_i\bold{W}_i$, where $\bold{X}_i$, $\bold{W}_i$ are the matrix and weights for each view $i$. The closer $\bold{T}$ is to $\bold{X}_i\bold{W}_i$, the higher the correlation between them. The constraint  $\bold{T^{\top}T}=\bold{I}$ ensures that the latent space is orthogonal to find different effects.
+With large amounts of data and improvements in hardware in recent years, `Deep' neural networks have become the state of the art in many tasks and in particular in computer vision. In principle, an infinitely wide neural network could model any function to arbitrary accuracy - a property known as the universal approximation theorem - and this flexibility allows neural networks to model complex relationships. 
 
-\[ \underset{\bold{W},\bold{T}}{\mathrm{argmin}}\left\{\sum_i \|\bold{X}_i\bold{W}_i-\bold{T}\|_{F}^2 \right\} \]
-  \[ \text{subject to: } \bold{T^{\top}T}=\bold{I} \]
+In practice, rather than infinitely wide networks, `Deep' Neural Networks combine layers of linear weights with non-linear activation functions. Each layer can generally be written as a function of the outputs of the previous layer (or the raw input for the first layer):
 
-To regularise the projection matrices, we add penalty terms to the objective function, such as $P(\bold{W}_i)=\lambda_i\|\bold{W}_i\|_F$ for ridge regression or $P(\bold{W}_i)=\lambda_i\|\bold{W}_i\|_1$ for lasso. This can help us avoid overfitting and improve the interpretability of the results. This means that \textbf{any regularised least squares solver} can be used to solve each subproblem, such as ridge regression, lasso, elastic net, etc. making our framework substantially more flexible than prior work.
+$$
+\bold{h_i}=s_i(\bold{W_ih_{i-1}}+\bold{b_i})
+$$
 
-\[ \underset{\bold{W},\bold{T}}{\mathrm{argmin}}\left\{\sum_i \|\bold{X}_i\bold{W}_i-\bold{T}\|_{F}^2 + \textcolor{red}{\lambda_i P(\bold{W}_i)}\}\right\} \]
-  \[ \text{subject to: } \bold{T^{\top}T}=\bold{I} \]
+Where we use the letter $h$ to denote a `hidden' layer or a representation between the input and output, $W$ to represent a matrix of weights, $b_i$ to represent a vector of bias terms and $s$, critically, to represent a non-linear activation function. One example of a non-linear activation function is the sigmoid function which maps linear outputs to a value between 0 and 1. Neural networks are often designed to have bottlenecks with fewer features in each subsequent hidden layer. This means that the outputs of each layer produce a hierarchy of features and it is often hypothesized that their generalisation ability is built upon producing these layers of abstraction\cite{li2018survey}. In general we will refer to the complete set of parameters (and architectural choices such as the number of layers) in a neural network with $\theta$. We therefore write a neural network function as $F(\bold{X};\theta_F)$.
 
-A benefit of this approach is that neuroimaging practitioners may have existing code for implementing specific regularisation methods in a regression context which can be reused. Furthermore, they may have large dimensions both in features and increasingly in number of samples which benefit from using highly optimised software. 
+The most common way to optimize neural networks is to use gradient descent (GD) in which we calculate the gradient of the network parameters with respect to some objective. When using the whole dataset to calculate the gradient we typically refer to `batch' gradient descent. However, when using non-linear functions, the objective is typically non-convex meaning GD is prone to finding local minima (regions in the parameter space where the gradient of the objective is zero) rather than global minima (local minima where the value of the objective is optimal). Perhaps for this reason, it is more effective to use Stochastic Gradient Descent (SGD), in which we estimate the gradient by using a single sample or a small set of samples referred to as a `minibatch'. This noisy estimate is less likely to get `stuck' in suboptimal solutions. Stochastic gradient descent mathematically relies on the stochastic estimate of the gradient being an unbiased estimate of the true gradient.
 
-\subsection{Flexible Regularised GEPs by Proximal Gradient Descent}
+\subsection{Deep CCA}
 
-\section{Experiments: Flexible Regularised ALS for Brain-Behaviour Associations in the Human Connectome Project}
+Deep Canonical Correlation Analysis provides an alternative method to kernel CCA for finding complex non-linear structure in multiview data \cite{andrew2013deep}. In Deep CCA we look to use functions parameterized by neural networks $F(\bold{X};\theta_F)$ and $G(\bold{Y};\theta_G)$ to map the original data into a space in which the two views are maximally correlated. The problem we would like to solve is therefore:
 
-\subsection{Experiment Design}
+\begin{align}
+    & \theta_{F_{opt}},\theta_{G_{opt}}=\mathrm{argmax}\{\text{trace}( F(\bold{X};\theta_F)^{\top}G(\bold{Y};\theta_G))  \}\\
+    & \text{subject to:} \notag\\
+    & F(\bold{X};\theta_F)^{\top}F(\bold{X};\theta_F)=1 \notag\\
+    & G(\bold{Y};\theta_G)^{\top}G(\bold{Y};\theta_G)=1 \notag
+\end{align}
 
-Using FRALS, we solve a CCA problem using alternating elastic net regressions with tuned l1 and l2 regularization. We compare our proposed framework to prior work including ridge Regularised CCA (RCCA), Penalized Matrix Decomposition (PMD), commonly referred to in the literature as Sparse CCA but which strictly optimises covariance rather than correlation, and separate Principal Components Analysis (PCA) of the brain and behavioural data. We show that our method improves on RCCA by finding sparse solutions and improves on PMD by optimising a correlation rather than covariance based objective.
+As we showed earlier in section \ref{sec:cca}, sum of the top $k$ canonical correlations of two views of a dataset can be shown to be the sum of the top $k$ singular values of the matrix $\bold{T}=\bold{\Sigma_{11}^{-\frac{1}{2}}\Sigma_{12}\Sigma_{22}^{-\frac{1}{2}}}$ where $\Sigma_{11}=F(\bold{X};\theta_F)^{\top}F(\bold{X};\theta_F)$. Now consider the identity $\|\bold{T}\|_*=\text{tr}(\sqrt{\bold{T^{\top}T}})$ known as the tracenorm of $\bold{T}$. This is symmetric and therefore can be diagonalised. Then since $T=\bold{U\Sigma V^{\top}}$:
 
-We used resting-state fMRI and non-imaging subject measures of 1003 healthy subjects from the 1200-subject data release of the Human Connectome Project (HCP). Following the main steps from \cite{smith2015positive}, we processed the rs-fMRI data into brain connectivity matrices. Like \cite{smith2015positive} we used 145 items of the non-imaging subject measures and removed the same confounding variables. We split the data into 80\% train and 20\% test and used cross-validation within the training data in order to tune hyperparameters.
+\begin{align}
+    & \|\bold{T}\|_*=tr(\sqrt{\bold{V\Sigma U^{\top}U\Sigma V^{\top}}})=tr(\sqrt{\bold{\Sigma^2 VV^{\top}}})=tr(\bold{\Sigma})
+\end{align}
 
-\subsection{Results}
+Therefore maximising the tracenorm maximises the total correlation between the representations.
 
-\subsubsection{Out of sample generalization}
+\begin{figure}[H] %[H] "corresponds to start the figure Here"
+    \centering %alignment can be flushleft, centering or flushright
+    %includegraphics is the command to include graphics or pictures, [Width should be defined with respect to textwidth]{The path/ location of the image in the specified folder}, the image should be either in .png, .jpg, .pdf formats faster processing
+    \includegraphics[width=0.5\textwidth]{chapters/litreview/DCCA.png} 
+    \caption[Deep CCA Representation]{\textit{\textbf{Deep CCA with two correlated dimensions:}} A separate neural network is learnt for each view and a linear CCA is applied on top \cite{andrew2013deep}}
+    \label{img:DCCA}
+\end{figure}
 
-\subsubsection{Model Similarities}
+A major problem with this DCCA formulation is that it relies on full-batch optimisation (optimized in the original paper by using the L-BFGS optimization algorithm). When gradients are calculated using smaller minibatches, the performance degrades drastically  because the estimation of the gradient is biased. In particular, mathematically the terms in $\Sigma_{ii}^{-\frac{1}{2}}$ are overestimated due to Jensen's inequality $E[\frac{1}{X}]>\frac{1}{E[X]}$. More intuitively, these matrices may be near singular for small samples causing stochastic gradients to blow up.
 
-\subsubsection{Brain Loadings}
+\section{Self-Supervised Learning}
+\subsubsection{Barlow Twins}
+%Relationship to CCA
 
-\subsubsection{Behaviour Loadings}
-
-\section{Experiments: Total Variation Regularisation using Simulated Data}
-\subsection{Experiment Design}
-\subsection{Results}
-
-
-\section{Experiments: Total Variation Regularisation of Brain-Behaviour Assocations in the ADNI Data}
-\subsection{Experiment Design}
-\subsection{Results}
-
-\section{Comparison of Sparse CCA Methods in Simulated Data}
-\subsection{Experiment Design}
-\subsection{Results}
+\subsubsection{VICReg}
+%Likewise
 
 
-\section{Discussion and Conclusion}
+It is well known that VICReg and Barlow twins are closely related to CCA \cite{balestriero2022contrastive}. Similarly, \cite{kiani2022joint} showed how the SSL losses like VICReg could be adapted and implemented in closed form using the kernel method. Our work approaches the problem from the opposite angle, demonstrating how these classical problems can be extended to deep learning and solved with SGD without introducing bias.
 
-
+\section{Summary}
