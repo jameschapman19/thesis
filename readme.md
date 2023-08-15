@@ -15,8 +15,6 @@ To set up Visual Studio Code for LaTeX, follow these steps:
 - Install the [LaTeX Workshop] extension, which provides many useful features for editing and compiling LaTeX documents.
 - Install `latexmk` from TeX Live (https://tug.org/texlive/)
 
-- Configure the LaTeX Workshop extension to use `latexmk` as the default recipe. You can do this by adding the following lines to your `settings.json` file:
-
 
 ## Hints
 
