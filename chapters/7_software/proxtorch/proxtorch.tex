@@ -1,0 +1,39 @@
+\section{ProxTorch}\label{sec:proxtorch}
+
+\subsection{Introduction}
+
+In an era where deep learning frameworks like PyTorch are the cornerstone of modern machine learning applications, the need for specialized optimization techniques is ever-growing.
+While gradient-based optimization methods have been front and center in this evolution, the utility of proximal gradient descent in handling non-smooth problems remains indisputable.
+However, a seamless integration of proximal operators into the PyTorch ecosystem has been noticeably missing.
+`ProxTorch` emerges as a groundbreaking software library to fill this void, offering a wide array of proximal operators that are fully compatible with PyTorch and optimized for GPU computations.
+
+\subsection{Background}
+
+Over the years, optimization techniques have evolved to solve increasingly complex problems.
+Specifically, proximal gradient descent has found applications across diverse domains like imaging, signal processing, and machine learning.
+However, most existing software libraries for proximal gradient descent are either problem-specific or confined to CPU-based, numpy-compatible environments.
+Meanwhile, PyTorch, a powerful deep learning framework with GPU support, lacked a dedicated library for proximal operators.
+Thus, the divide between proximal optimization and mainstream deep learning frameworks like PyTorch needed to be bridged.
+
+\subsection{Implementation}
+
+\subsubsection{API}
+
+`ProxTorch` presents a clean and intuitive API that allows users to easily incorporate a variety of proximal operators into their PyTorch-based projects.
+It includes constraints such as L0Ball, L1Ball, L2Ball, and many others, along with regularizers like ElasticNet, GroupLasso, and Huber loss among others.
+This rich collection makes it an ideal tool for both practitioners and researchers working on optimization tasks in a PyTorch setting.
+
+\subsection{Benchmarking}
+
+To establish its computational efficiency, `ProxTorch` was benchmarked against `Nilearn`, a numpy-based module tailored for NeuroImaging.
+The focus of the benchmark was the Total Variation-L1 (TVL1) proximal operator.
+Notably, `ProxTorch` outperformed `Nilearn` across different dimensions, both on CPUs and GPUs. This performance gain becomes increasingly significant with growing data dimensions, emphasizing the advantages of GPU acceleration.
+
+\subsection{Conclusion}
+
+`ProxTorch` serves as a pivotal advancement in the field of optimization, particularly for those operating within the PyTorch ecosystem.
+It unifies the realms of proximal gradient descent and deep learning, offering a comprehensive, efficient, and GPU-compatible toolbox for tackling a wide range of optimization problems.
+As such, `ProxTorch` stands as an indispensable tool for both academic research and real-world applications in optimization.
+
+
+

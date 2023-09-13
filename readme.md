@@ -17,6 +17,10 @@ To set up Visual Studio Code for LaTeX, follow these steps:
 
 - Configure the LaTeX Workshop extension to use `latexmk` as the default recipe. You can do this by adding the following lines to your `settings.json` file:
 
+## Version Control/Using with Overleaf when you want
+
+You can switch back and forth between editing your thesis locally and on Overleaf. To do this, you just host your thesis on GitHub and use Overleaf's [GitHub integration] to sync your changes. Wahey!
+
 
 ## Hints
 

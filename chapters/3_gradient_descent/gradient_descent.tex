@@ -1,21 +1,25 @@
 \chapter{Gradient Descent Based Formulations of Generalized Eigenvalue Problems for Multiview Subspace Learning: A Novel and Efficient Approach to Multiview Dimensionality Reduction}\label{gradient descent}
 
-The content of this chapter is based on a preprint paper where I am first author. I have extensively rewritten here in order to focus on the stochastic solution of Generalized Eigenvalue Problems. I initiated the project based on heuristic arguments and contacted coauthors Ana Lawry Aguila (who provided and analysed the UK Biobank data) and Lennie Wells (who provided extensive mathematical proofs which are in the appenix of this PhD thesis for the interest of the reader). Both of my coauthors helped me to revise the manuscript.
+The content of this chapter is based on a preprint paper where I am first author.
+I initiated the project based on heuristic arguments and contacted coauthors Ana Lawry Aguila (who provided and analysed the UK Biobank data) and Lennie Wells (who provided extensive mathematical proofs which are in the appenix of this PhD thesis for the interest of the reader).
+Both of my coauthors helped me to revise the manuscript.
 
 \section{Introduction} %Introduce the problem statement and its importance
 
 \textit{How can we effectively implement Canonical Correlation Analysis (CCA) using gradient descent and subsequently enhance its performance and scalability via stochastic gradient descent, laying a foundation for the application of proximal gradient descent in regularisation?}
-
-Subspace learning methodologies, such as Principal Component Analysis (PCA) \cite{hotelling1933analysis}, Partial Least Squares (PLS) \cite{haenlein2004beginner}, Linear Discriminant Analysis (LDA), and Canonical Correlation Analysis (CCA) \cite{hotelling1992relations}, have been cornerstones in various fields including computer vision, neuroimaging \cite{Krishnan2011}, finance \cite{cassel2000measurement}, and imaging genetics \cite{Hansen2021}. These techniques all essentially operate as generalized eigenvalue problems (GEPs), seeking low-dimensional linear transformations of data to maximize certain objectives.
-
-The caveat, however, is the computational intensity and high memory demands when employing standard full batch algorithms to solve GEPs in the context of large-scale data. This constraint has fueled the interest towards developing approximations to these solutions in stochastic or data-streaming settings \cite{arora2012stochastic}.
-
-Within the gamut of subspace learning techniques, CCA stands out as the most intricate, converting a pair of data views into highly correlated representations. Recent developments such as Deep CCA (DCCA) \cite{andrew2013deep} have demonstrated efficacy in extracting non-linear representations from multiview data, but their training is challenging in a stochastic setting \cite{wang2015stochastic}.
-
-Addressing these challenges, this chapter aims to answer two key research questions. First, we explore how CCA can be effectively solved using gradient descent. This paves the way for the introduction of regularisation in the subsequent chapters, where we will adopt proximal gradient descent as a method to build regularised CCA models. Second, we aim to scale our CCA method for large-scale medical datasets using stochastic gradient descent. This approach becomes critical in situations where it's infeasible to load all the data into memory or when the associated calculations are prohibitively slow.
-
-To this end, we propose a principled framework for subspace learning and Self-Supervised Learning (SSL), grounded on an innovative unconstrained characterization of the optimal subspaces of GEPs, proposition \ref{prop:EY-charac}. The subsequent sections of this chapter will validate the effectiveness and scalability of our proposed framework across a variety of tasks and datasets, demonstrating faster convergence and better correlation performance on stochastic CCA benchmarks. Furthermore, we will present a unique real-world application through a stochastic PLS analysis on an extremely high-dimensional biomedical dataset.
-
+Subspace learning methodologies, such as Principal Component Analysis (PCA) \cite{hotelling1933analysis}, Partial Least Squares (PLS) \cite{haenlein2004beginner}, Linear Discriminant Analysis (LDA), and Canonical Correlation Analysis (CCA) \cite{hotelling1992relations}, have been cornerstones in various fields including computer vision, neuroimaging \cite{Krishnan2011}, finance \cite{cassel2000measurement}, and imaging genetics \cite{Hansen2021}.
+These techniques all essentially operate as generalized eigenvalue problems (GEPs), seeking low-dimensional linear transformations of data to maximize certain objectives.
+The caveat, however, is the computational intensity and high memory demands when employing standard full batch algorithms to solve GEPs in the context of large-scale data.
+This constraint has fueled the interest towards developing approximations to these solutions in stochastic or data-streaming settings \cite{arora2012stochastic}.
+Within the gamut of subspace learning techniques, CCA stands out as the most intricate, converting a pair of data views into highly correlated representations.
+Recent developments such as Deep CCA (DCCA) \cite{andrew2013deep} have demonstrated efficacy in extracting non-linear representations from multiview data, but their training is challenging in a stochastic setting \cite{wang2015stochastic}.
+Addressing these challenges, this chapter aims to answer two key research questions.
+First, we explore how CCA can be effectively solved using gradient descent.
+This paves the way for the introduction of regularisation in the subsequent chapters, where we will adopt proximal gradient descent as a method to build regularised CCA models.
+Second, we aim to scale our CCA method for large-scale medical datasets using stochastic gradient descent.
+This approach becomes critical in situations where it's infeasible to load all the data into memory or when the associated calculations are prohibitively slow.
+To this end, we propose a principled framework for subspace learning and Self-Supervised Learning (SSL), grounded on an innovative unconstrained characterization of the optimal subspaces of GEPs, proposition \ref{prop:EY-charac}.
+The subsequent sections of this chapter will validate the effectiveness and scalability of our proposed framework across a variety of tasks and datasets, demonstrating faster convergence and better correlation performance on stochastic CCA benchmarks. Furthermore, we will present a unique real-world application through a stochastic PLS analysis on an extremely high-dimensional biomedical dataset.
 Ultimately, this chapter prepares the groundwork for later chapters that delve into regularized CCA models using proximal gradient descent, hence creating a coherent narrative that intertwines the principles of gradient descent, CCA, and advanced learning paradigms such as DCCA and SSL.
 
 
@@ -38,7 +42,7 @@ To generate measures of genetic disease risk, we calculated polygenic risk score
 
 In this section, we introduce a new class of algorithms based on matrix analysis results which allow us to efficiently solve a number of interesting problems including but not limited to CCA, PLS, DCCA, and SSL.
 
-\subsection{GEP-EY: an unconstrained objective for GEPs}\label{sec:gep-ey-formulation}
+\subsection{GEP-EY: an unconstrained objective for GEPs}
 %old: A formulation of GEP problems by Matrix Analysis
 
 First, we present GEP-EY, a formulation of GEP problems by matrix analysis which permits efficient optimization by gradient descent. 
@@ -52,7 +56,7 @@ This is summarised by proposition \ref{prop:EY-charac}, a consequence of applyin
     %     \max_{W \in \R^{d \times k}} \mathcal{U}^\text{GEP-EY}(W) \defeq \tr \left( 2\, W^T A W - \left(W^T B W\right) \left(W^T B W\right) \right).
     % \end{align}
     The top-$k$ subspace of the GEP $(A,B)$ can be characterised by maximising the following objective over $W \in \R^{d \times k}$:
-    \begin{align}\label{eq:EY-charac}
+    \begin{align}
         \mathcal{U}^\text{GEP-EY}(W) \defeq \tr \left( 2\, W^T A W - \left(W^T B W\right) \left(W^T B W\right) \right)
     \end{align}
     Moreover, the maximum value is precisely $\sum_{j=1}^k \lambda_j^2$, where $(\lambda_j)$ are the generalised eigenvalues.
@@ -205,6 +209,7 @@ We ran GEP-EY with minibatch size 500 on brain imaging (82 regional volumes) and
 \section{Discussion and Conclusion}
 
 We presented a new unconstrained objective to characterise GEPs; this immediately gave efficient algorithms to solve many subspace learning methods in the stochastic setting with SGD.
-Crucially, the gradient estimates are unbiased and cheap to compute. Moreover, the only hyperparameter is the choice of optimiser.
+Crucially, the gradient estimates are unbiased and cheap to compute.
+Moreover, the only hyperparameter is the choice of optimiser.
 
-We will later show how this work can be adapted and applied to optmise regularised GEPs and in particular CCA.
+We will later show how this work can be adapted and applied to optimise regularised GEPs and, in particular, CCA.
