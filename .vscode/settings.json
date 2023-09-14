@@ -1,4 +1,10 @@
 {
     "window.autoDetectColorScheme": true,
-    "window.commandCenter": false
+    "window.commandCenter": false,
+    "files.exclude": {
+        "**/.git": true,
+        "**/.idea": true,
+        "**.xml": true,
+        "**.log": true,
+    },
 }

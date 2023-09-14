@@ -1,18 +1,17 @@
 \chapter{Extending our work to Deep CCA and Self-Supervised Learning: A Powerful Approach to Multiview Nonlinear Association Learning}
-\label{Deep}
 
 \section{Introduction}
 
 \section{Data}
 
 \subsection{Split MNIST}
-The Split MNIST dataset \cite{wang2015stochastic} is a standard benchmark for DCCA. It consists of 60,000 images of handwritten digits from the MNIST dataset \cite{lecun1998gradient}. Each image is 28\times28 pixels with 1 channel but we split the image into two halves, each of size 28\times14 pixels. We use the standard train/test split.
+The Split MNIST dataset \cite{wang2015stochastic} is a standard benchmark for DCCA. It consists of 60,000 images of handwritten digits from the MNIST dataset \cite{lecun1998gradient}. Each image is 28$\times$28 pixels with 1 channel but we split the image into two halves, each of size 28$\times$14 pixels. We use the standard train/test split.
 
 \subsection{XRMB}
 The X-Ray Microbeam (XRMB) dataset \cite{westbury1994x} is a multimodal dataset of speech recordings from 139 speakers with acoustic and articulatory features. The acoustic features are 39-dimensional Mel-frequency cepstral coefficients (MFCCs) extracted from the speech recordings. The articulatory features are 12-dimensional vectors of the vertical positions of the tongue, lips, and jaw. The dataset contains 1,429,236 frames of data, with 10,302 frames per speaker. We use the standard train/test split.
 
 \subsection{CIFAR-10 and CIFAR-100}
-The CIFAR-10 and CIFAR-100 datasets contain 60,000 images each, with 10 and 100 classes respectively. Each image is 32\times32 pixels with 3 channels. We use the standard train/test split.
+The CIFAR-10 and CIFAR-100 datasets contain 60,000 images each, with 10 and 100 classes respectively. Each image is 32$\times$32 pixels with 3 channels. We use the standard train/test split.
 
 
 \section{Methods}
@@ -24,7 +23,6 @@ The GEP-EY and CCA-SVD formulations also lead naturally to new formulations of D
 We derive the DCCA-EY formulation by applying the GEP formulation of CCA (\ref{eq:cca-GEV}) to our DCCA definition. The analogous derivation for DCCA-SVD is left to supplement \ref{supp:algorithm-details}. 
 
 Population DCCA \cite{andrew2013deep} can be defined analogously to population CCA (see section \ref{sec:CCA Definition}):
-% Following the definition of CCA in section \ref{sec:CCA Definition}, the population formulation of DCCA \cite{andrew2013deep}, can be defined as follows: 
 given input random vectors $X \in \R^{D_x}, Y \in \R^{D_y}$, find neural networks $f,g$ maximising:
 \begin{align}\label{eq:DCCA-Andrew}
     \max_{f,g}  \norm{\CCA_K\left(f(X),g(Y)\right)}_2
@@ -100,14 +98,14 @@ We now turn to compare our proposed DCCA-EY and DCCA-SVD methods with existing m
      \centering
      \begin{subfigure}[b]{0.49\textwidth}
          \centering
-         \includegraphics[width=\textwidth]{figures/DCCA/dcca_lr_experiment.png}
+         \includegraphics[width=\textwidth]{figures/deep_learning/DCCA/dcca_lr_experiment.png}
          \caption{}
          \label{fig:lrexp}
      \end{subfigure}
      \hfill
      \begin{subfigure}[b]{0.49\textwidth}
          \centering
-         \includegraphics[width=\textwidth]{figures/DCCA/dcca_XRMB.png}
+         \includegraphics[width=\textwidth]{figures/deep_learning/DCCA/dcca_XRMB.png}
          \caption{}
                  \label{fig:xrmb}
      \end{subfigure}
