@@ -7,9 +7,6 @@ The advent of modern technologies in biomedical research has led to an unprecede
 
 In light of these challenges, this thesis proposes new methodologies based on unsupervised and self-supervised learning to extract meaningful information from these large, unlabelled, and complex biomedical datasets. It presents a specific focus on Canonical Correlation Analysis (CCA), a widely used technique in the area of multi-view self-supervised learning (SSL), which, while powerful, comes with its own set of limitations when dealing with large-scale biomedical data.
 
-
-
-
 \section{Problem Statement: The Need for Scalable, Flexible, and Interpretable Multiview SSL Methods}
 
 Despite the advantages offered by multiview SSL methods in handling complex and high-dimensional biomedical data, the existing methodologies face substantial limitations, particularly concerning scalability, flexibility, and interpretability. The computational costs of traditional algorithms for solving CCA and other generalized eigenvalue problems are prohibitive when dealing with large-scale datasets. This limitation directly impacts their scalability and applicability to modern biomedical datasets. Moreover, the inherent inflexibility of traditional methods fails to capture the nonlinear relationships often present in biomedical data.
@@ -24,7 +21,11 @@ In Chapter 3, we propose a novel formulation for CCA, introducing an approach to
 
 In Chapter 4, we introduce regularization via proximal gradient descent into our framework. This addition allows us to incorporate structured priors into our model, improving the interpretability of our findings, and enhancing their relevance to the biomedical context.
 
-In subsequent chapters, we discuss the application and effectiveness of these methodologies, demonstrating their ability to handle large-scale datasets and the robustness of their results. We further present the possibility of extending these methods to deep learning when the sample size permits.
+In Chapter 5, we show our approach can be extended to Deep CCA and Self-Supervised Learning more generally. While the sample sizes in biomedical research are still too small to apply these methods, we lay the groundwork for their potential incorporation into our framework in the future.
+
+In Chapter 6, we present CCA-Zoo, a Python package for CCA and multiview learning, which implements the methodologies proposed in this thesis. We show how this work filled a gap in the Python ecostystem, and how it will facilitate the adoption of these methods in the biomedical community.
+
+In Chapter 7, we discuss the implications, challenges, and limitations of our work, and how they can be addressed in future research.
 
 The main contributions of this thesis are:
 
@@ -32,7 +33,7 @@ The main contributions of this thesis are:
     \item The introduction of a new formulation for CCA and generalized eigenvalue problems which can be solved via gradient descent, enabling the scaling of these methods to much larger datasets.
     \item The integration of regularization into the proposed framework using proximal gradient descent, enabling the inclusion of structured priors and improving the interpretability of the findings.
     \item Laying the groundwork for the potential incorporation of deep learning methods into the framework when the sample size permits, enabling the capture of non-linear associations in the data.
-    \item 
+    \item
 \end{itemize}
 
 Through these contributions, this thesis strives to bridge the gap between the potential of large-scale, complex biomedical data and the capabilities of existing analytical methodologies, bringing us one step closer to truly personalised medicine.

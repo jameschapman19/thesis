@@ -80,11 +80,11 @@ In order to explain CCA, it is helpful to first explain the related and arguably
 
 Principal components analysis (PCA)\cite{hotelling1933analysis} is a method for finding the directions of maximum variance of a matrix $X \in \mathbb{R}^{n \times p}$  where it is common for the rows of $X$ to represent $n$ subjects and the columns $p$ features for each subject. First consider the case $k=2$ where we are interested in the two directions of maximum variance of some data. We show this visually in figure\ref{fig:PCA} for simulated data.
 
-\begin{figure}[H] %[H] "corresponds to start the figure Here" 
-    \centering %alignment can be flushleft, centering or flushright
-    %includegraphics is the command to include graphics or pictures, [Width should be defined with respect to textwidth]{The path/ location of the image in the specified folder}, the image should be either in .png, .jpg, .pdf formats faster processing
+\begin{figure}
+    \centering
     \includegraphics[width=0.9\textwidth]{chapters/2_background/PCA.png}
-    \caption[Principal Components Analysis Example]{\textit{\textbf{Principal Components Analysis Example:}} On the left the original data with its directions of maximum variance is shown by the black arrows. On the right we rotate the data to a new basis in which the variance in the direction of the basis is maximised.}\label{fig:PCA}\end{figure}
+    \caption[Principal Components Analysis Example]{\textit{\textbf{Principal Components Analysis Example:}} On the left the original data with its directions of maximum variance is shown by the black arrows. On the right we rotate the data to a new basis in which the variance in the direction of the basis is maximised.}\label{fig:PCA}
+\end{figure}
 
 As we can see, the direction of maximum variance must be a weighted sum of the directions of the feature space which we denote as a vector $w$ (in two dimensions, this gives us a rotation matrix). Since we have defined $w$ as a direction it also has unit length. The variance of the data in that direction will be given by the l2-norm of $Xw$ defined as:
 
@@ -92,20 +92,20 @@ As we can see, the direction of maximum variance must be a weighted sum of the d
      & \|Xw\|^2_2=w^{\top}X^{\top}Xw
 \end{align}
 
-The equation follows because $Xw$ is a vector of length $N$ with one element for each row of the original data. PCA can therefore be represented by the optimisation problem:
+The equation follows because $Xw$ is a vector of length $N$ with one element for each row of the original data. PCA can therefore be represented by the constrained optimisation problem:
 
 \begin{align}
-     & \bold{w_{opt}}=\underset{\bold{w}}{\mathrm{argmax}}\{\bold{w^{\top}X^{\top}}\bold{Xw}\} \\
-     & \text{subject to:} \notag                                                               \\
-     & \bold{w^{\top}w}=1 \notag
+     & \mathbf{w_{opt}}=\underset{\mathbf{w}}{\mathrm{argmax}}\{\mathbf{w^{\top}X^{\top}}\mathbf{Xw}\} \\
+     & \text{subject to:} \notag                                                                       \\
+     & \mathbf{w^{\top}w}=1 \notag
 \end{align}
 
-The equation follows because $\bold{Xw}$ is a vector of length $N$ with one element for each row of the original data.
+The equation follows because $\mathbf{Xw}$ is a vector of length $N$ with one element for each row of the original data.
 
 We can write this optimisation problem in its lagrangian form as the function:
 
 \begin{align}
-     & f(\bold{w},\lambda)=\bold{w^{\top}X^{\top}}\bold{Xw} + \lambda(1-\bold{w^{\top}w})
+     & f(\mathbf{w},\lambda)=\mathbf{w^{\top}X^{\top}}\mathbf{Xw} + \lambda(1-\mathbf{w^{\top}w})
 \end{align}
 
 Where $\lambda$ is an auxiliary variable called a Lagrange multiplier. A solution to the original optimisation problem must maximise this function with respect to $w$ and also have 0 derivative with respect to $\lambda$ since this results in the equality constraints being fulfilled.
@@ -113,13 +113,13 @@ Where $\lambda$ is an auxiliary variable called a Lagrange multiplier. A solutio
 By differentiating the lagrangian function, we find first order conditions which must be satisfied by any solution where the constraints are active:
 
 \begin{align}
-     & \bold{X^{\top}}\bold{Xw}=\lambda \bold{w} \\
-     & \bold{w^{\top}w}=1
+     & \mathbf{X^{\top}}\mathbf{Xw}=\lambda \mathbf{w} \\
+     & \mathbf{w^{\top}w}=1
 \end{align}
 
-This can now be understood as an eigenvalue problem for the variance-covariance matrix $\bold{X^{\top}X}$ for which we have standard solvers (e.g. scikit-learn in Python\cite{pedregosa2011scikit}). The mathematical intuition behind this form is that the variance-covariance matrix $\bold{X^{\top}X}$ contains the covariance between each pair of variables of $X$ with the variance of each variable on the diagonal. Since this matrix is symmetric, it is also diagonalizable (can be written $\bold{A=P^{-1}DP}$) and the associated eigenvectors would correspond to a change of basis $\bold{P}$ (a rotation matrix). Since by definition the eigenvectors are orthogonal, the diagonal elements must then represent the variance of $\bold{X}$ in each new basis direction and the eigenvectors are orthogonal by definition.
+This can now be understood as an eigenvalue problem for the variance-covariance matrix $\mathbf{X^{\top}X}$ for which we have standard solvers (e.g. scikit-learn in Python\cite{pedregosa2011scikit}). The mathematical intuition behind this form is that the variance-covariance matrix $\mathbf{X^{\top}X}$ contains the covariance between each pair of variables of $X$ with the variance of each variable on the diagonal. Since this matrix is symmetric, it is also diagonalizable (can be written $\mathbf{A=P^{-1}DP}$) and the associated eigenvectors would correspond to a change of basis $\mathbf{P}$ (a rotation matrix). Since by definition the eigenvectors are orthogonal, the diagonal elements must then represent the variance of $\mathbf{X}$ in each new basis direction and the eigenvectors are orthogonal by definition.
 
-The first principal component is then the direction in which the variance of the data is a maximum or equivalently the eigenvector associated with the maximum eigenvalue $\lambda$. We can find further components by taking the ordered eigenvectors in order of their eigenvalues. If each of the variables in $\bold{X}$ are orthogonal, then it follows that the principal components are simply the direction of each of the original variables, ordered by highest to lowest variance.
+The first principal component is then the direction in which the variance of the data is a maximum or equivalently the eigenvector associated with the maximum eigenvalue $\lambda$. We can find further components by taking the ordered eigenvectors in order of their eigenvalues. If each of the variables in $\mathbf{X}$ are orthogonal, then it follows that the principal components are simply the direction of each of the original variables, ordered by highest to lowest variance.
 
 In this report, we will typically refer to $w$ as \textbf{weights}, $z=Xw$ as \textbf{projections} or \textbf{latent dimensions}.
 
@@ -130,59 +130,59 @@ In the context of finding relationships between high-dimensional neuroimaging an
 Partial least squares (PLS) is a method for finding the directions of the maximum shared covariance between two paired views of the data. Interestingly, PCA can be seen as a special case of PLS where the two paired datasets are the same. The process is therefore somewhat similar to that in PCA except that we now have two sets of directions and we susbtitute the covariance for the cross-covariance. It can therefore be represented by the optimisation problem:
 
 \begin{align}
-     & \bold{w_{opt}}=\underset{\bold{w}}{\mathrm{argmax}}\{ \bold{w_1^{\top}X_1^{\top}X_2w_2}  \} \\
-     & \text{subject to:} \notag                                                                   \\
-     & \bold{w_1^{\top}w_1}=1 \notag                                                               \\
-     & \bold{w_2^{\top}w_2}=1 \notag
+     & \mathbf{w_{opt}}=\underset{\mathbf{w}}{\mathrm{argmax}}\{ \mathbf{w_1^{\top}X_1^{\top}X_2w_2}  \} \\
+     & \text{subject to:} \notag                                                                         \\
+     & \mathbf{w_1^{\top}w_1}=1 \notag                                                                   \\
+     & \mathbf{w_2^{\top}w_2}=1 \notag
 \end{align}
 
-Where $\bold{X_1} \in \mathbb{R}^{n \times p_1}$ and $\bold{X_2} \in \mathbb{R}^{n \times p_2}$ or in other words we have two `views' with the same number of subjects but a potentially different number of features.
+Where $\mathbf{X_1} \in \mathbb{R}^{n \times p_1}$ and $\mathbf{X_2} \in \mathbb{R}^{n \times p_2}$ or in other words we have two `views' with the same number of subjects but a potentially different number of features.
 
-We can formulate PLS as the solution to an appropriate eigenvalue problem, the singular value decomposition of the covariance matrix $\bold{X_1^{\top}X_2}$, and the solution to an iterative algorithm.
+We can formulate PLS as the solution to an appropriate eigenvalue problem, the singular value decomposition of the covariance matrix $\mathbf{X_1^{\top}X_2}$, and the solution to an iterative algorithm.
 
 \subsubsection{Eigenvalue Problem}
 
 This has a lagrangian form:
 
 \begin{align}
-     & f(w,\lambda)=\bold{w_1^{\top}X_1^{\top}X_2w_2} + \lambda_1(1-\bold{w_1^{\top}w_1}) + \lambda_2(1-\bold{w_2^{\top}w_2})
+     & f(w,\lambda)=\mathbf{w_1^{\top}X_1^{\top}X_2w_2} + \lambda_1(1-\mathbf{w_1^{\top}w_1}) + \lambda_2(1-\mathbf{w_2^{\top}w_2})
 \end{align}
 
 With first order conditions:
 
 \begin{align}
-     & \bold{X_2^{\top}X_1w_1}=\lambda_2\bold{w_2} \\
-     & \bold{X_1^{\top}X_2w_2}=\lambda_1\bold{w_1} \\
-     & \bold{w_1^{\top}w_1}=1                      \\
-     & \bold{w_2^{\top}w_2}=1
+     & \mathbf{X_2^{\top}X_1w_1}=\lambda_2\mathbf{w_2} \\
+     & \mathbf{X_1^{\top}X_2w_2}=\lambda_1\mathbf{w_1} \\
+     & \mathbf{w_1^{\top}w_1}=1                        \\
+     & \mathbf{w_2^{\top}w_2}=1
 \end{align}
 
 By substituting the second two conditions into the first two conditions we find that $\lambda_1=\lambda_2=\lambda$ by symmetry and therefore we can substitute the second into the first condition which becomes:
 
 \begin{align}
-     & \bold{X_2^{\top}X_1w_1}=\lambda^2\bold{(X_1^{\top}X_2)^{-1}w_1} \\
-     & \bold{X_1^{\top}X_2X_2^{\top}X_1w_1}=\lambda^2\bold{w_1}
+     & \mathbf{X_2^{\top}X_1w_1}=\lambda^2\mathbf{(X_1^{\top}X_2)^{-1}w_1} \\
+     & \mathbf{X_1^{\top}X_2X_2^{\top}X_1w_1}=\lambda^2\mathbf{w_1}
 \end{align}
 
 And similarly, substituting the first condition into the second:
 
 \begin{align}
-     & \bold{X_2^{\top}X_1X_1^{\top}X_2w_2}=\lambda^2\bold{w_2}
+     & \mathbf{X_2^{\top}X_1X_1^{\top}X_2w_2}=\lambda^2\mathbf{w_2}
 \end{align}
 
-Once again, this is the same as finding the eigendecomposition of the matrices $\bold{X_1^{\top}X_2X_2^{\top}X_1}$ and $\bold{X_2^{\top}X_1X_1^{\top}X_2}$. The eigenvectors of the first matrix are then weights $\bold{w_1}$ and the eigenvectors of the second are then weights $\bold{w_2}$. Hoskuldsson showed that the weights and projections of partial least squares can be summarised by four eigenvalue problems \cite{hoskuldsson1988pls}.
+Once again, this is the same as finding the eigendecomposition of the matrices $\mathbf{X_1^{\top}X_2X_2^{\top}X_1}$ and $\mathbf{X_2^{\top}X_1X_1^{\top}X_2}$. The eigenvectors of the first matrix are then weights $\mathbf{w_1}$ and the eigenvectors of the second are then weights $\mathbf{w_2}$. Hoskuldsson showed that the weights and projections of partial least squares can be summarised by four eigenvalue problems \cite{hoskuldsson1988pls}.
 
 \subsubsection{Singular Value Decomposition}
 
 The SVD is a generalization of the eigendecomposition for non square matrices. We can show that finding the eigenvectors from these two eigendecompositions are equivalent to finding the "singular value decomposition" (SVD) of the matrix $X_1^{\top}X_2$ due to the following relationship:
 
 \begin{align}
-     & \text{SVD}(\bold{X_1^{\top}X_2})=\bold{U\Sigma V^{\top}}                                                              \\
-     & \bold{X_1^{\top}X_2X_2^{\top}X_1}=\bold{U\Sigma (V^{\top} V) \Sigma^{\top} U^{\top}=U(\Sigma \Sigma^{\top}) U^{\top}} \\
-     & \bold{X_2^{\top}X_1X_1^{\top}X_2}=\bold{V\Sigma^{\top} (U^{\top} U) \Sigma V^{\top}=V(\Sigma^{\top} \Sigma) V^{\top}}
+     & \text{SVD}(\mathbf{X_1^{\top}X_2})=\mathbf{U\Sigma V^{\top}}                                                              \\
+     & \mathbf{X_1^{\top}X_2X_2^{\top}X_1}=\mathbf{U\Sigma (V^{\top} V) \Sigma^{\top} U^{\top}=U(\Sigma \Sigma^{\top}) U^{\top}} \\
+     & \mathbf{X_2^{\top}X_1X_1^{\top}X_2}=\mathbf{V\Sigma^{\top} (U^{\top} U) \Sigma V^{\top}=V(\Sigma^{\top} \Sigma) V^{\top}}
 \end{align}
 
-Using the SVD, the matrix of the left singular vectors $\bold{U}$ are the matrix of weights $\bold{W_1}$ and the matrix of right singular vectors $\bold{V^{\top}}$ are the matrix of weights $\bold{W_2}$.
+Using the SVD, the matrix of the left singular vectors $\mathbf{U}$ are the matrix of weights $\mathbf{W_1}$ and the matrix of right singular vectors $\mathbf{V^{\top}}$ are the matrix of weights $\mathbf{W_2}$.
 
 \subsubsection{Iterative solution with NIPALS}
 
@@ -216,10 +216,10 @@ The problem with applying PLS to neuroimaging and behavioural modalities is that
 Returning to CCA, we now would like to find the directions of maximum correlation rather than of maximum covariance between two views of a dataset. This small change makes CCA invariant to the scale of the features. CCA can therefore be represented by the optimisation problem:
 
 \begin{align}
-     & \bold{w_{opt}}=\underset{\bold{w}}{\mathrm{argmax}}\{ \bold{w_1^{\top}X_1^{\top}X_2w_2}  \} \\
-     & \text{subject to:} \notag                                                                   \\
-     & \bold{w_1^{\top}X_1^{\top}X_1w_1}=1 \notag                                                  \\
-     & \bold{w_2^{\top}X_2^{\top}X_2w_2}=1 \notag
+     & \mathbf{w_{opt}}=\underset{\mathbf{w}}{\mathrm{argmax}}\{ \mathbf{w_1^{\top}X_1^{\top}X_2w_2}  \} \\
+     & \text{subject to:} \notag                                                                         \\
+     & \mathbf{w_1^{\top}X_1^{\top}X_1w_1}=1 \notag                                                      \\
+     & \mathbf{w_2^{\top}X_2^{\top}X_2w_2}=1 \notag
 \end{align}
 
 Despite this problem being non-convex, the CCA problem has been well studied in the literature and there are a number of other ways of forming and solving the CCA objective. CCA can be formed as an iterative optimisation using an eigenvalue problem, a generalised eigenvalue problem, block coordinate descent by alternating least squares regressions \cite{golub1995canonical} \cite{sun2008least} or by gradient descent \cite{via2007learning}.
@@ -229,39 +229,39 @@ Despite this problem being non-convex, the CCA problem has been well studied in 
 By forming the lagrangian and taking partial derivatives in the same way as the PLS case we have first order conditions:
 
 \begin{align}\label{CCA:FOCs}
-     & \bold{X_2^{\top}X_1w_1}=\lambda_2 \bold{X_2^{\top}X_2w_2} \\
-     & \bold{X_1^{\top}X_2w_2}=\lambda_1 \bold{X_1^{\top}X_1w_1} \\
-     & \bold{w_1^{\top}X_1^{\top}X_1w_1}=1                       \\
-     & \bold{w_2^{\top}X_2^{\top}X_2w_2}=1
+     & \mathbf{X_2^{\top}X_1w_1}=\lambda_2 \mathbf{X_2^{\top}X_2w_2} \\
+     & \mathbf{X_1^{\top}X_2w_2}=\lambda_1 \mathbf{X_1^{\top}X_1w_1} \\
+     & \mathbf{w_1^{\top}X_1^{\top}X_1w_1}=1                         \\
+     & \mathbf{w_2^{\top}X_2^{\top}X_2w_2}=1
 \end{align}
 
-By again substituting the second two conditions into the first two conditions, we once again have $\lambda_1=\lambda_2=\lambda$. Then substituting the second condition into the first, and recognising $\bold{X_i^{\top}X_i}$ as the covariance matrix of $\bold{X_i}$, $\bold{\Sigma_{ii}}$, and $\bold{X_i^{\top}X_j}$ as the cross-covariance matrix $\bold{\Sigma_{ij}}$, we show that the optimisation problem is another pair of eigenvalue problems:
+By again substituting the second two conditions into the first two conditions, we once again have $\lambda_1=\lambda_2=\lambda$. Then substituting the second condition into the first, and recognising $\mathbf{X_i^{\top}X_i}$ as the covariance matrix of $\mathbf{X_i}$, $\mathbf{\Sigma_{ii}}$, and $\mathbf{X_i^{\top}X_j}$ as the cross-covariance matrix $\mathbf{\Sigma_{ij}}$, we show that the optimisation problem is another pair of eigenvalue problems:
 
 \begin{align}
-     & \bold{X_2^{\top}X_1w_1}=\lambda^2\bold{X_2^{\top}X_2(X_1^{\top}X_2)^{-1}X_1^{\top}X_1w_1}              \\
-     & \bold{(X_1^{\top}X_1)^{-1}X_1^{\top}X_2(X_2^{\top}X_2)^{-1}X_2^{\top}X_1w_1}=\lambda^2\bold{w_1}\notag \\
-     & \bold{\Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}w_1}=\lambda^2\bold{w_1}\notag             \\
+     & \mathbf{X_2^{\top}X_1w_1}=\lambda^2\mathbf{X_2^{\top}X_2(X_1^{\top}X_2)^{-1}X_1^{\top}X_1w_1}              \\
+     & \mathbf{(X_1^{\top}X_1)^{-1}X_1^{\top}X_2(X_2^{\top}X_2)^{-1}X_2^{\top}X_1w_1}=\lambda^2\mathbf{w_1}\notag \\
+     & \mathbf{\Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}w_1}=\lambda^2\mathbf{w_1}\notag             \\
 \end{align}
 
 Likewise, we have:
 
 \begin{align}
-     & \bold{(X_2^{\top}X_2)^{-1}X_2^{\top}X_1(X_1^{\top}X_1)^{-1}X_1^{\top}X_2w_2}=\lambda^2\bold{w_2}\notag \\
-     & \bold{\Sigma_{22}^{-1}\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}w_2}=\lambda^2\bold{w_2}\notag             \\
+     & \mathbf{(X_2^{\top}X_2)^{-1}X_2^{\top}X_1(X_1^{\top}X_1)^{-1}X_1^{\top}X_2w_2}=\lambda^2\mathbf{w_2}\notag \\
+     & \mathbf{\Sigma_{22}^{-1}\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}w_2}=\lambda^2\mathbf{w_2}\notag             \\
 \end{align}
 
 We can also find an alternative form of CCA by reparameterizing $w^*_i=(X_i^{\top}X_i)^{-\frac{1}{2}}w_i$. Then the CCA optimization problem becomes:
 
 \begin{align}
-     & \bold{w^*_{opt}}=\underset{\bold{w*}}{\mathrm{argmax}}\{ \bold{w^{*T}_1(X_1X_1^{\top})^{-\frac{1}{2}}X_1^{\top}X_2(X_2^{\top}X_2)^{-\frac{1}{2}}w^*_2\}} \\
-     & \text{subject to:} \notag                                                                                                                                \\
-     & \bold{w^{*T}_1w^*_1}=1 \notag                                                                                                                            \\
-     & \bold{w^{*T}_2w^*_2}=1 \notag
+     & \mathbf{w^*_{opt}}=\underset{\mathbf{w*}}{\mathrm{argmax}}\{ \mathbf{w^{*T}_1(X_1X_1^{\top})^{-\frac{1}{2}}X_1^{\top}X_2(X_2^{\top}X_2)^{-\frac{1}{2}}w^*_2\}} \\
+     & \text{subject to:} \notag                                                                                                                                      \\
+     & \mathbf{w^{*T}_1w^*_1}=1 \notag                                                                                                                                \\
+     & \mathbf{w^{*T}_2w^*_2}=1 \notag
 \end{align}
 
-Which we recognise once again as an eigenvalue problem and an associated SVD, this time finding the SVD of $\bold{(X_1X_1^{\top})^{-\frac{1}{2}}X_1^{\top}X_2(X_2^{\top}X_2)^{-\frac{1}{2}}}$ or $\bold{T}=\bold{\Sigma^{-\frac{1}{2}}_{11}\Sigma_{12}\Sigma^{-\frac{1}{2}}_{22}}$. This form of the problem will later form the basis of the Deep Canonical Correlation Analysis (DCCA).
+Which we recognise once again as an eigenvalue problem and an associated SVD, this time finding the SVD of $\mathbf{(X_1X_1^{\top})^{-\frac{1}{2}}X_1^{\top}X_2(X_2^{\top}X_2)^{-\frac{1}{2}}}$ or $\mathbf{T}=\mathbf{\Sigma^{-\frac{1}{2}}_{11}\Sigma_{12}\Sigma^{-\frac{1}{2}}_{22}}$. This form of the problem will later form the basis of the Deep Canonical Correlation Analysis (DCCA).
 
-In this form, we can also see that PLS can be made equivalent to CCA by whitening the data matrices prior to forming the covariance matrix (transforming the data covariance to an identity matrix) because this ensures that $\bold{\Sigma^{-\frac{1}{2}}_{ii}}$ is equal to the identity matrix and makes the problem equivalent to PLS. When the number of features exceeds the number of samples $p>n$, CCA degenerates because the within-view covariance matrices cannot be inverted - a major difference between CCA and PLS which can always be computed.
+In this form, we can also see that PLS can be made equivalent to CCA by whitening the data matrices prior to forming the covariance matrix (transforming the data covariance to an identity matrix) because this ensures that $\mathbf{\Sigma^{-\frac{1}{2}}_{ii}}$ is equal to the identity matrix and makes the problem equivalent to PLS. When the number of features exceeds the number of samples $p>n$, CCA degenerates because the within-view covariance matrices cannot be inverted - a major difference between CCA and PLS which can always be computed.
 
 \subsubsection{Generalized Eigenvalue Problems}
 
@@ -269,26 +269,26 @@ Interestingly, we can also set up the system of equations in equation \ref{CCA:F
 
 \begin{align}
     \begin{pmatrix}
-        0                  & \bold{\Sigma_{12}} \\
-        \bold{\Sigma_{21}} & 0
+        0                    & \mathbf{\Sigma_{12}} \\
+        \mathbf{\Sigma_{21}} & 0
     \end{pmatrix}
     \begin{pmatrix}
-        \bold{w_1} \\
-        \bold{w_2}
+        \mathbf{w_1} \\
+        \mathbf{w_2}
     \end{pmatrix}
     =
     \lambda
     \begin{pmatrix}
-        \bold{\Sigma_{11}} & 0                  \\
-        0                  & \bold{\Sigma_{22}}
+        \mathbf{\Sigma_{11}} & 0                    \\
+        0                    & \mathbf{\Sigma_{22}}
     \end{pmatrix}
     \begin{pmatrix}
-        \bold{w_1} \\
-        \bold{w_2}
+        \mathbf{w_1} \\
+        \mathbf{w_2}
     \end{pmatrix}
 \end{align}
 
-Which is of the form $\bold{A v} = \lambda \bold{B v}$. CCA is therefore often referred to as a generalized eigenvalue problem for which there are a number of publicly available solvers.
+Which is of the form $\mathbf{A v} = \lambda \mathbf{B v}$. CCA is therefore often referred to as a generalized eigenvalue problem for which there are a number of publicly available solvers.
 
 \subsection{Sample Covariance and Population Covariance}
 All of the methods can be described through covariance terms: $\mathbb{E}[X^TX]=\Sigma_{XX}$, $\mathbb{E}[Y^TY]=\Sigma_{YY}$, and $\mathbb{E}[X^TY]=\Sigma_{XY}$. We can either consider our training data as samples from the population covariances $\Sigma$ or we can consider the Sample Average Approximation $\frac{1}{b-1}\bar{\mathbf{X}} \bar{\mathbf{Y}}^T=\hat{\Sigma_{XY}}$ where we have a minibatch $b$ of pairs of samples from $X,Y$ into the data matrices $\mathbf{X} \in \R^{p \times b}, \mathbf{Y} \in \R^{q \times b}$ and we let $\bar{\mathbf{X}},\bar{\mathbf{Y}}$ be the centred versions.
@@ -354,33 +354,33 @@ Regularised solutions to the CCA problem are desirable both to provide a solutio
 Vinod proposed the "Canonical Ridge" which combined the PLS and CCA constraints in a single constrained optimisation \cite{vinod1976canonical}:
 
 \begin{align}
-     & w_{opt}=\underset{w}{\mathrm{argmax}}\{\bold{w_1^{\top}X_1^{\top}X_2w_2}\}      \\
-     & \text{subject to:} \notag                                                       \\
-     & (1-\tau_1)\bold{w_1^{\top}X_1^{\top}X_1w_1}+\tau_1\bold{w_1^{\top}w_1}=1 \notag \\
-     & (1-\tau_2)\bold{w_2^{\top}X_2^{\top}X_2w_2}+\tau_2\bold{w_2^{\top}w_2}=1 \notag
+     & w_{opt}=\underset{w}{\mathrm{argmax}}\{\mathbf{w_1^{\top}X_1^{\top}X_2w_2}\}        \\
+     & \text{subject to:} \notag                                                           \\
+     & (1-\tau_1)\mathbf{w_1^{\top}X_1^{\top}X_1w_1}+\tau_1\mathbf{w_1^{\top}w_1}=1 \notag \\
+     & (1-\tau_2)\mathbf{w_2^{\top}X_2^{\top}X_2w_2}+\tau_2\mathbf{w_2^{\top}w_2}=1 \notag
 \end{align}
 
 Where $\tau_i$ is a mixing hyperparameter that makes the solution more or less CCA-like ($c_i=0$) or PLS-like ($c_i=1$) depending on the constraint. By once again forming the lagrangian and taking partial derivatives we have first order conditions:
 
 \begin{align}
-     & \bold{X_1^{\top}X_2w_2} + \lambda_1((1-\tau_1)\bold{X_1^{\top}X_1w_1}+\tau_1\bold{w_1}-1)=0 \\
-     & \bold{X_2^{\top}X_1w_1} + \lambda_2((1-\tau_2)\bold{X_2^{\top}X_2w_2}+\tau_2\bold{w_2}-1)=0
+     & \mathbf{X_1^{\top}X_2w_2} + \lambda_1((1-\tau_1)\mathbf{X_1^{\top}X_1w_1}+\tau_1\mathbf{w_1}-1)=0 \\
+     & \mathbf{X_2^{\top}X_1w_1} + \lambda_2((1-\tau_2)\mathbf{X_2^{\top}X_2w_2}+\tau_2\mathbf{w_2}-1)=0
 \end{align}
 
 And this gives us the eigenvalue problems \cite{rosipal2005overview}:
 
 \begin{align}
-     & ((1-\tau_1)\bold{X_1^{\top}X_1}+\tau_1I)^{-1}\bold{X_1^{\top}X_2}((1-\tau_2)\bold{X_2^{\top}X_2}+\tau_2I)^{-1}\bold{X_2^{\top}X_1w_1}=\lambda^2\bold{w_1} \notag \\
-     & ((1-\tau_2)\bold{X_2^{\top}X_2}+\tau_2I)^{-1}\bold{X_2^{\top}X_1}((1-\tau_1)\bold{X_1^{\top}X_1}+\tau_1I)^{-1}\bold{X_1^{\top}X_2w_2}=\lambda^2\bold{w_2}
+     & ((1-\tau_1)\mathbf{X_1^{\top}X_1}+\tau_1I)^{-1}\mathbf{X_1^{\top}X_2}((1-\tau_2)\mathbf{X_2^{\top}X_2}+\tau_2I)^{-1}\mathbf{X_2^{\top}X_1w_1}=\lambda^2\mathbf{w_1} \notag \\
+     & ((1-\tau_2)\mathbf{X_2^{\top}X_2}+\tau_2I)^{-1}\mathbf{X_2^{\top}X_1}((1-\tau_1)\mathbf{X_1^{\top}X_1}+\tau_1I)^{-1}\mathbf{X_1^{\top}X_2w_2}=\lambda^2\mathbf{w_2}
 \end{align}
 
-The main difference between this eigenvalue problem and the CCA eigenvalue problem is the substitution of the matrices $\bold{X_1^{\top}X_1}$ and $\bold{X_2^{\top}X_2}$ for the matrices $((1-\tau_1)\bold{X_1^{\top}X_1}+\tau_1I)$ and $((1-\tau_2)\bold{X_2^{\top}X_2}+\tau_2I)$. We can therefore see that this regularisation is equivalent to adding a constant to the diagonal of the covariance matrix $\bold{X_i^{\top}X_i}$. Hardoon showed that this form of regularisation can also be implemented using the kernel trick \cite{hardoon2004canonical}.
+The main difference between this eigenvalue problem and the CCA eigenvalue problem is the substitution of the matrices $\mathbf{X_1^{\top}X_1}$ and $\mathbf{X_2^{\top}X_2}$ for the matrices $((1-\tau_1)\mathbf{X_1^{\top}X_1}+\tau_1I)$ and $((1-\tau_2)\mathbf{X_2^{\top}X_2}+\tau_2I)$. We can therefore see that this regularisation is equivalent to adding a constant to the diagonal of the covariance matrix $\mathbf{X_i^{\top}X_i}$. Hardoon showed that this form of regularisation can also be implemented using the kernel trick \cite{hardoon2004canonical}.
 
 \section{Multiple Effects, Orthogonality, and Deflation}\label{sec:orthogonality}
 
 We have only explicitly referred to the vectors of weights that produce maximal variance or correlation so far in this report. However the eigendecomposition formulations of PCA, PLS, and CCA with multiple possible eigenvector and eigenvalue pairs implies that we are able to find more than one orthogonal effect when using all three methods. We refer respectively to the top-$1$ and top-$k$ PLS and CCA problems to distinguish these problems where $k$ refers to the number of effects we wish to find.
 
-While the SVD and eigendecomposition based methods are able to generate all of the latent dimensions at once, they require the inversion of the covariance matrices $\bold{\Sigma_{11}}$ and $\bold{\Sigma_{22}}$ and therefore for very large data have a high computational cost.
+While the SVD and eigendecomposition based methods are able to generate all of the latent dimensions at once, they require the inversion of the covariance matrices $\mathbf{\Sigma_{11}}$ and $\mathbf{\Sigma_{22}}$ and therefore for very large data have a high computational cost.
 
 However when we use iterative methods we typically compute only the first (i.e. the maximally correlated/covarying effect). If we wish to find further effects, we must define a way to ensure that any other effects we find are different to the first (i.e. the maximally correlated/covarying effect). By a process of deflation we can remove a given effect from our data and repeat the process to find the next top correlated/covarying effect.
 
@@ -392,42 +392,42 @@ In their (generalized) eigenvalue problem form, the definition of orthogonality 
 
 \begin{align}
     \begin{pmatrix}
-        0                  & \bold{\Sigma_{12}} \\
-        \bold{\Sigma_{21}} & 0
+        0                    & \mathbf{\Sigma_{12}} \\
+        \mathbf{\Sigma_{21}} & 0
     \end{pmatrix}
-    \bold{w}
+    \mathbf{w}
     =
     \lambda
-    \bold{w}
+    \mathbf{w}
 \end{align}
 
-Implies that the first component $\bold{w_1}$ and the second component $\bold{w_2}$ must have the relationship $\bold{w_{i_1}^{\top} w_{i_2}}=0$. In other words the weight vectors must be orthogonal.
+Implies that the first component $\mathbf{w_1}$ and the second component $\mathbf{w_2}$ must have the relationship $\mathbf{w_{i_1}^{\top} w_{i_2}}=0$. In other words the weight vectors must be orthogonal.
 
 In the CCA case, the generalized eigenvalue problem:
 
 \begin{align}
     \begin{pmatrix}
-        0                  & \bold{\Sigma_{12}} \\
-        \bold{\Sigma_{21}} & 0
+        0                    & \mathbf{\Sigma_{12}} \\
+        \mathbf{\Sigma_{21}} & 0
     \end{pmatrix}
-    \bold{w}
+    \mathbf{w}
     =
     \lambda
     \begin{pmatrix}
-        \bold{\Sigma_{11}} & 0                  \\
-        0                  & \bold{\Sigma_{22}}
+        \mathbf{\Sigma_{11}} & 0                    \\
+        0                    & \mathbf{\Sigma_{22}}
     \end{pmatrix}
-    \bold{w}
+    \mathbf{w}
 \end{align}
 
-Implies that the first component $\bold{w_1}$ and the second component $\bold{w_2}$ must have the relationship:
+Implies that the first component $\mathbf{w_1}$ and the second component $\mathbf{w_2}$ must have the relationship:
 
 \begin{align}
-    \bold{w_{i_1}^{\top}\begin{pmatrix}\bold{\Sigma_{11}} & 0 \\0 & \bold{\Sigma_{22}}
-                        \end{pmatrix}w^{(2)}}=0
+    \mathbf{w_{i_1}^{\top}\begin{pmatrix}\mathbf{\Sigma_{11}} & 0 \\0 & \mathbf{\Sigma_{22}}
+                          \end{pmatrix}w^{(2)}}=0
 \end{align}
 
-which implies that the projections for each view $\bold{X_iw_i}$ are orthogonal.
+which implies that the projections for each view $\mathbf{X_iw_i}$ are orthogonal.
 
 However for both CCA and PLS we could also define effects in different ways and indeed the PLS literature contains a number of variants\cite{hoskuldsson1988pls} \cite{wegelin2000survey}. When using iterative methods, we typically use a procedure known as deflation. The deflation step and initialisation of each inner loop forms an algorithmic "outer loop" while the "inner loop" finds the next largest component. There are two common methods for deflation for CCA and PLS described in the literature: Hotelling's deflation and projection deflation.
 
@@ -435,8 +435,8 @@ However for both CCA and PLS we could also define effects in different ways and 
 Hotelling's deflation ensures orthogonality of the weight vectors and is typically used for methods based on the power method for the SVD. Hotelling's deflation removes the covariance, $d$, associated with each set of weights:
 
 \begin{align}
-     & d = \bold{w^{\top}_1X^{\top}_1X_2w_2}                                        \\
-     & \bold{\Sigma^{(i+1)}_{12}}= \bold{\Sigma^{(i)}_{12}} - d\bold{w_1w^{\top}_2}
+     & d = \mathbf{w^{\top}_1X^{\top}_1X_2w_2}                                            \\
+     & \mathbf{\Sigma^{(i+1)}_{12}}= \mathbf{\Sigma^{(i)}_{12}} - d\mathbf{w_1w^{\top}_2}
 \end{align}
 
 Hotelling's deflation only ensures orthogonality of the respective weight vectors when $w_1$ and $w_2$ are true singular vectors. For this reason when the problem is regularised, Hotelling's deflation may be suboptimal.
@@ -445,16 +445,16 @@ Hotelling's deflation only ensures orthogonality of the respective weight vector
 
 Projection deflation projects each dataset into a subspace that is uncorrelated with its first respective projection. It is used to ensure that the projection vectors are orthogonal. This is the method used by Wold's NIPALS algorithm and is also refered to as mode-A deflation or CCA deflation \cite{mackey2009deflation}.
 
-With this method, the projection of each column of $\bold{X}$ in the direction $\bold{Xw}$ is equal to the cross-product of $\bold{Xw}$ with each column of $\bold{X}$ multiplied by the direction: $\frac{\bold{Xw}}{\|\bold{Xw}\|}$.
+With this method, the projection of each column of $\mathbf{X}$ in the direction $\mathbf{Xw}$ is equal to the cross-product of $\mathbf{Xw}$ with each column of $\mathbf{X}$ multiplied by the direction: $\frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}$.
 
 \begin{align}
-     & P(\bold{X})= \frac{\bold{Xw}}{\|\bold{Xw}\|}\bold{w^{\top}X^{\top}X}
+     & P(\mathbf{X})= \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X}
 \end{align}
 
-We can then find the residual of $\bold{X}$, the variance in $\bold{X}$  that is orthogonal to the first canonical projection. This ensures that the next set of score vectors will be orthogonal to the first.
+We can then find the residual of $\mathbf{X}$, the variance in $\mathbf{X}$  that is orthogonal to the first canonical projection. This ensures that the next set of score vectors will be orthogonal to the first.
 
 \begin{align}
-     & P^\perp(\bold{X})= \bold{X} - \frac{\bold{Xw}}{\|\bold{Xw}\|}\bold{w^{\top}X^{\top}X} = (I - \frac{\bold{Xw}}{\|\bold{Xw}\|}\bold{w^{\top}X^{\top})X}
+     & P^\perp(\mathbf{X})= \mathbf{X} - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X} = (I - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top})X}
 \end{align}
 
 \section{Deep CCA}\label{sec:DCCA}
