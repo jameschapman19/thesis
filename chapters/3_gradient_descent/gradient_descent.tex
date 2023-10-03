@@ -3,7 +3,7 @@ The content of this chapter is based on a preprint paper where I am first author
 I initiated the project based on heuristic arguments and contacted coauthors Ana Lawry Aguila (who provided and analysed the UK Biobank data) and Lennie Wells (who provided extensive mathematical proofs which are in the appenix of this PhD thesis for the interest of the reader).
 Both of my coauthors helped me to revise the manuscript.
 \minitoc
-\section{Introduction} %Introduce the problem statement and its importance
+\section{Introduction}
 
 \textit{How can we effectively implement Canonical Correlation Analysis (CCA) using gradient descent and subsequently enhance its performance and scalability via stochastic gradient descent, laying a foundation for the application of proximal gradient descent in regularisation?}
 Subspace learning methodologies, such as Principal Component Analysis (PCA) \cite{hotelling1933analysis}, Partial Least Squares (PLS) \cite{haenlein2004beginner}, Linear Discriminant Analysis (LDA), and Canonical Correlation Analysis (CCA) \cite{hotelling1992relations}, have been cornerstones in various fields including computer vision, neuroimaging \cite{Krishnan2011}, finance \cite{cassel2000measurement}, and imaging genetics \cite{Hansen2021}.
@@ -20,8 +20,13 @@ This approach becomes critical in situations where it's infeasible to load all t
 To this end, we propose a principled framework for subspace learning and Self-Supervised Learning (SSL), grounded on an innovative unconstrained characterization of the optimal subspaces of GEPs, proposition \ref{prop:EY-charac}.
 The subsequent sections of this chapter will validate the effectiveness and scalability of our proposed framework across a variety of tasks and datasets, demonstrating faster convergence and better correlation performance on stochastic CCA benchmarks. Furthermore, we will present a unique real-world application through a stochastic PLS analysis on an extremely high-dimensional biomedical dataset.
 Ultimately, this chapter prepares the groundwork for later chapters that delve into regularized CCA models using proximal gradient descent, hence creating a coherent narrative that intertwines the principles of gradient descent, CCA, and advanced learning paradigms such as DCCA and SSL.
+\subsection{Problem Statement}
 
-\section{Related Work}
+\subsection{Contributions}
+
+
+
+\section{Background}
 \subsection{Reconstruction perspective on PCA and CCA}
 The key idea behind this chapter relies on treating CCA as a low-rank approximation problem, rather than a constrained optimization problem or a generalized eigenvalue problem.
 
@@ -53,7 +58,7 @@ For the GEP-EY PLS analysis on biomedical data, we used 33,333 subjects from the
 To generate measures of genetic disease risk, we calculated polygenic risk scores using PRSice \cite{PRSice2014}. We calculated scores, with a p-value threshold of 0.05, using GWAS summary statistics for the following diseases; Alzheimer's \cite{Lambert2013}, Schizophrenia \cite{Trubetskoy2022}, Bipolar \cite{Mullins2021}, ADHD \cite{Demontis2023}, ALS \cite{Van_Rheenen2021}, Parkinson's \cite{Nalls2019}, and Epilepsy \cite{International_League_Against_Epilepsy_Consortium_on_Complex_Epilepsies2018}, using the referenced GWAS studies.
 
 
-\section{Method}
+\section{Methods}
 
 In this section, we introduce a new class of algorithms based on matrix analysis results which allow us to efficiently solve a number of interesting problems including but not limited to CCA, PLS, DCCA, and SSL.
 
@@ -88,27 +93,10 @@ This is summarised by proposition \ref{prop:EY-charac}, a consequence of applyin
     Moreover, the maximum value is precisely $\sum_{j=1}^k \lambda_j^2$, where $(\lambda_j)$ are the generalised eigenvalues.
 \end{restatable}
 
-\subsection{CCA-SVD: an unconstrained objective for CCA}\label{sec:gep-ey-formulation}
-% A formulation of CCA by Matrix Analysis
-Next, we introduce CCA-SVD; a closely-related result that optimizes the SVD formulation of CCA and results in slightly more compact objectives which are cheaper to evaluate. It is summarized by proposition \ref{prop:SVD-CCA-charac}.
 
-\begin{restatable}[SVD inspired objective for CCA]{proprep}{SVDCCAcharac}
-    \label{prop:SVD-CCA-charac}
-    % The top-$k$ subspace for the CCA problem defined by $(\Sigxx,\Sigyy,\Sigxy)$ can be characterised by:
-    % \begin{align}\label{eq:EY-charac}
-    %     \max_{U \in \R^{p \times k}, V \in \R^{q \times k}} \mathcal{U}^\text{SVD-CCA}(U,V) 
-    %     \defeq 2 \tr\left(U^T \Sigxy V \right) - \tr\left( U^T \Sigxx U \: V^T \Sigyy V \right)
-    % \end{align}
-    The top-$k$ subspace for the CCA problem defined by $X,Y \in \R^p,\R^q$ can be characterized by maximizing the following objective over $U \in \R^{p \times k}, V \in \R^{q \times k}$:
-    \begin{align}\label{eq:EY-charac}
-        \mathcal{U}^\text{SVD-CCA}(U,V)
-        \defeq 2 \tr\left({U}^T \Cov(X,Y) {V} \right) - \tr\left(\, {U}^T \Var(X) {U} \:\, {V}^T \Var(Y) {V} \,\right)
-    \end{align}
-    Moreover, the maximum value is precisely $\sum_{j=1}^k \rho_j^2$, where $(\rho_j)$ are the canonical correlations.
-\end{restatable}
 
 In the following sections, we describe a number of algorithms for solving GEPs using proposition \ref{prop:EY-charac}.
-These will be denoted with \textbf{EY}. For the case of CCA, each of these algorithms have analogous forms using proposition \ref{prop:SVD-CCA-charac}, which will be denoted with \textbf{SVD}. However, describing both versions would muddle the exposition, and the GEP formulation is more general. We leave more detailed descriptions of the SVD-based forms to supplement \ref{supp:algorithm-details}.
+These will be denoted with \textbf{EY}.
 
 \subsection{Stochastic Optimization}
 
@@ -152,7 +140,7 @@ These estimates will then be low rank; indeed we can factorise these estimates i
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Stochastic CCA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Application of GEP-EY and CCA-SVD to stochastic CCA}
+\subsection{Experiment 1: Application of CCA-EY to stochastic CCA}
 
 In this section, we compare GEP-GD and CCA-SVD to $\gamma$-EigenGame \cite{gemp2022generalized} and SGHA \cite{chen2019constrained} for approximating CCA in the stochastic setting. Replicating the experiment in \cite{meng2021online, gemp2022generalized}, we optimize for the top-4 CCA subspace for the MediaMill and Split CIFAR (left and right halves of CIFAR-10 images) datasets. We use a minibatch size 100 and train for one epoch across 5 random seeds (with 1 standard deviation error bars in the plots). We use the Scipy \cite{virtanen2020scipy} package to solve the full batch GEPs as a ground truth value and use the proportion of correlation captured (PCC) captured by the learnt subspace as compared to this ground truth (defined in supplement \ref{supp:experimental details}). Unlike \cite{gemp2022generalized}, we do not perform PCA on the data before applying the CCA methods but instead, for the MNIST data, we add gaussian noise to avoid zero variance subspaces in $X$ and $Y$. This makes our task more challenging, as performing PCA simplifies the problem by substituting $B$ for the identity matrix $I$. This explains the decrease in performance of $\gamma$-EigenGame as compared to their original work.
 
@@ -210,7 +198,7 @@ This indicates that our method can learn effectively from a limited number of sa
 
 %Stochastic PLS UKBB
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Application of GEP-EY to PLS on large scale biomedical data}
+\subsection{Application of PLS-EY to PLS on large scale biomedical data}
 
 We demonstrate the power of GEP-EY for large-scale subspace learning by solving PLS on imaging genetics data from the UK Biobank \cite{sudlow2015uk}, a biomedical database. This can reveal novel phenotypes of interest and uncover genetic mechanisms of disease and brain morphometry. Previous imaging genetics analyses using PLS and CCA were limited to small-scale datasets \cite{Lorenzi2018,Taquet2021,Lefloch2012}, which are prone to overfitting and instability. Full batch approaches are infeasible for this data due to the high computational cost. The only other large-scale PLS analysis on the UK Biobank used a federated approach with local batch PLS-SVD \cite{lorenzi2016}, which approximates the global solution. We present the first stochastic PLS analysis on large-scale biomedical data.
 

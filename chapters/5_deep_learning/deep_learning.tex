@@ -3,6 +3,11 @@
 \section{Introduction}
 In this chapter, we extend our work to the deep learning setting. We show that our approach can be applied to deep canonical correlation analysis (DCCA) and self-supervised learning (SSL) more generally. We show that our approach is competitive with existing methods on standard benchmarks and that it is much more stable and scalable. We also show that our approach is much more interpretable than existing methods. We conclude that our approach is a powerful new tool for multiview nonlinear association learning.
 
+\subsection{Problem Statement}
+
+\subsection{Contributions}
+
+
 \section{Background}
 \subsection{Deep Learning}
 Deep learning has revolutionised machine learning in the last decade. It has led to breakthroughs in many areas including computer vision \cite{krizhevsky2012imagenet}, natural language processing \cite{devlin2018bert}, and reinforcement learning \cite{mnih2015human}. Deep learning has also been applied to many biomedical problems including drug discovery \cite{gawehn2016deep}, medical imaging \cite{litjens2017survey}, and electronic health records \cite{rajkomar2018scalable}.
@@ -22,7 +27,10 @@ The X-Ray Microbeam (XRMB) dataset \cite{westbury1994x} is a multimodal dataset 
 The CIFAR-10 and CIFAR-100 datasets contain 60,000 images each, with 10 and 100 classes respectively. Each image is 32$\times$32 pixels with 3 channels. We use the standard train/test split.
 
 
-\section{Methods for Deep CCA}
+\section{Methods}
+\subsection{DCCA-EY}
+
+\subsection{SSL-EY}
 
 We can construct a new class of algorithms for Deep CCA based on each of the forms we introduce in chapter \ref{ch:gradient_descent}.
 
@@ -80,12 +88,6 @@ Therefore, we can apply some variant of SGD to optimize equation \ref{eq:DCCA-EY
 
 Note that, as in the earlier DCCA work, though we derived the algorithm by considering $f,g$ with output dimensions $d_x,d_y$, we ultimately end up with networks $\bar{f},\bar{g}$ with the same output dimension $k$; we can view these as giving highly correlated $k$-dimensional embeddings of our data.
 
-\subsection{DCCA-SVD}
-
-Finally, we can apply the SVD formulation of CCA (\ref{eq:cca-SVD}) to our DCCA definition. 
-
-
-
 \section{Methods for Self-Supervised Learning}
 
 
@@ -109,12 +111,12 @@ Once again, we define SSL-SVD by analogy in supplement \ref{supp:algorithm-detai
 \textbf{Implementation Details:} Typical architectures for the encoder and the projector vary depending on the domain and the dataset \cite{balestriero2023cookbook}. For example, for image classification tasks on CIFAR-10 or ImageNet, a common choice for the encoder is a ResNet, while for the projector a linear layer or a two-layer MLP is often used. Common augmentations for images are cropping, flipping, rotating, color jittering, etc. In this work, we adopt standard architectures and augmentations from the literature.
 
 
-\section{Experiments and Results}
+\section{Experiments}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %DCCA Benchmarking
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Application of DCCA-EY and DCCA-SVD to to Deep multiview learning on toy data}
+\subsection{Experiment 1: Application of DCCA-EY to to Deep multiview learning on toy data}
 
 We now turn to compare our proposed DCCA-EY and DCCA-SVD methods with existing methods for deep canonical correlation analysis (DCCA). We replicate an experiment from \cite{wang2015stochastic} using the left and right halves of MNIST \cite{lecun1998gradient} digits ($n$=60,000) and X-Ray Microbeam (XRMB, $n$=1,429,236) data \cite{westbury1994x}. XRMB is a multimodal dataset of speech recordings from 139 speakers with acoustic and articulatory features. We use minibatch sizes of 100 for 20 epochs, the architectures described in \cite{wang2015stochastic}, and an output dimensionality of 50.  We use the total correlation captured (TCC) of the learnt subspace on the validation set as a metric (defined in supplement \ref{supp:experimental details}).
 
@@ -139,10 +141,13 @@ We now turn to compare our proposed DCCA-EY and DCCA-SVD methods with existing m
 
 On the split MNIST data, we show in figure \ref{fig:lrexp} the substantial effect of changing the learning rate on the convergence of the TCC objective. This demonstrates the important of spending computational resource on optimizing the learning rate. An important benefit of our approach is that because the only hyperparameter is learning rate, we can spend all of our computational budget on this critical area. In figure \ref{fig:xrmb}, we show that our proposed methods exhibit extremely fast convergence compared to prior work. Furthermore, both proposed methods find higher validation correlations than DCCA-STOL, showing that they are much more effective ways of estimating the full batch DCCA objective. Note that, the decrease in validation correlation in later epochs is due to overfitting which should be addressed in practical settings by using early stopping as is standard in deep learning.
 
+
+\subsection{Experiment 2: Application of DCCA-EY to to Deep multiview learning}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %SSL
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Application of SSL-EY and SSL-SVD to Self-Supervised Learning}
+\subsection{Experiment 3: Application of SSL-EY to Self-Supervised Learning}
 
 In this section, we test our SSL objectives on the CIFAR-10 and CIFAR-100 datasets, which both have 60,000 images and 10 and 100 classes respectively. We compare our methods, SSL-EY and SSL-SVD, with two state-of-the-art methods, Barlow Twins and VICReg. We report k-Nearest Neighbor accuracy on the representations of the validation data in a zero-shot setup.
 
