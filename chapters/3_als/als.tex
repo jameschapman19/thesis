@@ -1,0 +1,214 @@
+\chapter{Regularized Alternating Least Squares: Flexible Regularization for CCA}
+\label{chap:als}
+\minitoc
+
+\section{Introduction}\label{sec:introduction}
+
+Canonical Correlation Analysis (CCA) has been an indispensable tool for discovering relationships between two multivariate sets of variables, commonly referred to as views. However, traditional CCA models often fail to adequately handle high-dimensional data, a challenge that is frequently encountered in brain research. To tackle this issue, we introduce a framework for regularized CCA based on alternating least squares (ALS), termed as Flexible Regularized Alternating Least Squares (FRALS). This work forms an early part of my PhD research and primarily aims to show that 'true CCA' models can unveil stronger signals in brain-behaviour data compared to Partial Least Squares (PLS) models.
+
+\subsection{Problem Statement}\label{subsec:problem-statement}
+The classical CCA methodology encounters difficulties when applied to high-dimensional datasets. These challenges include overfitting and the possibility of drawing spurious conclusions. While regularization techniques like ridge or lasso regression have been employed to alleviate these issues, they often lack the flexibility needed to cater to various types of data and research queries.
+
+\subsection{Contributions}\label{subsec:contributions}
+Our main contribution is the development and evaluation of FRALS, a novel framework that allows the utilization of any regularized least squares solver. This innovation enhances flexibility and provides a more robust defense against the risk of overfitting. Although our experimental outcomes indicate that FRALS excels in terms of out-of-sample correlation, it is important to note that the algorithm ultimately proves to be too slow and impractical for most applications. Nonetheless, it serves as an instructive stepping stone in the ongoing quest for efficient and reliable CCA methods.
+
+\section{Background}\label{sec:background}
+
+\subsection{Regularized CCA}\label{subsec:regularized-cca}
+Traditional approaches to regularized CCA include the use of ridge penalties (RCCA) and sparse methods like Penalized Matrix Decomposition (PMD). These methods each have their own limitations; for example, RCCA does not produce sparse solutions, while PMD may miss low-variance but high-correlation directions.
+
+\section{Methods}\label{sec:methods}
+
+\subsection{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least-squares-(frals)}
+We adopt an alternating minimization strategy to solve the CCA problem.
+The objective is to minimize the sum of squared Frobenius norms between the latent variables and their projections in each view.
+Regularization terms are added to the objective function to avoid overfitting.
+Our formulation allows the incorporation of any regularized least squares solver, making it extremely flexible.
+
+\subsubsection{Mathematical Formulation}
+We can solve CCA by alternating minimization over each view, based on the alternating least squares form.
+This form finds a variable $\bold{T}$ that is close to the latent variables $\bold{X}_i\bold{W}_i$, where $\bold{X}_i$, $\bold{W}_i$ are the matrix and weights for each view $i$.
+The closer $\bold{T}$ is to $\bold{X}_i\bold{W}_i$, the higher the correlation between them.
+The constraint  $\bold{T^{\top}T}=\bold{I}$ ensures that the latent space is orthogonal to find different effects.
+
+\begin{gather*}
+    \underset{\bold{W},\bold{T}}{\mathrm{argmin}}\left\{\sum_i \|\bold{X}_i\bold{W}_i-\bold{T}\|_{F}^2 \right\}\\
+    \text{subject to: } \bold{T^{\top}T}=\bold{I}\\
+\end{gather*}
+
+To regularize the projection matrices, we add penalty terms to the objective function, such as $P(\bold{W}_i)=\lambda_i\|\bold{W}_i\|_F$ for ridge regression or $P(\bold{W}_i)=\lambda_i\|\bold{W}_i\|_1$ for lasso.
+This can help us avoid overfitting and improving the interpretability of the results.
+This means that \textbf{any regularized least squares solver} can be used to solve each subproblem, such as ridge regression, lasso, elastic net, etc.\ making our framework substantially more flexible than prior work.
+
+\begin{gather*}
+    \underset{\bold{W},\bold{T}}{\mathrm{argmin}}\left\{\sum_i \|\bold{X}_i\bold{W}_i-\bold{T}\|_{F}^2 + \textcolor{red}{\lambda_i P(\bold{W}_i)}\}\right\}\\
+    \text{subject to: } \bold{T^{\top}T}=\bold{I}\\
+\end{gather*}
+
+\section{Experiments}\label{sec:experiments}
+
+\subsection{Experiment 1: Simulated Data Evaluation}\label{subsec:exp1}
+
+In this experiment, we evaluate several Sparse Canonical Correlation Analysis (CCA) variants using synthetic data generated with the FRALS framework.
+Two of these variants, IPLS+ and ElasticNet, are implemented within the FRALS framework for added flexibility.
+We provide intuition for the comparison of these models:
+
+- \textbf{IPLS+ (Sparse CCA via Iterative Penalized Least Squares with Positive Constraints):} IPLS+ assumes a prior about the data generation process, specifically that the true weights are positive.
+This prior matches the data generation process, making it more suitable for the given synthetic data.
+As a result, IPLS+ is expected to perform well as it aligns with the underlying data structure.
+
+- \textbf{ElasticNet:} ElasticNet, another model implemented using the FRALS framework, offers a combination of L1 (lasso) and L2 (ridge) regularization.
+While it provides flexibility in handling different types of data, it may not align with the specific prior assumption of positive weights in our synthetic data generation process.
+
+\subsubsection{Simulated Data Generation}\label{subsubsec:simulated-data-generation}
+
+
+
+In this experiment, we evaluate several Sparse Canonical Correlation Analysis (CCA) variants using synthetic data generated with the FRALS framework. Two of these variants, IPLS+ and ElasticNet, are implemented within the FRALS framework for added flexibility.
+
+Therefore, we anticipate that IPLS+ may outperform ElasticNet due to its alignment with the prior assumptions about data generation. This experiment aims to validate this intuition by comparing the performance of these models and others.
+
+\subsubsection{Methodology}
+
+To carry out the experiment, we leverage the CCA-Zoo Python package. The synthetic data is generated using the `LinearSimulatedData` class from the package, with parameters set to emulate a high-dimensional feature space.
+
+\begin{itemize}
+    \item Number of samples (\textit{n}): 500
+    \item Number of features in View 1 (\textit{p}): 200
+    \item Number of features in View 2 (\textit{q}): 200
+    \item Latent dimensions: 1
+    \item Sparsity in View 1: 0.1
+    \item Sparsity in View 2: 0.1
+    \item Target correlation between views: 0.9
+\end{itemize}
+
+We employ several CCA variants for this experiment:
+\begin{itemize}
+    \item Canonical Correlation Analysis (CCA)
+    \item Partial Least Squares (PLS)
+    \item Sparse CCA via Penalized Majorization-Minimization (SCCA\_PMD)
+    \item Sparse CCA via Iterative Penalized Least Squares (SCCA\_IPLS)
+    \item Sparse CCA via Span Regularization (SCCA\_Span)
+    \item Elastic CCA
+\end{itemize}
+
+Grid search is used for hyperparameter tuning for Elastic CCA and SCCA\_PMD models.
+
+\subsubsection{Evaluation Metrics}
+
+The models are evaluated based on their correlation score on a validation set comprising 20\% of the original data. Additionally, the weights of each model are visualized for interpretability.
+
+\subsubsection{Results}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\linewidth]{figures/als/validation_correlation_comparison.png}
+\caption{Bar plot showing the validation correlation of different CCA variants.}
+\end{figure}
+
+
+
+\subsubsection{Discussion}
+
+
+
+\subsection{Experiment 2: Human Connectome Project (HCP) Data Evaluation}
+
+\subsubsection{Experiment Design}
+In our study, we used resting-state fMRI along with non-imaging subject measures from a total of 1003 healthy subjects, sourced from the 1200-subject data release of the Human Connectome Project (HCP). The dataset was divided into an 80\% training set and a 20\% testing set.
+To fine-tune the regularization of hyperparameters, cross-validation was employed within the training data.
+Our approach, dubbed Flexible Regularized Alternating Least Squares (FRALS) with elastic net regularization on both views, was compared against existing methods, namely separate PCA on each modality, Penalized Matrix Decomposition (PMD), and Ridge Regularized CCA (RCCA). The performance was evaluated based on out-of-sample correlations.
+
+\subsubsection{Performance Metrics}
+The primary metric for evaluating the performance of our FRALS model was out-of-sample canonical correlations.
+It was compared against PCA performed individually on each modality, as well as against PMD and RCCA\@.
+
+\subsubsection{Performance and Model Similarities}
+Our model, FRALS, demonstrated superior performance by achieving the highest out-of-sample canonical correlations among all models tested.
+Additionally, we computed the correlation matrix of the scores for each modality to evaluate the similarity of the latent variables learned by each model.
+FRALS exhibited low or negative correlations with other models, highlighting its ability to capture novel and distinct aspects of brain-behaviour associations.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.32\linewidth]{figures/als/barcorr}
+\includegraphics[width=0.32\linewidth]{figures/als/behaviour_model_similarities}
+\includegraphics[width=0.32\linewidth]{figures/als/brain_model_similarities}
+\caption{Left: Out-of-sample canonical correlations for each model. Middle: Correlation matrix of the scores for each modality. Right: Correlation matrix of the brain loadings for each model.}
+\label{fig:performance}
+\end{figure}
+
+\subsubsection{Behaviour and Brain Loadings}
+In terms of behavioral loadings, except for PCA, all models identified a latent variable that correlated positively with cognitive tests and negatively with cigarette, tobacco, or alcohol use.
+Both RCCA and FRALS demonstrated stronger correlations with the Line Orientation test, which measures visuospatial abilities.
+
+\begin{figure}[h]
+\centering
+\includesvg[width=\linewidth]{figures/all_top_and_bottom_loadings.svg}
+\label{fig:behaviour}
+\caption*{Top 5 positive and negative non-imaging loadings for each model}
+\end{figure}
+
+Regarding the brain loadings, our analysis shows that each model assigns different weights to various brain regions
+based on their connectivity.
+RCCA and FRALS assigned more weight to the parietal lobe, known for its role in visuospatial processing, than did PCA and PMD. This suggests that the parietal lobe is more relevant for the brain-behaviour correlations captured by our model.
+Conversely, PMD appears to rely on principal components in the brain, potentially missing the true associations between the views.
+FRALS functions as a sparse version of RCCA in this context.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.49\linewidth]{figures/als/pca_brain_loadings.pdf}
+\includegraphics[width=0.49\linewidth]{figures/als/pmd_brain_loadings.pdf}
+\includegraphics[width=0.49\linewidth]{figures/als/rcca_brain_loadings.pdf}
+\includegraphics[width=0.49\linewidth]{figures/als/flexals_brain_loadings.pdf}
+\caption*{Map of CCA connection strength increases/decreases, with each node’s parcel map weighted by CCA edge-strength increases, summed across edges involving that node.}
+\label{fig:brain}
+\end{figure}
+
+\section{Discussion}
+
+
+\section{Limitations}\label{sec:limitations}
+
+While FRALS offers promising performance in terms of out-of-sample correlation, it does come with significant drawbacks, the most noteworthy being its computational inefficiency. Below, we outline the primary factors contributing to the slow speed of FRALS and provide some insights into the computational bottlenecks.
+
+\subsection{Computational Time}\label{subsec:computational-time}
+One of the major constraints of FRALS is the time complexity involved in solving the regularized least squares regressions to completion. The algorithm’s iterative nature, which involves solving a sequence of regressions, makes it computationally intensive, particularly when dealing with high-dimensional data.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.6\linewidth]{figures/time_comparison.png}
+\caption{Time comparison between FRALS and other CCA methods}
+\end{figure}
+
+\subsection{Changing Regression Targets}\label{subsec:changing-regression-targets}
+Adding to the computational burden is the fact that the regression targets, i.e., the projections of the other view, are not static but change dynamically throughout the algorithm's run.
+Each update to the least squares solution consequently alters the global objective, leading to a constantly shifting landscape that the algorithm needs to navigate.
+
+
+
+
+
+\subsection{Conclusions and Further Work}
+The main idea of this chapter is to introduce FRALS, a novel approach in the realm of multiview learning that optimizes
+both flexibility and performance.
+Our experiments indicate that FRALS not only outperforms established methods like PCA, PMD, and RCCA in terms of out-of-sample canonical correlations but also captures novel and distinct aspects of brain-behavior associations.
+This uniqueness is evident from the low or negative correlations FRALS holds with other models.
+
+Our findings also underline the importance of the parietal lobe in understanding brain-behavior associations.
+FRALS emphasizes this region more compared to traditional methods like PCA and PMD. Future work should focus on understanding the specific functions and contributions of different brain regions captured by FRALS and how they relate to various behaviors.
+
+Given its promising initial results, the next step for FRALS would be its application to larger datasets and its adaptation for different kinds of biological and non-biological data to further evaluate its robustness and applicability.
+
+
+
+\section{Conclusion}
+
+We have introduced a flexible and efficient framework for regularized CCA that addresses the limitations of existing methods.
+Our framework is particularly well-suited for high-dimensional data and can be adapted to various types of regularization, offering an effective tool for uncovering complex relationships in multiview data.
+
+
+
+
+
+
+

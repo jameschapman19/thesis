@@ -1,5 +1,5 @@
-\chapter{Extending our work to Deep CCA and Self-Supervised Learning: A Powerful Approach to Multiview Nonlinear Association Learning}
-
+\chapter{Extending our work to Deep CCA}
+\minitoc
 \section{Introduction}
 In this chapter, we extend our work to the deep learning setting. We show that our approach can be applied to deep canonical correlation analysis (DCCA) and self-supervised learning (SSL) more generally. We show that our approach is competitive with existing methods on standard benchmarks and that it is much more stable and scalable. We also show that our approach is much more interpretable than existing methods. We conclude that our approach is a powerful new tool for multiview nonlinear association learning.
 
@@ -22,12 +22,10 @@ The X-Ray Microbeam (XRMB) dataset \cite{westbury1994x} is a multimodal dataset 
 The CIFAR-10 and CIFAR-100 datasets contain 60,000 images each, with 10 and 100 classes respectively. Each image is 32$\times$32 pixels with 3 channels. We use the standard train/test split.
 
 
-\section{Methods}
+\section{Methods for Deep CCA}
 
-\subsection{DCCA-EY and DCCA-SVD: Extension to Deep CCA}\label{sec:deep-cca}
-The GEP-EY and CCA-SVD formulations also lead naturally to new formulations of Deep CCA which solve a more flexible CCA problem but unlike prior work can be optimized efficiently in the stochastic setting. We will refer to these as DCCA-EY and DCCA-SVD.
+We can construct a new class of algorithms for Deep CCA based on each of the forms we introduce in chapter \ref{ch:gradient_descent}.
 
-%L; just moved this up
 We derive the DCCA-EY formulation by applying the GEP formulation of CCA (\ref{eq:cca-GEV}) to our DCCA definition. The analogous derivation for DCCA-SVD is left to supplement \ref{supp:algorithm-details}. 
 
 Population DCCA \cite{andrew2013deep} can be defined analogously to population CCA (see section \ref{sec:CCA Definition}):
@@ -41,6 +39,17 @@ The GEP formulation becomes:
     A_{fg} = \begin{pmatrix} 0 &\Cov(f(X),g(Y)) \\ \Cov(g(Y),f(X)) & 0 \end{pmatrix}, \qquad
 	B_{fg} = \begin{pmatrix}\Var(f(X)) & 0 \\ 0 & \Var(g(Y)) \end{pmatrix}.
 \end{equation*}
+
+\subsection{DCCA-GHA}
+
+Proposition \ref{prop:EY-charac} then allows us to rewrite our objective (\ref{eq:DCCA-Andrew}) as:
+\begin{align*}
+    \norm{\CCA_k\left(f(X),g(Y)\right)}^2 
+    = \sum_{j=1}^k \rho_j^2 
+    = \max_{W \in \R^{d \times k}} \tr \left( 2\, W^T A_{fg} W - \left(W^T A_{fg} W\right) \left(W^T B_{fg} W\right) \right).
+\end{align*}
+
+\subsection{DCCA-EY}
 
 Proposition \ref{prop:EY-charac} then allows us to rewrite our objective (\ref{eq:DCCA-Andrew}) as:
 \begin{align*}
@@ -71,7 +80,14 @@ Therefore, we can apply some variant of SGD to optimize equation \ref{eq:DCCA-EY
 
 Note that, as in the earlier DCCA work, though we derived the algorithm by considering $f,g$ with output dimensions $d_x,d_y$, we ultimately end up with networks $\bar{f},\bar{g}$ with the same output dimension $k$; we can view these as giving highly correlated $k$-dimensional embeddings of our data.
 
-\subsection{SSL-EY and SSL-SVD: Application to Self-Supervised Learning}
+\subsection{DCCA-SVD}
+
+Finally, we can apply the SVD formulation of CCA (\ref{eq:cca-SVD}) to our DCCA definition. 
+
+
+
+\section{Methods for Self-Supervised Learning}
+
 
 Finding highly correlated embeddings is a natural objective for SSL.
 To apply the previous ideas to joint embedding methods, we simply apply (\ref{eq:DCCA-EY}) in the Siamese pair setting where $\bar{f}=\bar{g}$ are the same map from input data to embeddings (composition of encoder and projector).
@@ -166,6 +182,122 @@ VICReg & 88.74 & 99.68 & 57.03& 84.45 \\
 \textbf{SSL-SVD} & \textbf{90.34} & 99.67 & 64.54 & 88.66 \\
 \hline 
 \end{tabular} \caption{SSL methods on CIFAR-10 and CIFAR-100 using 256 unit projectors.} \label{tab:selfsupsmaller} \end{table}
+
+
+\subsection{Deep CCA Minibatch Size}
+
+We investigated how the minibatch size affects the performance of DCCA-SVD. As we can see in figure \ref{fig:deep minibatch size ablation}, and consistent with the previous experiments with linear CCA, smaller minibatches can converge much faster on a per-epoch basis. Furthermore, since there is evidence of overfitting on the validation TCC metric, this experiment also demonstrates the need for regularisation in the deep learning setting.  While for this simple problem the issue can be solved by early stopping, it raises interesting questions for the self-supervised learning setting including what we should use as a metric for tuning.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{figures/deep_learning/DCCA/deep_SplitMNIST_minibatch_size_ablation.png}
+\caption{}
+\label{fig:deep minibatch size ablation}
+\end{figure}
+
+
+\subsection{SSL}
+To evaluate the robustness of our proposed method, we conduct ablation studies on different hyperparameters that may affect the performance, including further studies on projector dimensions, removing the projector altogether, different augmentations, and minibatch sizes.
+
+\textbf{Further Projector Sizes}: We ran each model for projector sizes 64, 128, 256, and 2048. As shown in figure \ref{fig:projectorablation}, we found that with our methods performance was surprisingly stable even down to projector size 64. It is worth noting that the performance curves do have a clear `elbow' at projector size 256 for CIFAR-100 while for CIFAR-10 performance is flat even for projector size 64. This could suggest that the natural size of the subspace is of a similar order of magnitude to the number of classes in these particular datasets. 
+
+\begin{figure}[h]
+     \centering
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/deep_learning/SSL/cifar10_proj_dim.png}
+         \caption{}
+         \label{fig:lrexp}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/deep_learning/SSL/cifar100_proj_dim.png}
+         \caption{}
+                 \label{fig:xrmb}
+     \end{subfigure}
+        \caption{Performance against projector capacity (a) Top-1 accuracy for CIFAR-10 (b) Top-1 accuracy for CIFAR-100}
+    \label{fig:projectorablation}
+\end{figure}
+
+\textbf{No Projector}: We conducted an experiment where instead of using the learnt representations from the resnet-18 output for classifications, we used the output of the projector directly with results presented in table \ref{tab:selfsupsmaller}. We make the same observation that the projector doesn't appear to be a neccessary feature of our proposed method with similar performance whether classification is made on the `representations' or `embeddings'. Indeed, our methods perform better than competitors in this setting. Despite the similarities between the motivations of all 4 methods, it is an interesting open question that Barlow twins benefits so much from the use of a projector and our results suggest that it is not a neccessary feature of correlation based models.
+
+\begin{table}[h!] 
+% thanks GPT
+\setlength{\tabcolsep}{6pt} % sets the padding on left and right of each column
+\renewcommand{\arraystretch}{1.1} % increase the row height
+\centering 
+\begin{tabular}{llcccc} 
+\toprule
+&& \multicolumn{2}{c}{CIFAR-10} & \multicolumn{2}{c}{CIFAR-100} \\ 
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+Method & Output & Top-1 & Top-5 & Top-1 & Top-5 \\ 
+\midrule
+Barlow Twins & Encoder & 92.1 & 99.73 & 71.38 & 92.32\\
+Barlow Twins & Projector & 89.99&99.21 & 63.51&86.99\\
+\midrule
+VICReg & Encoder & 91.68	&99.66 & 68.56&	90.76\\
+VICReg & Projector & \textbf{90.99}&99.46 & 63.82&86.39\\
+\midrule
+SSL-EY & Encoder & 89.49 & 99.54 & 65.62& 89.00\\
+SSL-EY & Projector & 90.98 &\textbf{99.69} & \textbf{65.21}&\textbf{88.09}\\
+\midrule
+SSL-SVD & Encoder & 90.34 & 99.67 & 64.54 & 88.66 \\
+SSL-SVD & Projector & 90.12& 99.59 & 63.14& 87.51
+ \\
+\bottomrule
+\addlinespace
+\end{tabular}
+\caption{SSL methods on CIFAR-10 and CIFAR-100 using 256 unit projectors.} 
+\label{tab:selfsupsmaller} 
+\end{table}
+
+\textbf{Augmentations}: We used VICReg augmentations and Barlow Twins augmentations with each of our proposed methods. We found that performance was similar and therefore confirms that differences in performance across Barlow Twins, VICReg, and our two methods is driven by differences in the objective.
+
+\begin{table}[h!] 
+\setlength{\tabcolsep}{6pt} % sets the padding on left and right of each column \renewcommand{\arraystretch}{1.1} % increase the row height 
+\centering 
+\begin{tabular}{llcccc} 
+\toprule 
+&& \multicolumn{2}{c}{CIFAR-10} & \multicolumn{2}{c}{CIFAR-100} \\ % added multicolumn for the two datasets 
+\cmidrule(lr){3-4} \cmidrule(lr){5-6} % added horizontal lines to separate the columns
+Method & Augmentation & Top-1 & Top-5 & Top-1 & Top-5 \\ 
+\midrule
+SSL-EY & Barlow Twins & 89.49 & 99.54 & 65.62& 89.00\\ 
+SSL-EY & VICReg &90.43& 99.62 & 64.34&87.89\\ 
+\midrule 
+\addlinespace 
+SSL-SVD & Barlow Twins & 90.34 & 99.67 & 64.54 & 88.66 \\ 
+SSL-SVD & VICReg &89.36& 99.66 & 63.68&87.49 \\ 
+\bottomrule 
+\addlinespace 
+\end{tabular} 
+\caption{SSL methods on CIFAR-10 and CIFAR-100 using different augmentations.} 
+\label{tab:selfsupsug} 
+\end{table}
+
+
+\textbf{Minibatch Size}: We ran experiments with minibatch sizes ranging from 128 to 512 (noting that this means four times as many iterations for 128 vs 512). Figure \ref{fig:sslbsablation} shows that methods generally performed strongly even as batch size was reduced.
+
+\begin{figure}[h!]
+     \centering
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/deep_learning/SSL/cifar10_bs.png}
+         \caption{}
+         \label{fig:lrexpminibatch}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/deep_learning/SSL/cifar100_bs.png}
+         \caption{}
+                 \label{fig:xrmbminibatch}
+     \end{subfigure}
+        \caption{Performance against projector capacity (a) Top-1 accuracy for CIFAR-10 (b) Top-1 accuracy for CIFAR-100}
+    \label{fig:sslbsablation}
+\end{figure}
+
 
 \section{Discussion and Conclusion}
 

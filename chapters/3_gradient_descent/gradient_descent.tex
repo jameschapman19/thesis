@@ -1,8 +1,8 @@
-\chapter{Gradient Descent Based Formulations of Generalized Eigenvalue Problems for Multiview Subspace Learning: A Novel and Efficient Approach to Multiview Dimensionality Reduction}\label{gradient descent}
+\chapter{Gradient Descent Based Formulations of CCA}\label{ch:gradient_descent}
 The content of this chapter is based on a preprint paper where I am first author.
 I initiated the project based on heuristic arguments and contacted coauthors Ana Lawry Aguila (who provided and analysed the UK Biobank data) and Lennie Wells (who provided extensive mathematical proofs which are in the appenix of this PhD thesis for the interest of the reader).
 Both of my coauthors helped me to revise the manuscript.
-
+\minitoc
 \section{Introduction} %Introduce the problem statement and its importance
 
 \textit{How can we effectively implement Canonical Correlation Analysis (CCA) using gradient descent and subsequently enhance its performance and scalability via stochastic gradient descent, laying a foundation for the application of proximal gradient descent in regularisation?}
@@ -57,8 +57,19 @@ To generate measures of genetic disease risk, we calculated polygenic risk score
 
 In this section, we introduce a new class of algorithms based on matrix analysis results which allow us to efficiently solve a number of interesting problems including but not limited to CCA, PLS, DCCA, and SSL.
 
+\subsection{GEP-GHA}
+First, we present GEP-GH.
+
+\begin{restatable}[Eckhart-Young inspired objective for GEPs]{proprep}{GHAcharac}
+    \label{prop:GHA-charac}
+    The top-$k$ subspace of the GEP $(A,B)$ can be characterised by maximising the following objective over $W \in \R^{d \times k}$:
+    \begin{align}
+        \mathcal{U}^\text{GEP-GHA}(W) \defeq \tr \left( 2\, W^T A W - \left(W^T A W\right) \left(W^T B W\right) \right)
+    \end{align}
+    Moreover, the maximum value is precisely $\sum_{j=1}^k \lambda_j^2$, where $(\lambda_j)$ are the generalised eigenvalues.
+\end{restatable}
+
 \subsection{GEP-EY: an unconstrained objective for GEPs}
-%old: A formulation of GEP problems by Matrix Analysis
 
 First, we present GEP-EY, a formulation of GEP problems by matrix analysis which permits efficient optimization by gradient descent.
 This is summarised by proposition \ref{prop:EY-charac}, a consequence of applying the Eckhart-Young-Minsky inequality \cite{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. Detailed statements and proofs can be found in supplement \ref{supp:proofs}.
@@ -194,6 +205,8 @@ This indicates that our method can learn effectively from a limited number of sa
     \caption{Ablation study on minibatch size for stochastic CCA for (a) cifar and (b) mediamill datasets for minibatch sizes 100, 20, and 5}
     \label{fig:minibatch size ablation}
 \end{figure}
+
+
 
 %Stochastic PLS UKBB
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -87,7 +87,7 @@
 
 % This package provides an easy way to input latin sample text (for the template only)
 \usepackage{blindtext}
-
+\usepackage{booktabs}
 \usepackage{amsfonts} 
 \usepackage{listings}
 
@@ -96,3 +96,13 @@
 \usepackage{thm-restate}
 
 \usepackage{setspace}
+
+\usepackage{minitoc} %for creating TOC at beginning of each chapter
+
+\newcommand\addtotoc[1]{
+
+  \refstepcounter{dummy}
+
+  \addcontentsline{toc}{chapter}{#1}}
+
+ 
