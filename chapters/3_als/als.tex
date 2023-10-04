@@ -64,35 +64,48 @@ While it provides flexibility in handling different types of data, it may not al
 
 \subsubsection{Simulated Data Generation}\label{subsubsec:simulated-data-generation}
 
-
-
 In this experiment, we evaluate several Sparse Canonical Correlation Analysis (CCA) variants using synthetic data generated with the FRALS framework. Two of these variants, IPLS+ and ElasticNet, are implemented within the FRALS framework for added flexibility.
 
 Therefore, we anticipate that IPLS+ may outperform ElasticNet due to its alignment with the prior assumptions about data generation. This experiment aims to validate this intuition by comparing the performance of these models and others.
 
 \subsubsection{Methodology}
 
-To carry out the experiment, we leverage the CCA-Zoo Python package. The synthetic data is generated using the `LinearSimulatedData` class from the package, with parameters set to emulate a high-dimensional feature space.
+To carry out the experiment, we leverage the CCA-Zoo Python package. The synthetic data is generated using the \texttt{LinearSimulatedData} class from the package, with parameters set to emulate a high-dimensional feature space.
 
-\begin{itemize}
-    \item Number of samples (\textit{n}): 500
-    \item Number of features in View 1 (\textit{p}): 200
-    \item Number of features in View 2 (\textit{q}): 200
-    \item Latent dimensions: 1
-    \item Sparsity in View 1: 0.1
-    \item Sparsity in View 2: 0.1
-    \item Target correlation between views: 0.9
-\end{itemize}
+\begin{table}[h]
+\centering
+\caption{Experiment Parameters}
+\begin{tabular}{l|l}
+\textbf{Parameter} & \textbf{Value} \\
+\hline
+Number of samples (\textit{n}) & 500 \\
+Number of features in View 1 (\textit{p}) & 200 \\
+Number of features in View 2 (\textit{q}) & 200 \\
+Latent dimensions & 1 \\
+Sparsity in View 1 & 0.1 \\
+Sparsity in View 2 & 0.1 \\
+Target correlation between views & 0.9 \\
+\end{tabular}
+\label{table:experiment-parameters}
+\end{table}
 
 We employ several CCA variants for this experiment:
-\begin{itemize}
-    \item Canonical Correlation Analysis (CCA)
-    \item Partial Least Squares (PLS)
-    \item Sparse CCA via Penalized Majorization-Minimization (SCCA\_PMD)
-    \item Sparse CCA via Iterative Penalized Least Squares (SCCA\_IPLS)
-    \item Sparse CCA via Span Regularization (SCCA\_Span)
-    \item Elastic CCA
-\end{itemize}
+
+\begin{table}[h]
+\centering
+\caption{Employed CCA Variants}
+\begin{tabular}{l}
+\textbf{CCA Variant} \\
+\hline
+Canonical Correlation Analysis (CCA) \\
+Partial Least Squares (PLS) \\
+Sparse CCA via Penalized Majorization-Minimization (SCCA\_PMD) \\
+Sparse CCA via Iterative Penalized Least Squares (SCCA\_IPLS) \\
+Sparse CCA via Span Regularization (SCCA\_Span) \\
+Elastic CCA \\
+\end{tabular}
+\label{table:cca-variants}
+\end{table}
 
 Grid search is used for hyperparameter tuning for Elastic CCA and SCCA\_PMD models.
 
@@ -100,17 +113,92 @@ Grid search is used for hyperparameter tuning for Elastic CCA and SCCA\_PMD mode
 
 The models are evaluated based on their correlation score on a validation set comprising 20\% of the original data. Additionally, the weights of each model are visualized for interpretability.
 
-\subsubsection{Results}
+\section{Results and Discussion}
+
+\subsection{Performance Comparison}
+
+\subsection{True Weights for Context}
+
+Figure~\ref{fig:True_weights} provides a ground truth reference for the weights in the true underlying signal, setting the context for our subsequent analysis.
 
 \begin{figure}[h]
-\centering
-\includegraphics[width=0.8\linewidth]{figures/als/validation_correlation_comparison.png}
-\caption{Bar plot showing the validation correlation of different CCA variants.}
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/als/simulated/True_weights.svg}
+    \caption{Ground truth weights for the true underlying signal.}
+    \label{fig:True_weights}
 \end{figure}
 
+\subsection{Interpretation of Weight Plots}
 
+Figures~\ref{fig:CCA_weights} to~\ref{fig:IPLS+_weights} visualize the weights attributed to each feature by different models.
+Different colors indicate the indices of weights involved in the true signal (as shown in Figure~\ref{fig:True_weights}) and those not involved.
 
-\subsubsection{Discussion}
+\subsection{Performance Insights}
+
+\paragraph{Impact of Sparsity:}
+Figure~\ref{fig:PLS_weights} and Figure~\ref{fig:CCA_weights} display the weights for PLS and CCA, respectively.
+Both models lack sparsity priors and hence select all features with non-zero weights.
+This dilutes the true signal and results in lower validation correlation.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/als/simulated/PLS_weights.svg}
+    \caption{PLS selects all features with non-zero weights, leading to diluted true signals.}
+    \label{fig:PLS_weights}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/als/simulated/CCA_weights.svg}
+    \caption{ Similar to PLS, CCA also lacks a sparsity prior, leading to poor feature selection.}
+    \label{fig:CCA_weights}
+\end{figure}
+
+\paragraph{Objective Mismatch:}
+In contrast, PMD incorporates a sparsity prior. However, as seen in Figure~\ref{fig:PMD_weights}, its objective is to maximize covariance, not correlation. This leads to its middling performance.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/als/simulated/PMD_weights.svg}
+    \caption{PMD shows sparsity but focuses on maximizing covariance rather than correlation.}
+    \label{fig:PMD_weights}
+\end{figure}
+
+\paragraph{Efficacy of IPLS:}
+IPLS performs well due to its alternating lasso procedure and sparsity priors on each view. Figure~\ref{fig:IPLS_weights} confirms its ability to better capture the true underlying signal.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/als/simulated/SCCA_IPLS_weights.svg}
+    \caption{IPLS captures the true underlying signal effectively, thanks to its sparsity priors.}
+    \label{fig:IPLS_weights}
+\end{figure}
+
+\paragraph{Advantage of Elastic Net:}
+Elastic Net regularization combines both $l_1$ and $l_2$ penalties. As Figure~\ref{fig:ElasticNet_weights} shows, this strikes a good balance between feature selection and signal capture.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/als/simulated/ElasticCCA_weights.svg}
+    \caption{Elastic Net shows balanced feature selection and effective signal capture.}
+    \label{fig:ElasticNet_weights}
+\end{figure}
+
+\paragraph{Superiority of IPLS+:}
+As illustrated in Figure~\ref{fig:IPLS+_weights}, IPLS+ with a positive constraint shows the best performance among the models tested, emphasizing the benefit of domain-specific priors.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/als/simulated/SCCA_IPLS_positive_weights.svg}
+    \caption{IPLS+ outperforms other models, benefiting from a positive constraint.}
+    \label{fig:IPLS+_weights}
+\end{figure}
+
+\subsection{Conclusion}
+
+The experimental results underscore the importance of incorporating sparsity and other domain-specific priors in multiview learning models.
+The interleaved figures and discussions affirm the need to align the model's objective with the characteristics of the underlying signal for effective feature selection and signal capture.
+
 
 
 
@@ -125,19 +213,27 @@ Our approach, dubbed Flexible Regularized Alternating Least Squares (FRALS) with
 The primary metric for evaluating the performance of our FRALS model was out-of-sample canonical correlations.
 It was compared against PCA performed individually on each modality, as well as against PMD and RCCA\@.
 
-\subsubsection{Performance and Model Similarities}
-Our model, FRALS, demonstrated superior performance by achieving the highest out-of-sample canonical correlations among all models tested.
-Additionally, we computed the correlation matrix of the scores for each modality to evaluate the similarity of the latent variables learned by each model.
-FRALS exhibited low or negative correlations with other models, highlighting its ability to capture novel and distinct aspects of brain-behaviour associations.
+\subsubsection{Performance Metrics}
+Our model, FRALS, demonstrated superior performance by achieving the highest out-of-sample canonical correlations among all models tested (see Figure \ref{fig:performance}).
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.32\linewidth]{figures/als/barcorr}
-\includegraphics[width=0.32\linewidth]{figures/als/behaviour_model_similarities}
-\includegraphics[width=0.32\linewidth]{figures/als/brain_model_similarities}
-\caption{Left: Out-of-sample canonical correlations for each model. Middle: Correlation matrix of the scores for each modality. Right: Correlation matrix of the brain loadings for each model.}
+\includesvg[width=0.5\linewidth]{figures/als/hcp/barcorr}
+\caption{Out-of-sample canonical correlations for each model.}
 \label{fig:performance}
 \end{figure}
+
+\subsubsection{Model Similarities}
+We computed the correlation matrix of the scores for each modality to evaluate the similarity of the latent variables learned by each model. FRALS exhibited low or negative correlations with other models, highlighting its ability to capture novel and distinct aspects of brain-behaviour associations (see Figure \ref{fig:similarities}).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.49\linewidth]{figures/als/hcp/behaviour_model_similarities}
+\includegraphics[width=0.49\linewidth]{figures/als/hcp/brain_model_similarities}
+\caption{Left: Correlation matrix of the scores for each modality. Right: Correlation matrix of the brain loadings for each model.}
+\label{fig:similarities}
+\end{figure}
+
 
 \subsubsection{Behaviour and Brain Loadings}
 In terms of behavioral loadings, except for PCA, all models identified a latent variable that correlated positively with cognitive tests and negatively with cigarette, tobacco, or alcohol use.
@@ -145,9 +241,9 @@ Both RCCA and FRALS demonstrated stronger correlations with the Line Orientation
 
 \begin{figure}[h]
 \centering
-\includesvg[width=\linewidth]{figures/all_top_and_bottom_loadings.svg}
-\label{fig:behaviour}
+\includesvg[width=\linewidth]{figures/als/hcp/all_top_and_bottom_loadings.svg}
 \caption*{Top 5 positive and negative non-imaging loadings for each model}
+\label{fig:behaviour}
 \end{figure}
 
 Regarding the brain loadings, our analysis shows that each model assigns different weights to various brain regions
@@ -158,10 +254,10 @@ FRALS functions as a sparse version of RCCA in this context.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.49\linewidth]{figures/als/pca_brain_loadings.pdf}
-\includegraphics[width=0.49\linewidth]{figures/als/pmd_brain_loadings.pdf}
-\includegraphics[width=0.49\linewidth]{figures/als/rcca_brain_loadings.pdf}
-\includegraphics[width=0.49\linewidth]{figures/als/flexals_brain_loadings.pdf}
+\includegraphics[width=0.49\linewidth]{figures/als/hcp/pca_brain_loadings.pdf}
+\includegraphics[width=0.49\linewidth]{figures/als/hcp/pmd_brain_loadings.pdf}
+\includegraphics[width=0.49\linewidth]{figures/als/hcp/rcca_brain_loadings.pdf}
+\includegraphics[width=0.49\linewidth]{figures/als/hcp/flexals_brain_loadings.pdf}
 \caption*{Map of CCA connection strength increases/decreases, with each node’s parcel map weighted by CCA edge-strength increases, summed across edges involving that node.}
 \label{fig:brain}
 \end{figure}
@@ -175,12 +271,6 @@ While FRALS offers promising performance in terms of out-of-sample correlation, 
 
 \subsection{Computational Time}\label{subsec:computational-time}
 One of the major constraints of FRALS is the time complexity involved in solving the regularized least squares regressions to completion. The algorithm’s iterative nature, which involves solving a sequence of regressions, makes it computationally intensive, particularly when dealing with high-dimensional data.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.6\linewidth]{figures/time_comparison.png}
-\caption{Time comparison between FRALS and other CCA methods}
-\end{figure}
 
 \subsection{Changing Regression Targets}\label{subsec:changing-regression-targets}
 Adding to the computational burden is the fact that the regression targets, i.e., the projections of the other view, are not static but change dynamically throughout the algorithm's run.

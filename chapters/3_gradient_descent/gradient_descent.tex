@@ -1,29 +1,33 @@
-\chapter{Gradient Descent Based Formulations of CCA}\label{ch:gradient_descent}
+\chapter{Gradient Descent: Accelerating CCA for Large Datasets}\label{ch:gradient_descent}
 The content of this chapter is based on a preprint paper where I am first author.
-I initiated the project based on heuristic arguments and contacted coauthors Ana Lawry Aguila (who provided and analysed the UK Biobank data) and Lennie Wells (who provided extensive mathematical proofs which are in the appenix of this PhD thesis for the interest of the reader).
+I initiated the project based on heuristic arguments and contacted coauthors Ana Lawry Aguila (who provided and analysed the UK Biobank data) and Lennie Wells (who provided extensive mathematical proofs which are in the appendix of this PhD thesis for the interest of the reader).
 Both of my coauthors helped me to revise the manuscript.
 \minitoc
+
 \section{Introduction}
 
-\textit{How can we effectively implement Canonical Correlation Analysis (CCA) using gradient descent and subsequently enhance its performance and scalability via stochastic gradient descent, laying a foundation for the application of proximal gradient descent in regularisation?}
-Subspace learning methodologies, such as Principal Component Analysis (PCA) \cite{hotelling1933analysis}, Partial Least Squares (PLS) \cite{haenlein2004beginner}, Linear Discriminant Analysis (LDA), and Canonical Correlation Analysis (CCA) \cite{hotelling1992relations}, have been cornerstones in various fields including computer vision, neuroimaging \cite{Krishnan2011}, finance \cite{cassel2000measurement}, and imaging genetics \cite{Hansen2021}.
-These techniques all essentially operate as generalized eigenvalue problems (GEPs), seeking low-dimensional linear transformations of data to maximize certain objectives.
-The caveat, however, is the computational intensity and high memory demands when employing standard full batch algorithms to solve GEPs in the context of large-scale data.
-This constraint has fueled the interest towards developing approximations to these solutions in stochastic or data-streaming settings \cite{arora2012stochastic}.
-Within the gamut of subspace learning techniques, CCA stands out as the most intricate, converting a pair of data views into highly correlated representations.
-Recent developments such as Deep CCA (DCCA) \cite{andrew2013deep} have demonstrated efficacy in extracting non-linear representations from multiview data, but their training is challenging in a stochastic setting \cite{wang2015stochastic}.
-Addressing these challenges, this chapter aims to answer two key research questions.
-First, we explore how CCA can be effectively solved using gradient descent.
-This paves the way for the introduction of regularisation in the subsequent chapters, where we will adopt proximal gradient descent as a method to build regularised CCA models.
-Second, we aim to scale our CCA method for large-scale medical datasets using stochastic gradient descent.
-This approach becomes critical in situations where it's infeasible to load all the data into memory or when the associated calculations are prohibitively slow.
-To this end, we propose a principled framework for subspace learning and Self-Supervised Learning (SSL), grounded on an innovative unconstrained characterization of the optimal subspaces of GEPs, proposition \ref{prop:EY-charac}.
-The subsequent sections of this chapter will validate the effectiveness and scalability of our proposed framework across a variety of tasks and datasets, demonstrating faster convergence and better correlation performance on stochastic CCA benchmarks. Furthermore, we will present a unique real-world application through a stochastic PLS analysis on an extremely high-dimensional biomedical dataset.
-Ultimately, this chapter prepares the groundwork for later chapters that delve into regularized CCA models using proximal gradient descent, hence creating a coherent narrative that intertwines the principles of gradient descent, CCA, and advanced learning paradigms such as DCCA and SSL.
+Subspace learning techniques such as Canonical Correlation Analysis (CCA) have been essential tools in various scientific domains.
+While these techniques are powerful, they face computational and scalability challenges, particularly for large datasets.
+The focus of this chapter is to explore methods to effectively implement CCA using gradient descent and further scale it using stochastic gradient descent.
+This chapter serves as a foundation for the application of proximal gradient descent in regularisation, which will be discussed in subsequent chapters.
+
 \subsection{Problem Statement}
+
+The existing methodologies for solving Canonical Correlation Analysis (CCA) face severe computational limitations, especially for large-scale datasets.
+The challenges include high computational intensity and memory demands.
 
 \subsection{Contributions}
 
+This chapter introduces a principled framework for subspace learning and Self-Supervised Learning (SSL) aimed at accelerating and scaling CCA. The contributions are:
+
+\begin{itemize}
+  \item Proposing an effective approach to solve CCA using gradient descent, laying the groundwork for future regularisation techniques using proximal gradient descent.
+  \item Introducing a scalable methodology for applying CCA to large-scale medical datasets through stochastic gradient descent.
+  \item Demonstrating the framework's effectiveness and scalability across diverse tasks and datasets.
+  \item Providing a unique real-world application of stochastic PLS on an extremely high-dimensional biomedical dataset.
+\end{itemize}
+
+The subsequent sections will elaborate on these contributions, validating our approaches through various experimental setups and real-world applications.
 
 
 \section{Background}
