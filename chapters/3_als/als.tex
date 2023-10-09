@@ -6,22 +6,202 @@
 
 The content relating to regularised alternating least squares as a method for optimizing regularised CCA is based on an abstract which I presented in poster form at OHBM. The work benefitted from extensive theoretical discussions with John Shawe-Taylor and Janaina Mourao-Miranda as well as Janaina and Rick Adams' help interpreting the results.
 
-Canonical Correlation Analysis (CCA) has been an indispensable tool for discovering relationships between two multivariate sets of variables, commonly referred to as views. However, traditional CCA models often fail to adequately handle high-dimensional data, a challenge that is frequently encountered in brain research. To tackle this issue, we introduce a framework for regularized CCA based on alternating least squares (ALS), termed as Flexible Regularized Alternating Least Squares (FRALS). This work forms an early part of my PhD research and primarily aims to show that 'true CCA' models can unveil stronger signals in brain-behaviour data compared to Partial Least Squares (PLS) models.
+Traditional CCA models often fail to adequately handle high-dimensional data, a challenge that is frequently encountered in brain research.
+To tackle this issue, we introduce a framework for regularized CCA based on alternating least squares (ALS), termed
+as Flexible Regularized Alternating Least Squares (FRALS). This work forms an early part of my PhD research and primarily aims to show that `true CCA' models can unveil stronger signals in brain-behaviour data compared to Partial Least Squares (PLS) models.
 
 \subsection{Problem Statement}\label{subsec:problem-statement}
-The classical CCA methodology encounters difficulties when applied to high-dimensional datasets. These challenges include overfitting and the possibility of drawing spurious conclusions. While regularization techniques like ridge or lasso regression have been employed to alleviate these issues, they often lack the flexibility needed to cater to various types of data and research queries.
+The classical CCA methodology encounters difficulties when applied to high-dimensional datasets.
+These challenges include overfitting and the possibility of drawing spurious conclusions.
+While regularization techniques like ridge or lasso regression have been employed to alleviate these issues, they often lack the flexibility needed to cater to various types of data and research queries.
 
 \subsection{Contributions}\label{subsec:contributions}
-Our main contribution is the development and evaluation of FRALS, a novel framework that allows the utilization of any regularized least squares solver. This innovation enhances flexibility and provides a more robust defense against the risk of overfitting. Although our experimental outcomes indicate that FRALS excels in terms of out-of-sample correlation, it is important to note that the algorithm ultimately proves to be too slow and impractical for most applications. Nonetheless, it serves as an instructive stepping stone in the ongoing quest for efficient and reliable CCA methods.
+Firstly, we review methods for generating simulated data from the CCA literature. We propose a method for generating
+data based on the probabilistic model of CCA and use this model to justify comparing the loadings rather than the
+weights of CCA models.
+Secondly, we develop FRALS, a novel framework that allows the utilization of any regularized least squares solver for
+brain-behaviour CCA problems.
+This innovation enhances flexibility and provides a more robust defense against the risk of overfitting.
+Although our experimental outcomes indicate that FRALS excels in terms of out-of-sample correlation, it is important to note that the algorithm ultimately proves to be too slow and impractical for most applications.
+Nonetheless, it serves as an instructive stepping stone in the ongoing quest for efficient and reliable CCA methods.
 
 \section{Background}\label{sec:background}
+
+\subsection{Probabilistic CCA, rCCA, and PLS}\label{subsec:probabilistic-cca-rcca-and-pls}
+
+\subsubsection{Probabilistic CCA}
+
+In Probabilistic CCA~\cite{bach2005probabilistic}, the generative model for each view \(i\) is defined as:
+\begin{align}
+    \mathbf{z}& \sim \mathcal{N}(\mathbf{0}, \mathbf{I})                                            \\
+    \mathbf{x}_i & \sim \mathcal{N}(\mathbf{W}_i \mathbf{z} + \boldsymbol{\mu}_i, \boldsymbol{\Psi}_i)
+\end{align}
+
+% TikZ Diagram for Probabilistic CCA
+\begin{tikzpicture}
+    % Define nodes
+    \node[latent] (z) {z};
+    \node[obs, below=of z] (x1) {\(x_1\)};
+    \node[obs, right=of x1] (x2) {\(x_2\)};
+    % Connect nodes
+    \edge {z} {x1,x2} ;
+    % Plates
+    \plate {} {(x1)(x2)} {Views}
+\end{tikzpicture}
+
+\subsubsection{Probabilistic rCCA}
+
+\cite{de2003regularization} proposed a probabilistic model for regularized CCA (rCCA) which is a generalization of CCA that allows for regularization of the covariance matrices.
+Specifically, they consider the following generative model for each view \(i\):
+
+\begin{align}
+    \mathbf{z}& \sim \mathcal{N}(\mathbf{0}, \mathbf{I})                                            \\
+    \mathbf{x}_i & \sim \mathcal{N}(\mathbf{W}_i \mathbf{z} + \boldsymbol{\mu}_i, \boldsymbol{\Psi}_i + \Sigma_i^2)
+\end{align}
+
+Where \(\Sigma_i^2\) is a diagonal matrix representing measurement noise. They showed that the maximum
+
+\subsubsection{Probabilistic PLS}
+
+There are a number of ways to write down a probabilistic model for PLS Regression \cite{el2018probabilistic,zheng2016probabilistic}.
+To the best of our knowledge there is no probabilistic model for the latent variable approach to so-called Canonical PLS
+. We will return
+to this in our contributions.
+
+\subsection{Data Generation}\label{subsec:data-generation-background}
+
+There are a number of ways used in the Sparse CCA literature to generate synthetic data.
+Witten\cite{witten2009extensions} used a generative model of the form defined by:
+
+\begin{align}\label{eq:wittengen}
+    & \bold{X_i}=\bold{z_kw_{ki}}+\epsilon
+\end{align}
+
+which we can represent as the graphical model in figure~\ref{fig:wittengraphical}.
+
+While this simple method directly controls the cross-covariance it doesn't control the within dataset covariance $\bold{\Sigma_{ii}}$.
+Later papers in the sparse CCA literature such as~\cite{mai2019iterative,chen2013sparse} have constructed the covariance matrix as in figure~\ref{fig:covariance} and sampled from this multivariate normal distribution to give two simulated views with specified active variables, correlations and within-view covariance.
+This has the advantage of allowing us to control the within-view covariance and therefore test the methods under specific conditions.
+The process was first described by Chen~\cite{chen2013sparse} and further explained by~\cite{suo2017sparse}.
+
 
 \subsection{Regularized CCA}\label{subsec:regularized-cca}
 Traditional approaches to regularized CCA include the use of ridge penalties (RCCA) and sparse methods like Penalized Matrix Decomposition (PMD). These methods each have their own limitations; for example, RCCA does not produce sparse solutions, while PMD may miss low-variance but high-correlation directions.
 
-\section{Methods}\label{sec:methods}
 
-\subsection{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least-squares-(frals)}
+\section{How is CCA and PLS Data Generated and Why Should We Care?}\label{sec:how-is-cca-and-pls-data-generated-and-why-should-we-care?}
+
+\subsection{Forward and Backward Models}
+
+At this stage we can consider the difference between forward and backward models in the context of CCA and PLS.
+In forward models we generate data from a known model and then try to recover the parameters of that model.
+In backward models we try to recover the parameters of a model from the data.
+
+In the CCA and PLS models described in chapter \ref{chap:background} we have backward models which aim to infer the
+latent variables $\bold{Z}$ from the data $\bold{X_i}$.
+In the probabilistic models described in section \ref{subsec:probabilistic-cca-rcca-and-pls} we have forward models which
+generate data from the latent variables $\bold{Z}$.
+
+\subsection{Why is this important?}
+
+If we are interested only in the latent variables $\bold{Z}$ then we can use the backward models described in chapter
+\ref{chap:background} to infer them from the data.
+However, if we are interested in interpreting the models then we need to understand how the
+
+Consider the probabilistic CCA model described in section \ref{subsec:probabilistic-cca-rcca-and-pls} but this time
+let us give a name to the latent variables and views.
+Consider figure \ref{fig:mentalhealthselfsupervised} where the latent variable is the severity of some mental health
+condition and the views are conditioned on this latent variable.
+
+\begin{figure}
+    \centering
+    \tikz{
+        % nodes
+        \node[latent, align=center, minimum size=2cm] (Z) {Severity};
+        %
+        \node[obs, below left=of Z, minimum size=2cm] (X_1) {Neuroimage};%
+        \node[obs, below right=of Z, minimum size=2cm] (X_2) {Behaviour};%
+        % edges
+        \edge{Z} {X_1}
+        \edge{Z} {X_2}}
+    \caption[Latent Variable Model of Mental Health]{\textit{\textbf{Latent Variable Model of Mental Health:}} From this perspective the neuroimaging modality and behavioural data are both considered to have been generated with distributions conditioned on the severity of a mental health condition}\label{fig:mentalhealthselfsupervised}
+\end{figure}
+
+In both the forward and backward models of CCA, the latent variables are of interest and identifiable (up to a
+rotation), meaning effectively that the latent variables are the same in both models.
+However, the weights have different interpretations in the forward and backward models.
+In the forward model the weights describe how the latent variables act on the views to generate the data.
+In the backward model the weights tell us how we can best predict or reconstruct the latent variables from the data.
+
+\subsection{What is the relationship between the forward and backward weights?}
+
+Both the forward and backward models of CCA give analytical forms for the joint covariance matrix of the views.
+
+\begin{align}
+    \Sigma &= \begin{bmatrix}
+        \bold{W_1W_1^T} + \bold{\Psi_1} & \bold{W_1W_2^T} \\
+        \bold{W_2W_1^T} & \bold{W_2W_2^T} + \bold{\Psi_2}
+    \end{bmatrix} = \begin{bmatrix}
+        \bold{\Sigma_1} & \bold{\Sigma_1}\sum_k \rho_k u_{1_k}^\top u_{2_k} \bold{\Sigma_2}  \\
+        \bold{\Sigma_2}\sum_k \rho_k u_{2_k}^\top u_{1_k} \bold{\Sigma_1} & \bold{\Sigma_1}
+    \end{bmatrix}
+\end{align}
+
+Where $\rho_k$ is the $k$th canonical correlation and $u_{i_k}$ is the $k$th column of $\bold{U_i}$.
+
+\subsection{A generative model for canonical PLS}\label{subsec:a-generative-model-for-canonical-pls}
+
+Our first contribution is to show that the data generation process described in~\cite{witten2009extensions} actually
+allows us to define a probabilistic model for latent variable PLS. The data generation process in equation \ref{eq
+:wittengen} is equivalent to the graphical model in figure~\ref{fig:wittengraphical}.
+
+\begin{figure}
+\centering
+  \tikz{
+%nodes
+ \node[latent, align=center] (Z) {$Z$}; %
+ \node[obs, below left=of Z] (X_1) {$X_1$};%
+ \node[obs, below right=of Z] (X_2) {$X_2$};%
+ \node[latent,above left=of X_1,fill] (W_1) {$W_1$}; %
+ \node[latent,above right=of X_2,fill] (W_2) {$W_2$}; %
+ \node[latent,left=of X_1] (sigma_1) {$\sigma_1$}; %
+ \node[latent,right=of X_2] (sigma_2) {$\sigma_2$}; %
+% edges
+ \edge {W_1,Z,sigma_1} {X_1}
+ \edge {W_2,Z,sigma_2} {X_2}}
+ \caption[Sparse Data Generation Graphical Model]{\textit{\textbf{Sparse Data Generation Graphical Model: }}For the Witten data generation, we set the active variables with the matrices $W_i$ and therefore rescale the latent variable Z in those variables with zeros in the other variables. Z has standard normal distribution. We add gaussian noise parameterized by $\sigma$.}
+ \label{fig:wittengraphical}
+\end{figure}
+
+By marginalizing out the latent variable $Z$ we can write down the joint distribution of the two views as:
+
+\begin{align}
+    p(X_1,X_2) &= \int p(X_1,X_2,Z) dZ \\
+    &= \int p(X_1|Z)p(X_2|Z)p(Z) dZ \\
+    &= \int \mathcal{N}(X_1|W_1Z,\sigma_1^2) \mathcal{N}(X_2|W_2Z,\sigma_2^2) \mathcal{N}(Z|0,1) dZ
+\end{align}
+
+Which means the joint covariance matrix is given by:
+
+\begin{align}
+    \Sigma &= \begin{bmatrix}
+        W_1W_1^T + \sigma_1^2I & W_1W_2^T \\
+        W_2W_1^T & W_2W_2^T + \sigma_2^2I
+    \end{bmatrix}
+\end{align}
+
+Where analagously to probabilistic PCA\cite{tipping1999probabilistic}, we recover PLS by setting $\sigma_1^2 = \sigma
+_2^2 = 0$.
+To the best of our knowledge this is the first probabilistic model for the canonical PLS models described in this
+thesis.
+
+Now we have a generative model for both CCA and PLS, we can consider how these relate to the backward models
+described in chapter~\ref{chap:background}.
+
+\subsection{Backward Models}\label{subsec:backward-models}
+
+
+\section{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least-squares-(frals)}
 We adopt an alternating minimization strategy to solve the CCA problem.
 The objective is to minimize the sum of squared Frobenius norms between the latent variables and their projections in each view.
 Regularization terms are added to the objective function to avoid overfitting.
@@ -47,11 +227,10 @@ This means that \textbf{any regularized least squares solver} can be used to sol
     \text{subject to: } \bold{T^{\top}T}=\bold{I}\\
 \end{gather*}
 
-\section{Experiments}\label{sec:experiments}
-
-\subsection{Experiment 1: Simulated Data Evaluation}\label{subsec:exp1}
+\section{Experiment 1: Simulated Data Evaluation}\label{subsec:exp1}
 
 In this experiment, we evaluate several Sparse Canonical Correlation Analysis (CCA) variants using synthetic data generated with the FRALS framework.
+
 Two of these variants, IPLS+ and ElasticNet, are implemented within the FRALS framework for added flexibility.
 We provide intuition for the comparison of these models:
 
@@ -123,7 +302,7 @@ Figure~\ref{fig:True_weights} provides a ground truth reference for the weights 
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.6\textwidth]{figures/als/simulated/True_weights.svg}
+    \includesvg[width=0.6\textwidth]{figures/als/simulated/True_weights.svg}
     \caption{Ground truth weights for the true underlying signal.}
     \label{fig:True_weights}
 \end{figure}
@@ -142,14 +321,14 @@ This dilutes the true signal and results in lower validation correlation.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.6\textwidth]{figures/als/simulated/PLS_weights.svg}
+    \includesvg[width=0.6\textwidth]{figures/als/simulated/PLS_weights.svg}
     \caption{PLS selects all features with non-zero weights, leading to diluted true signals.}
     \label{fig:PLS_weights}
 \end{figure}
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.6\textwidth]{figures/als/simulated/CCA_weights.svg}
+    \includesvg[width=0.6\textwidth]{figures/als/simulated/CCA_weights.svg}
     \caption{ Similar to PLS, CCA also lacks a sparsity prior, leading to poor feature selection.}
     \label{fig:CCA_weights}
 \end{figure}
@@ -159,7 +338,7 @@ In contrast, PMD incorporates a sparsity prior. However, as seen in Figure~\ref{
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.6\textwidth]{figures/als/simulated/PMD_weights.svg}
+    \includesvg[width=0.6\textwidth]{figures/als/simulated/PMD_weights.svg}
     \caption{PMD shows sparsity but focuses on maximizing covariance rather than correlation.}
     \label{fig:PMD_weights}
 \end{figure}
@@ -169,7 +348,7 @@ IPLS performs well due to its alternating lasso procedure and sparsity priors on
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.6\textwidth]{figures/als/simulated/SCCA_IPLS_weights.svg}
+    \includesvg[width=0.6\textwidth]{figures/als/simulated/SCCA_IPLS_weights.svg}
     \caption{IPLS captures the true underlying signal effectively, thanks to its sparsity priors.}
     \label{fig:IPLS_weights}
 \end{figure}
@@ -179,7 +358,7 @@ Elastic Net regularization combines both $l_1$ and $l_2$ penalties. As Figure~\r
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.6\textwidth]{figures/als/simulated/ElasticCCA_weights.svg}
+    \includesvg[width=0.6\textwidth]{figures/als/simulated/ElasticCCA_weights.svg}
     \caption{Elastic Net shows balanced feature selection and effective signal capture.}
     \label{fig:ElasticNet_weights}
 \end{figure}
@@ -189,7 +368,7 @@ As illustrated in Figure~\ref{fig:IPLS+_weights}, IPLS+ with a positive constrai
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.6\textwidth]{figures/als/simulated/SCCA_IPLS_positive_weights.svg}
+    \includesvg[width=0.6\textwidth]{figures/als/simulated/SCCA_IPLS_positive_weights.svg}
     \caption{IPLS+ outperforms other models, benefiting from a positive constraint.}
     \label{fig:IPLS+_weights}
 \end{figure}
@@ -214,7 +393,7 @@ The primary metric for evaluating the performance of our FRALS model was out-of-
 It was compared against PCA performed individually on each modality, as well as against PMD and RCCA\@.
 
 \subsubsection{Performance Metrics}
-Our model, FRALS, demonstrated superior performance by achieving the highest out-of-sample canonical correlations among all models tested (see Figure \ref{fig:performance}).
+Our model, FRALS, demonstrated superior performance by achieving the highest out-of-sample canonical correlations among all models tested (see Figure~\ref{fig:performance}).
 
 \begin{figure}[h]
 \centering
@@ -224,7 +403,8 @@ Our model, FRALS, demonstrated superior performance by achieving the highest out
 \end{figure}
 
 \subsubsection{Model Similarities}
-We computed the correlation matrix of the scores for each modality to evaluate the similarity of the latent variables learned by each model. FRALS exhibited low or negative correlations with other models, highlighting its ability to capture novel and distinct aspects of brain-behaviour associations (see Figure \ref{fig:similarities}).
+We computed the correlation matrix of the scores for each modality to evaluate the similarity of the latent variables learned by each model.
+FRALS exhibited low or negative correlations with other models, highlighting its ability to capture novel and distinct aspects of brain-behaviour associations (see Figure~\ref{fig:similarities}).
 
 \begin{figure}[h]
 \centering
@@ -254,10 +434,10 @@ FRALS functions as a sparse version of RCCA in this context.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.49\linewidth]{figures/als/hcp/pca_brain_loadings.pdf}
-\includegraphics[width=0.49\linewidth]{figures/als/hcp/pmd_brain_loadings.pdf}
-\includegraphics[width=0.49\linewidth]{figures/als/hcp/rcca_brain_loadings.pdf}
-\includegraphics[width=0.49\linewidth]{figures/als/hcp/flexals_brain_loadings.pdf}
+\includegraphics[width=0.49\linewidth]{figures/als/hcp/pca_brain_loadings}
+\includegraphics[width=0.49\linewidth]{figures/als/hcp/pmd_brain_loadings}
+\includegraphics[width=0.49\linewidth]{figures/als/hcp/rcca_brain_loadings}
+\includegraphics[width=0.49\linewidth]{figures/als/hcp/flexals_brain_loadings}
 \caption*{Map of CCA connection strength increases/decreases, with each node’s parcel map weighted by CCA edge-strength increases, summed across edges involving that node.}
 \label{fig:brain}
 \end{figure}

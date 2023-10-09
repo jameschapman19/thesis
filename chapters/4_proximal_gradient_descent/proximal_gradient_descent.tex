@@ -1,44 +1,171 @@
 \chapter{Proximal Gradient Descent: A Flexible, Scalable Approach to Regularised CCA}
-\label{Regularised}
+\label{ch:proximal-gradient-descent}
 \minitoc
 
 
 \section{Introduction}
 
-\subsection{Problem Statement}
-Canonical Correlation Analysis (CCA) is a widely-used technique for finding correlated components between two sets of variables. However, its applicability to large-scale data sets and its robustness to overfitting have been limiting factors. Regularization methods can mitigate these issues, but implementing them in an efficient, scalable manner is not straightforward.
+High-dimensional data are now more prevalent than ever, presenting both opportunities and challenges.
+Canonical Correlation Analysis (CCA), despite its utility, struggles with high-dimensional datasets, resulting in problems like overfitting and computational inefficiency.
+The CCA-EY formulation, introduced in the previous chapter, partially addresses these issues but leaves room for improvement, particularly for large-scale neuroimaging datasets.
+This chapter aims to bridge this gap by incorporating regularization techniques via proximal gradient descent.
 
-\subsection{Contributions}
-The main idea of this chapter is to introduce a novel formulation for regularized CCA using proximal gradient descent algorithms. Our approach allows for the incorporation of various regularization terms, thereby making it highly flexible. We illustrate its scalability and robustness through experiments.
+\section{Problem Statement}
+
+The application of CCA in high-dimensional settings, such as neuroimaging data containing tens of thousands of subjects and features, often leads to overfitting.
+While CCA-EY has mitigated some challenges, there remains a critical need for a methodology that can handle large-scale, high-dimensional data without sacrificing interpretability or computational efficiency.
+
+\section{Contributions}
+
+Our contributions in this chapter are as follows:
+
+\begin{itemize}
+    \item We integrate regularization into the CCA-EY framework to explicitly tackle the high-dimensionality problem. See \textit{Section X} for technical details.
+    \item We employ proximal gradient descent to optimize the regularized objective function, creating a method that is both scalable and interpretable.
+    \item A comparative analysis against existing techniques validates the effectiveness of our approach.
+    \item A case study demonstrates the real-world applicability of the proposed method. Refer to \textit{Section X} for an in-depth look at the implementation and results.
+\end{itemize}
+
+In summary, this chapter introduces a robust, scalable, and interpretable extension to the CCA-EY framework to better analyze high-dimensional, multimodal data.
 
 \section{Background}
+
 \subsection{Proximal Gradient Descent}
-%TODO - background to Proximal Gradient Descent
+
+Proximal Gradient Descent is an optimization algorithm commonly used for solving non-smooth convex optimization problems.
+The general objective function can be expressed as \( f(x) + g(x) \), where \( f(x) \) is a differentiable convex function and \( g(x) \) is a non-differentiable convex function.
+The algorithm iteratively updates \( x \) using the following equation:
+
+\[
+x^{(k+1)} = \text{prox}_{\alpha g} \left( x^{(k)} - \alpha \nabla f(x^{(k)}) \right)
+\]
+
+Here, \( \alpha \) is the step size, \( \nabla f(x^{(k)}) \) is the gradient of \( f \) at \( x^{(k)} \), and \( \text{prox}_{\alpha g}(v) \) is the proximal operator defined as:
+
+\[
+\text{prox}_{\alpha g}(v) = \arg\min_{x} \left( g(x) + \frac{1}{2\alpha} \| x - v \|^2 \right)
+\]
+
+By combining the gradients of the smooth part \( f(x) \) and the proximal operator of the non-smooth part \( g(x) \), proximal gradient descent is capable of solving problems that are otherwise intractable using basic gradient descent.
+
 \subsection{Total Variation Regularization}
-%TODO - background to Total Variation Regularization
+
+Total Variation (TV) Regularization is a regularization technique often used for signal denoising and image reconstruction. The TV norm of a signal \( x \in \mathbb{R}^n \) is given by:
+
+\[
+\| x \|_{TV} = \sum_{i=1}^{n-1} |x_{i+1} - x_i|
+\]
+
+In a 2D image, the TV norm extends to:
+
+\[
+\| x \|_{TV} = \sum_{i,j} \sqrt{(x_{i+1,j} - x_{i,j})^2 + (x_{i,j+1} - x_{i,j})^2}
+\]
+
+When incorporated as a regularizer \( R(x) \) in an optimization problem, it typically takes the form:
+
+\[
+\min_{x} \; f(x) + \lambda \| x \|_{TV}
+\]
+
+where \( \lambda \) is the regularization parameter that controls the trade-off between the data fidelity term \( f(x) \) and the regularizer \( \| x \|_{TV} \).
+
+By leveraging TV regularization, one can impose piecewise-smoothness on the solution, making it particularly useful for preserving edges in images or abrupt changes in signals.
+
+\subsection{GraphNet Regularization in Neuroimaging}
+
+While Elastic-Net regression offers a balance between ridge and lasso penalties, it lacks the ability to explicitly model spatial and temporal structures inherent in neuroimaging data.
+This is where GraphNet—an extension of the Elastic-Net—comes into play.
+
+\textbf{GraphNet Formulation}: GraphNet incorporates an additional penalty term linked with a graph \(G\), which could be a Laplacian matrix \(L = D - A\).
+The graph Laplacian captures our intuition that voxels which are neighbors in both space and time should have similar activation levels:
+
+\[
+\text{GraphNet Penalty} = \lambda_{1} \lVert \beta \rVert_{1} + \lambda_{2} \beta^T G \beta
+\]
+
+Here, \(\beta(x, y, z, t)\) represents coefficients across the 4D spatio-temporal brain volume, and \(\lambda_{1}\) and \(\lambda_{2}\) are regularization parameters. When \(G = L\), the penalty term morphs into:
+
+\[
+\sum_{(i, j) \in \epsilon_{G}} (\beta_{i} - \beta_{j})^{2}
+\]
+
+\textbf{Preserving Smoothness in the Brain}: One of the core advantages of using GraphNet in neuroimaging is its ability to maintain smoothness across the brain map.
+Unlike methods like Total Variation, which may create piecewise constant structures, GraphNet aims to create a spatially smooth map.
+This is aligned with the nature of fMRI data, where spatial smoothness is often expected.
+
+\textbf{Algorithmic Simplicity and Efficiency}: The quadratic nature of the GraphNet penalty avoids the algorithmic complexities often seen in non-smooth penalties.
+This is particularly important in high-dimensional neuroimaging data where computational efficiency is crucial.
+
+\textbf{Flexibility in Model Constraints}: GraphNet allows for user-specified constraints to be easily integrated into the model, making it flexible for a variety of neuroimaging applications.
+
+In summary, GraphNet offers a regularization technique that is not only sparse but also structured in a way that respects the spatial and temporal smoothness inherent in brain data.
+This makes it a compelling choice for neuroimaging applications where a smooth representation of the brain is desired.
+
 
 \section{Methods}
 \subsection{Proximal CCA-EY}
-We introduce a formulation called Proximal CCA-EY that extends the Generalized Eigenvalue Problem (GEP) formulation for CCA. By adding a regularization term to the objective function, we can solve this regularized GEP using proximal gradient descent algorithms. This approach permits the use of a variety of regularization functions, which we demonstrate can be efficiently computed. Algorithm details are similar to those shown in Algorithm 1 in the previous section, with an additional step to include the proximal operator corresponding to the chosen regularization term.
+We introduce a formulation called Proximal CCA-EY that extends the Generalized Eigenvalue Problem (GEP) formulation for CCA. In this extended formulation, \( W = (W_1, W_2) \), with each set of weights potentially subject to a different regularization term.
+By adding regularization terms to the objective function, we can solve this regularized GEP using proximal gradient descent algorithms.
+This approach permits the use of a variety of regularization functions, which we demonstrate can be efficiently computed.
+Algorithm details are similar to those shown in Algorithm 1 in the previous section, with additional steps to include the proximal operators corresponding to the chosen regularization terms for each \( W_i \).
 
 \begin{equation}
 \label{eq:proximal-CCA-EY}
-    \mathcal{U}^{\text{Proximal CCA-EY}}(W) = \mathcal{L}^\text{EY}(W) + \lambda \mathcal{R}(W)
+    \mathcal{U}^{\text{Proximal CCA-EY}}(W_1, W_2) = \mathcal{L}^{\text{EY}}(W_1, W_2) + \lambda_1 \mathcal{R}_1(W_1) + \lambda_2 \mathcal{R}_2(W_2)
 \end{equation}
 
-Here, \(\lambda\) is a hyperparameter that controls the strength of the regularization term, and \(\mathcal{R}(W)\) can be any function for which a proximal operator can be efficiently computed. Specific implementations for L1 and Total Variation regularizations are provided.
+Here, \( \lambda_1 \) and \( \lambda_2 \) are hyperparameters that control the strength of the regularization terms, and \( \mathcal{R}_1(W_1) \) and \( \mathcal{R}_2(W_2) \) can be any functions for which proximal operators can be efficiently computed.
+Specific implementations for \( L_1 \) and Total Variation regularizations are provided for both \( W_1 \) and \( W_2 \).
 
-\section{Experiments}
-To validate our approach, we conduct experiments on synthetic and real-world datasets. We compare our Proximal CCA-EY algorithm against classical CCA and other existing regularized CCA methods in terms of their ability to find meaningful correlations and their resilience to overfitting. Furthermore, we demonstrate the scalability of our approach by applying it to large datasets.
+The proximal gradient descent update for this problem is then given by:
+
+\begin{equation}
+\label{eq:proximal-update}
+    W_1^{(t+1)} = \text{prox}_{\alpha \lambda_1 \mathcal{R}_1}\left( W_1^{(t)} - \alpha \nabla_{W_1} \mathcal{L}^{\text{EY}}(W_1^{(t)}, W_2^{(t)}) \right)
+\end{equation}
+
+\begin{equation}
+\label{eq:proximal-update-W2}
+    W_2^{(t+1)} = \text{prox}_{\alpha \lambda_2 \mathcal{R}_2}\left( W_2^{(t)} - \alpha \nabla_{W_2} \mathcal{L}^{\text{EY}}(W_1^{(t)}, W_2^{(t)}) \right)
+\end{equation}
+
+Where \( \alpha \) is the learning rate, and \( \text{prox}_{\alpha \lambda_i \mathcal{R}_i} \) is the proximal operator for \( \alpha \lambda_i \mathcal{R}_i \).
+
+\subsubsection{L1 Regularization}
+For \( L_1 \) regularization, \( \mathcal{R}_i(W_i) = \| W_i \|_1 \), and the proximal operator becomes a simple soft-thresholding operation.
+
+\subsubsection{Total Variation Regularization}
+For Total Variation regularization, \( \mathcal{R}_i(W_i) = \text{TV}(W_i) \), where TV stands for the Total Variation.
+The corresponding proximal operator can be efficiently computed using existing methods.
+
+
+\section{Experiment 1: Simulated Data Experiments}
+To validate our approach, we conduct experiments on synthetic and real-world datasets.
+We compare our Proximal CCA-EY algorithm against classical CCA and other existing regularized CCA methods in terms of their ability to find meaningful correlations and their resilience to overfitting.
+Furthermore, we demonstrate the scalability of our approach by applying it to large datasets.
+
+\section{Experiment 2: Brain-Behaviour Experiments}
+
+
+\subsection{ADNI}
+
+
+\subsection{ABCD}
+
 
 \subsection{Experimental Setup}
-The experiments are conducted using Python. We utilize high-performance numerical libraries to ensure efficient execution. The code is made publicly available for reproducibility.
+The experiments are conducted using Python.
+We utilize high-performance numerical libraries to ensure efficient execution.
+The code is made publicly available for reproducibility.
 
 \subsection{Results}
-Our method outperforms existing methods in various aspects, including computation time, quality of correlated components, and robustness to overfitting. The flexibility to use different regularization terms makes our approach applicable to a variety of scenarios.
+Our method outperforms existing methods in various aspects, including computation time, quality of correlated components, and robustness to overfitting.
+The flexibility to use different regularization terms makes our approach applicable to a variety of scenarios.
 
 \section{Conclusions}
-We have presented a novel method for implementing a flexible, scalable regularized CCA. The use of proximal gradient descent algorithms allows for efficient optimization, making our approach highly suitable for large-scale data analysis. Future work will focus on extending this approach to other variants of CCA and exploring different forms of regularization.
+We have presented a novel method for implementing a flexible, scalable regularized CCA. The use of proximal gradient descent algorithms allows for efficient optimization, making our approach highly suitable for large-scale data analysis.
+Future work will focus on extending this approach to other variants of CCA and exploring different forms of regularization.
 
 
 
