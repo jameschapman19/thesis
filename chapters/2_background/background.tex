@@ -2,8 +2,6 @@
 \label{chap:background}
 \minitoc
 
-
-
 \section{Machine Learning}
 Machine learning is a subfield of computer science that automates the process of data analysis, enabling systems to learn from data and make decisions without being explicitly programmed.
 It is a cornerstone of modern artificial intelligence, offering a set of tools that extends far beyond traditional statistical methods.
@@ -70,11 +68,6 @@ In this sense, one can argue that the task of learning from multiview data becom
 It is important to note that the distinction between unsupervised and self-supervised learning is not always clear-cut.
 In particular, we will argue that a number of classical subspace learning algorithms including Canonical Correlation
 Analysis (CCA) can be interpreted as both an unsupervised (learning associations between views) and a self-supervised (where the derived target is the subject) method depending on the context.
-
-
-\subsection{Data fusion for multiview learning}
-
-Data fusion is the process of combining multiple data sources to produce more consistent, accurate, and useful information than could be obtained from a single source alone.
 
 
 
@@ -174,16 +167,6 @@ By substituting the constraint conditions into these equations, we find that \( 
 \end{align}
 
 Thus, solving these equations will yield the \( u\sps{1}_1 \) and \( u\sps{2}_1 \) vectors as the eigenvectors of \( X\sps{1}^{\top} X\sps{2} X\sps{2}^{\top} X\sps{1} \) and \( X\sps{2}^{\top} X\sps{1} X\sps{1}^{\top} X\sps{2} \), respectively \cite{hoskuldsson1988pls}.
-
-\subsubsection{Singular Value Decomposition}
-
-SVD can be applied to solve the optimization problem more efficiently. The relationship between the eigenvalue problem and SVD can be seen as:
-
-\begin{align}
-    \text{SVD}(X\sps{1}^{\top} X\sps{2}) &= U\sps{1} \Sigma U\sps{2}^{\top} \\
-    X\sps{1}^{\top}X\sps{2} X\sps{2}^{\top} X\sps{1} &= U\sps{1} \Sigma \Sigma^{\top} U\sps{1}^{\top} \\
-    X\sps{2}^{\top}X\sps{1} X\sps{1}^{\top} X\sps{2} &= U\sps{2} \Sigma^{\top} \Sigma U\sps{2}^{\top}
-\end{align}
 
 \textbf{Limitations: } The problem with applying PLS to neuroimaging and behavioural modalities is that PLS is not scale invariant and
 is therefore biased towards the largest principal components in the data \cite{helmer2020stability}.
@@ -319,26 +302,6 @@ The generalized eigenvalue problem (GEP) can be written in matrix form as follow
     \end{pmatrix}.
 \end{align}
 
-% Table summarizing the definitions of A and B for various methods
-\begin{table}[h]
-    \centering
-    \begin{tabular}{|c|c|c|c|}
-        \hline
-        Method & \( A \)                                                                                    & \( B \)                                                              & \( W \)                                  \\
-        \hline
-        PCA    & \( \Sigma\sps{11} \)                                                                        & \( \mathbf{I} \)                                                     & \( W \)                                  \\
-        \hline
-        LDA    & \( \mathbf{S}_B \)                                                                          & \( \mathbf{S}_W \)                                                   & \( W \)                                  \\
-        \hline
-        CCA    & \( \begin{pmatrix} \Sigma\sps{11} & \Sigma\sps{12} \\ \Sigma\sps{21} & \Sigma\sps{22} \end{pmatrix} \) & \( \begin{pmatrix} \Sigma\sps{11} & \mathbf{0} \\ \mathbf{0} & \Sigma\sps{22} \end{pmatrix} \) & \( \begin{pmatrix} U \\ V \end{pmatrix} \) \\
-        \hline
-        PLS    & \( \begin{pmatrix} \mathbf{0} & \Sigma\sps{12} \\ \Sigma\sps{21} & \mathbf{0} \end{pmatrix} \)       & \( \mathbf{I} \)                                                     & \( \begin{pmatrix} U \\ V \end{pmatrix} \) \\
-        \hline
-    \end{tabular}
-    \caption{Definitions of \( A \) and \( B \) for different subspace learning methods. \( \mathbf{S}_B \) and \( \mathbf{S}_W \) are the between and within class scatter matrices. With the exception of PLS, \( \textbf{A} \) is always positive semi-definite.}
-    \label{tab:subspace}
-\end{table}
-
 \subsection{Sample Covariance and Population Covariance}
 In the previous sections, the methods were described in terms of population covariance matrices such as \(\Sigma\sps{11}=\mathbb{E}[X\sps{1}^T X\sps{1}]\), \(\Sigma\sps{22}=\mathbb{E}[X\sps{2}^T X\sps{2}]\), and \(\Sigma\sps{12}=\mathbb{E}[X\sps{1}^T X\sps{2}]\). These population covariances assume an underlying probability distribution from which the data are drawn.
 
@@ -382,13 +345,43 @@ consider either the top-$1$ or top-$k$ solutions to the eigenvalue problems for 
 
 The challenges of high-dimensional data often manifest when solving Generalized Eigenvalue Problems (GEPs) for Canonical Correlation Analysis (CCA). The computational burden of solving these problems becomes daunting as the number of features grows. To combat this issue, various efficient algorithms have been developed to reduce the complexity. In this section, we will explore some of these strategies.
 
+\subsubsection{Challenges in Solving Generalized Eigenvalue Problems}
+
+The GEP is often represented as\( Ax = \lambda Bx \), where \( A \)and \( B \)are matrices whose dimensions depend on the method in use.
+For instance, in PCA, \( A \)and \( B \)are\( p \times p \); in PLS and CCA, they are\( (p+q) \times (p+q) \).
+
+% Table summarizing the definitions of A and B for various methods
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        Method & \( A \)&\( B \)&\( X \)& Dimensions\\
+        \hline
+        PCA& \( \Sigma\sps{11} \)&\( \mathbf{I} \)&\( U\sps{1} \)&\( p \times p \) \\
+        \hline
+        LDA& \( \mathbf{S}_B \)&\( \mathbf{S}_W \)&\( U\sps{1} \)&\( p \times p \) \\
+        \hline
+        CCA& \( \begin{pmatrix} \Sigma\sps{11} & \Sigma\sps{12} \\ \Sigma\sps{21} & \Sigma\sps{22} \end{pmatrix} \)&\( \begin{pmatrix} \Sigma\sps{11} & \mathbf{0} \\ \mathbf{0} & \Sigma\sps{22} \end{pmatrix} \)&\( \begin{pmatrix} U\sps{1} \\ U\sps{2} \end{pmatrix} \)&\( (p+q) \times (p+q) \) \\
+        \hline
+        PLS& \( \begin{pmatrix} \mathbf{0} & \Sigma\sps{12} \\ \Sigma\sps{21} & \mathbf{0} \end{pmatrix} \)&\( \mathbf{I} \)&\( \begin{pmatrix} U\sps{1} \\ U\sps{2} \end{pmatrix} \)&\( (p+q) \times (p+q) \) \\
+        \hline
+    \end{tabular}
+    \caption{Definitions and dimensions of \( A \)and \( B \)for different subspace learning methods.}
+    \label{tab:subspace}
+\end{table}
+
+To solve the GEP, one common technique is to transform it into a standard eigenvalue problem\( B^{-\frac{1}{2}} A B^{-\frac{1}{2}} y = \lambda y \), followed by eigendecomposition.
+However, this approach has computational complexity \(O(n^3)\)and may suffer from numerical instability.
+
 \subsubsection{PCA-CCA}
 
-One common approach is to first apply Principal Component Analysis (PCA) to each view separately and then employ CCA on the PCA-reduced views. When the number of features is greater than the number of samples, applying PCA beforehand ensures no loss of information. However, when the number of features is smaller, PCA becomes a lossy procedure, effectively acting as a form of regularization. This limits the CCA components to exist within the largest PCA components, thus adding an implicit constraint to the problem.
+The primary advantage of using PCA-CCA is computational efficiency, especially for high-dimensional data.
+The overall complexity of PCA-CCA is\(O(p^2K + p^3)\), where \( K \)is the number of reduced components.
+This method is particularly beneficial when \( p \)is large.
 
 \subsubsection{KCCA}
 
-Traditional methods like PCA and CCA are primarily limited to finding linear correlations between datasets. Kernel Canonical Correlation Analysis (KCCA) is a non-parametric alternative \cite{hardoon2004canonical}. The optimization problem for KCCA is expressed as:
+Kernel Canonical Correlation Analysis (KCCA) extends CCA to capture nonlinear relationships. The optimization problem for KCCA is:
 
 \begin{align}
     & \bold{\alpha_{opt}}=\underset{\bold{\alpha_{opt}}}{\mathrm{argmax}}\{ \bold{\alpha_1^{\top}K_1^{\top}K_2\alpha_2}  \}\\
@@ -397,22 +390,12 @@ Traditional methods like PCA and CCA are primarily limited to finding linear cor
     & \bold{\alpha_2^{\top}K_2^{\top}K_2\alpha_2}=1 \notag
 \end{align}
 
-When dealing with high-dimensional data ($p>n$), KCCA provides an advantage because the kernel matrices $\bold{K_1}$ and $\bold{K_2}$ are $n \times n$ rather than $p \times p$, making the computational cost scale with the number of samples instead of the number of features.
-
-Regularization can also be added to avoid overfitting, as shown in the following formulation:
-
-\begin{align}
-    & \bold{\alpha_{opt}}=\underset{\bold{\alpha_{opt}}}{\mathrm{argmax}}\{ \bold{\alpha_1^{\top}K_1^{\top}K_2\alpha_2}  \}\\
-    & \text{subject to:} \notag\\
-    & (1-c_1)\bold{\alpha_1^{\top}K_1^{\top}K_1\alpha_1}+c_1\bold{\alpha_1^{\top}K_1^{\top}K_1\alpha_1}=1 \notag\\
-    & (1-c_2)\bold{\alpha_2^{\top}K_2^{\top}K_2\alpha_2}+c_2\bold{\alpha_2^{\top}K_2^{\top}K_2\alpha_2}=1 \notag
-\end{align}
-
-Additionally, because KCCA is non-parametric, evaluating it on out-of-sample data necessitates access to all training data at test time, posing challenges for efficiency and scalability.
+KCCA is computationally efficient for high-dimensional data (\(p>n\)) because its complexity scales with the number of samples\(n\), not the number of features\(p\).
+However, it requires access to all training data at test time, raising efficiency concerns.
 
 \subsection{Regularisation for High-Dimensional and Structured Data}
 
-Regularised solutions to the CCA problem are desirable both to provide a solution in the case where the number of features, \( p \) exceeds the number of observations, \( n \) as well as to improve the robustness of the projections in the case where we expect noisy observations \cite{branco2005robust} and/or to produce sparse solutions for better interpretability \cite{parkhomenko2009sparse}.
+Regularised solutions to the CCA problem are desirable both to provide a solution in the case where the number of features, \( p \) exceeds the number of observations, \( n \)as well as to improve the robustness of the projections in the case where we expect noisy observations \cite{branco2005robust} and/or to produce sparse solutions for better interpretability\cite{parkhomenko2009sparse}.
 
 \subsubsection{Ridge regularisation}\label{subsec:ridge-regularisation}
 
@@ -463,7 +446,8 @@ The optimization problem for PMD is then given by:
 \end{align}
 
 \textbf{Penalized CCA} Parkhomenko et al.\ \cite{parkhomenko2009sparse} also proposed a sparse CCA variant that
-operates directly on correlation matrices. Their optimization problem is formulated as:
+operates directly on correlation matrices.
+Their optimization problem is formulated as:
 
 \begin{align}
     \label{eq:parkho}
@@ -499,28 +483,35 @@ This allows them to find an (approximately) optimal pair of supports without eva
 
 Existing methods in regularized Canonical Correlation Analysis (CCA) have provided valuable insights, but there is still much room for improvement, especially when handling high-dimensional data—a pressing concern that has garnered significant attention in contemporary research.
 
-Ridge CCA is a stabilizing force in the solution space but falls short in providing sparse solutions. This makes the interpretation of the canonical vectors challenging, a shortcoming that is especially glaring in high-dimensional settings where interpretability is crucial. Additionally, the method demands a careful selection of the regularization parameter, a process that is not always straightforward.
+Ridge CCA is a stabilizing force in the solution space but falls short in providing sparse solutions.
+This makes the interpretation of the canonical vectors challenging, a shortcoming that is especially glaring in high-dimensional settings where interpretability is crucial.
+Additionally, the method demands a careful selection of the regularization parameter, a process that is not always straightforward.
 
-PCA-CCA simplifies computational demands by first reducing dimensionality using PCA. However, this risks overlooking subtle but crucial relationships between variables, as it focuses on leading principal components. This method, too, faces the challenge of interpretability, a recurring theme in PCA-based approaches.
+PCA-CCA simplifies computational demands by first reducing dimensionality using PCA. However, this risks overlooking subtle but crucial relationships between variables, as it focuses on leading principal components.
+This method, too, faces the challenge of interpretability, a recurring theme in PCA-based approaches.
 
-Witten's PMD, despite its influence, effectively performs Sparse PLS, diverging from its initial framing as sparse CCA due to its use of an identity covariance assumption. Similarly, Penalized CCA \cite{parkhomenko2009sparse} hasn't gained substantial traction, possibly because its penalty terms make sparsity control cumbersome. This issue also manifests in the Iterative Penalized Least Squares (IPLS) approach, which adds another layer of complexity: the selection of appropriate regularization parameters. Moreover, the computational expense of solving high-dimensional IPLS problems is considerable, particularly when iterative steps are required.
+Witten's PMD, despite its influence, effectively performs Sparse PLS, diverging from its initial framing as sparse CCA due to its use of an identity covariance assumption.
+Similarly, Penalized CCA \cite{parkhomenko2009sparse} hasn't gained substantial traction, possibly because its penalty terms make sparsity control cumbersome.
+This issue also manifests in the Iterative Penalized Least Squares (IPLS) approach, which adds another layer of complexity: the selection of appropriate regularization parameters.
+Moreover, the computational expense of solving high-dimensional IPLS problems is considerable, particularly when iterative steps are required.
 
 Lastly, the sparse diagonal CCA proposed by \cite{asteris2016simple} is limited in its ability to capture complex relationships between variables due to its assumption of diagonal covariance matrices.
 
-These challenges collectively point to an urgent need for CCA models that are not only more interpretable and flexible but also computationally efficient for high-dimensional data. This need strongly motivates the contributions of the present thesis.
+These challenges collectively point to an urgent need for CCA models that are not only more interpretable and flexible but also computationally efficient for high-dimensional data.
+This need strongly motivates the contributions of the present thesis.
 
 
 \section{Multiview Learning in Neuroimaging}
 
 There have been a number of applications of CCA and related methods to multiview problems in neuroimaging.
 Using resting state fMRI data, modes of correlation have been found that relate to differences in sex and age relating to drug and alcohol abuse, depression and self harm \cite{mihalik2019brain}.
-A similar mode relating to `positive-negative' wellbeing has been found across studies \cite{smith2015positive} suggesting that mental wellbeing has a relationship (though not necessarily causally) with functional connectivity between networks in the brain.
+A similar mode relating to `positive-negative' wellbeing has been found across studies \cite{smith2015positive}suggesting that mental wellbeing has a relationship (though not necessarily causally) with functional connectivity between networks in the brain.
 Later in this dissertation we will replicate and build on the findings from this paper by using regularised and non-linear CCA methods.
 
 CCA has also been used as a preprocessing step in order to identify groups of subjects in the latent variable space.
-In particular, CCA and clustering have been used to identify depression using fMRI data \cite{dinga2019evaluating} \cite{drysdale2017resting}.
+In particular, CCA and clustering have been used to identify depression using fMRI data\cite{dinga2019evaluating} \cite{drysdale2017resting}.
 CCA has also been used in the manner we described to denoise two views of a dataset such as separate measures of neuroimaging data \cite{zhuang2020technical} to remove artefacts.
-Deep CCA has recently been used to extract features for the diagnosis of schizophrenia \cite{qi2016deep}.
+Deep CCA has recently been used to extract features for the diagnosis of schizophrenia\cite{qi2016deep}.
 
 
 %\subsection{Deflation and Orthogonality}
