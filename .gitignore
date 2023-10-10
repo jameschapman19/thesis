@@ -283,6 +283,11 @@ TSWLatexianTemp*
 ./auto/*
 *.el
 
+*.xml
+*.iml
+*.pdf
+
+
 # expex forward references with \gathertags
 *-tags.tex
 
