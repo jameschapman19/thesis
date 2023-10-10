@@ -158,39 +158,8 @@ Later papers in the sparse CCA literature such as~\cite{mai2019iterative,chen201
 This has the advantage of allowing us to control the within-view covariance and therefore test the methods under specific conditions.
 The process was first described by Chen~\cite{chen2013sparse} and further explained by~\cite{suo2017sparse}.
 
-\subsection{Regularized CCA}\label{subsec:regularized-cca}
 
-Regularised solutions to the CCA problem are desirable both to provide a solution in the case where the number of features, $p$ exceeds the number of observations, $n$ as well as to improve the robustness of the projections in the case where we expect noisy observations \cite{branco2005robust} and/or to produce sparse solutions for better interpretability \cite{parkhomenko2009sparse}.
-
-\subsection{Ridge regularisation}\label{sec:Regularised CCA}
-
-Vinod proposed the "Canonical Ridge" which combined the PLS and CCA constraints in a single constrained optimisation \cite{vinod1976canonical}:
-
-\begin{align}
-     & w_{opt}=\underset{w}{\mathrm{argmax}}\{\mathbf{w_1^{\top}X_1^{\top}X_2w_2}\}        \\
-     & \text{subject to:} \notag                                                           \\
-     & (1-\tau_1)\mathbf{w_1^{\top}X_1^{\top}X_1w_1}+\tau_1\mathbf{w_1^{\top}w_1}=1 \notag \\
-     & (1-\tau_2)\mathbf{w_2^{\top}X_2^{\top}X_2w_2}+\tau_2\mathbf{w_2^{\top}w_2}=1 \notag
-\end{align}
-
-Where $\tau_i$ is a mixing hyperparameter that makes the solution more or less CCA-like ($c_i=0$) or PLS-like ($c_i=1$) depending on the constraint. By once again forming the lagrangian and taking partial derivatives we have first order conditions:
-
-\begin{align}
-     & \mathbf{X_1^{\top}X_2w_2} + \lambda_1((1-\tau_1)\mathbf{X_1^{\top}X_1w_1}+\tau_1\mathbf{w_1}-1)=0 \\
-     & \mathbf{X_2^{\top}X_1w_1} + \lambda_2((1-\tau_2)\mathbf{X_2^{\top}X_2w_2}+\tau_2\mathbf{w_2}-1)=0
-\end{align}
-
-And this gives us the eigenvalue problems \cite{rosipal2005overview}:
-
-\begin{align}
-     & ((1-\tau_1)\mathbf{X_1^{\top}X_1}+\tau_1I)^{-1}\mathbf{X_1^{\top}X_2}((1-\tau_2)\mathbf{X_2^{\top}X_2}+\tau_2I)^{-1}\mathbf{X_2^{\top}X_1w_1}=\lambda^2\mathbf{w_1} \notag \\
-     & ((1-\tau_2)\mathbf{X_2^{\top}X_2}+\tau_2I)^{-1}\mathbf{X_2^{\top}X_1}((1-\tau_1)\mathbf{X_1^{\top}X_1}+\tau_1I)^{-1}\mathbf{X_1^{\top}X_2w_2}=\lambda^2\mathbf{w_2}
-\end{align}
-
-The main difference between this eigenvalue problem and the CCA eigenvalue problem is the substitution of the matrices $\mathbf{X_1^{\top}X_1}$ and $\mathbf{X_2^{\top}X_2}$ for the matrices $((1-\tau_1)\mathbf{X_1^{\top}X_1}+\tau_1I)$ and $((1-\tau_2)\mathbf{X_2^{\top}X_2}+\tau_2I)$. We can therefore see that this regularisation is equivalent to adding a constant to the diagonal of the covariance matrix $\mathbf{X_i^{\top}X_i}$. Hardoon showed that this form of regularisation can also be implemented using the kernel trick \cite{hardoon2004canonical}.
-
-
-\subsection{A generative model for canonical PLS}\label{subsec:a-generative-model-for-canonical-pls}
+\section{A generative model for canonical PLS}\label{subsec:a-generative-model-for-canonical-pls}
 
 Our first contribution is to show that the data generation process described in~\cite{witten2009extensions} actually
 allows us to define a probabilistic model for latent variable PLS. The data generation process in equation \ref{eq
@@ -233,12 +202,36 @@ Which means the joint covariance matrix is given by:
 
 Where analagously to probabilistic PCA\cite{tipping1999probabilistic}, we recover PLS by setting $\sigma_1^2 = \sigma
 _2^2 = 0$.
-To the best of our knowledge this is the first probabilistic model for the canonical PLS models described in this
+To the best of our knowledge, this is the first probabilistic model for the canonical PLS models described in this
 thesis.
 
-Now we have a generative model for both CCA and PLS, we can consider how these relate to the backward models
-described in chapter~\ref{chap:background}.
+% Likelihood Function
+\begin{align*}
+\mathcal{L}(W_1, W_2 | X_1, X_2) &= \prod_{i=1}^{N} p(\mathbf{x}_{1i}, \mathbf{x}_{2i}) \\
+&= \prod_{i=1}^{N} \frac{1}{(2\pi)^{d/2} |C|^{1/2}} \exp \left( -\frac{1}{2} (\mathbf{x}_i - \boldsymbol{\mu})^T C^{-1} (\mathbf{x}_i - \boldsymbol{\mu}) \right)
+\end{align*}
 
+% Log-Likelihood Function
+\begin{align*}
+\log \mathcal{L}(W_1, W_2 | X_1, X_2) &= -\frac{Nd}{2} \log(2\pi) - \frac{N}{2} \log |C| - \frac{1}{2} \sum_{i=1}^{N} (\mathbf{x}_i - \boldsymbol{\mu})^T C^{-1} (\mathbf{x}_i - \boldsymbol{\mu})
+\end{align*}
+
+% Optimization
+\begin{align*}
+W_1^*, W_2^* = \arg\max_{W_1, W_2} \log \mathcal{L}(W_1, W_2 | X_1, X_2)
+\end{align*}
+
+% Sample covariance
+\begin{align*}
+S &= \frac{1}{N} \sum_{i=1}^N (\mathbf{x}_i - \boldsymbol{\mu})(\mathbf{x}_i - \boldsymbol{\mu})^T
+\end{align*}
+
+% Relate C and S
+Note that in practice, \( C \) would often be estimated as the sample covariance matrix \( S \) which would then be factorized to obtain \( W_1 \) and \( W_2 \).
+
+
+
+\subsection{}
 
 \section{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least-squares-(frals)}
 We adopt an alternating minimization strategy to solve the CCA problem.
@@ -246,25 +239,26 @@ The objective is to minimize the sum of squared Frobenius norms between the late
 Regularization terms are added to the objective function to avoid overfitting.
 Our formulation allows the incorporation of any regularized least squares solver, making it extremely flexible.
 
-\subsubsection{Mathematical Formulation}
+\subsection{Mathematical Formulation}
 We can solve CCA by alternating minimization over each view, based on the alternating least squares form.
-This form finds a variable $\bold{T}$ that is close to the latent variables $\bold{X}_i\bold{W}_i$, where $\bold{X}_i$, $\bold{W}_i$ are the matrix and weights for each view $i$.
-The closer $\bold{T}$ is to $\bold{X}_i\bold{W}_i$, the higher the correlation between them.
-The constraint  $\bold{T^{\top}T}=\bold{I}$ ensures that the latent space is orthogonal to find different effects.
+This form finds a variable \( T \) that is close to the latent variables \( X\sps{1} U\sps{1} \), where \( X\sps{1} \), \( U\sps{1} \) are the matrix and weights for each view \( i \).
+The closer \( T \) is to \( X\sps{1} U\sps{1} \), the higher the correlation between them.
+The constraint \( T^\top T = I \) ensures that the latent space is orthogonal to find different effects.
 
 \begin{gather*}
-    \underset{\bold{W},\bold{T}}{\mathrm{argmin}}\left\{\sum_i \|\bold{X}_i\bold{W}_i-\bold{T}\|_{F}^2 \right\}\\
-    \text{subject to: } \bold{T^{\top}T}=\bold{I}\\
+    \underset{U, T}{\mathrm{argmin}}\left\{\sum_i \|X\sps{i} U\sps{i} - T\|_F^2 \right\}\\
+    \text{subject to: } T^\top T = I\\
 \end{gather*}
 
-To regularize the projection matrices, we add penalty terms to the objective function, such as $P(\bold{W}_i)=\lambda_i\|\bold{W}_i\|_F$ for ridge regression or $P(\bold{W}_i)=\lambda_i\|\bold{W}_i\|_1$ for lasso.
-This can help us avoid overfitting and improving the interpretability of the results.
-This means that \textbf{any regularized least squares solver} can be used to solve each subproblem, such as ridge regression, lasso, elastic net, etc.\ making our framework substantially more flexible than prior work.
+To regularize the projection matrices, we add penalty terms to the objective function, such as \( P(U\sps{1}) = \lambda_i \|U\sps{1}\|_F \) for ridge regression or \( P(U\sps{1}) = \lambda_i \|U\sps{1}\|_1 \) for lasso.
+This can help us avoid overfitting and improve the interpretability of the results.
+This means that \textbf{any regularized least squares solver} can be used to solve each subproblem, such as ridge regression, lasso, elastic net, etc., making our framework substantially more flexible than prior work.
 
 \begin{gather*}
-    \underset{\bold{W},\bold{T}}{\mathrm{argmin}}\left\{\sum_i \|\bold{X}_i\bold{W}_i-\bold{T}\|_{F}^2 + \textcolor{red}{\lambda_i P(\bold{W}_i)}\}\right\}\\
-    \text{subject to: } \bold{T^{\top}T}=\bold{I}\\
+    \underset{U, T}{\mathrm{argmin}}\left\{\sum_i \|X\sps{i} U\sps{i} - T\|_F^2 + \textcolor{red}{\lambda_i P(U\sps{i})}\right\}\\
+    \text{subject to: } T^\top T = I\\
 \end{gather*}
+
 
 \section{Experiment 1: Simulated Data Evaluation}\label{subsec:exp1}
 

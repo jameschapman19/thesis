@@ -171,7 +171,8 @@ Thus, solving these equations will yield the \( u\sps{1}_1 \) and \( u\sps{2}_1 
 \textbf{Limitations: } The problem with applying PLS to neuroimaging and behavioural modalities is that PLS is not scale invariant and
 is therefore biased towards the largest principal components in the data \cite{helmer2020stability}.
 This is particularly problematic when there is a low signal to noise ratio since PLS may find directions in either dataset which correspond to the largest directions of noise in the other.
-Additionally, PLS assumes that the structures contributing to variance in both datasets are linearly related, which may not be the case in complex biological systems like the brain or in intricate behavioral patterns \cite{rosipal2006overview}.
+Additionally, PLS assumes that the structures contributing to variance in both datasets are linearly related, which
+may not be the case in complex biological systems like the brain or in intricate behavioral patterns \cite{rosipal2005overview}.
 The linearity assumption can sometimes be overly restrictive, failing to capture more complicated, nonlinear relationships between the data modalities.
 Another issue is the lack of sparsity in the PLS solution.
 Traditional PLS methods do not provide sparse weight vectors, which makes the interpretation of results challenging in high-dimensional settings such as neuroimaging where only a subset of features might be relevant \cite{leurgans1993canonical}.
@@ -181,7 +182,8 @@ Since the method aims to maximize covariance, extreme values in one dataset can 
 
 \subsection{Canonical Correlation Analysis}\label{sec:cca}
 
-In CCA, we aim to find the directions that maximize correlation, as opposed to maximizing covariance between two views of a dataset. This nuance renders CCA invariant to feature scale. The optimization problem for CCA can be expressed as:
+In CCA, we aim to find the directions that maximize correlation, as opposed to maximizing covariance between two views of a dataset.
+This nuance renders CCA invariant to feature scale. The optimization problem for CCA can be expressed as:
 
 \begin{align}
      & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\sps{1}^{\top}X\sps{1}^{\top}X\sps{2}u\sps{2} \} \\
@@ -190,7 +192,7 @@ In CCA, we aim to find the directions that maximize correlation, as opposed to m
      & u\sps{2}^{\top}X\sps{2}^{\top}X\sps{2}u\sps{2}=1 \notag
 \end{align}
 
-Although non-convex, numerous methods exist for solving the CCA problem, such as eigenvalue problems, generalized eigenvalue problems, block coordinate descent via alternating least squares regressions \cite{golub1995canonical} \cite{sun2008least}, and gradient descent \cite{via2007learning}.
+Although non-convex, numerous methods exist for solving the CCA problem, such as eigenvalue problems, generalized eigenvalue problems, block coordinate descent via alternating least squares regressions \cite{golub1995canonical,sun2008least} , and gradient descent \cite{via2007learning}.
 
 \subsubsection{Eigenvalue Problem}
 
@@ -252,7 +254,8 @@ Which is of the form $\mathbf{A v} = \lambda \mathbf{B v}$. CCA is therefore oft
 
 \subsubsection{LDA as a Special Case of CCA}
 
-Linear Discriminant Analysis (LDA) can be viewed as a special case of Canonical Correlation Analysis (CCA) where \(X^{(2)}\) is a one-hot encoded matrix representing the class labels. This allows us to draw a connection between the unsupervised learning framework of CCA and the supervised framework of LDA, thus expanding the understanding of both algorithms.
+Linear Discriminant Analysis (LDA) can be viewed as a special case of Canonical Correlation Analysis (CCA) where \(X^{(2)}\) is a one-hot encoded matrix representing the class labels.
+This allows us to draw a connection between the unsupervised learning framework of CCA and the supervised framework of LDA, thus expanding the understanding of both algorithms.
 
 \textbf{Intuition:} In LDA, the aim is to find a lower-dimensional subspace where the classes are maximally separated. This objective can be viewed through the lens of CCA, where the optimal directions \(u^{(1)}\) and \(u^{(2)}\) in the original and one-hot encoded spaces aim to maximize correlation. In the LDA context, \(u^{(1)}\) would maximize the separation between classes.
 
@@ -266,7 +269,9 @@ Mathematically, LDA is reduced to solving a generalized eigenvalue problem invol
     \hat{\mathbf{S}_W} = \sum_{i=1}^{c} \sum_{x \in X_i} (x - \mu_i)(x - \mu_i)^T
 \]
 
-\textbf{Connection to CCA:} When \(X^{(2)}\) is the one-hot encoded matrix of class labels, the CCA problem effectively tries to maximize the correlation between the feature vectors and their corresponding labels. This turns out to be equivalent to maximizing the between-class variance in LDA while minimizing the within-class variance. Thus, LDA can be thought of as a constrained form of CCA, tailored to classification tasks.
+\textbf{Connection to CCA:} When \(X^{(2)}\) is the one-hot encoded matrix of class labels, the CCA problem effectively tries to maximize the correlation between the feature vectors and their corresponding labels.
+This turns out to be equivalent to maximizing the between-class variance in LDA while minimizing the within-class variance.
+Thus, LDA can be thought of as a constrained form of CCA, tailored to classification tasks.
 
 This perspective unifies the two algorithms and shows that the core objective—finding meaningful relationships or directions in the data—is shared between both CCA and LDA.
 
@@ -319,25 +324,48 @@ Here, \(b\) denotes the size of the minibatch, and \(\mathbf{X}\sps{1} \in \math
 
 This dual perspective—considering both population and sample covariance matrices—enables a more robust and flexible approach to the methods discussed, bridging the gap between theoretical analysis and practical application.
 
-\subsection{Subspaces vs Components}
+\subsection{Multiple Effects, Orthogonality, and Deflation}\label{subsec:orthogonality}
 
-A consequence of the eigenvalue formulations of PCA, PLS, and CCA is that the solutions are in general not unique.
-In particular, the eigenvectors of the covariance matrices are only defined up to a sign.
-This means that the solutions to the eigenvalue problems are only unique up to a sign flip.
-This is not a problem for PCA since the signs of the eigenvectors are arbitrary and do not affect the variance of the projections.
-However, for PLS and CCA, the signs of the eigenvectors are important since they determine the direction of the projections.
-This means that the solutions to the eigenvalue problems are only unique up to a sign flip.
-This is not a problem for PCA since the signs of the eigenvectors are arbitrary and do not affect the variance of the projections.
-However, for PLS and CCA, the signs of the eigenvectors are important since they determine the direction of the projections.
+Understanding multiple correlated or covarying effects is fundamental in multivariate data analysis methods such as Principal Component Analysis (PCA), Partial Least Squares (PLS), and Canonical Correlation Analysis (CCA). Although these methods generally aim to find a single maximal correlation or covariance (referred to as the top-1 problem), they are capable of identifying more than one orthogonal effect, a scenario often termed the top-$k$ problem, where $k$ denotes the number of orthogonal effects desired.
 
-Perhaps more importantly, if any eigenvalues are repeated, then the eigenvectors are not even unique up to a sign flip
-but are instead only unique up to an orthogonal transformation.
-While in practice, we can assume that the eigenvalues are unique for a given sample, this can be problematic when comparing solutions across samples.
-Most obviously, when we use cross-validation for parameter tuning or model selection, small perturbations in the data
-can lead to large changes in the solution (components effectively `swapping' between folds).
+\subsection{Challenges in Identifying Multiple Components}
 
-For this reason, in this thesis we take the view that the subspace perspective is more appropriate. We will typically
-consider either the top-$1$ or top-$k$ solutions to the eigenvalue problems for PCA, PLS, and CCA.
+Identifying multiple components using iterative methods introduces specific challenges.
+Firstly, to discover subsequent effects that are orthogonal to the maximally correlated or covarying one, a deflation step is commonly applied.
+This is essential because the second component is conditional on the first in deflation models, meaning that interpreting the second component as an independent form of variation becomes untenable if the wrong first component is identified.
+
+\subsection{Deflation Methods for Orthogonality}
+
+Two prevalent deflation methods, Hotelling's Deflation and Projection Deflation, serve to ensure the orthogonality of the components.
+
+\textbf{Hotelling's method}  is mainly used for methods based on the power method for the Singular Value
+Decomposition (SVD).
+
+\begin{align}
+     & d = \mathbf{w^{\top}_1X^{\top}_1X_2w_2}                                            \\
+     & \mathbf{\Sigma^{(i+1)}_{12}}= \mathbf{\Sigma^{(i)}_{12}} - d\mathbf{w_1w^{\top}_2}
+\end{align}
+
+\textbf{Projection Deflation} is common in algorithms like Wold's NIPALS and ensures that the projection vectors
+themselves are orthogonal. These methods work by systematically reducing the data dimensions, so that each new component is orthogonal to the ones found before it. However, these methods come with their own limitations and are sensitive to the condition of the original problem, including issues related to regularization.
+
+\begin{align}
+     & P(\mathbf{X})= \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X}
+\end{align}
+
+\begin{align}
+     & P^\perp(\mathbf{X})= \mathbf{X} - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X} = (I - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top})X}
+\end{align}
+
+\subsection{Non-Uniqueness of Components}
+
+Another critical consideration is the non-uniqueness of the identified components.
+The eigenvectors of covariance matrices in these methods are only defined up to a sign, or up to an orthogonal transformation when eigenvalues are repeated. This lack of uniqueness can lead to inconsistencies, especially when comparing solutions across different samples or data folds.
+
+\subsection{Thesis Perspective}
+
+Given these complexities, this thesis adopts a subspace perspective, focusing on either the top-1 or top-$k$ solutions, considering these as the most reliable and interpretable representations of the data's underlying structure.
+This approach aims to mitigate the limitations of deflation methods and the non-uniqueness of solutions, providing a more robust framework for multivariate data analysis.
 
 \section{Open challenges in CCA}
 
@@ -454,15 +482,19 @@ Their optimization problem is formulated as:
     & \bold{u\sps{opt}}=\underset{\bold{u}}{\mathrm{argmax}}\{ \bold{(X\sps{1}X\sps{1}\top)^{-\frac{1}{2}}X\sps{1}\top X\sps{2}(X\sps{2}\top X\sps{2})^{-\frac{1}{2}}} \}
 \end{align}
 
-\textbf{Iterative Penalized Least Squares} Some approaches to sparse CCA relate to alternating regression forms of
-CCA, such as sparse alternating regressions \cite{wilms2015sparse}. Mai et al.\ \cite{mai2019iterative} provided a proof that these methods can yield true global solutions to projection-length constrained lasso regression problems.
+\textbf{Iterative Penalized Least Squares} Some approaches to sparse Canonical Correlation Analysis (CCA) are related to alternating regression forms, such as sparse alternating regressions~\cite{wilms2015sparse}.
+Mai et al.~\cite{mai2019iterative} proved that these methods can yield true global solutions to projection-length constrained lasso regression problems.
+However, this holds true only for one-homogeneous penalties, meaning the regularization function must take the form \( P((\mu + 1)\boldsymbol{\theta}) = (\mu + 1)P(\boldsymbol{\theta}) \). Consequently, we need \( P(\boldsymbol{\theta}) \) to be a one-homogeneous function to use regularized alternating least squares for solving regularized CCA objectives.
 
 \begin{align}
     \label{eq:mai}
-    & \bold{u}=\underset{\bold{u}}{\mathrm{argmin}}\{ \|\bold{Xu-y}\|^2_2 + P(\bold{u}) \} \\
-    & \text{subject to:} \notag \\
-    & \bold{u\sps{1}\top X\sps{1}\top X\sps{1} u\sps{1}}=1 \notag
+    \boldsymbol{u} &= \underset{\boldsymbol{u}}{\mathrm{argmin}} \left\{ \|\boldsymbol{Xu} - \boldsymbol{y}\|_2^2 + P(\boldsymbol{u}) \right\} \\
+    \text{subject to:} \notag \\
+    \boldsymbol{u^{(1)\top} X^{(1)\top} X^{(1)} u^{(1)}} &= 1 \notag
 \end{align}
+
+However, the one homogenous penalty in practice limits the flexibility of the method.
+For example, the elastic net penalty is not one-homogenous and therefore cannot be used with this method.
 
 \textbf{Sparse Diagonal CCA}\cite{asteris2016simple} propose a combinatorial algorithm for sparse diagonal CCA. Their algorithm operates on a low-rank approximation of the input data and scales linearly with the number of input variables.
 The algorithm precisely controls the sparsity of the extracted canonical vectors and offers data-dependent global approximation guarantees based on the spectrum of the input data.
@@ -513,93 +545,6 @@ In particular, CCA and clustering have been used to identify depression using fM
 CCA has also been used in the manner we described to denoise two views of a dataset such as separate measures of neuroimaging data \cite{zhuang2020technical} to remove artefacts.
 Deep CCA has recently been used to extract features for the diagnosis of schizophrenia\cite{qi2016deep}.
 
-
-%\subsection{Deflation and Orthogonality}
-
-
-
-
-%
-%\section{Multiple Effects, Orthogonality, and Deflation}\label{sec:orthogonality}
-%
-%We have only explicitly referred to the vectors of weights that produce maximal variance or correlation so far in this report. However the eigendecomposition formulations of PCA, PLS, and CCA with multiple possible eigenvector and eigenvalue pairs implies that we are able to find more than one orthogonal effect when using all three methods. We refer respectively to the top-$1$ and top-$k$ PLS and CCA problems to distinguish these problems where $k$ refers to the number of effects we wish to find.
-%
-%While the SVD and eigendecomposition based methods are able to generate all of the latent dimensions at once, they require the inversion of the covariance matrices $\mathbf{\Sigma_{11}}$ and $\mathbf{\Sigma_{22}}$ and therefore for very large data have a high computational cost.
-%
-%However when we use iterative methods we typically compute only the first (i.e. the maximally correlated/covarying effect). If we wish to find further effects, we must define a way to ensure that any other effects we find are different to the first (i.e. the maximally correlated/covarying effect). By a process of deflation we can remove a given effect from our data and repeat the process to find the next top correlated/covarying effect.
-%
-%To achieve this we need to project the data in a specific way based on orthogonality.
-%
-%\subsection{Orthogonality}
-%
-%In their (generalized) eigenvalue problem form, the definition of orthogonality in the PLS and CCA case is given implicitly. In the PLS case the generalized eigenvalue problem:
-%
-%\begin{align}
-%    \begin{pmatrix}
-%        0                    & \mathbf{\Sigma_{12}} \\
-%        \mathbf{\Sigma_{21}} & 0
-%    \end{pmatrix}
-%    \mathbf{w}
-%    =
-%    \lambda
-%    \mathbf{w}
-%\end{align}
-%
-%Implies that the first component $\mathbf{w_1}$ and the second component $\mathbf{w_2}$ must have the relationship $\mathbf{w_{i_1}^{\top} w_{i_2}}=0$. In other words the weight vectors must be orthogonal.
-%
-%In the CCA case, the generalized eigenvalue problem:
-%
-%\begin{align}
-%    \begin{pmatrix}
-%        0                    & \mathbf{\Sigma_{12}} \\
-%        \mathbf{\Sigma_{21}} & 0
-%    \end{pmatrix}
-%    \mathbf{w}
-%    =
-%    \lambda
-%    \begin{pmatrix}
-%        \mathbf{\Sigma_{11}} & 0                    \\
-%        0                    & \mathbf{\Sigma_{22}}
-%    \end{pmatrix}
-%    \mathbf{w}
-%\end{align}
-%
-%Implies that the first component $\mathbf{w_1}$ and the second component $\mathbf{w_2}$ must have the relationship:
-%
-%\begin{align}
-%    \mathbf{w_{i_1}^{\top}\begin{pmatrix}\mathbf{\Sigma_{11}} & 0 \\0 & \mathbf{\Sigma_{22}}
-%                          \end{pmatrix}w^{(2)}}=0
-%\end{align}
-%
-%which implies that the projections for each view $\mathbf{X_iw_i}$ are orthogonal.
-%
-%However for both CCA and PLS we could also define effects in different ways and indeed the PLS literature contains a number of variants\cite{hoskuldsson1988pls} \cite{wegelin2000survey}. When using iterative methods, we typically use a procedure known as deflation. The deflation step and initialisation of each inner loop forms an algorithmic "outer loop" while the "inner loop" finds the next largest component. There are two common methods for deflation for CCA and PLS described in the literature: Hotelling's deflation and projection deflation.
-%
-%\subsection{Hotelling's Deflation}
-%Hotelling's deflation ensures orthogonality of the weight vectors and is typically used for methods based on the power method for the SVD. Hotelling's deflation removes the covariance, $d$, associated with each set of weights:
-%
-%\begin{align}
-%     & d = \mathbf{w^{\top}_1X^{\top}_1X_2w_2}                                            \\
-%     & \mathbf{\Sigma^{(i+1)}_{12}}= \mathbf{\Sigma^{(i)}_{12}} - d\mathbf{w_1w^{\top}_2}
-%\end{align}
-%
-%Hotelling's deflation only ensures orthogonality of the respective weight vectors when $w_1$ and $w_2$ are true singular vectors. For this reason when the problem is regularised, Hotelling's deflation may be suboptimal.
-%
-%\subsection{Projection Deflation}
-%
-%Projection deflation projects each dataset into a subspace that is uncorrelated with its first respective projection. It is used to ensure that the projection vectors are orthogonal. This is the method used by Wold's NIPALS algorithm and is also refered to as mode-A deflation or CCA deflation \cite{mackey2009deflation}.
-%
-%With this method, the projection of each column of $\mathbf{X}$ in the direction $\mathbf{Xw}$ is equal to the cross-product of $\mathbf{Xw}$ with each column of $\mathbf{X}$ multiplied by the direction: $\frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}$.
-%
-%\begin{align}
-%     & P(\mathbf{X})= \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X}
-%\end{align}
-%
-%We can then find the residual of $\mathbf{X}$, the variance in $\mathbf{X}$  that is orthogonal to the first canonical projection. This ensures that the next set of score vectors will be orthogonal to the first.
-%
-%\begin{align}
-%     & P^\perp(\mathbf{X})= \mathbf{X} - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X} = (I - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top})X}
-%\end{align}
 
 
 
