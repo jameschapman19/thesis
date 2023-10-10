@@ -1,41 +1,48 @@
-\chapter{Regularized Alternating Least Squares: Flexible Regularization for CCA}
+\chapter{Flexible Regularization for CCA}
 \label{chap:als}
 \minitoc
 
 \section{Introduction}\label{sec:introduction}
 
-The content relating to regularised alternating least squares as a method for optimizing regularised CCA is based on an abstract which I presented in poster form at OHBM. The work benefitted from extensive theoretical discussions with John Shawe-Taylor and Janaina Mourao-Miranda as well as Janaina and Rick Adams' help interpreting the results.
+This chapter is an extension of work that I have previously presented in poster form at the OHBM conference.
+I have benefitted from constructive theoretical discussions with John Shawe-Taylor and Janaina Mourao-Miranda, as well as insights into result interpretation from Janaina and Rick Adams.
 
-Traditional CCA models often fail to adequately handle high-dimensional data, a challenge that is frequently encountered in brain research.
-To tackle this issue, we introduce a framework for regularized CCA based on alternating least squares (ALS), termed
-as Flexible Regularized Alternating Least Squares (FRALS). This work forms an early part of my PhD research and primarily aims to show that `true CCA' models can unveil stronger signals in brain-behaviour data compared to Partial Least Squares (PLS) models.
+The core focus of this part of my PhD research shifts towards understanding and improving the regularization in Canonical Correlation Analysis (CCA) models.
+Traditional CCA models often exhibit shortcomings when grappling with high-dimensional data, a challenge particularly acute in the context of brain-behavior studies.
+In response, this chapter introduces Flexible Regularized Alternating Least Squares (FRALS), an optimized framework for regularized CCA.
 
 \subsection{Problem Statement}\label{subsec:problem-statement}
-The classical CCA methodology encounters difficulties when applied to high-dimensional datasets.
-These challenges include overfitting and the possibility of drawing spurious conclusions.
-While regularization techniques like ridge or lasso regression have been employed to alleviate these issues, they often lack the flexibility needed to cater to various types of data and research queries.
+
+Classical CCA methods struggle with high-dimensional data, leading to problems like overfitting and spurious conclusions.
+We aim to investigate the role of model priors in CCA by using simulated and real data to show that the best model performance is achieved when the model priors match the data-generating priors.
+Further, we delve into the implications of regularizing weights and loadings, arguing that regularized weights may
+improve out-of-sample correlation but are less interpretable than loadings.
 
 \subsection{Contributions}\label{subsec:contributions}
-Firstly, we review methods for generating simulated data from the CCA literature. We propose a method for generating
-data based on the probabilistic model of CCA and use this model to justify comparing the loadings rather than the
-weights of CCA models.
-Secondly, we develop FRALS, a novel framework that allows the utilization of any regularized least squares solver for
-brain-behaviour CCA problems.
-This innovation enhances flexibility and provides a more robust defense against the risk of overfitting.
-Although our experimental outcomes indicate that FRALS excels in terms of out-of-sample correlation, it is important to note that the algorithm ultimately proves to be too slow and impractical for most applications.
-Nonetheless, it serves as an instructive stepping stone in the ongoing quest for efficient and reliable CCA methods.
+
+This chapter brings several contributions to the field of multiview machine learning and specifically to the application of CCA in brain-behavior studies.
+First, we review existing methods for generating simulated data in CCA research and propose a new method based on the probabilistic model of CCA. We use this to justify focusing on the comparison of loadings rather than weights.
+Second, we introduce FRALS, a novel and flexible framework that allows for the utilization of any regularized least squares solver, thereby offering a more robust defense against overfitting.
+Our experimental results demonstrate that FRALS shows promise in terms of out-of-sample correlation but also reveal its computational limitations, serving as an educational stepping stone for future work in this area.
+
 
 \section{Background}\label{sec:background}
 
-\subsection{Probabilistic CCA, rCCA, and PLS}\label{subsec:probabilistic-cca-rcca-and-pls}
+\subsection{How is CCA and PLS Data Generated and Why Should We Care?}\label{sec:how-is-cca-and-pls-data-generated-and
+-why-should-we-care?}
+
+Understanding the data generation process in Canonical Correlation Analysis (CCA) and Partial Least Squares (PLS) is pivotal for many reasons. It influences the choice of appropriate models, evaluation metrics, and sheds light on the underlying structure and dependencies between views. Probabilistic formulations provide a principled framework to understand this process, helping us gauge the assumptions we make and the limitations these impose.
 
 \subsubsection{Probabilistic CCA}
 
-In Probabilistic CCA~\cite{bach2005probabilistic}, the generative model for each view \(i\) is defined as:
+In Probabilistic CCA~\cite{bach2005probabilistic}, the generative model is articulated as a two-step process for each view \(i\):
+
 \begin{align}
     \mathbf{z}& \sim \mathcal{N}(\mathbf{0}, \mathbf{I})                                            \\
     \mathbf{x}_i & \sim \mathcal{N}(\mathbf{W}_i \mathbf{z} + \boldsymbol{\mu}_i, \boldsymbol{\Psi}_i)
 \end{align}
+
+Here, \(\mathbf{z}\) represents the latent variables shared between the different views. \(\mathbf{x}_i\) is generated conditionally based on \(\mathbf{z}\), and can be thought of as the observed data with additional noise \(\boldsymbol{\Psi}_i\).
 
 % TikZ Diagram for Probabilistic CCA
 \begin{tikzpicture}
@@ -51,22 +58,89 @@ In Probabilistic CCA~\cite{bach2005probabilistic}, the generative model for each
 
 \subsubsection{Probabilistic rCCA}
 
-\cite{de2003regularization} proposed a probabilistic model for regularized CCA (rCCA) which is a generalization of CCA that allows for regularization of the covariance matrices.
-Specifically, they consider the following generative model for each view \(i\):
+Probabilistic rCCA~\cite{de2003regularization} extends Probabilistic CCA by incorporating regularization directly into the covariance structure:
 
 \begin{align}
     \mathbf{z}& \sim \mathcal{N}(\mathbf{0}, \mathbf{I})                                            \\
     \mathbf{x}_i & \sim \mathcal{N}(\mathbf{W}_i \mathbf{z} + \boldsymbol{\mu}_i, \boldsymbol{\Psi}_i + \Sigma_i^2)
 \end{align}
 
-Where \(\Sigma_i^2\) is a diagonal matrix representing measurement noise. They showed that the maximum
+Here, \(\Sigma_i^2\) is a diagonal matrix that models measurement noise. This addition allows the model to be more robust to overfitting and other data challenges.
 
 \subsubsection{Probabilistic PLS}
 
-There are a number of ways to write down a probabilistic model for PLS Regression \cite{el2018probabilistic,zheng2016probabilistic}.
-To the best of our knowledge there is no probabilistic model for the latent variable approach to so-called Canonical PLS
-. We will return
-to this in our contributions.
+Probabilistic formulations of PLS are still an evolving field \cite{el2018probabilistic,zheng2016probabilistic}.
+Despite various models for PLS regression, a canonical probabilistic model for Canonical PLS remains elusive.
+We will address this gap in our contributions.
+
+\subsection{Forward and Backward Models}
+
+At this stage we can consider the difference between forward and backward models in the context of CCA and PLS.
+In forward models we generate data from a known model and then try to recover the parameters of that model.
+In backward models we try to recover the parameters of a model from the data.
+
+In the CCA and PLS models described in chapter \ref{chap:background} we have backward models which aim to infer the
+latent variables $\bold{Z}$ from the data $\bold{X_i}$.
+In the probabilistic models described in section \ref{subsec:probabilistic-cca-rcca-and-pls} we have forward models which
+generate data from the latent variables $\bold{Z}$.
+
+\subsection{Why is this important?}
+
+If we are solely interested in the latent variables $\boldsymbol{Z}$, then the backward models described in chapter \ref{chap:background} suffice for inferring them from the data. However, if we aim for a comprehensive understanding and interpretability of the model, it becomes vital to understand both forward and backward formulations.
+
+Consider the probabilistic CCA model described in section \ref{subsec:probabilistic-cca-rcca-and-pls}, but with concrete names for the latent variables and views. Let's take figure \ref{fig:mentalhealthselfsupervised} as an example where the latent variable represents the severity of a mental health condition, and the views (neuroimaging and behavioral data) are conditioned on this latent variable.
+
+
+\begin{figure}
+    \centering
+    \tikz{
+        % nodes
+        \node[latent, align=center, minimum size=2cm] (Z) {Severity};
+        %
+        \node[obs, below left=of Z, minimum size=2cm] (X_1) {Neuroimage};%
+        \node[obs, below right=of Z, minimum size=2cm] (X_2) {Behaviour};%
+        % edges
+        \edge{Z} {X_1}
+        \edge{Z} {X_2}}
+    \caption[Latent Variable Model of Mental Health]{\textit{\textbf{Latent Variable Model of Mental Health:}} From this perspective the neuroimaging modality and behavioural data are both considered to have been generated with distributions conditioned on the severity of a mental health condition}\label{fig:mentalhealthselfsupervised}
+\end{figure}
+
+In both the forward and backward models of CCA, the latent variables are of interest and are mathematically identifiable (up to a rotation), meaning that although they may be represented differently, they capture the same underlying structure. However, their conceptual implications differ between the two models. In the forward model, the weights indicate how the latent variables influence the generation of the views. Conversely, in the backward model, the weights help us best predict or reconstruct the latent variables from the data.
+
+\subsection{What is the relationship between the forward and backward weights?}
+
+Both the forward and backward models of CCA give analytical forms for the joint covariance matrix of the views.
+
+\begin{align}
+    \Sigma &= \begin{bmatrix}
+        \bold{W_1W_1^T} + \bold{\Psi_1} & \bold{W_1W_2^T} \\
+        \bold{W_2W_1^T} & \bold{W_2W_2^T} + \bold{\Psi_2}
+    \end{bmatrix} = \begin{bmatrix}
+        \bold{\Sigma_1} & \bold{\Sigma_1}\sum_k \rho_k u_{1_k}^\top u_{2_k} \bold{\Sigma_2}  \\
+        \bold{\Sigma_2}\sum_k \rho_k u_{2_k}^\top u_{1_k} \bold{\Sigma_1} & \bold{\Sigma_1}
+    \end{bmatrix}
+\end{align}
+
+Where $\rho_k$ is the $k$th canonical correlation and $u_{i_k}$ is the $k$th column of $\bold{U_i}$.
+
+By examining the joint covariance matrix we can see that the weights in the forward model are related to the weights in the backward model by:
+
+\begin{align}
+    \bold{W_1W_2^T} &= \bold{\Sigma_1}\sum_k \rho_k u_{1_k}^\top u_{2_k} \bold{\Sigma_2}
+\end{align}
+
+For a single latent variable, we therefore have:
+
+\begin{align}
+    \bold{w_1} &= p_1\bold{\Sigma_1} u_{1_1}^\top \\
+    \bold{w_2} &= p_2\bold{\Sigma_2} u_{2_1}^\top
+\end{align}
+
+Where $p_i$ is a scalar constant and $\prod_i p_i = \rho$. Notice that the weights in the backward model are scaled
+by the covariance matrices $\bold{\Sigma_i}$ so this is almost exactly the same definition as loadings.
+
+Note that weights in forward and backward models are the same (up to scaling by $p$) if the covariance matrices are identity matrices.
+Further note that sparse weights do not in general imply sparse loadings and vice versa (unless the covariance matrices are identity matrices).
 
 \subsection{Data Generation}\label{subsec:data-generation-background}
 
@@ -84,70 +158,37 @@ Later papers in the sparse CCA literature such as~\cite{mai2019iterative,chen201
 This has the advantage of allowing us to control the within-view covariance and therefore test the methods under specific conditions.
 The process was first described by Chen~\cite{chen2013sparse} and further explained by~\cite{suo2017sparse}.
 
-
 \subsection{Regularized CCA}\label{subsec:regularized-cca}
-Traditional approaches to regularized CCA include the use of ridge penalties (RCCA) and sparse methods like Penalized Matrix Decomposition (PMD). These methods each have their own limitations; for example, RCCA does not produce sparse solutions, while PMD may miss low-variance but high-correlation directions.
 
+Regularised solutions to the CCA problem are desirable both to provide a solution in the case where the number of features, $p$ exceeds the number of observations, $n$ as well as to improve the robustness of the projections in the case where we expect noisy observations \cite{branco2005robust} and/or to produce sparse solutions for better interpretability \cite{parkhomenko2009sparse}.
 
-\section{How is CCA and PLS Data Generated and Why Should We Care?}\label{sec:how-is-cca-and-pls-data-generated-and-why-should-we-care?}
+\subsection{Ridge regularisation}\label{sec:Regularised CCA}
 
-\subsection{Forward and Backward Models}
-
-At this stage we can consider the difference between forward and backward models in the context of CCA and PLS.
-In forward models we generate data from a known model and then try to recover the parameters of that model.
-In backward models we try to recover the parameters of a model from the data.
-
-In the CCA and PLS models described in chapter \ref{chap:background} we have backward models which aim to infer the
-latent variables $\bold{Z}$ from the data $\bold{X_i}$.
-In the probabilistic models described in section \ref{subsec:probabilistic-cca-rcca-and-pls} we have forward models which
-generate data from the latent variables $\bold{Z}$.
-
-\subsection{Why is this important?}
-
-If we are interested only in the latent variables $\bold{Z}$ then we can use the backward models described in chapter
-\ref{chap:background} to infer them from the data.
-However, if we are interested in interpreting the models then we need to understand how the
-
-Consider the probabilistic CCA model described in section \ref{subsec:probabilistic-cca-rcca-and-pls} but this time
-let us give a name to the latent variables and views.
-Consider figure \ref{fig:mentalhealthselfsupervised} where the latent variable is the severity of some mental health
-condition and the views are conditioned on this latent variable.
-
-\begin{figure}
-    \centering
-    \tikz{
-        % nodes
-        \node[latent, align=center, minimum size=2cm] (Z) {Severity};
-        %
-        \node[obs, below left=of Z, minimum size=2cm] (X_1) {Neuroimage};%
-        \node[obs, below right=of Z, minimum size=2cm] (X_2) {Behaviour};%
-        % edges
-        \edge{Z} {X_1}
-        \edge{Z} {X_2}}
-    \caption[Latent Variable Model of Mental Health]{\textit{\textbf{Latent Variable Model of Mental Health:}} From this perspective the neuroimaging modality and behavioural data are both considered to have been generated with distributions conditioned on the severity of a mental health condition}\label{fig:mentalhealthselfsupervised}
-\end{figure}
-
-In both the forward and backward models of CCA, the latent variables are of interest and identifiable (up to a
-rotation), meaning effectively that the latent variables are the same in both models.
-However, the weights have different interpretations in the forward and backward models.
-In the forward model the weights describe how the latent variables act on the views to generate the data.
-In the backward model the weights tell us how we can best predict or reconstruct the latent variables from the data.
-
-\subsection{What is the relationship between the forward and backward weights?}
-
-Both the forward and backward models of CCA give analytical forms for the joint covariance matrix of the views.
+Vinod proposed the "Canonical Ridge" which combined the PLS and CCA constraints in a single constrained optimisation \cite{vinod1976canonical}:
 
 \begin{align}
-    \Sigma &= \begin{bmatrix}
-        \bold{W_1W_1^T} + \bold{\Psi_1} & \bold{W_1W_2^T} \\
-        \bold{W_2W_1^T} & \bold{W_2W_2^T} + \bold{\Psi_2}
-    \end{bmatrix} = \begin{bmatrix}
-        \bold{\Sigma_1} & \bold{\Sigma_1}\sum_k \rho_k u_{1_k}^\top u_{2_k} \bold{\Sigma_2}  \\
-        \bold{\Sigma_2}\sum_k \rho_k u_{2_k}^\top u_{1_k} \bold{\Sigma_1} & \bold{\Sigma_1}
-    \end{bmatrix}
+     & w_{opt}=\underset{w}{\mathrm{argmax}}\{\mathbf{w_1^{\top}X_1^{\top}X_2w_2}\}        \\
+     & \text{subject to:} \notag                                                           \\
+     & (1-\tau_1)\mathbf{w_1^{\top}X_1^{\top}X_1w_1}+\tau_1\mathbf{w_1^{\top}w_1}=1 \notag \\
+     & (1-\tau_2)\mathbf{w_2^{\top}X_2^{\top}X_2w_2}+\tau_2\mathbf{w_2^{\top}w_2}=1 \notag
 \end{align}
 
-Where $\rho_k$ is the $k$th canonical correlation and $u_{i_k}$ is the $k$th column of $\bold{U_i}$.
+Where $\tau_i$ is a mixing hyperparameter that makes the solution more or less CCA-like ($c_i=0$) or PLS-like ($c_i=1$) depending on the constraint. By once again forming the lagrangian and taking partial derivatives we have first order conditions:
+
+\begin{align}
+     & \mathbf{X_1^{\top}X_2w_2} + \lambda_1((1-\tau_1)\mathbf{X_1^{\top}X_1w_1}+\tau_1\mathbf{w_1}-1)=0 \\
+     & \mathbf{X_2^{\top}X_1w_1} + \lambda_2((1-\tau_2)\mathbf{X_2^{\top}X_2w_2}+\tau_2\mathbf{w_2}-1)=0
+\end{align}
+
+And this gives us the eigenvalue problems \cite{rosipal2005overview}:
+
+\begin{align}
+     & ((1-\tau_1)\mathbf{X_1^{\top}X_1}+\tau_1I)^{-1}\mathbf{X_1^{\top}X_2}((1-\tau_2)\mathbf{X_2^{\top}X_2}+\tau_2I)^{-1}\mathbf{X_2^{\top}X_1w_1}=\lambda^2\mathbf{w_1} \notag \\
+     & ((1-\tau_2)\mathbf{X_2^{\top}X_2}+\tau_2I)^{-1}\mathbf{X_2^{\top}X_1}((1-\tau_1)\mathbf{X_1^{\top}X_1}+\tau_1I)^{-1}\mathbf{X_1^{\top}X_2w_2}=\lambda^2\mathbf{w_2}
+\end{align}
+
+The main difference between this eigenvalue problem and the CCA eigenvalue problem is the substitution of the matrices $\mathbf{X_1^{\top}X_1}$ and $\mathbf{X_2^{\top}X_2}$ for the matrices $((1-\tau_1)\mathbf{X_1^{\top}X_1}+\tau_1I)$ and $((1-\tau_2)\mathbf{X_2^{\top}X_2}+\tau_2I)$. We can therefore see that this regularisation is equivalent to adding a constant to the diagonal of the covariance matrix $\mathbf{X_i^{\top}X_i}$. Hardoon showed that this form of regularisation can also be implemented using the kernel trick \cite{hardoon2004canonical}.
+
 
 \subsection{A generative model for canonical PLS}\label{subsec:a-generative-model-for-canonical-pls}
 
@@ -197,8 +238,6 @@ thesis.
 
 Now we have a generative model for both CCA and PLS, we can consider how these relate to the backward models
 described in chapter~\ref{chap:background}.
-
-\subsection{Backward Models}\label{subsec:backward-models}
 
 
 \section{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least-squares-(frals)}

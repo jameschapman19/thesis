@@ -2,24 +2,41 @@
 \label{chap:background}
 \minitoc
 \section{Machine Learning}
+Machine learning is a subfield of computer science that automates the process of data analysis, enabling systems to learn from data and make decisions without being explicitly programmed.
+It is a cornerstone of modern artificial intelligence, offering a set of tools that extends far beyond traditional statistical methods.
+These automated methods are used in a myriad of applications, from filtering spam emails to making medical diagnoses and powering self-driving cars.
 
-Machine learning is a branch of artificial intelligence and computer science that focuses on the use of data and algorithms to imitate the way that humans learn, gradually improving its accuracy. Machine learning methods can exploit different forms of supervision signals derived from the data itself, such as contrastive learning, reconstruction, prediction, or clustering. Machine learning methods can also benefit from deep neural networks that can learn expressive and flexible representations from complex and high-dimensional data. Machine learning methods have shown remarkable performance on various tasks, such as computer vision, natural language processing, speech recognition, and recommender systems. The mathematical foundations of Machine learning are provided by mathematical optimization methods.
+This field is generally divided into three primary categories: supervised, unsupervised, and reinforcement learning.
+Each of these paradigms is suited to a different type of problem, and the choice of approach often depends on the type and amount of data available.
+This thesis will focus on a specialized area of machine learning known as `multiview machine learning," which deals with data sets that contain multiple types or `views" of information.
 
-Machine learning arguably differs from statistics in that it emphasizes the prediction and generalization of out-of-sample data, rather than the explanation and inference of in-sample data. ML methods can handle complex and nonlinear relationships among data, as well as large-scale and high-dimensional data, that may not be suitable for statistical models. Machine learning methods can also learn from unstructured or unlabeled data, such as text or images, that may not have predefined features or categories.
+\subsection{Supervised Learning}
 
-It is common to distinguish between flavours of machine learning based on the type of supervision signal that is used to train the model. Supervised learning methods learn a mapping from inputs to outputs based on a set of training examples and targets. Unsupervised learning methods learn a mapping from inputs to outputs without any training targets. Self-supervised learning methods learn a mapping from inputs to outputs based on a training signal that is derived from the data itself. Reinforcement learning methods learn a mapping from inputs to outputs based on a reward signal that is provided by an environment. In this report we will focus on unsupervised and self-supervised learning methods.
+Supervised learning is a machine learning paradigm where the algorithm learns from labeled training data, and makes predictions or decisions based on that data.
+This type of learning allows for the mapping of input data to output labels, essentially using annotated examples to discern how to generalize to unseen data.
+A classic example of supervised learning is a spam email filter, where a model is trained on a dataset of emails labeled as 'spam' or 'not spam', and the task is to classify new, incoming emails into one of these categories.
 
-A challenge in machine learning for biomedical applications is that obtaining training data can be expensive and time-consuming. This is particularly true for medical imaging data, which often requires expert annotation. Furthermore, in mental health, there is often a lack of consensus on the definition of a mental health condition, and the boundaries between different conditions are often unclear, even to experts. For this reason, unsupervised and self-supervised learning methods are of particular interest for biomedical applications and will be the focus of this thesis.
+The primary components of supervised learning include a set of input-output pairs known as the training set.
+The goal is to find a function that approximates the relationship between the corresponding input and output variables.
+This function is then applied to new, unseen data to make predictions or decisions.
 
 \subsection{Unsupervised Learning}
 
-Unsupervised learning methods learn a mapping from inputs to outputs without any training targets. Unsupervised learning methods can be used to learn representations of the data that can be used for downstream tasks such as classification or regression. They can also be used as a way to discover relationships between the data, such as understanding the underlying structure of the data or finding correlations between different modalities of data. Some generative models can also be used to generate new data with similar characteristics to the training data.
+Unsupervised learning methods learn a mapping from inputs to outputs without any training targets.
+Unsupervised learning methods can be used to learn representations of the data that can be used for downstream tasks such as classification or regression.
+They can also be used as a way to discover relationships between the data, such as understanding the underlying structure of the data or finding correlations between different modalities of data.
+Some generative models can also be used to generate new data with similar characteristics to the training data.
 
-Perhaps the most well-known example of unsupervised learning is principal components analysis (PCA), which learns a mapping from inputs to outputs based on the directions of maximum variance in the data. PCA can be used to learn a low-dimensional representation of the data that captures the most variance in the data.
+Perhaps the most well-known example of unsupervised learning is principal components analysis (PCA), which learns a mapping from inputs to outputs based on the directions of maximum variance in the data.
+PCA can be used to learn a low-dimensional representation of the data that captures the most variance in the data.
 
 \subsection{Self-Supervised Learning}
 
-Self-supervised learning methods learn a mapping from inputs to outputs based on a training signal that is derived from the data itself. The transformer model behind the success of many Large Language Models (LLMs) such as BERT \cite{devlin2018bert} and GPT-3 \cite{brown2020language} is trained using a self-supervised learning method called masked language modelling. In masked language modelling, the model is trained to predict a masked word in a sentence based on the other words in the sentence. In this case it is clear that . Of closer relevance to this PhD thesis is work on self-supervised learning for computer vision tasks. In these methods, the model is trained to predict a patch of an image based on the other patches in the image.
+Self-supervised learning methods learn a mapping from inputs to outputs based on a training signal that is derived from the data itself.
+The transformer model behind the success of many Large Language Models (LLMs) such as BERT \cite{devlin2018bert} and GPT-3 \cite{brown2020language} is trained using a self-supervised learning method called masked language modelling.
+In masked language modelling, the model is trained to predict a masked word in a sentence based on the other words in the sentence.
+Of closer relevance to this PhD thesis is work on self-supervised learning for computer vision tasks.
+In these methods, the model is trained to predict a patch of an image based on the other patches in the image.
 
 Like unsupervised learning methods, self-supervised learning methods can be used to learn representations of the data that can be used for downstream tasks such as classification or regression.
 
@@ -33,18 +50,21 @@ Each source or modality is referred to as a view, and different views may provid
 Multiview learning methods can be used to generate robust low-dimensional representations for a downstream task such as classification or regression, or to discover relationships between views such as correlation or even causation.
 They been widely applied across a range of fields such as neuroimaging\cite{Krishnan2011}, finance\cite{cassel2000measurement}, Imaging Genetics\cite{Hansen2021}, to find associations between views in large datasets.
 
-Multiview machine learning methods can be interpreted as either unsupervised or self-supervised depending on the underlying assumptions about their data-generating process. Specifically, the presence of a shared latent variable can influence how we categorize these methods. This interpretation will have important implications for the methods that we consider in this thesis.
+Multiview machine learning methods can be interpreted as either unsupervised or self-supervised depending on the underlying assumptions about their data-generating process.
+Specifically, the presence of a shared latent variable can influence how we categorize these methods.
+This interpretation will have important implications for the methods that we consider in this thesis.
 
 \subsection{Unsupervised Multiview Machine Learning}
 In unsupervised multiview machine learning, the focus is typically on finding a shared representation that captures the essence of different views without making any assumptions about the nature of these views.
-The main idea here is that each view provides a different "angle" on the same object or phenomenon, but there is no explicit modeling of a shared latent variable that generates these views. Methods such as Canonical Correlation Analysis (CCA) aim to maximize the correlation between the different views in a common space but do not inherently posit that these views come from a single latent source.
+The main idea here is that each view provides a different `angle' on the same object or phenomenon, but there is no explicit modeling of a shared latent variable that generates these views.
+Methods such as Canonical Correlation Analysis (CCA) aim to maximize the correlation between the different views in a
+common space but do not inherently posit that these views come from a single latent source.
 
 \subsection{Self-Supervised Multiview Machine Learning}
 Self-supervised multiview machine learning, on the other hand, often assumes that the different views are generated from a common latent variable.
 In this sense, one can argue that the task of learning from multiview data becomes a form of self-supervised learning.
 
-It is important to note that the distinction between unsupervised and self-supervised learning is not always clear.
--cut.
+It is important to note that the distinction between unsupervised and self-supervised learning is not always clear-cut.
 In particular, we will argue that a number of classical subspace learning algorithms including Canonical Correlation
 Analysis (CCA) can be interpreted as both an unsupervised (learning associations between views) and a self-supervised (where the derived target is the subject) method depending on the context.
 
@@ -65,7 +85,8 @@ Later on we will introduce total number of samples $N$.
 \subsection{Principal Components Analysis}
 
 Principal Components Analysis (PCA)\cite{hotelling1933analysis} is a classical method in unsupervised machine learning for representation learning.
-It is widely used for dimensionality reduction and feature extraction. The primary goal of PCA is to transform the original high-dimensional data into a new coordinate system defined by orthogonal axes, capturing the most relevant aspects of the data.
+It is widely used for dimensionality reduction and feature extraction.
+The primary goal of PCA is to transform the original high-dimensional data into a new coordinate system defined by orthogonal axes, capturing the most relevant aspects of the data.
 
 \paragraph{Mathematical Formalism} In PCA, the representations are constrained to be linear transformations of the form:
 \begin{equation}\label{eq:pca-linear-function-def}
@@ -107,7 +128,7 @@ data, PCA's main limitation arises: it only accounts for variance within a singl
 
 \subsection{Partial Least Squares}
 
-Partial Least Squares (PLS)\cite{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as "views". PLS can be seen as a generalization of PCA, where PCA becomes a special case when the two views are identical. The optimization problem for PLS can be formulated as:
+Partial Least Squares (PLS)\cite{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as `views". PLS can be seen as a generalization of PCA, where PCA becomes a special case when the two views are identical. The optimization problem for PLS can be formulated as:
 
 \begin{align}
      u\sps{1}_{\text{opt}} &= \underset{u\sps{1}}{\mathrm{argmax}} \{ u\sps{1}_{1}^{\top} X\sps{1}^{\top} X\sps{2} u\sps{2} \} \\
@@ -259,9 +280,9 @@ This perspective unifies the two algorithms and shows that the core objective—
 \textbf{Multi-view CCA} is a straightforward extension of CCA to the case of 3-or more datasets.
 The optimization problem for MCCA can be stated as:
 \begin{align}
-     & u_{\text{opt}} = \underset{u}{\mathrm{argmax}} \sum_{i=1}^{m} \sum_{j=1, j \neq i}^{m} u^{i\top} X^{i\top} X^{j} u^{j} \\
+     & u_{\text{opt}} = \underset{u}{\mathrm{argmax}} \sum_{i=1}^{m} \sum_{j=1, j \neq i}^{m} u\sps{i\top} X\sps{i\top} X\sps{j} u\sps{j} \\
      & \text{subject to:} \notag \\
-     & \sum_{i=1}^{m} u^{i\top} X^{i\top} X^{i} u^{i} = 1 \notag
+     & \sum_{i=1}^{m} u\sps{i\top} X\sps{i\top} X\sps{i} u\sps{i} = 1 \notag
 \end{align}
 
 The generalized eigenvalue problem (GEP) can be written in matrix form as follows:
@@ -269,45 +290,42 @@ The generalized eigenvalue problem (GEP) can be written in matrix form as follow
 \begin{align}
     \mathbf{A} \mathbf{U} &= \lambda \mathbf{B} \mathbf{U} \\
     \mathbf{A} &= \begin{pmatrix}
-        \mathbf{0} & \Sigma^{12} & \cdots & \Sigma^{1m} \\
-        \Sigma^{21} & \mathbf{0} & \cdots & \Sigma^{2m} \\
+        \mathbf{0} & \Sigma\sps{12} & \cdots & \Sigma\sps{1m} \\
+        \Sigma\sps{21} & \mathbf{0} & \cdots & \Sigma\sps{2m} \\
         \vdots & \vdots & \ddots & \vdots \\
-        \Sigma^{m1} & \Sigma^{m2} & \cdots & \mathbf{0}
+        \Sigma\sps{m1} & \Sigma\sps{m2} & \cdots & \mathbf{0}
     \end{pmatrix}, \\
     \mathbf{B} &= \begin{pmatrix}
-        \Sigma^{11} & \mathbf{0} & \cdots & \mathbf{0} \\
-        \mathbf{0} & \Sigma^{22} & \cdots & \mathbf{0} \\
+        \Sigma\sps{11} & \mathbf{0} & \cdots & \mathbf{0} \\
+        \mathbf{0} & \Sigma\sps{22} & \cdots & \mathbf{0} \\
         \vdots & \vdots & \ddots & \vdots \\
-        \mathbf{0} & \mathbf{0} & \cdots & \Sigma^{mm}
+        \mathbf{0} & \mathbf{0} & \cdots & \Sigma\sps{mm}
     \end{pmatrix}, \\
     \mathbf{U} &= \begin{pmatrix}
-        u^{1} \\
-        u^{2} \\
+        u\sps{1} \\
+        u\sps{2} \\
         \vdots \\
-        u^{m}
+        u\sps{m}
     \end{pmatrix}.
 \end{align}
 
-
-Table \ref{tab:subspace} summarizes the definitions of $A$ and $B$ for different subspace learning methods.
-
-%table with PCA, LDA, CCA, PLS and their definitions of A and B e.g. PCA A=X'X B=I.
+% Table summarizing the definitions of A and B for various methods
 \begin{table}[h]
     \centering
     \begin{tabular}{|c|c|c|c|}
         \hline
-        Method & $A$                                                                                    & $B$                                                                & $W$                                    \\
+        Method & \( A \)                                                                                    & \( B \)                                                              & \( W \)                                  \\
         \hline
-        PCA    & $\Sigma_{XX}$                                                                          & $\mathbf{I}$                                                       & $\begin{pmatrix}W\end{pmatrix}$        \\
+        PCA    & \( \Sigma\sps{11} \)                                                                        & \( \mathbf{I} \)                                                     & \( W \)                                  \\
         \hline
-        LDA    & $\mathbf{S}_B$                                                                         & $\mathbf{S}_W$                                                     & $\begin{pmatrix}W\end{pmatrix}$        \\
+        LDA    & \( \mathbf{S}_B \)                                                                          & \( \mathbf{S}_W \)                                                   & \( W \)                                  \\
         \hline
-        CCA    & $\begin{pmatrix} \Sigma_{XX} & \Sigma_{XY} \\ \Sigma_{YX} & \Sigma_{YY} \end{pmatrix}$ & $\begin{pmatrix} \Sigma_{XX} & 0 \\ 0 & \Sigma_{YY} \end{pmatrix}$ & $\begin{pmatrix} U \\ V \end{pmatrix}$ \\
+        CCA    & \( \begin{pmatrix} \Sigma\sps{11} & \Sigma\sps{12} \\ \Sigma\sps{21} & \Sigma\sps{22} \end{pmatrix} \) & \( \begin{pmatrix} \Sigma\sps{11} & \mathbf{0} \\ \mathbf{0} & \Sigma\sps{22} \end{pmatrix} \) & \( \begin{pmatrix} U \\ V \end{pmatrix} \) \\
         \hline
-        PLS    & $\begin{pmatrix} 0 & \Sigma_{XY} \\ \Sigma_{YX} & 0 \end{pmatrix}$                     & $\mathbf{I}$                                                       & $\begin{pmatrix} U \\ V \end{pmatrix}$ \\
+        PLS    & \( \begin{pmatrix} \mathbf{0} & \Sigma\sps{12} \\ \Sigma\sps{21} & \mathbf{0} \end{pmatrix} \)       & \( \mathbf{I} \)                                                     & \( \begin{pmatrix} U \\ V \end{pmatrix} \) \\
         \hline
     \end{tabular}
-    \caption{Definitions of $A$ and $B$ for different subspace learning methods. $\mathbf{S}_B$ and $\mathbf{S}_W$ are the between and within class scatter matrices. With the exception of PLS, $\textbf{A}$ is always positive semi-definite.}
+    \caption{Definitions of \( A \) and \( B \) for different subspace learning methods. \( \mathbf{S}_B \) and \( \mathbf{S}_W \) are the between and within class scatter matrices. With the exception of PLS, \( \textbf{A} \) is always positive semi-definite.}
     \label{tab:subspace}
 \end{table}
 
@@ -328,117 +346,258 @@ Here, \(b\) denotes the size of the minibatch, and \(\mathbf{X}\sps{1} \in \math
 
 This dual perspective—considering both population and sample covariance matrices—enables a more robust and flexible approach to the methods discussed, bridging the gap between theoretical analysis and practical application.
 
-\section{Adding regularisation to CCA and PLS}
+\subsection{Subspaces vs Components}
 
-Regularised solutions to the CCA problem are desirable both to provide a solution in the case where the number of features, $p$ exceeds the number of observations, $n$ as well as to improve the robustness of the projections in the case where we expect noisy observations \cite{branco2005robust} and/or to produce sparse solutions for better interpretability \cite{parkhomenko2009sparse}.
+A consequence of the eigenvalue formulations of PCA, PLS, and CCA is that the solutions are in general not unique.
+In particular, the eigenvectors of the covariance matrices are only defined up to a sign.
+This means that the solutions to the eigenvalue problems are only unique up to a sign flip.
+This is not a problem for PCA since the signs of the eigenvectors are arbitrary and do not affect the variance of the projections.
+However, for PLS and CCA, the signs of the eigenvectors are important since they determine the direction of the projections.
+This means that the solutions to the eigenvalue problems are only unique up to a sign flip.
+This is not a problem for PCA since the signs of the eigenvectors are arbitrary and do not affect the variance of the projections.
+However, for PLS and CCA, the signs of the eigenvectors are important since they determine the direction of the projections.
 
-\subsection{Ridge regularisation}\label{sec:Regularised CCA}
+Perhaps more importantly, if any eigenvalues are repeated, then the eigenvectors are not even unique up to a sign flip
+but are instead only unique up to an orthogonal transformation.
+While in practice, we can assume that the eigenvalues are unique for a given sample, this can be problematic when comparing solutions across samples.
+Most obviously, when we use cross-validation for parameter tuning or model selection, small perturbations in the data
+can lead to large changes in the solution (components effectively `swapping' between folds).
 
-Vinod proposed the "Canonical Ridge" which combined the PLS and CCA constraints in a single constrained optimisation \cite{vinod1976canonical}:
+For this reason, in this thesis we take the view that the subspace perspective is more appropriate. We will typically
+consider either the top-$1$ or top-$k$ solutions to the eigenvalue problems for PCA, PLS, and CCA.
+
+\section{Open challenges in CCA}
+
+\subsection{Efficient Algorithms for High-Dimensional Data}
+
+The challenges of high-dimensional data often manifest when solving Generalized Eigenvalue Problems (GEPs) for Canonical Correlation Analysis (CCA). The computational burden of solving these problems becomes daunting as the number of features grows. To combat this issue, various efficient algorithms have been developed to reduce the complexity. In this section, we will explore some of these strategies.
+
+\subsubsection{PCA-CCA}
+
+One common approach is to first apply Principal Component Analysis (PCA) to each view separately and then employ CCA on the PCA-reduced views. When the number of features is greater than the number of samples, applying PCA beforehand ensures no loss of information. However, when the number of features is smaller, PCA becomes a lossy procedure, effectively acting as a form of regularization. This limits the CCA components to exist within the largest PCA components, thus adding an implicit constraint to the problem.
+
+\subsubsection{KCCA}
+
+Traditional methods like PCA and CCA are primarily limited to finding linear correlations between datasets. Kernel Canonical Correlation Analysis (KCCA) is a non-parametric alternative \cite{hardoon2004canonical}. The optimization problem for KCCA is expressed as:
 
 \begin{align}
-     & w_{opt}=\underset{w}{\mathrm{argmax}}\{\mathbf{w_1^{\top}X_1^{\top}X_2w_2}\}        \\
-     & \text{subject to:} \notag                                                           \\
-     & (1-\tau_1)\mathbf{w_1^{\top}X_1^{\top}X_1w_1}+\tau_1\mathbf{w_1^{\top}w_1}=1 \notag \\
-     & (1-\tau_2)\mathbf{w_2^{\top}X_2^{\top}X_2w_2}+\tau_2\mathbf{w_2^{\top}w_2}=1 \notag
+    & \bold{\alpha_{opt}}=\underset{\bold{\alpha_{opt}}}{\mathrm{argmax}}\{ \bold{\alpha_1^{\top}K_1^{\top}K_2\alpha_2}  \}\\
+    & \text{subject to:} \notag\\
+    & \bold{\alpha_1^{\top}K_1^{\top}K_1\alpha_1}=1 \notag\\
+    & \bold{\alpha_2^{\top}K_2^{\top}K_2\alpha_2}=1 \notag
 \end{align}
 
-Where $\tau_i$ is a mixing hyperparameter that makes the solution more or less CCA-like ($c_i=0$) or PLS-like ($c_i=1$) depending on the constraint. By once again forming the lagrangian and taking partial derivatives we have first order conditions:
+When dealing with high-dimensional data ($p>n$), KCCA provides an advantage because the kernel matrices $\bold{K_1}$ and $\bold{K_2}$ are $n \times n$ rather than $p \times p$, making the computational cost scale with the number of samples instead of the number of features.
+
+Regularization can also be added to avoid overfitting, as shown in the following formulation:
 
 \begin{align}
-     & \mathbf{X_1^{\top}X_2w_2} + \lambda_1((1-\tau_1)\mathbf{X_1^{\top}X_1w_1}+\tau_1\mathbf{w_1}-1)=0 \\
-     & \mathbf{X_2^{\top}X_1w_1} + \lambda_2((1-\tau_2)\mathbf{X_2^{\top}X_2w_2}+\tau_2\mathbf{w_2}-1)=0
+    & \bold{\alpha_{opt}}=\underset{\bold{\alpha_{opt}}}{\mathrm{argmax}}\{ \bold{\alpha_1^{\top}K_1^{\top}K_2\alpha_2}  \}\\
+    & \text{subject to:} \notag\\
+    & (1-c_1)\bold{\alpha_1^{\top}K_1^{\top}K_1\alpha_1}+c_1\bold{\alpha_1^{\top}K_1^{\top}K_1\alpha_1}=1 \notag\\
+    & (1-c_2)\bold{\alpha_2^{\top}K_2^{\top}K_2\alpha_2}+c_2\bold{\alpha_2^{\top}K_2^{\top}K_2\alpha_2}=1 \notag
+\end{align}
+
+Additionally, because KCCA is non-parametric, evaluating it on out-of-sample data necessitates access to all training data at test time, posing challenges for efficiency and scalability.
+
+\subsection{Regularisation for High-Dimensional and Structured Data}
+
+Regularised solutions to the CCA problem are desirable both to provide a solution in the case where the number of features, \( p \) exceeds the number of observations, \( n \) as well as to improve the robustness of the projections in the case where we expect noisy observations \cite{branco2005robust} and/or to produce sparse solutions for better interpretability \cite{parkhomenko2009sparse}.
+
+\subsection{Ridge regularisation}\label{subsec:ridge-regularisation}
+
+Vinod proposed the `Canonical Ridge' which combined the PLS and CCA constraints in a single constrained optimisation \cite{vinod1976canonical}:
+
+\begin{align}
+     & u\sps{1}_{\text{opt}} = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\sps{1}^\top X\sps{1}^\top X\sps{2} u\sps{2} \} \\
+     & \text{subject to:} \notag \\
+     & (1 - \tau_1) u\sps{1}^\top X\sps{1}^\top X\sps{1} u\sps{1} + \tau_1 u\sps{1}^\top u\sps{1} = 1 \notag \\
+     & (1 - \tau_2) u\sps{2}^\top X\sps{2}^\top X\sps{2} u\sps{2} + \tau_2 u\sps{2}^\top u\sps{2} = 1 \notag
+\end{align}
+
+Where \( \tau_i \) is a mixing hyperparameter that makes the solution more or less CCA-like (\( c_i = 0 \)) or PLS-like (\( c_i = 1 \)) depending on the constraint.
+By once again forming the Lagrangian and taking partial derivatives, we have the first-order conditions:
+
+\begin{align}
+    & X\sps{1}^\top X\sps{2} u\sps{2} + \lambda_1 ((1-\tau_1) X\sps{1}^\top X\sps{1} u\sps{1} + \tau_1 u\sps{1} - 1) = 0 \\
+    & X\sps{2}^\top X\sps{1} u\sps{1} + \lambda_2 ((1-\tau_2) X\sps{2}^\top X\sps{2} u\sps{2} + \tau_2 u\sps{2} - 1) = 0
 \end{align}
 
 And this gives us the eigenvalue problems \cite{rosipal2005overview}:
 
 \begin{align}
-     & ((1-\tau_1)\mathbf{X_1^{\top}X_1}+\tau_1I)^{-1}\mathbf{X_1^{\top}X_2}((1-\tau_2)\mathbf{X_2^{\top}X_2}+\tau_2I)^{-1}\mathbf{X_2^{\top}X_1w_1}=\lambda^2\mathbf{w_1} \notag \\
-     & ((1-\tau_2)\mathbf{X_2^{\top}X_2}+\tau_2I)^{-1}\mathbf{X_2^{\top}X_1}((1-\tau_1)\mathbf{X_1^{\top}X_1}+\tau_1I)^{-1}\mathbf{X_1^{\top}X_2w_2}=\lambda^2\mathbf{w_2}
+    & ((1-\tau_1) X\sps{1}^\top X\sps{1} + \tau_1 I)^{-1} X\sps{1}^\top X\sps{2} ((1-\tau_2) X\sps{2}^\top X\sps{2} + \tau_2 I)^{-1} X\sps{2}^\top X\sps{1} u\sps{1} = \lambda^2 u\sps{1} \notag \\
+    & ((1-\tau_2) X\sps{2}^\top X\sps{2} + \tau_2 I)^{-1} X\sps{2}^\top X\sps{1} ((1-\tau_1) X\sps{1}^\top X\sps{1} + \tau_1 I)^{-1} X\sps{1}^\top X\sps{2} u\sps{2} = \lambda^2 u\sps{2}
 \end{align}
 
-The main difference between this eigenvalue problem and the CCA eigenvalue problem is the substitution of the matrices $\mathbf{X_1^{\top}X_1}$ and $\mathbf{X_2^{\top}X_2}$ for the matrices $((1-\tau_1)\mathbf{X_1^{\top}X_1}+\tau_1I)$ and $((1-\tau_2)\mathbf{X_2^{\top}X_2}+\tau_2I)$. We can therefore see that this regularisation is equivalent to adding a constant to the diagonal of the covariance matrix $\mathbf{X_i^{\top}X_i}$. Hardoon showed that this form of regularisation can also be implemented using the kernel trick \cite{hardoon2004canonical}.
+The main difference between this eigenvalue problem and the CCA eigenvalue problem is the substitution of the matrices \(X\sps{1}^\top X\sps{1}\) and \(X\sps{2}^\top X\sps{2}\) for the matrices \( ((1-\tau_1) X\sps{1}^\top X\sps{1} + \tau_1 I) \) and \( ((1-\tau_2) X\sps{2}^\top X\sps{2} + \tau_2 I) \).
+We can therefore see that this regularisation is equivalent to adding a constant to the diagonal of the covariance matrix \(X\sps{i}^\top X\sps{i}\).
 
-\section{Multiple Effects, Orthogonality, and Deflation}\label{sec:orthogonality}
+\subsection{Sparse CCA}
 
-We have only explicitly referred to the vectors of weights that produce maximal variance or correlation so far in this report. However the eigendecomposition formulations of PCA, PLS, and CCA with multiple possible eigenvector and eigenvalue pairs implies that we are able to find more than one orthogonal effect when using all three methods. We refer respectively to the top-$1$ and top-$k$ PLS and CCA problems to distinguish these problems where $k$ refers to the number of effects we wish to find.
+Sparse CCA methods aim to find sparse vectors \(u\sps{1}\) and \(v\sps{2}\) that optimize the correlation while maintaining interpretability.
 
-While the SVD and eigendecomposition based methods are able to generate all of the latent dimensions at once, they require the inversion of the covariance matrices $\mathbf{\Sigma_{11}}$ and $\mathbf{\Sigma_{22}}$ and therefore for very large data have a high computational cost.
+\subsection{Sparse PLS: Penalized Matrix Decomposition}
 
-However when we use iterative methods we typically compute only the first (i.e. the maximally correlated/covarying effect). If we wish to find further effects, we must define a way to ensure that any other effects we find are different to the first (i.e. the maximally correlated/covarying effect). By a process of deflation we can remove a given effect from our data and repeat the process to find the next top correlated/covarying effect.
-
-To achieve this we need to project the data in a specific way based on orthogonality.
-
-\subsection{Orthogonality}
-
-In their (generalized) eigenvalue problem form, the definition of orthogonality in the PLS and CCA case is given implicitly. In the PLS case the generalized eigenvalue problem:
+Witten's Penalized Matrix Decomposition (PMD) \cite{witten2009penalized} provides an approximate solution to the sparse CCA problem by altering the constraints of the classical CCA formulation.
+Specifically, PMD replaces the constraint \(\bold{u\sps{1}\top X\sps{1}\top X\sps{1} u\sps{1}}=1\) with \(\bold{u\sps{1}\top u\sps{1}}=1\).
+The optimization problem for PMD is then given by:
 
 \begin{align}
-    \begin{pmatrix}
-        0                    & \mathbf{\Sigma_{12}} \\
-        \mathbf{\Sigma_{21}} & 0
-    \end{pmatrix}
-    \mathbf{w}
-    =
-    \lambda
-    \mathbf{w}
+    \label{eq:pmd}
+    & \bold{u\sps{opt}}=\underset{\bold{u}}{\mathrm{argmax}}\{ \bold{u\sps{1}\top X\sps{1}\top X\sps{2} v\sps{2}} \} \\
+    & \text{subject to:} \notag \\
+    & \bold{u\sps{1}\top u\sps{1}} \leq 1 \notag \\
+    & \bold{v\sps{2}\top v\sps{2}} \leq 1 \notag \\
+    & P(\bold{u\sps{1}}) \leq c_1 \notag \\
+    & P(\bold{v\sps{2}}) \leq c_2 \notag
 \end{align}
 
-Implies that the first component $\mathbf{w_1}$ and the second component $\mathbf{w_2}$ must have the relationship $\mathbf{w_{i_1}^{\top} w_{i_2}}=0$. In other words the weight vectors must be orthogonal.
+\subsection{Penalized CCA}
 
-In the CCA case, the generalized eigenvalue problem:
+Parkhomenko et al.\ \cite{parkhomenko2009sparse} also proposed a sparse CCA variant that operates directly on correlation matrices. Their optimization problem is formulated as:
 
 \begin{align}
-    \begin{pmatrix}
-        0                    & \mathbf{\Sigma_{12}} \\
-        \mathbf{\Sigma_{21}} & 0
-    \end{pmatrix}
-    \mathbf{w}
-    =
-    \lambda
-    \begin{pmatrix}
-        \mathbf{\Sigma_{11}} & 0                    \\
-        0                    & \mathbf{\Sigma_{22}}
-    \end{pmatrix}
-    \mathbf{w}
+    \label{eq:parkho}
+    & \bold{u\sps{opt}}=\underset{\bold{u}}{\mathrm{argmax}}\{ \bold{(X\sps{1}X\sps{1}\top)^{-\frac{1}{2}}X\sps{1}\top X\sps{2}(X\sps{2}\top X\sps{2})^{-\frac{1}{2}}} \}
 \end{align}
 
-Implies that the first component $\mathbf{w_1}$ and the second component $\mathbf{w_2}$ must have the relationship:
+\subsection{Iterative Penalized Least Squares}
+
+Some approaches to sparse CCA relate to alternating regression forms of CCA, such as sparse alternating regressions \cite{wilms2015sparse}. Mai et al.\ \cite{mai2019iterative} provided a proof that these methods can yield true global solutions to projection-length constrained lasso regression problems.
 
 \begin{align}
-    \mathbf{w_{i_1}^{\top}\begin{pmatrix}\mathbf{\Sigma_{11}} & 0 \\0 & \mathbf{\Sigma_{22}}
-                          \end{pmatrix}w^{(2)}}=0
+    \label{eq:mai}
+    & \bold{u}=\underset{\bold{u}}{\mathrm{argmin}}\{ \|\bold{Xu-y}\|^2_2 + P(\bold{u}) \} \\
+    & \text{subject to:} \notag \\
+    & \bold{u\sps{1}\top X\sps{1}\top X\sps{1} u\sps{1}}=1 \notag
 \end{align}
 
-which implies that the projections for each view $\mathbf{X_iw_i}$ are orthogonal.
+\paragraph{Sparse Diagonal CCA}
+\cite{asteris2016simple} propose a combinatorial algorithm for sparse diagonal CCA. Their algorithm operates on a low-rank approximation of the input data and scales linearly with the number of input variables.
+The algorithm precisely controls the sparsity of the extracted canonical vectors and offers data-dependent global approximation guarantees based on the spectrum of the input data.
 
-However for both CCA and PLS we could also define effects in different ways and indeed the PLS literature contains a number of variants\cite{hoskuldsson1988pls} \cite{wegelin2000survey}. When using iterative methods, we typically use a procedure known as deflation. The deflation step and initialisation of each inner loop forms an algorithmic "outer loop" while the "inner loop" finds the next largest component. There are two common methods for deflation for CCA and PLS described in the literature: Hotelling's deflation and projection deflation.
+Formally, they optimize the following problem:
 
-\subsection{Hotelling's Deflation}
-Hotelling's deflation ensures orthogonality of the weight vectors and is typically used for methods based on the power method for the SVD. Hotelling's deflation removes the covariance, $d$, associated with each set of weights:
+\begin{aligned}
+    \label{eq:asteris}
+    \max_{u\sps{1} \in U\sps{1}, u\sps{2} \in U\sps{2}} \quad & (u\sps{1})^{\top}\Sigma_{X\sps{1}X\sps{2}}u\sps{2} \\
+    \text{where } & U\sps{1} = \left\{ u\sps{1} \in \mathbb{R}^{m} : ||u\sps{1}||_2 = 1, ||u\sps{1}||_0 \leq s_x \right\}, \\
+    & U\sps{2} = \left\{ u\sps{2} \in \mathbb{R}^{n} : ||u\sps{2}||_2 = 1, ||u\sps{2}||_0 \leq s_y \right\},
+\end{aligned}
 
-\begin{align}
-     & d = \mathbf{w^{\top}_1X^{\top}_1X_2w_2}                                            \\
-     & \mathbf{\Sigma^{(i+1)}_{12}}= \mathbf{\Sigma^{(i)}_{12}} - d\mathbf{w_1w^{\top}_2}
-\end{align}
+Their approach balances between exhaustive search and thresholding methods by focusing on a principal subspace of the input matrix $\Sigma_{X\sps{1}X\sps{2}}$ spanned by its leading \( r \geq 1 \) singular vector pairs.
+This allows them to find an (approximately) optimal pair of supports without evaluating the entire set of possible supports, thus making it both efficient and parallelizable.
 
-Hotelling's deflation only ensures orthogonality of the respective weight vectors when $w_1$ and $w_2$ are true singular vectors. For this reason when the problem is regularised, Hotelling's deflation may be suboptimal.
+\subsection{Critical Commentary on Existing Methods}
 
-\subsection{Projection Deflation}
+While existing methods offer valuable insights into regularized Canonical Correlation Analysis, they also exhibit limitations that warrant further investigation.
+For instance, Witten's PMD, although influential, actually performs a Sparse PLS despite being initially framed as sparse CCA due to its identity covariance assumption. Penalized CCA \cite{parkhomenko2009sparse} has not gained as much traction, perhaps because it is difficult to control the level of sparsity due to the use of penalties rather than constraints.
+This issue is shared by the Iterative Penalized Least Squares (IPLS) approach, which also faces challenges in selecting appropriate regularization parameters.
+Moreover, solving the high-dimensional IPLS can be computationally expensive, particularly when multiple iterative steps are needed. Lastly, the sparse diagonal CCA by \cite{asteris2016simple} assumes diagonal covariance matrices, which limits its applicability in capturing more complex relationships between variables.
 
-Projection deflation projects each dataset into a subspace that is uncorrelated with its first respective projection. It is used to ensure that the projection vectors are orthogonal. This is the method used by Wold's NIPALS algorithm and is also refered to as mode-A deflation or CCA deflation \cite{mackey2009deflation}.
+These limitations collectively highlight the need for more flexible and interpretable models which are
+computationally efficient.
 
-With this method, the projection of each column of $\mathbf{X}$ in the direction $\mathbf{Xw}$ is equal to the cross-product of $\mathbf{Xw}$ with each column of $\mathbf{X}$ multiplied by the direction: $\frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}$.
+\section{Multiview Learning in Neuroimaging}
 
-\begin{align}
-     & P(\mathbf{X})= \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X}
-\end{align}
+There have been a number of applications of CCA and related methods to multiview problems in neuroimaging.
+Using resting state fMRI data, modes of correlation have been found that relate to differences in sex and age relating to drug and alcohol abuse, depression and self harm \cite{mihalik2019brain}.
+A similar mode relating to `positive-negative' wellbeing has been found across studies \cite{smith2015positive} suggesting that mental wellbeing has a relationship (though not necessarily causally) with functional connectivity between networks in the brain.
+Later in this dissertation we will replicate and build on the findings from this paper by using regularised and non-linear CCA methods.
 
-We can then find the residual of $\mathbf{X}$, the variance in $\mathbf{X}$  that is orthogonal to the first canonical projection. This ensures that the next set of score vectors will be orthogonal to the first.
+CCA has also been used as a preprocessing step in order to identify groups of subjects in the latent variable space.
+In particular, CCA and clustering have been used to identify depression using fMRI data \cite{dinga2019evaluating} \cite{drysdale2017resting}.
+CCA has also been used in the manner we described to denoise two views of a dataset such as separate measures of neuroimaging data \cite{zhuang2020technical} to remove artefacts.
+Deep CCA has recently been used to extract features for the diagnosis of schizophrenia \cite{qi2016deep}.
 
-\begin{align}
-     & P^\perp(\mathbf{X})= \mathbf{X} - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X} = (I - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top})X}
-\end{align}
+
+%\subsection{Deflation and Orthogonality}
+
+
+
+
+%
+%\section{Multiple Effects, Orthogonality, and Deflation}\label{sec:orthogonality}
+%
+%We have only explicitly referred to the vectors of weights that produce maximal variance or correlation so far in this report. However the eigendecomposition formulations of PCA, PLS, and CCA with multiple possible eigenvector and eigenvalue pairs implies that we are able to find more than one orthogonal effect when using all three methods. We refer respectively to the top-$1$ and top-$k$ PLS and CCA problems to distinguish these problems where $k$ refers to the number of effects we wish to find.
+%
+%While the SVD and eigendecomposition based methods are able to generate all of the latent dimensions at once, they require the inversion of the covariance matrices $\mathbf{\Sigma_{11}}$ and $\mathbf{\Sigma_{22}}$ and therefore for very large data have a high computational cost.
+%
+%However when we use iterative methods we typically compute only the first (i.e. the maximally correlated/covarying effect). If we wish to find further effects, we must define a way to ensure that any other effects we find are different to the first (i.e. the maximally correlated/covarying effect). By a process of deflation we can remove a given effect from our data and repeat the process to find the next top correlated/covarying effect.
+%
+%To achieve this we need to project the data in a specific way based on orthogonality.
+%
+%\subsection{Orthogonality}
+%
+%In their (generalized) eigenvalue problem form, the definition of orthogonality in the PLS and CCA case is given implicitly. In the PLS case the generalized eigenvalue problem:
+%
+%\begin{align}
+%    \begin{pmatrix}
+%        0                    & \mathbf{\Sigma_{12}} \\
+%        \mathbf{\Sigma_{21}} & 0
+%    \end{pmatrix}
+%    \mathbf{w}
+%    =
+%    \lambda
+%    \mathbf{w}
+%\end{align}
+%
+%Implies that the first component $\mathbf{w_1}$ and the second component $\mathbf{w_2}$ must have the relationship $\mathbf{w_{i_1}^{\top} w_{i_2}}=0$. In other words the weight vectors must be orthogonal.
+%
+%In the CCA case, the generalized eigenvalue problem:
+%
+%\begin{align}
+%    \begin{pmatrix}
+%        0                    & \mathbf{\Sigma_{12}} \\
+%        \mathbf{\Sigma_{21}} & 0
+%    \end{pmatrix}
+%    \mathbf{w}
+%    =
+%    \lambda
+%    \begin{pmatrix}
+%        \mathbf{\Sigma_{11}} & 0                    \\
+%        0                    & \mathbf{\Sigma_{22}}
+%    \end{pmatrix}
+%    \mathbf{w}
+%\end{align}
+%
+%Implies that the first component $\mathbf{w_1}$ and the second component $\mathbf{w_2}$ must have the relationship:
+%
+%\begin{align}
+%    \mathbf{w_{i_1}^{\top}\begin{pmatrix}\mathbf{\Sigma_{11}} & 0 \\0 & \mathbf{\Sigma_{22}}
+%                          \end{pmatrix}w^{(2)}}=0
+%\end{align}
+%
+%which implies that the projections for each view $\mathbf{X_iw_i}$ are orthogonal.
+%
+%However for both CCA and PLS we could also define effects in different ways and indeed the PLS literature contains a number of variants\cite{hoskuldsson1988pls} \cite{wegelin2000survey}. When using iterative methods, we typically use a procedure known as deflation. The deflation step and initialisation of each inner loop forms an algorithmic "outer loop" while the "inner loop" finds the next largest component. There are two common methods for deflation for CCA and PLS described in the literature: Hotelling's deflation and projection deflation.
+%
+%\subsection{Hotelling's Deflation}
+%Hotelling's deflation ensures orthogonality of the weight vectors and is typically used for methods based on the power method for the SVD. Hotelling's deflation removes the covariance, $d$, associated with each set of weights:
+%
+%\begin{align}
+%     & d = \mathbf{w^{\top}_1X^{\top}_1X_2w_2}                                            \\
+%     & \mathbf{\Sigma^{(i+1)}_{12}}= \mathbf{\Sigma^{(i)}_{12}} - d\mathbf{w_1w^{\top}_2}
+%\end{align}
+%
+%Hotelling's deflation only ensures orthogonality of the respective weight vectors when $w_1$ and $w_2$ are true singular vectors. For this reason when the problem is regularised, Hotelling's deflation may be suboptimal.
+%
+%\subsection{Projection Deflation}
+%
+%Projection deflation projects each dataset into a subspace that is uncorrelated with its first respective projection. It is used to ensure that the projection vectors are orthogonal. This is the method used by Wold's NIPALS algorithm and is also refered to as mode-A deflation or CCA deflation \cite{mackey2009deflation}.
+%
+%With this method, the projection of each column of $\mathbf{X}$ in the direction $\mathbf{Xw}$ is equal to the cross-product of $\mathbf{Xw}$ with each column of $\mathbf{X}$ multiplied by the direction: $\frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}$.
+%
+%\begin{align}
+%     & P(\mathbf{X})= \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X}
+%\end{align}
+%
+%We can then find the residual of $\mathbf{X}$, the variance in $\mathbf{X}$  that is orthogonal to the first canonical projection. This ensures that the next set of score vectors will be orthogonal to the first.
+%
+%\begin{align}
+%     & P^\perp(\mathbf{X})= \mathbf{X} - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X} = (I - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top})X}
+%\end{align}
 
 
 
