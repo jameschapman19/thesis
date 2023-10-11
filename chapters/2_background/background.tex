@@ -71,7 +71,7 @@ Analysis (CCA) can be interpreted as both an unsupervised (learning associations
 
 
 
-\section{Learning Representations}
+\section{Learning Representations: Definitions and Notation}
 
 Suppose we have a sequence of vector-valued random variables $X^{(i)} \in \R^{D_i}$ for $i \in \{1, \dots, I \}$
 We want to learn meaningful $K$-dimensional representations
@@ -85,13 +85,20 @@ $d \in [D_i]$ for dimensions of input variables;
 and $l,k \in [K]$ for dimensions of representations - i.e. to subscript dimensions of $Z\sps{i}, f\sps{i}$.
 Later on we will introduce total number of samples $N$.
 
+In this report, we will typically refer to $u_k$ as \textbf{weights}, $Z_k = X_k u_k$ as \textbf{representations},
+        \textbf{latent
+dimensions}, or \textbf{scores} depending on the context. We will sometimes consider the
+        matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of weights, and the
+        matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations. We will refer to $\mathbb{E
+        }[X_k^\top X_k] u_k$ as loadings.
+
 \subsection{Principal Components Analysis}
 
 Principal Components Analysis (PCA)\cite{hotelling1933analysis} is a classical method in unsupervised machine learning for representation learning.
 It is widely used for dimensionality reduction and feature extraction.
 The primary goal of PCA is to transform the original high-dimensional data into a new coordinate system defined by orthogonal axes, capturing the most relevant aspects of the data.
 
-\paragraph{Mathematical Formalism} In PCA, the representations are constrained to be linear transformations of the form:
+In PCA, the representations are constrained to be linear transformations of the form:
 \begin{equation}\label{eq:pca-linear-function-def}
     Z_k = X u_k,
 \end{equation}
@@ -99,9 +106,6 @@ where $u_k$ are the orthonormal basis vectors:
 \begin{equation}\label{eq:pca-orthonormality-constraint}
     u_k^\top u_l = \delta_{kl}.
 \end{equation}
-
-In this report, we will typically refer to $u_k$ as \textbf{weights}, $Z_k = X u_k$ as \textbf{representations},\textbf{latent
-dimensions}, or \textbf{scores} depending on the context. We will sometimes consider the matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of weights, and the matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations.
 
 The primary goal of PCA is to maximize the variance of the projections \(Z_k\). Mathematically, this can be formulated
 as:

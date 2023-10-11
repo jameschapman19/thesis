@@ -33,6 +33,69 @@ Our experimental results demonstrate that FRALS shows promise in terms of out-of
 
 Understanding the data generation process in Canonical Correlation Analysis (CCA) and Partial Least Squares (PLS) is pivotal for many reasons. It influences the choice of appropriate models, evaluation metrics, and sheds light on the underlying structure and dependencies between views. Probabilistic formulations provide a principled framework to understand this process, helping us gauge the assumptions we make and the limitations these impose.
 
+
+\subsection{Data Generation}\label{subsec:data-generation-background}
+
+There are a number of ways used in the Sparse CCA literature to generate synthetic data.
+
+\subsubsection{Simple Latent Variable Model}
+
+Witten\cite{witten2009extensions} used a generative model of the form defined by:
+
+\begin{align}\label{eq:wittengen}
+    & \bold{X_i}=\bold{z_kw_{ki}}+\epsilon
+\end{align}
+
+which we can represent as the graphical model in figure~\ref{fig:wittengraphical}.
+
+\begin{figure}
+\centering
+  \tikz{
+%nodes
+ \node[latent, align=center] (Z) {$Z$}; %
+ \node[obs, below left=of Z] (X_1) {$X_1$};%
+ \node[obs, below right=of Z] (X_2) {$X_2$};%
+ \node[latent,above left=of X_1,fill] (W_1) {$W_1$}; %
+ \node[latent,above right=of X_2,fill] (W_2) {$W_2$}; %
+ \node[latent,left=of X_1] (sigma_1) {$\sigma_1$}; %
+ \node[latent,right=of X_2] (sigma_2) {$\sigma_2$}; %
+% edges
+ \edge {W_1,Z,sigma_1} {X_1}
+ \edge {W_2,Z,sigma_2} {X_2}}
+ \caption[Sparse Data Generation Graphical Model]{\textit{\textbf{Sparse Data Generation Graphical Model: }}For the Witten data generation, we set the active variables with the matrices $W_i$ and therefore rescale the latent variable Z in those variables with zeros in the other variables. Z has standard normal distribution. We add gaussian noise parameterized by $\sigma$.}
+ \label{fig:wittengraphical}
+\end{figure}
+
+While this simple method directly controls the cross-covariance it doesn't control the within dataset covariance $\bold{\Sigma_{ii}}$.
+
+Indeed, by marginalising out the latent variables $\bold{Z}$ we can write down the joint distribution of the two views as:
+
+\begin{align}
+    \begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{0} \\ \bold{0} \end{bmatrix}, \begin{bmatrix} \bold{W_1W_1^T} + \sigma_1^2\bold{I} & \bold{W_1W_2^T} \\ \bold{W_2W_1^T} & \bold{W_2W_2^T} + \sigma_2^2\bold{I} \end{bmatrix} \right)
+\end{align}
+
+\subsubsection{Joint Covariance Matrix}
+Later papers in the sparse CCA literature such as~\cite{mai2019iterative,chen2013sparse} have constructed the covariance matrix as in figure~\ref{fig:covariance} and sampled from this multivariate normal distribution to give two simulated views with specified active variables, correlations and within-view covariance.
+This has the advantage of allowing us to control the within-view covariance and therefore test the methods under specific conditions.
+The process was first described by Chen~\cite{chen2013sparse} and further explained by~\cite{suo2017sparse}.
+
+We construct the joint distribution as follows:
+
+\begin{align}\label{eq:covariance}
+    \begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{0} \\ \bold{0} \end{bmatrix}, \begin{bmatrix} \bold{\Sigma_{11}} & \bold{\Sigma_{12}} \\ \bold{\Sigma_{21}} & \bold{\Sigma_{22}} \end{bmatrix} \right)
+\end{align}
+
+Where $\bold{\Sigma_{11}}$ and $\bold{\Sigma_{22}}$ are the within-view covariance matrices and $\bold{\Sigma_{12}}$ and $\bold{\Sigma_{21}}$ are the between-view covariance matrices.
+
+We can control the true signal by setting the active variables and correlations in the between-view covariance
+matrices $\bold{\Sigma_{12}}$ and $\bold{\Sigma_{21}}$. Specifically
+
+\begin{align}
+    \bold{\Sigma_{12}}=\sum_{k=1}^{K}\rho_k\Sigma_{11}u\sps{1}_ku\sps{2}_k^T\Sigma_{22}
+\end{align}
+
+Where $\rho_k$ is the $k$th canonical correlation and $u\sps{i}_k$ is the $k$th column of $\bold{U_i}$.
+
 \subsubsection{Probabilistic CCA}
 
 In Probabilistic CCA~\cite{bach2005probabilistic}, the generative model is articulated as a two-step process for each view \(i\):
@@ -56,6 +119,12 @@ Here, \(\mathbf{z}\) represents the latent variables shared between the differen
     \plate {} {(x1)(x2)} {Views}
 \end{tikzpicture}
 
+Once again, by marginalizing out the latent variables \(\mathbf{z}\), we can write down the joint distribution of the two views as:
+
+\begin{align}
+    \begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{\mu_1} \\ \bold{\mu_2} \end{bmatrix}, \begin{bmatrix} \bold{W_1W_1^T} + \bold{\Psi_1} & \bold{W_1W_2^T} \\ \bold{W_2W_1^T} & \bold{W_2W_2^T} + \bold{\Psi_2} \end{bmatrix} \right)
+\end{align}
+
 \subsubsection{Probabilistic rCCA}
 
 Probabilistic rCCA~\cite{de2003regularization} extends Probabilistic CCA by incorporating regularization directly into the covariance structure:
@@ -65,13 +134,54 @@ Probabilistic rCCA~\cite{de2003regularization} extends Probabilistic CCA by inco
     \mathbf{x}_i & \sim \mathcal{N}(\mathbf{W}_i \mathbf{z} + \boldsymbol{\mu}_i, \boldsymbol{\Psi}_i + \Sigma_i^2)
 \end{align}
 
-Here, \(\Sigma_i^2\) is a diagonal matrix that models measurement noise. This addition allows the model to be more robust to overfitting and other data challenges.
+Here, \(\Sigma_i^2\) is a diagonal matrix that models measurement noise. This addition allows the model to be more
+robust to overfitting and other data challenges. This gives us the following joint distribution:
+
+\begin{align}
+    \begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{\mu_1} \\ \bold{\mu_2} \end{bmatrix}, \begin{bmatrix} \bold{W_1W_1^T} + \bold{\Psi_1} + \bold{\Sigma_1^2} & \bold{W_1W_2^T} \\ \bold{W_2W_1^T} & \bold{W_2W_2^T} + \bold{\Psi_2} + \bold{\Sigma_2^2} \end{bmatrix} \right)
+\end{align}
 
 \subsubsection{Probabilistic PLS}
 
 Probabilistic formulations of PLS are still an evolving field \cite{el2018probabilistic,zheng2016probabilistic}.
 Despite various models for PLS regression, a canonical probabilistic model for Canonical PLS remains elusive.
-We will address this gap in our contributions.
+
+\subsection{Summary of Data Generation Methods}
+
+\begin{table}[h]
+    \centering
+    \caption{Summary of Data Generation Methods}
+    \begin{tabular}{l|l|l|l}
+        \textbf{Method} & \textbf{Within-View Covariance} & \textbf{Between-View Covariance} & \textbf{Active
+        Variables} \\
+        \hline
+        Witten           & No                              & No                               & No                        \\
+        Covariance       & Yes                             & Yes                              & Yes                       \\
+        Probabilistic CCA & Yes                             & Yes                              & Yes                       \\
+        Probabilistic rCCA & Yes                             & Yes                              & Yes                       \\
+    \end{tabular}
+    \label{table:data-generation-methods-properties}
+\end{table}
+
+% table with the joint covariance matrix for each method
+
+\begin{table}[h]
+    \centering
+    \caption{Summary of Data Generation Methods}
+    \begin{tabular}{l|l|l|l}
+        \textbf{Method} & \textbf{Joint Covariance}  \\
+        \hline
+        Witten&\(\begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{0} \\ \bold{0} \end{bmatrix}, \begin{bmatrix} \bold{W_1W_1^T} + \sigma_1^2\bold{I} & \bold{W_1W_2^T} \\ \bold{W_2W_1^T} & \bold{W_2W_2^T} + \sigma_2^2\bold{I} \end{bmatrix} \right)\)\\
+        Covariance&\(\begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{0} \\ \bold{0} \end{bmatrix}, \begin{bmatrix} \bold{\Sigma_{11}} & \bold{\Sigma_{12}} \\ \bold{\Sigma_{21}} & \bold{\Sigma_{22}} \end{bmatrix} \right)\)\\
+        Probabilistic CCA&\(\begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{\mu_1} \\ \bold{\mu_2} \end{bmatrix}, \begin{bmatrix} \bold{W_1W_1^T} + \bold{\Psi_1} & \bold{W_1W_2^T} \\ \bold{W_2W_1^T} & \bold{W_2W_2^T} + \bold{\Psi_2} \end{bmatrix} \right)\)\\
+        Probabilistic rCCA&\(\begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{\mu_1} \\ \bold{\mu_2} \end{bmatrix}, \begin{bmatrix} \bold{W_1W_1^T} + \bold{\Psi_1} + \bold{\Sigma_1^2} & \bold{W_1W_2^T} \\ \bold{W_2W_1^T} & \bold{W_2W_2^T} + \bold{\Psi_2} + \bold{\Sigma_2^2} \end{bmatrix} \right)\)\\
+    \end{tabular}
+    \label{table:data-generation-methods}
+\end{table}
+
+\section{Our contribution: Clarifying the use of weights and loadings in CCA}\label{sec:our-contribution:-clarifying-the-use-of-weights-and-loadings-in-cca}
+
+Our first contribution is to clarify the use and intepretation of weights and loadings in CCA.
 
 \subsection{Forward and Backward Models}
 
@@ -86,7 +196,8 @@ generate data from the latent variables $\bold{Z}$.
 
 \subsection{Why is this important?}
 
-If we are solely interested in the latent variables $\boldsymbol{Z}$, then the backward models described in chapter \ref{chap:background} suffice for inferring them from the data. However, if we aim for a comprehensive understanding and interpretability of the model, it becomes vital to understand both forward and backward formulations.
+If we are solely interested in the latent variables $\boldsymbol{Z}$, then the backward models described in chapter \ref{chap:background} suffice for inferring them from the data.
+However, if we aim for a comprehensive understanding and interpretability of the model, it becomes vital to understand both forward and backward formulations.
 
 Consider the probabilistic CCA model described in section \ref{subsec:probabilistic-cca-rcca-and-pls}, but with concrete names for the latent variables and views. Let's take figure \ref{fig:mentalhealthselfsupervised} as an example where the latent variable represents the severity of a mental health condition, and the views (neuroimaging and behavioral data) are conditioned on this latent variable.
 
@@ -105,11 +216,13 @@ Consider the probabilistic CCA model described in section \ref{subsec:probabilis
     \caption[Latent Variable Model of Mental Health]{\textit{\textbf{Latent Variable Model of Mental Health:}} From this perspective the neuroimaging modality and behavioural data are both considered to have been generated with distributions conditioned on the severity of a mental health condition}\label{fig:mentalhealthselfsupervised}
 \end{figure}
 
-In both the forward and backward models of CCA, the latent variables are of interest and are mathematically identifiable (up to a rotation), meaning that although they may be represented differently, they capture the same underlying structure. However, their conceptual implications differ between the two models. In the forward model, the weights indicate how the latent variables influence the generation of the views. Conversely, in the backward model, the weights help us best predict or reconstruct the latent variables from the data.
+In both the forward and backward models of CCA, the latent variables are of interest and are mathematically identifiable (up to a rotation), meaning that although they may be represented differently, they capture the same underlying structure.
+However, their conceptual implications differ between the two models.
+In the forward model, the weights indicate how the latent variables influence the generation of the views.
+Conversely, in the backward model, the weights help us best predict or reconstruct the latent variables from the data.
 
-\subsection{What is the relationship between the forward and backward weights?}
-
-Both the forward and backward models of CCA give analytical forms for the joint covariance matrix of the views.
+One of our primary contributions in this work is shedding light on the intricate relationship between the forward and backward models of CCA, particularly with regard to the weights involved.
+Both the forward and backward models provide analytical forms for the joint covariance matrix of the views:
 
 \begin{align}
     \Sigma &= \begin{bmatrix}
@@ -121,117 +234,33 @@ Both the forward and backward models of CCA give analytical forms for the joint 
     \end{bmatrix}
 \end{align}
 
-Where $\rho_k$ is the $k$th canonical correlation and $u_{i_k}$ is the $k$th column of $\bold{U_i}$.
+Here, $\rho_k$ represents the $k$th canonical correlation, and $u_{i_k}$ denotes the $k$th column of $\bold{U_i}$.
 
-By examining the joint covariance matrix we can see that the weights in the forward model are related to the weights in the backward model by:
+Our crucial insight lies in the relationship between the weights of the forward and backward models, which can be expressed as:
 
 \begin{align}
     \bold{W_1W_2^T} &= \bold{\Sigma_1}\sum_k \rho_k u_{1_k}^\top u_{2_k} \bold{\Sigma_2}
 \end{align}
 
-For a single latent variable, we therefore have:
+For a single latent variable, this leads to the following relationships:
 
 \begin{align}
     \bold{w_1} &= p_1\bold{\Sigma_1} u_{1_1}^\top \\
     \bold{w_2} &= p_2\bold{\Sigma_2} u_{2_1}^\top
 \end{align}
 
-Where $p_i$ is a scalar constant and $\prod_i p_i = \rho$. Notice that the weights in the backward model are scaled
-by the covariance matrices $\bold{\Sigma_i}$ so this is almost exactly the same definition as loadings.
+Here, $p_i$ represents scalar constants, and it's important to note that the product of these constants, $\prod_i p_i$ equals $\rho$.
+Interestingly, this relationship highlights that the weights in the backward model are scaled by the covariance matrices $\bold{\Sigma_i}$, making them closely akin to loadings.
 
-Note that weights in forward and backward models are the same (up to scaling by $p$) if the covariance matrices are identity matrices.
-Further note that sparse weights do not in general imply sparse loadings and vice versa (unless the covariance matrices are identity matrices).
+It's worth noting that this revelation underscores the significance of covariance matrices in determining the relationships between forward and backward weights.
+Specifically, when the covariance matrices are identity matrices, the forward and backward weights become identical (up to scaling by $p$).
+Furthermore, it's important to recognize that sparse weights do not necessarily imply sparse loadings and vice versa, unless the covariance matrices themselves are identity matrices.
 
-\subsection{Data Generation}\label{subsec:data-generation-background}
+We explore this relationship using simulated data in section \ref{sec:exp1}.
 
-There are a number of ways used in the Sparse CCA literature to generate synthetic data.
-Witten\cite{witten2009extensions} used a generative model of the form defined by:
+\section{Experiment 1: Weights vs Loadings}\label{sec:exp1}
 
-\begin{align}\label{eq:wittengen}
-    & \bold{X_i}=\bold{z_kw_{ki}}+\epsilon
-\end{align}
-
-which we can represent as the graphical model in figure~\ref{fig:wittengraphical}.
-
-While this simple method directly controls the cross-covariance it doesn't control the within dataset covariance $\bold{\Sigma_{ii}}$.
-Later papers in the sparse CCA literature such as~\cite{mai2019iterative,chen2013sparse} have constructed the covariance matrix as in figure~\ref{fig:covariance} and sampled from this multivariate normal distribution to give two simulated views with specified active variables, correlations and within-view covariance.
-This has the advantage of allowing us to control the within-view covariance and therefore test the methods under specific conditions.
-The process was first described by Chen~\cite{chen2013sparse} and further explained by~\cite{suo2017sparse}.
-
-
-\section{A generative model for canonical PLS}\label{subsec:a-generative-model-for-canonical-pls}
-
-Our first contribution is to show that the data generation process described in~\cite{witten2009extensions} actually
-allows us to define a probabilistic model for latent variable PLS. The data generation process in equation \ref{eq
-:wittengen} is equivalent to the graphical model in figure~\ref{fig:wittengraphical}.
-
-\begin{figure}
-\centering
-  \tikz{
-%nodes
- \node[latent, align=center] (Z) {$Z$}; %
- \node[obs, below left=of Z] (X_1) {$X_1$};%
- \node[obs, below right=of Z] (X_2) {$X_2$};%
- \node[latent,above left=of X_1,fill] (W_1) {$W_1$}; %
- \node[latent,above right=of X_2,fill] (W_2) {$W_2$}; %
- \node[latent,left=of X_1] (sigma_1) {$\sigma_1$}; %
- \node[latent,right=of X_2] (sigma_2) {$\sigma_2$}; %
-% edges
- \edge {W_1,Z,sigma_1} {X_1}
- \edge {W_2,Z,sigma_2} {X_2}}
- \caption[Sparse Data Generation Graphical Model]{\textit{\textbf{Sparse Data Generation Graphical Model: }}For the Witten data generation, we set the active variables with the matrices $W_i$ and therefore rescale the latent variable Z in those variables with zeros in the other variables. Z has standard normal distribution. We add gaussian noise parameterized by $\sigma$.}
- \label{fig:wittengraphical}
-\end{figure}
-
-By marginalizing out the latent variable $Z$ we can write down the joint distribution of the two views as:
-
-\begin{align}
-    p(X_1,X_2) &= \int p(X_1,X_2,Z) dZ \\
-    &= \int p(X_1|Z)p(X_2|Z)p(Z) dZ \\
-    &= \int \mathcal{N}(X_1|W_1Z,\sigma_1^2) \mathcal{N}(X_2|W_2Z,\sigma_2^2) \mathcal{N}(Z|0,1) dZ
-\end{align}
-
-Which means the joint covariance matrix is given by:
-
-\begin{align}
-    \Sigma &= \begin{bmatrix}
-        W_1W_1^T + \sigma_1^2I & W_1W_2^T \\
-        W_2W_1^T & W_2W_2^T + \sigma_2^2I
-    \end{bmatrix}
-\end{align}
-
-Where analagously to probabilistic PCA\cite{tipping1999probabilistic}, we recover PLS by setting $\sigma_1^2 = \sigma
-_2^2 = 0$.
-To the best of our knowledge, this is the first probabilistic model for the canonical PLS models described in this
-thesis.
-
-% Likelihood Function
-\begin{align*}
-\mathcal{L}(W_1, W_2 | X_1, X_2) &= \prod_{i=1}^{N} p(\mathbf{x}_{1i}, \mathbf{x}_{2i}) \\
-&= \prod_{i=1}^{N} \frac{1}{(2\pi)^{d/2} |C|^{1/2}} \exp \left( -\frac{1}{2} (\mathbf{x}_i - \boldsymbol{\mu})^T C^{-1} (\mathbf{x}_i - \boldsymbol{\mu}) \right)
-\end{align*}
-
-% Log-Likelihood Function
-\begin{align*}
-\log \mathcal{L}(W_1, W_2 | X_1, X_2) &= -\frac{Nd}{2} \log(2\pi) - \frac{N}{2} \log |C| - \frac{1}{2} \sum_{i=1}^{N} (\mathbf{x}_i - \boldsymbol{\mu})^T C^{-1} (\mathbf{x}_i - \boldsymbol{\mu})
-\end{align*}
-
-% Optimization
-\begin{align*}
-W_1^*, W_2^* = \arg\max_{W_1, W_2} \log \mathcal{L}(W_1, W_2 | X_1, X_2)
-\end{align*}
-
-% Sample covariance
-\begin{align*}
-S &= \frac{1}{N} \sum_{i=1}^N (\mathbf{x}_i - \boldsymbol{\mu})(\mathbf{x}_i - \boldsymbol{\mu})^T
-\end{align*}
-
-% Relate C and S
-Note that in practice, \( C \) would often be estimated as the sample covariance matrix \( S \) which would then be factorized to obtain \( W_1 \) and \( W_2 \).
-
-
-
-\subsection{}
+The two methods we have described for generating simulated data
 
 \section{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least-squares-(frals)}
 We adopt an alternating minimization strategy to solve the CCA problem.
@@ -260,7 +289,7 @@ This means that \textbf{any regularized least squares solver} can be used to sol
 \end{gather*}
 
 
-\section{Experiment 1: Simulated Data Evaluation}\label{subsec:exp1}
+\section{Experiment 2: Simulated Data Evaluation}\label{subsec:exp1}
 
 In this experiment, we evaluate several Sparse Canonical Correlation Analysis (CCA) variants using synthetic data generated with the FRALS framework.
 
@@ -276,13 +305,16 @@ While it provides flexibility in handling different types of data, it may not al
 
 \subsubsection{Simulated Data Generation}\label{subsubsec:simulated-data-generation}
 
-In this experiment, we evaluate several Sparse Canonical Correlation Analysis (CCA) variants using synthetic data generated with the FRALS framework. Two of these variants, IPLS+ and ElasticNet, are implemented within the FRALS framework for added flexibility.
+In this experiment, we evaluate several Sparse Canonical Correlation Analysis (CCA) variants using synthetic data generated with the FRALS framework.
+Two of these variants, IPLS+ and ElasticNet, are implemented within the FRALS framework for added flexibility.
 
-Therefore, we anticipate that IPLS+ may outperform ElasticNet due to its alignment with the prior assumptions about data generation. This experiment aims to validate this intuition by comparing the performance of these models and others.
+Therefore, we anticipate that IPLS+ may outperform ElasticNet due to its alignment with the prior assumptions about data generation.
+This experiment aims to validate this intuition by comparing the performance of these models and others.
 
 \subsubsection{Methodology}
 
-To carry out the experiment, we leverage the CCA-Zoo Python package. The synthetic data is generated using the \texttt{LinearSimulatedData} class from the package, with parameters set to emulate a high-dimensional feature space.
+To carry out the experiment, we leverage the CCA-Zoo Python package.
+The synthetic data is generated using the \texttt{LinearSimulatedData} class from the package, with parameters set to emulate a high-dimensional feature space.
 
 \begin{table}[h]
 \centering
