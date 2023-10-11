@@ -124,12 +124,14 @@ These estimates will then be low rank; indeed we can factorise these estimates i
     \end{algorithmic}
 \end{algorithm}
 
-\section{Experiments and Results}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Stochastic CCA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experiment 1: Application of CCA-EY to stochastic CCA}
+
+\subsection{Set-up}
+
+
 
 \subsubsection{Data}
 \textbf{Mediamill}: The MediaMill dataset \cite{feng2004context} is a benchmark dataset for multilabel classification
@@ -140,6 +142,9 @@ of 1200 video clips from the TRECVID 2003 conference, each annotated with 101 la
 classes, with 6000 images per class. There are 50,000 training images and 10,000 test images. We split the images into two halves.
 
 In this section, we compare GEP-GD and CCA-SVD to $\gamma$-EigenGame \cite{gemp2022generalized} and SGHA \cite{chen2019constrained} for approximating CCA in the stochastic setting. Replicating the experiment in \cite{meng2021online, gemp2022generalized}, we optimize for the top-4 CCA subspace for the MediaMill and Split CIFAR (left and right halves of CIFAR-10 images) datasets. We use a minibatch size 100 and train for one epoch across 5 random seeds (with 1 standard deviation error bars in the plots). We use the Scipy \cite{virtanen2020scipy} package to solve the full batch GEPs as a ground truth value and use the proportion of correlation captured (PCC) captured by the learnt subspace as compared to this ground truth (defined in supplement \ref{supp:experimental details}). Unlike \cite{gemp2022generalized}, we do not perform PCA on the data before applying the CCA methods but instead, for the MNIST data, we add gaussian noise to avoid zero variance subspaces in $X$ and $Y$. This makes our task more challenging, as performing PCA simplifies the problem by substituting $B$ for the identity matrix $I$. This explains the decrease in performance of $\gamma$-EigenGame as compared to their original work.
+
+
+\subsection{Results}
 
 Figure \ref{fig:ccaiter} shows that both of our methods outperform SGHA and $\gamma$-EigenGame on both datasets in terms of speed of convergence and achieve near-optimal performance in terms of PCC after just one epoch. All of the algorithms share the same complexity per iteration so that these results are also representative in terms of runtime. This demonstrates the effectiveness and superiority of our method for solving CCA in the stochastic setting.
 
@@ -161,12 +166,7 @@ Figure \ref{fig:ccaiter} shows that both of our methods outperform SGHA and $\ga
     \label{fig: stochasticcca}
 \end{figure}
 
-\subsection{Stochastic CCA Minibatch Size}
-
-\subsection{Exploration of Stochastic CCA Minibatch Size}
-
-\subsection{Stochastic CCA Minibatch Size Examination}
-
+\subsubsection{Stochastic CCA Minibatch Size}
 In this section, we take a closer look at how minibatch sizes impact the performance of our method in the stochastic CCA setting. We maintain a constraint of single epoch training. This means that when we use smaller minibatches, the number of training steps increases correspondingly.
 
 Our experiments, as displayed in Figure \ref{fig:minibatch size ablation}, show that our method performs well across a range of minibatch sizes. Notably, it achieves high performance even when the minibatch size is nearly equivalent to the number of components.
@@ -191,11 +191,15 @@ This indicates that our method can learn effectively from a limited number of sa
     \label{fig:minibatch size ablation}
 \end{figure}
 
+\subsection{Discussion}
+
 
 
 %Stochastic PLS UKBB
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experiment 2: Application of PLS-EY to PLS on large scale biomedical data}
+
+\subsection{Set-up}
 
 \subsection{Data}
 \textbf{The UK Biobank}: is arguably the largest scale biomedical database in the world with around half a
@@ -236,7 +240,9 @@ We found that the PLS brain subspace was associated with genetic risk measures f
 \end{figure}
 
 
-\section{Discussion and Conclusion}
+\subsection{Discussion and Conclusion}
+
+\section{Conclusion}
 
 We presented a new unconstrained objective to characterise GEPs; this immediately gave efficient algorithms to solve many subspace learning methods in the stochastic setting with SGD.
 Crucially, the gradient estimates are unbiased and cheap to compute.
