@@ -1,0 +1,52 @@
+%\section{A generative model for canonical PLS}\label{subsec:a-generative-model-for-canonical-pls}
+%
+%Our first contribution is to show that the data generation process described in~\cite{witten2009extensions} actually
+%allows us to define a probabilistic model for latent variable PLS. The data generation process in equation \ref{eq
+%:wittengen} is equivalent to the graphical model in figure~\ref{fig:wittengraphical}.
+%
+%
+%By marginalizing out the latent variable $Z$ we can write down the joint distribution of the two views as:
+%
+%\begin{align}
+%    p(X_1,X_2) &= \int p(X_1,X_2,Z) dZ \\
+%    &= \int p(X_1|Z)p(X_2|Z)p(Z) dZ \\
+%    &= \int \mathcal{N}(X_1|W_1Z,\sigma_1^2) \mathcal{N}(X_2|W_2Z,\sigma_2^2) \mathcal{N}(Z|0,1) dZ
+%\end{align}
+%
+%Which means the joint covariance matrix is given by:
+%
+%\begin{align}
+%    \Sigma &= \begin{bmatrix}
+%        W_1W_1^T + \sigma_1^2I & W_1W_2^T \\
+%        W_2W_1^T & W_2W_2^T + \sigma_2^2I
+%    \end{bmatrix}
+%\end{align}
+%
+%Where analagously to probabilistic PCA\cite{tipping1999probabilistic}, we recover PLS by setting $\sigma_1^2 = \sigma
+%_2^2 = 0$.
+%To the best of our knowledge, this is the first probabilistic model for the canonical PLS models described in this
+%thesis.
+%
+%% Likelihood Function
+%\begin{align*}
+%\mathcal{L}(W_1, W_2 | X_1, X_2) &= \prod_{i=1}^{N} p(\mathbf{x}_{1i}, \mathbf{x}_{2i}) \\
+%&= \prod_{i=1}^{N} \frac{1}{(2\pi)^{d/2} |C|^{1/2}} \exp \left( -\frac{1}{2} (\mathbf{x}_i - \boldsymbol{\mu})^T C^{-1} (\mathbf{x}_i - \boldsymbol{\mu}) \right)
+%\end{align*}
+%
+%% Log-Likelihood Function
+%\begin{align*}
+%\log \mathcal{L}(W_1, W_2 | X_1, X_2) &= -\frac{Nd}{2} \log(2\pi) - \frac{N}{2} \log |C| - \frac{1}{2} \sum_{i=1}^{N} (\mathbf{x}_i - \boldsymbol{\mu})^T C^{-1} (\mathbf{x}_i - \boldsymbol{\mu})
+%\end{align*}
+%
+%% Optimization
+%\begin{align*}
+%W_1^*, W_2^* = \arg\max_{W_1, W_2} \log \mathcal{L}(W_1, W_2 | X_1, X_2)
+%\end{align*}
+%
+%% Sample covariance
+%\begin{align*}
+%S &= \frac{1}{N} \sum_{i=1}^N (\mathbf{x}_i - \boldsymbol{\mu})(\mathbf{x}_i - \boldsymbol{\mu})^T
+%\end{align*}
+%
+%% Relate C and S
+%Note that in practice, \( C \) would often be estimated as the sample covariance matrix \( S \) which would then be factorized to obtain \( W_1 \) and \( W_2 \).

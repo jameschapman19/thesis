@@ -2,74 +2,72 @@
 \label{chap:background}
 \minitoc
 
-\section{Machine Learning}
-Machine learning is a subfield of computer science that automates the process of data analysis, enabling systems to learn from data and make decisions without being explicitly programmed.
-It is a cornerstone of modern artificial intelligence, offering a set of tools that extends far beyond traditional statistical methods.
-These automated methods are used in a myriad of applications, from filtering spam emails to making medical diagnoses and powering self-driving cars.
+\chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}
+\label{chap:background}
+\minitoc
 
-This field is generally divided into three primary categories: supervised, unsupervised, and reinforcement learning.
-Each of these paradigms is suited to a different type of problem, and the choice of approach often depends on the type and amount of data available.
-This thesis will focus on a specialized area of machine learning known as `multiview machine learning," which deals with data sets that contain multiple types or `views" of information.
+\section{Introduction to Machine Learning and Multiview Learning}
 
-\subsection{Supervised Learning}
+Machine learning automates data analysis, allowing models to learn patterns and make decisions. It is divided into three primary paradigms: supervised, unsupervised, and reinforcement learning. This thesis focuses on \textit{multiview machine learning}, a specialized domain dealing with data that contain multiple `views' or types of information. 
 
-Supervised learning is a machine learning paradigm where the algorithm learns from labeled training data, and makes predictions or decisions based on that data.
-This type of learning allows for the mapping of input data to output labels, essentially using annotated examples to discern how to generalize to unseen data.
-A classic example of supervised learning is a spam email filter, where a model is trained on a dataset of emails labeled as 'spam' or 'not spam', and the task is to classify new, incoming emails into one of these categories.
+\subsection{The Focus of Multiview Learning}
 
-The primary components of supervised learning include a set of input-output pairs known as the training set.
-The goal is to find a function that approximates the relationship between the corresponding input and output variables.
-This function is then applied to new, unseen data to make predictions or decisions.
+Multiview learning is concerned with learning robust representations and identifying associations between different views. For example, in representing a person, the face image, voice, text, and gesture could be different views. These methods can be categorized as either unsupervised or self-supervised based on their goals and assumptions about the data-generating process.
 
-\subsection{Unsupervised Learning}
+\subsection{Machine Learning Vs Statistical Inference}
+Machine learning aims to optimize out-of-sample performance, typically measured on a designated test set that the algorithm has never seen before. This emphasis on generalization to new, unseen data distinguishes it from statistical inference, where the primary concern is parameter estimation within a given sample, and hypothesis testing to infer population parameters.
 
-Unsupervised learning methods learn a mapping from inputs to outputs without any training targets.
-Unsupervised learning methods can be used to learn representations of the data that can be used for downstream tasks such as classification or regression.
-They can also be used as a way to discover relationships between the data, such as understanding the underlying structure of the data or finding correlations between different modalities of data.
-Some generative models can also be used to generate new data with similar characteristics to the training data.
+\subsubsection{Training, Validation, and Test Sets}
 
-Perhaps the most well-known example of unsupervised learning is principal components analysis (PCA), which learns a mapping from inputs to outputs based on the directions of maximum variance in the data.
-PCA can be used to learn a low-dimensional representation of the data that captures the most variance in the data.
+In machine learning, a dataset is often divided into three subsets: the training set, the validation set, and the test set. The training set is used to train the model; the validation set is used to fine-tune model parameters and for hyperparameter tuning; and the test set serves to evaluate the model's generalization performance. 
 
-\subsection{Self-Supervised Learning}
+\subsubsection{Cross-Validation}
 
-Self-supervised learning methods learn a mapping from inputs to outputs based on a training signal that is derived from the data itself.
-The transformer model behind the success of many Large Language Models (LLMs) such as BERT \cite{devlin2018bert} and GPT-3 \cite{brown2020language} is trained using a self-supervised learning method called masked language modelling.
-In masked language modelling, the model is trained to predict a masked word in a sentence based on the other words in the sentence.
-Of closer relevance to this PhD thesis is work on self-supervised learning for computer vision tasks.
-In these methods, the model is trained to predict a patch of an image based on the other patches in the image.
+Cross-validation is a technique used to assess the generalizability of the model by partitioning the original training dataset into a set of smaller train and test subsets. The model is trained on each combination of these subsets and validated on the remaining data. This provides multiple performance metrics, usually summarized by their mean and variance, offering a robust way to evaluate the model's out-of-sample performance.
 
-Like unsupervised learning methods, self-supervised learning methods can be used to learn representations of the data that can be used for downstream tasks such as classification or regression.
+\subsubsection{Holdout Method}
 
-\subsection{Multiview Machine Learning}
+Sometimes a separate holdout set, distinct from the test set, is used for final model evaluation. This holdout set is not used during any part of the training or hyperparameter tuning process, serving as a final, unbiased performance metric.
 
-Throughout this report we will refer to different modalities of data for the same subject as different `views', consistent with the literature\cite{sun2013survey}.
-Multiview machine learning is a branch of machine learning that deals with data that have multiple sources or modalities that describe the same phenomenon or entity.
-For example, a person can be represented by their face image, voice, text, and gesture.
-Each source or modality is referred to as a view, and different views may provide complementary or redundant information.
+\subsection{Types of Multiview Machine Learning}
 
-Multiview learning methods can be used to generate robust low-dimensional representations for a downstream task such as classification or regression, or to discover relationships between views such as correlation or even causation.
-They been widely applied across a range of fields such as neuroimaging\cite{Krishnan2011}, finance\cite{cassel2000measurement}, Imaging Genetics\cite{Hansen2021}, to find associations between views in large datasets.
+Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as 'views'. These techniques can be broadly classified into supervised, unsupervised, and self-supervised multiview learning, with some algorithms straddling the boundary between the two. 
 
-Multiview machine learning methods can be interpreted as either unsupervised or self-supervised depending on the underlying assumptions about their data-generating process.
-Specifically, the presence of a shared latent variable can influence how we categorize these methods.
-This interpretation will have important implications for the methods that we consider in this thesis.
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[level distance=1.5cm,
+    level 1/.style={sibling distance=3cm},
+    level 2/.style={sibling distance=2cm}]
+    
+    \node {Multiview Machine Learning}
+        child {node {Supervised Multiview Learning}}
+        child {node {Unsupervised Multiview Learning}}
+        child {node {Self-Supervised Multiview Learning}
+            child {node {Pretext Tasks}}
+            child {node {Learning Representations}}
+            child {node {Learning Associations}}
+        };
+        
+    \end{tikzpicture}
+    \caption{Categories of Multiview Machine Learning}
+    \label{fig:multiview_ml}
+\end{figure}
 
-\subsection{Unsupervised Multiview Machine Learning}
-In unsupervised multiview machine learning, the focus is typically on finding a shared representation that captures the essence of different views without making any assumptions about the nature of these views.
-The main idea here is that each view provides a different `angle' on the same object or phenomenon, but there is no explicit modeling of a shared latent variable that generates these views.
-Methods such as Canonical Correlation Analysis (CCA) aim to maximize the correlation between the different views in a
-common space but do not inherently posit that these views come from a single latent source.
+\subsubsection{Supervised Multiview Learning}
 
-\subsection{Self-Supervised Multiview Machine Learning}
-Self-supervised multiview machine learning, on the other hand, often assumes that the different views are generated from a common latent variable.
-In this sense, one can argue that the task of learning from multiview data becomes a form of self-supervised learning.
+In supervised multiview learning, one view serves as the input while the other view is treated as the target label. The algorithm learns to predict the target view based on the input view, leveraging the information from both to enhance the predictive performance. This approach is especially useful when each view contains complementary information that can improve the model's accuracy or robustness.
 
-It is important to note that the distinction between unsupervised and self-supervised learning is not always clear-cut.
-In particular, we will argue that a number of classical subspace learning algorithms including Canonical Correlation
-Analysis (CCA) can be interpreted as both an unsupervised (learning associations between views) and a self-supervised (where the derived target is the subject) method depending on the context.
+\subsubsection{Unsupervised Multiview Learning}
 
+In unsupervised multiview learning, the primary focus is on capturing the inherent associations between different views without relying on explicit labels. For instance, Canonical Correlation Analysis (CCA) aims to find a common space where the correlation between different views is maximized. However, in this context, CCA does not inherently posit that these correlated views arise from a single latent source.
 
+\subsubsection{Self-Supervised Multiview Learning}
+
+Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels. The cornerstone of SSL is the concept of a `pretext task,' a learning task created from the data that trains the model to capture useful features or representations. In the context of multiview machine learning, self-supervised learning operates under the assumption that different views are generated from a common latent variable. The pretext task, in this case, is to predict these latent variables from the given views. This not only enables the model to learn associations between views but also allows it to derive robust and informative representations for subsequent tasks like classification or regression.
+
+\subsubsection{Blurred Boundaries}
+
+While these categorizations provide a useful framework, it is important to note that the boundaries between unsupervised and self-supervised multiview learning are not always distinct. Algorithms like CCA can be interpreted differently based on context and specific datasets. In certain scenarios, CCA may function in an unsupervised manner by learning associations between
 
 \section{Learning Representations: Definitions and Notation}
 
@@ -138,10 +136,10 @@ data, PCA's main limitation arises: it only accounts for variance within a singl
 Partial Least Squares (PLS)\cite{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as `views". PLS can be seen as a generalization of PCA, where PCA becomes a special case when the two views are identical. The optimization problem for PLS can be formulated as:
 
 \begin{align}
-     u\sps{1}_{\text{opt}} &= \underset{u\sps{1}}{\mathrm{argmax}} \{ u\sps{1}_{1}^{\top} X\sps{1}^{\top} X\sps{2} u\sps{2} \} \\
+     u\sps{1}_{\text{opt}} &= \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} X\spstop{1} X\sps{2} u\sps{2} \} \\
      \text{subject to:} \notag \\
-     u\sps{1}_1^{\top}u\sps{1}_1 &= 1 \notag \\
-     u\sps{2}_1^{\top}u\sps{2}_1 &= 1 \notag
+     u\spstop{1}u\sps{1} &= 1 \notag \\
+     u\spstop{2}u\sps{2} &= 1 \notag
 \end{align}
 
 where \( X\sps{1} \in \mathbb{R}^{n \times p_1} \) and \( X\sps{2} \in \mathbb{R}^{n \times p_2} \), meaning we have two views with the same number of samples but potentially different number of features.
@@ -151,26 +149,26 @@ where \( X\sps{1} \in \mathbb{R}^{n \times p_1} \) and \( X\sps{2} \in \mathbb{R
 The Lagrangian for this optimization problem can be formulated as:
 
 \begin{equation}
-f(u\sps{1}, \lambda) = u\sps{1}_{1}^{\top} X\sps{1}^{\top} X\sps{2} u\sps{2} + \lambda_1 (1 - u\sps{1}_1^{\top}u\sps{1}_1) + \lambda_2 (1 - u\sps{2}_1^{\top}u\sps{2}_1)
+f(u\sps{1}, \lambda) = u\spstop{1} X\spstop{1} X\sps{2} u\sps{2} + \lambda_1 (1 - u\spstop{1}u\sps{1}) + \lambda_2 (1 - u\spstop{2}u\sps{2})
 \end{equation}
 
 Upon deriving the first order conditions, we get:
 
 \begin{align}
-    X\sps{2}^{\top} X\sps{1} u\sps{1}_1 &= \lambda_2 u\sps{2}_1 \\
-    X\sps{1}^{\top} X\sps{2} u\sps{2}_1 &= \lambda_1 u\sps{1}_1 \\
-    u\sps{1}_1^{\top}u\sps{1}_1 &= 1 \\
-    u\sps{2}_1^{\top}u\sps{2}_1 &= 1
+    X\spstop{2} X\sps{1} u\sps{1} &= \lambda_2 u\sps{2} \\
+    X\spstop{1} X\sps{2} u\sps{2} &= \lambda_1 u\sps{1} \\
+    u\spstop{1}u\sps{1} &= 1 \\
+    u\spstop{2}u\sps{2} &= 1
 \end{align}
 
 By substituting the constraint conditions into these equations, we find that \( \lambda_1 = \lambda_2 = \lambda \) by symmetry. Further simplification yields:
 
 \begin{align}
-    X\sps{2}^{\top}X\sps{1} X\sps{1}^{\top} X\sps{2} u\sps{2}_1 &= \lambda^2 u\sps{2}_1 \\
-    X\sps{1}^{\top}X\sps{2} X\sps{2}^{\top} X\sps{1} u\sps{1}_1 &= \lambda^2 u\sps{1}_1
+    X\spstop{2}X\sps{1} X\spstop{1} X\sps{2} u\sps{2} &= \lambda^2 u\sps{2} \\
+    X\spstop{1}X\sps{2} X\spstop{2} X\sps{1} u\sps{1} &= \lambda^2 u\sps{1}
 \end{align}
 
-Thus, solving these equations will yield the \( u\sps{1}_1 \) and \( u\sps{2}_1 \) vectors as the eigenvectors of \( X\sps{1}^{\top} X\sps{2} X\sps{2}^{\top} X\sps{1} \) and \( X\sps{2}^{\top} X\sps{1} X\sps{1}^{\top} X\sps{2} \), respectively \cite{hoskuldsson1988pls}.
+Thus, solving these equations will yield the \( u\sps{1} \) and \( u\sps{2} \) vectors as the eigenvectors of \( X\spstop{1} X\sps{2} X\spstop{2} X\sps{1} \) and \( X\spstop{2} X\sps{1} X\spstop{1} X\sps{2} \), respectively \cite{hoskuldsson1988pls}.
 
 \textbf{Limitations: } The problem with applying PLS to neuroimaging and behavioural modalities is that PLS is not scale invariant and
 is therefore biased towards the largest principal components in the data \cite{helmer2020stability}.
@@ -190,10 +188,10 @@ In CCA, we aim to find the directions that maximize correlation, as opposed to m
 This nuance renders CCA invariant to feature scale. The optimization problem for CCA can be expressed as:
 
 \begin{align}
-     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\sps{1}^{\top}X\sps{1}^{\top}X\sps{2}u\sps{2} \} \\
+     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}X\spstop{1}X\sps{2}u\sps{2} \} \\
      & \text{subject to:} \notag \\
-     & u\sps{1}^{\top}X\sps{1}^{\top}X\sps{1}u\sps{1}=1 \notag \\
-     & u\sps{2}^{\top}X\sps{2}^{\top}X\sps{2}u\sps{2}=1 \notag
+     & u\spstop{1}X\spstop{1}X\sps{1}u\sps{1}=1 \notag \\
+     & u\spstop{2}X\spstop{2}X\sps{2}u\sps{2}=1 \notag
 \end{align}
 
 Although non-convex, numerous methods exist for solving the CCA problem, such as eigenvalue problems, generalized eigenvalue problems, block coordinate descent via alternating least squares regressions \cite{golub1995canonical,sun2008least} , and gradient descent \cite{via2007learning}.
@@ -203,26 +201,26 @@ Although non-convex, numerous methods exist for solving the CCA problem, such as
 The first-order conditions derived in the same manner as the PLS case are:
 
 \begin{align}\label{CCA:FOCs}
-     & X\sps{2}^{\top}X\sps{1}u\sps{1}=\lambda\sps{2} X\sps{2}^{\top}X\sps{2}u\sps{2} \\
-     & X\sps{1}^{\top}X\sps{2}u\sps{2}=\lambda\sps{1} X\sps{1}^{\top}X\sps{1}u\sps{1} \\
-     & u\sps{1}^{\top}X\sps{1}^{\top}X\sps{1}u\sps{1}=1 \\
-     & u\sps{2}^{\top}X\sps{2}^{\top}X\sps{2}u\sps{2}=1
+     & X\spstop{2}X\sps{1}u\sps{1}=\lambda\sps{2} X\spstop{2}X\sps{2}u\sps{2} \\
+     & X\spstop{1}X\sps{2}u\sps{2}=\lambda\sps{1} X\spstop{1}X\sps{1}u\sps{1} \\
+     & u\spstop{1}X\spstop{1}X\sps{1}u\sps{1}=1 \\
+     & u\spstop{2}X\spstop{2}X\sps{2}u\sps{2}=1
 \end{align}
 
 Substituting the second two conditions into the first two, we get \(\lambda\sps{1}=\lambda\sps{2}=\lambda\). Then, recognizing \(X_i^{\top}X_i\) as the covariance matrix \(\Sigma_{ii}\) and \(X_i^{\top}X_j\) as the cross-covariance matrix \(\Sigma_{ij}\), we obtain another pair of eigenvalue problems:
 
 \begin{align}
-     & \Sigma\sps{11}^{-1}\Sigma\sps{12}\Sigma\sps{22}^{-1}\Sigma\sps{21}u\sps{1}=\lambda^2u\sps{1} \notag \\
-     & \Sigma\sps{22}^{-1}\Sigma\sps{21}\Sigma\sps{11}^{-1}\Sigma\sps{12}u\sps{2}=\lambda^2u\sps{2} \notag
+     & \Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}u\sps{1}=\lambda^2u\sps{1} \notag \\
+     & \Sigma_{22}^{-1}\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}u\sps{2}=\lambda^2u\sps{2} \notag
 \end{align}
 
-An alternative form of the CCA problem can be developed by reparameterizing \(u^*_i=(X_i^{\top}X_i)^{-\frac{1}{2}}u_i\). The optimization problem then becomes:
+An alternative form of the CCA problem can be developed by reparameterizing \(u\sps{i*}=(X\spstop{i}X\sps{i})^{-\frac{1}{2}}u\sps{i}\). The optimization problem then becomes:
 
 \begin{align}
-     & u^*_{\text{opt}}=\underset{u^*}{\mathrm{argmax}}\{ u^{*T}\sps{1}(X\sps{1}X\sps{1}^{\top})^{-\frac{1}{2}}X\sps{1}^{\top}X\sps{2}(X\sps{2}^{\top}X\sps{2})^{-\frac{1}{2}}u^*\sps{2} \} \\
+     & u\sps{*}_{\text{opt}}=\underset{u\spstop{*}}{\mathrm{argmax}}\{ u\spstop{1*}(X\spstop{1}X\sps{1})^{-\frac{1}{2}}X\spstop{1}X\sps{2}(X\spstop{2}X\sps{2})^{-\frac{1}{2}}u\sps{2*} \} \\
      & \text{subject to:} \notag \\
-     & u^{*T}\sps{1}u^*\sps{1}=1 \notag \\
-     & u^{*T}\sps{2}u^*\sps{2}=1 \notag
+     & u\spstop{1*}u\sps{1*}=1 \notag \\
+     & u\spstop{2*}u\sps{1*}=1 \notag
 \end{align}
 
 This reparameterized form will later underpin Deep Canonical Correlation Analysis (DCCA).
@@ -235,8 +233,8 @@ We can also represent the system of equations in equation \ref{CCA:FOCs} as a ma
 
 \begin{align}
     \begin{pmatrix}
-        0                    & \Sigma\sps{12} \\
-        \Sigma\sps{21} & 0
+        0                    & \Sigma_{12} \\
+        \Sigma_{21} & 0
     \end{pmatrix}
     \begin{pmatrix}
         u\sps{1} \\
@@ -245,8 +243,8 @@ We can also represent the system of equations in equation \ref{CCA:FOCs} as a ma
     =
     \lambda
     \begin{pmatrix}
-        \Sigma\sps{11} & 0 \\
-        0                    & \Sigma\sps{22}
+        \Sigma_{11} & 0 \\
+        0                    & \Sigma_{22}
     \end{pmatrix}
     \begin{pmatrix}
         u\sps{1} \\
@@ -263,14 +261,14 @@ This allows us to draw a connection between the unsupervised learning framework 
 
 \textbf{Intuition:} In LDA, the aim is to find a lower-dimensional subspace where the classes are maximally separated. This objective can be viewed through the lens of CCA, where the optimal directions \(u^{(1)}\) and \(u^{(2)}\) in the original and one-hot encoded spaces aim to maximize correlation. In the LDA context, \(u^{(1)}\) would maximize the separation between classes.
 
-Mathematically, LDA is reduced to solving a generalized eigenvalue problem involving the between-class scatter matrix \(\mathbf{S}_B\) and the within-class scatter matrix \(\mathbf{S}_W\):
+Mathematically, LDA is reduced to solving a generalized eigenvalue problem involving the between-class scatter matrix \(S_B\) and the within-class scatter matrix \(S_W\):
 
 \[
-    \hat{\mathbf{S}_B} = \sum_{i=1}^{c} n_i (\mu_i - \mu)(\mu_i - \mu)^T
+    \hat{S_B} = \sum_{i=1}^{c} n_i (\mu_i - \mu)(\mu_i - \mu)\top
 \]
 
 \[
-    \hat{\mathbf{S}_W} = \sum_{i=1}^{c} \sum_{x \in X_i} (x - \mu_i)(x - \mu_i)^T
+    \hat{S_W} = \sum_{i=1}^{c} \sum_{x \in X_i} (x - \mu_i)(x - \mu_i)\top
 \]
 
 \textbf{Connection to CCA:} When \(X^{(2)}\) is the one-hot encoded matrix of class labels, the CCA problem effectively tries to maximize the correlation between the feature vectors and their corresponding labels.
@@ -292,16 +290,16 @@ The generalized eigenvalue problem (GEP) can be written in matrix form as follow
 \begin{align}
     \mathbf{A} \mathbf{U} &= \lambda \mathbf{B} \mathbf{U} \\
     \mathbf{A} &= \begin{pmatrix}
-        \mathbf{0} & \Sigma\sps{12} & \cdots & \Sigma\sps{1m} \\
-        \Sigma\sps{21} & \mathbf{0} & \cdots & \Sigma\sps{2m} \\
+        0 & \Sigma_{12} & \cdots & \Sigma_{1m} \\
+        \Sigma_{21} & 0 & \cdots & \Sigma_{2m} \\
         \vdots & \vdots & \ddots & \vdots \\
-        \Sigma\sps{m1} & \Sigma\sps{m2} & \cdots & \mathbf{0}
+        \Sigma_{m1} & \Sigma_{m2} & \cdots & 0
     \end{pmatrix}, \\
     \mathbf{B} &= \begin{pmatrix}
-        \Sigma\sps{11} & \mathbf{0} & \cdots & \mathbf{0} \\
-        \mathbf{0} & \Sigma\sps{22} & \cdots & \mathbf{0} \\
+        \Sigma_{11} & 0 & \cdots & 0 \\
+        0 & \Sigma_{22} & \cdots & 0 \\
         \vdots & \vdots & \ddots & \vdots \\
-        \mathbf{0} & \mathbf{0} & \cdots & \Sigma\sps{mm}
+        0 & 0 & \cdots & \Sigma_{mm}
     \end{pmatrix}, \\
     \mathbf{U} &= \begin{pmatrix}
         u\sps{1} \\
@@ -312,12 +310,12 @@ The generalized eigenvalue problem (GEP) can be written in matrix form as follow
 \end{align}
 
 \subsection{Sample Covariance and Population Covariance}
-In the previous sections, the methods were described in terms of population covariance matrices such as \(\Sigma\sps{11}=\mathbb{E}[X\sps{1}^T X\sps{1}]\), \(\Sigma\sps{22}=\mathbb{E}[X\sps{2}^T X\sps{2}]\), and \(\Sigma\sps{12}=\mathbb{E}[X\sps{1}^T X\sps{2}]\). These population covariances assume an underlying probability distribution from which the data are drawn.
+In the previous sections, the methods were described in terms of population covariance matrices such as \(\Sigma_{11}=\mathbb{E}[X\spstop{1} X\sps{1}]\), \(\Sigma_{22}=\mathbb{E}[X\spstop{2} X\sps{2}]\), and \(\Sigma_{12}=\mathbb{E}[X\spstop{1} X\sps{2}]\). These population covariances assume an underlying probability distribution from which the data are drawn.
 
 \textbf{Sample Covariance:} In practical settings, we often do not have access to the entire population but only to a sample. Hence, we can utilize the Sample Average Approximation to estimate these covariances:
 
 \[
-    \hat{\Sigma}\sps{12} = \frac{1}{b-1} \bar{\mathbf{X}\sps{1}} \bar{\mathbf{X}\sps{2}}^T
+    \hat{\Sigma}\sps{12} = \frac{1}{b-1} \bar{\mathbf{X}\sps{1}} \bar{\mathbf{X}\sps{2}}\top
 \]
 
 Here, \(b\) denotes the size of the minibatch, and \(\mathbf{X}\sps{1} \in \mathbb{R}^{p \times b}\) and \(\mathbf{X}\sps{2} \in \mathbb{R}^{q \times b}\) are the data matrices for the samples from \(X\sps{1}\) and \(X\sps{2}\), respectively. The bar over \(\mathbf{X}\sps{1}\) and \(\mathbf{X}\sps{2}\) signifies that these are centered versions of the matrices, i.e., the mean has been subtracted from each column.
@@ -379,23 +377,23 @@ The challenges of high-dimensional data often manifest when solving Generalized 
 
 \subsubsection{Challenges in Solving Generalized Eigenvalue Problems}
 
-The GEP is often represented as\( Ax = \lambda Bx \), where \( A \)and \( B \)are matrices whose dimensions depend on the method in use.
-For instance, in PCA, \( A \)and \( B \)are\( p \times p \); in PLS and CCA, they are\( (p+q) \times (p+q) \).
+The GEP is often represented as \( Ax = \lambda Bx \), where \( A \)and \( B \)are matrices whose dimensions depend on the method in use.
+For instance, in PCA, \( A \) and \( B \)are \( p \times p \); in PLS and CCA, they are \( (p+q) \times (p+q) \).
 
 % Table summarizing the definitions of A and B for various methods
 \begin{table}[h]
     \centering
     \begin{tabular}{|c|c|c|c|c|}
         \hline
-        Method & \( A \)&\( B \)&\( X \)& Dimensions\\
+        Method & \( A \)&\( B \)&\( x \)& Dimensions\\
         \hline
-        PCA& \( \Sigma\sps{11} \)&\( \mathbf{I} \)&\( U\sps{1} \)&\( p \times p \) \\
+        PCA& \( \Sigma_{11} \)&\( I \)&\( u\sps{1} \)&\( p \times p \) \\
         \hline
-        LDA& \( \mathbf{S}_B \)&\( \mathbf{S}_W \)&\( U\sps{1} \)&\( p \times p \) \\
+        LDA& \( S_B \)&\( S_W \)&\( u\sps{1} \)&\( p \times p \) \\
         \hline
-        CCA& \( \begin{pmatrix} \Sigma\sps{11} & \Sigma\sps{12} \\ \Sigma\sps{21} & \Sigma\sps{22} \end{pmatrix} \)&\( \begin{pmatrix} \Sigma\sps{11} & \mathbf{0} \\ \mathbf{0} & \Sigma\sps{22} \end{pmatrix} \)&\( \begin{pmatrix} U\sps{1} \\ U\sps{2} \end{pmatrix} \)&\( (p+q) \times (p+q) \) \\
+        CCA& \( \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix} \)&\( \begin{pmatrix} \Sigma_{11} & 0 \\ 0 & \Sigma_{22} \end{pmatrix} \)&\( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \)&\( (p+q) \times (p+q) \) \\
         \hline
-        PLS& \( \begin{pmatrix} \mathbf{0} & \Sigma\sps{12} \\ \Sigma\sps{21} & \mathbf{0} \end{pmatrix} \)&\( \mathbf{I} \)&\( \begin{pmatrix} U\sps{1} \\ U\sps{2} \end{pmatrix} \)&\( (p+q) \times (p+q) \) \\
+        PLS& \( \begin{pmatrix} 0 & \Sigma_{12} \\ \Sigma_{21} & 0 \end{pmatrix} \)&\( I \)&\( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \)&\( (p+q) \times (p+q) \) \\
         \hline
     \end{tabular}
     \caption{Definitions and dimensions of \( A \)and \( B \)for different subspace learning methods.}
@@ -416,11 +414,12 @@ This method is particularly beneficial when \( p \)is large.
 Kernel Canonical Correlation Analysis (KCCA) extends CCA to capture nonlinear relationships. The optimization problem for KCCA is:
 
 \begin{align}
-    & \bold{\alpha_{opt}}=\underset{\bold{\alpha_{opt}}}{\mathrm{argmax}}\{ \bold{\alpha_1^{\top}K_1^{\top}K_2\alpha_2}  \}\\
+    & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha_1^{\top}K_1^{\top}K_2\alpha_2  \}\\
     & \text{subject to:} \notag\\
-    & \bold{\alpha_1^{\top}K_1^{\top}K_1\alpha_1}=1 \notag\\
-    & \bold{\alpha_2^{\top}K_2^{\top}K_2\alpha_2}=1 \notag
+    & \alpha_1^{\top}K_1^{\top}K_1\alpha_1=1 \notag\\
+    & \alpha_2^{\top}K_2^{\top}K_2\alpha_2=1 \notag
 \end{align}
+
 
 KCCA is computationally efficient for high-dimensional data (\(p>n\)) because its complexity scales with the number of samples\(n\), not the number of features\(p\).
 However, it requires access to all training data at test time, raising efficiency concerns.
@@ -434,67 +433,69 @@ Regularised solutions to the CCA problem are desirable both to provide a solutio
 Vinod proposed the `Canonical Ridge' which combined the PLS and CCA constraints in a single constrained optimisation \cite{vinod1976canonical}:
 
 \begin{align}
-     & u\sps{1}_{\text{opt}} = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\sps{1}^\top X\sps{1}^\top X\sps{2} u\sps{2} \} \\
+     & u\sps{1}_{\text{opt}} = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} X\spstop{1} X\sps{2} u\sps{2} \} \\
      & \text{subject to:} \notag \\
-     & (1 - \tau_1) u\sps{1}^\top X\sps{1}^\top X\sps{1} u\sps{1} + \tau_1 u\sps{1}^\top u\sps{1} = 1 \notag \\
-     & (1 - \tau_2) u\sps{2}^\top X\sps{2}^\top X\sps{2} u\sps{2} + \tau_2 u\sps{2}^\top u\sps{2} = 1 \notag
+     & (1 - \tau_1) u\spstop{1} X\spstop{1} X\sps{1} u\sps{1} + \tau_1 u\spstop{1} u\sps{1} = 1 \notag \\
+     & (1 - \tau_2) u\spstop{2} X\spstop{2} X\sps{2} u\sps{2} + \tau_2 u\spstop{2} u\sps{2} = 1 \notag
 \end{align}
 
 Where \( \tau_i \) is a mixing hyperparameter that makes the solution more or less CCA-like (\( c_i = 0 \)) or PLS-like (\( c_i = 1 \)) depending on the constraint.
 By once again forming the Lagrangian and taking partial derivatives, we have the first-order conditions:
 
 \begin{align}
-    & X\sps{1}^\top X\sps{2} u\sps{2} + \lambda_1 ((1-\tau_1) X\sps{1}^\top X\sps{1} u\sps{1} + \tau_1 u\sps{1} - 1) = 0 \\
-    & X\sps{2}^\top X\sps{1} u\sps{1} + \lambda_2 ((1-\tau_2) X\sps{2}^\top X\sps{2} u\sps{2} + \tau_2 u\sps{2} - 1) = 0
+    & X\spstop{1} X\sps{2} u\sps{2} + \lambda_1 ((1-\tau_1) X\spstop{1} X\sps{1} u\sps{1} + \tau_1 u\sps{1} - 1) = 0 \\
+    & X\spstop{2} X\sps{1} u\sps{1} + \lambda_2 ((1-\tau_2) X\spstop{2} X\sps{2} u\sps{2} + \tau_2 u\sps{2} - 1) = 0
 \end{align}
 
 And this gives us the eigenvalue problems \cite{rosipal2005overview}:
 
 \begin{align}
-    & ((1-\tau_1) X\sps{1}^\top X\sps{1} + \tau_1 I)^{-1} X\sps{1}^\top X\sps{2} ((1-\tau_2) X\sps{2}^\top X\sps{2} + \tau_2 I)^{-1} X\sps{2}^\top X\sps{1} u\sps{1} = \lambda^2 u\sps{1} \notag \\
-    & ((1-\tau_2) X\sps{2}^\top X\sps{2} + \tau_2 I)^{-1} X\sps{2}^\top X\sps{1} ((1-\tau_1) X\sps{1}^\top X\sps{1} + \tau_1 I)^{-1} X\sps{1}^\top X\sps{2} u\sps{2} = \lambda^2 u\sps{2}
+    & ((1-\tau_1) X\spstop{1} X\sps{1} + \tau_1 I)^{-1} X\spstop{1} X\sps{2} ((1-\tau_2) X\spstop{2} X\sps{2} + \tau_2 I)^{-1} X\spstop{2} X\sps{1} u\sps{1} = \lambda^2 u\sps{1} \notag \\
+    & ((1-\tau_2) X\spstop{2} X\sps{2} + \tau_2 I)^{-1} X\spstop{2} X\sps{1} ((1-\tau_1) X\spstop{1} X\sps{1} + \tau_1 I)^{-1} X\spstop{1} X\sps{2} u\sps{2} = \lambda^2 u\sps{2}
 \end{align}
 
-The main difference between this eigenvalue problem and the CCA eigenvalue problem is the substitution of the matrices \(X\sps{1}^\top X\sps{1}\) and \(X\sps{2}^\top X\sps{2}\) for the matrices \( ((1-\tau_1) X\sps{1}^\top X\sps{1} + \tau_1 I) \) and \( ((1-\tau_2) X\sps{2}^\top X\sps{2} + \tau_2 I) \).
-We can therefore see that this regularisation is equivalent to adding a constant to the diagonal of the covariance matrix \(X\sps{i}^\top X\sps{i}\).
+The main difference between this eigenvalue problem and the CCA eigenvalue problem is the substitution of the matrices \(X\spstop{1} X\sps{1}\) and \(X\spstop{2} X\sps{2}\) for the matrices \( ((1-\tau_1) X\spstop{1} X\sps{1} + \tau_1 I) \) and \( ((1-\tau_2) X\spstop{2} X\sps{2} + \tau_2 I) \).
+We can therefore see that this regularisation is equivalent to adding a constant to the diagonal of the covariance matrix \(X\spstop{i} X\sps{i}\).
 
 \subsubsection{Sparse CCA}
 
 Sparse CCA methods aim to find sparse vectors \(u\sps{1}\) and \(v\sps{2}\) that optimize the correlation while maintaining interpretability.
 
-\textbf{Sparse PLS: Penalized Matrix Decomposition}Witten's Penalized Matrix Decomposition (PMD) \cite{
-    witten2009penalized} provides an approximate solution to the sparse CCA problem by altering the constraints of the classical CCA formulation.
-Specifically, PMD replaces the constraint \(\bold{u\sps{1}\top X\sps{1}\top X\sps{1} u\sps{1}}=1\) with \(\bold{u\sps{1}\top u\sps{1}}=1\).
+\textbf{Sparse PLS: Penalized Matrix Decomposition}Witten's Penalized Matrix Decomposition (PMD) \cite{witten2009penalized} provides an approximate solution to the sparse CCA problem by altering the constraints of the classical CCA formulation.
+Specifically, PMD replaces the constraint \(u\spstop{1} X\sps{1} X\sps{1} u\sps{1}=1\) with \(u\spstop{1} u\sps{1} \leq 1\).
 The optimization problem for PMD is then given by:
 
 \begin{align}
     \label{eq:pmd}
-    & \bold{u\sps{opt}}=\underset{\bold{u}}{\mathrm{argmax}}\{ \bold{u\sps{1}\top X\sps{1}\top X\sps{2} v\sps{2}} \} \\
+    & u^{opt}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1} X\spstop{1} X\sps{2} u\sps{2} \} \\
     & \text{subject to:} \notag \\
-    & \bold{u\sps{1}\top u\sps{1}} \leq 1 \notag \\
-    & \bold{v\sps{2}\top v\sps{2}} \leq 1 \notag \\
-    & P(\bold{u\sps{1}}) \leq c_1 \notag \\
-    & P(\bold{v\sps{2}}) \leq c_2 \notag
+    & u\spstop{1} u\sps{1} \leq 1 \notag \\
+    & u\spstop{2} u\sps{2} \leq 1 \notag \\
+    & P(u\sps{1}) \leq c_1 \notag \\
+    & P(u\sps{2}) \leq c_2 \notag
 \end{align}
 
-\textbf{Penalized CCA} Parkhomenko et al.\ \cite{parkhomenko2009sparse} also proposed a sparse CCA variant that
+Penalized CCA Parkhomenko et al.\ \cite{parkhomenko2009sparse} also proposed a sparse CCA variant that
 operates directly on correlation matrices.
 Their optimization problem is formulated as:
 
 \begin{align}
-    \label{eq:parkho}
-    & \bold{u\sps{opt}}=\underset{\bold{u}}{\mathrm{argmax}}\{ \bold{(X\sps{1}X\sps{1}\top)^{-\frac{1}{2}}X\sps{1}\top X\sps{2}(X\sps{2}\top X\sps{2})^{-\frac{1}{2}}} \}
+    \label{eq:pmd}
+    & u^{opt}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1} X\spstop{1} X\sps{2} u\sps{2} + P(u\sps{1})+ P(u\sps{2})\}\\
+    & \text{subject to:} \notag \\
+    & u\spstop{1} u\sps{1} \leq 1 \notag \\
+    & u\spstop{2} u\sps{2} \leq 1 \notag \\
 \end{align}
 
-\textbf{Iterative Penalized Least Squares} Some approaches to sparse Canonical Correlation Analysis (CCA) are related to alternating regression forms, such as sparse alternating regressions~\cite{wilms2015sparse}.
+Iterative Penalized Least Squares Some approaches to sparse Canonical Correlation Analysis (CCA) are related to alternating regression forms, such as sparse alternating regressions~\cite{wilms2015sparse}.
 Mai et al.~\cite{mai2019iterative} proved that these methods can yield true global solutions to projection-length constrained lasso regression problems.
-However, this holds true only for one-homogeneous penalties, meaning the regularization function must take the form \( P((\mu + 1)\boldsymbol{\theta}) = (\mu + 1)P(\boldsymbol{\theta}) \). Consequently, we need \( P(\boldsymbol{\theta}) \) to be a one-homogeneous function to use regularized alternating least squares for solving regularized CCA objectives.
+However, this holds true only for one-homogeneous penalties, meaning the regularization function must take the form \( P((\mu + 1)\theta) = (\mu + 1)P(\theta) \). Consequently, we need \( P(\theta) \) to be a one-homogeneous function to use regularized alternating least squares for solving regularized CCA objectives.
 
 \begin{align}
     \label{eq:mai}
-    \boldsymbol{u} &= \underset{\boldsymbol{u}}{\mathrm{argmin}} \left\{ \|\boldsymbol{Xu} - \boldsymbol{y}\|_2^2 + P(\boldsymbol{u}) \right\} \\
-    \text{subject to:} \notag \\
-    \boldsymbol{u^{(1)\top} X^{(1)\top} X^{(1)} u^{(1)}} &= 1 \notag
+    u^{opt} &= \underset{u}{\mathrm{argmin}} \left\{ \|Xu - y\|_2^2 + P(u) \right\} \\
+    &\text{subject to:} \notag \\
+    &u\spstop{1} X\spstop{1} X\sps{1} u\sps{1}=1 \notag
 \end{align}
 
 However, the one homogenous penalty in practice limits the flexibility of the method.
@@ -505,12 +506,15 @@ The algorithm precisely controls the sparsity of the extracted canonical vectors
 
 Formally, they optimize the following problem:
 
-\begin{aligned}
+\begin{align}
     \label{eq:asteris}
-    \max_{u\sps{1} \in U\sps{1}, u\sps{2} \in U\sps{2}} \quad & (u\sps{1})^{\top}\Sigma_{X\sps{1}X\sps{2}}u\sps{2} \\
-    \text{where } & U\sps{1} = \left\{ u\sps{1} \in \mathbb{R}^{m} : ||u\sps{1}||_2 = 1, ||u\sps{1}||_0 \leq s_x \right\}, \\
-    & U\sps{2} = \left\{ u\sps{2} \in \mathbb{R}^{n} : ||u\sps{2}||_2 = 1, ||u\sps{2}||_0 \leq s_y \right\},
-\end{aligned}
+    u^{opt}&=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}X\spstop{1} X\sps{2}u\sps{2}\}\\ 
+    &\text{subject to:} \notag \\
+    &||u\sps{1}||_2 = 1 \\
+    &||u\sps{1}||_0 \leq s_x \\
+    &||u\sps{2}||_2 = 1 \\
+    &||u\sps{2}||_0 \leq s_y
+\end{align}
 
 Their approach balances between exhaustive search and thresholding methods by focusing on a principal subspace of the input matrix $\Sigma_{X\sps{1}X\sps{2}}$ spanned by its leading \( r \geq 1 \) singular vector pairs.
 This allows them to find an (approximately) optimal pair of supports without evaluating the entire set of possible supports, thus making it both efficient and parallelizable.

@@ -53,15 +53,15 @@ which we can represent as the graphical model in figure~\ref{fig:wittengraphical
   \tikz{
 %nodes
  \node[latent, align=center] (Z) {$Z$}; %
- \node[obs, below left=of Z] (X_1) {$X_1$};%
- \node[obs, below right=of Z] (X_2) {$X_2$};%
- \node[latent,above left=of X_1,fill] (W_1) {$W_1$}; %
- \node[latent,above right=of X_2,fill] (W_2) {$W_2$}; %
- \node[latent,left=of X_1] (sigma_1) {$\sigma_1$}; %
- \node[latent,right=of X_2] (sigma_2) {$\sigma_2$}; %
+ \node[obs, below left=of Z] (X\sps{1}) {$X\sps{1}$};%
+ \node[obs, below right=of Z] (X\sps{2}) {$X\sps{2}$};%
+ \node[latent,above left=of X\sps{1},fill] (W\sps{1}) {$W\sps{1}$}; %
+ \node[latent,above right=of X\sps{2},fill] (W\sps{2}) {$W\sps{2}$}; %
+ \node[latent,left=of X\sps{1}] (sigma_1) {$\sigma_1$}; %
+ \node[latent,right=of X\sps{2}] (sigma_2) {$\sigma_2$}; %
 % edges
- \edge {W_1,Z,sigma_1} {X_1}
- \edge {W_2,Z,sigma_2} {X_2}}
+ \edge {W\sps{1},Z,sigma_1} {X\sps{1}}
+ \edge {W\sps{2},Z,sigma_2} {X\sps{2}}}
  \caption[Sparse Data Generation Graphical Model]{\textit{\textbf{Sparse Data Generation Graphical Model: }}For the Witten data generation, we set the active variables with the matrices $W_i$ and therefore rescale the latent variable Z in those variables with zeros in the other variables. Z has standard normal distribution. We add gaussian noise parameterized by $\sigma$.}
  \label{fig:wittengraphical}
 \end{figure}
@@ -71,18 +71,18 @@ While this simple method directly controls the cross-covariance it doesn't contr
 Indeed, by marginalising out the latent variables $\bold{Z}$ we can write down the joint distribution of the two views as:
 
 \begin{align}
-    \begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{0} \\ \bold{0} \end{bmatrix}, \begin{bmatrix} \bold{W_1W_1^T} + \sigma_1^2\bold{I} & \bold{W_1W_2^T} \\ \bold{W_2W_1^T} & \bold{W_2W_2^T} + \sigma_2^2\bold{I} \end{bmatrix} \right)
+    \begin{bmatrix} \bold{X\sps{1}} \\ \bold{X\sps{2}} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{0} \\ \bold{0} \end{bmatrix}, \begin{bmatrix} \bold{W\sps{1}W\spstop{1}} + \sigma_1^2\bold{I} & \bold{W\sps{1}W\spstop{2}} \\ \bold{W\sps{2}W\spstop{1}} & \bold{W\sps{2}W\spstop{2}} + \sigma_2^2\bold{I} \end{bmatrix} \right)
 \end{align}
 
 \subsubsection{Joint Covariance Matrix}
-Later papers in the sparse CCA literature such as~\cite{mai2019iterative,chen2013sparse} have constructed the covariance matrix as in figure~\ref{fig:covariance} and sampled from this multivariate normal distribution to give two simulated views with specified active variables, correlations and within-view covariance.
+Later papers in the sparse CCA literature such as~\cite{mai2019iterative,chen2013sparse} directly contstruct the joint covariance and sample from this multivariate normal distribution to give two simulated views with specified active variables, correlations and within-view covariance.
 This has the advantage of allowing us to control the within-view covariance and therefore test the methods under specific conditions.
 The process was first described by Chen~\cite{chen2013sparse} and further explained by~\cite{suo2017sparse}.
 
 We construct the joint distribution as follows:
 
 \begin{align}\label{eq:covariance}
-    \begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{0} \\ \bold{0} \end{bmatrix}, \begin{bmatrix} \bold{\Sigma_{11}} & \bold{\Sigma_{12}} \\ \bold{\Sigma_{21}} & \bold{\Sigma_{22}} \end{bmatrix} \right)
+    \begin{bmatrix} \bold{X\sps{1}} \\ \bold{X\sps{2}} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{0} \\ \bold{0} \end{bmatrix}, \begin{bmatrix} \bold{\Sigma_{11}} & \bold{\Sigma_{12}} \\ \bold{\Sigma_{21}} & \bold{\Sigma_{22}} \end{bmatrix} \right)
 \end{align}
 
 Where $\bold{\Sigma_{11}}$ and $\bold{\Sigma_{22}}$ are the within-view covariance matrices and $\bold{\Sigma_{12}}$ and $\bold{\Sigma_{21}}$ are the between-view covariance matrices.
@@ -91,7 +91,7 @@ We can control the true signal by setting the active variables and correlations 
 matrices $\bold{\Sigma_{12}}$ and $\bold{\Sigma_{21}}$. Specifically
 
 \begin{align}
-    \bold{\Sigma_{12}}=\sum_{k=1}^{K}\rho_k\Sigma_{11}u\sps{1}_ku\sps{2}_k^T\Sigma_{22}
+    \bold{\Sigma_{12}}=\sum_{k=1}^{K}\rho_k\Sigma_{11}u\sps{1}_{k}u\sps{2\top}_k\Sigma_{22}
 \end{align}
 
 Where $\rho_k$ is the $k$th canonical correlation and $u\sps{i}_k$ is the $k$th column of $\bold{U_i}$.
@@ -111,8 +111,8 @@ Here, \(\mathbf{z}\) represents the latent variables shared between the differen
 \begin{tikzpicture}
     % Define nodes
     \node[latent] (z) {z};
-    \node[obs, below=of z] (x1) {\(x_1\)};
-    \node[obs, right=of x1] (x2) {\(x_2\)};
+    \node[obs, below=of z] (x1) {\(X\sps{1}\)};
+    \node[obs, right=of x1] (x2) {\(X\sps{2}\)};
     % Connect nodes
     \edge {z} {x1,x2} ;
     % Plates
@@ -122,7 +122,7 @@ Here, \(\mathbf{z}\) represents the latent variables shared between the differen
 Once again, by marginalizing out the latent variables \(\mathbf{z}\), we can write down the joint distribution of the two views as:
 
 \begin{align}
-    \begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{\mu_1} \\ \bold{\mu_2} \end{bmatrix}, \begin{bmatrix} \bold{W_1W_1^T} + \bold{\Psi_1} & \bold{W_1W_2^T} \\ \bold{W_2W_1^T} & \bold{W_2W_2^T} + \bold{\Psi_2} \end{bmatrix} \right)
+    \begin{bmatrix} \bold{X\sps{1}} \\ \bold{X\sps{2}} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{\mu\sps{1}} \\ \bold{\mu\sps{2}} \end{bmatrix}, \begin{bmatrix} \bold{W\sps{1}W\spstop{1}} + \bold{\Psi_1} & \bold{W\sps{1}W\spstop{2}} \\ \bold{W\sps{2}W\spstop{1}} & \bold{W\sps{2}W\spstop{2}} + \bold{\Psi_2} \end{bmatrix} \right)
 \end{align}
 
 \subsubsection{Probabilistic rCCA}
@@ -138,7 +138,7 @@ Here, \(\Sigma_i^2\) is a diagonal matrix that models measurement noise. This ad
 robust to overfitting and other data challenges. This gives us the following joint distribution:
 
 \begin{align}
-    \begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{\mu_1} \\ \bold{\mu_2} \end{bmatrix}, \begin{bmatrix} \bold{W_1W_1^T} + \bold{\Psi_1} + \bold{\Sigma_1^2} & \bold{W_1W_2^T} \\ \bold{W_2W_1^T} & \bold{W_2W_2^T} + \bold{\Psi_2} + \bold{\Sigma_2^2} \end{bmatrix} \right)
+    \begin{bmatrix} \bold{X\sps{1}} \\ \bold{X\sps{2}} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{\mu\sps{1}} \\ \bold{\mu\sps{2}} \end{bmatrix}, \begin{bmatrix} \bold{W\sps{1}W\spstop{1}} + \bold{\Psi_1} + \bold{\Sigma_1^2} & \bold{W\sps{1}W\spstop{2}} \\ \bold{W\sps{2}W\spstop{1}} & \bold{W\sps{2}W\spstop{2}} + \bold{\Psi_2} + \bold{\Sigma_2^2} \end{bmatrix} \right)
 \end{align}
 
 \subsubsection{Probabilistic PLS}
@@ -151,7 +151,7 @@ Despite various models for PLS regression, a canonical probabilistic model for C
 \begin{table}[h]
     \centering
     \caption{Summary of Data Generation Methods}
-    \begin{tabular}{l|l|l|l}
+    \begin{tabular}{l|c|c|c|}
         \textbf{Method} & \textbf{Within-View Covariance} & \textbf{Between-View Covariance} & \textbf{Active
         Variables} \\
         \hline
@@ -159,6 +159,7 @@ Despite various models for PLS regression, a canonical probabilistic model for C
         Covariance       & Yes                             & Yes                              & Yes                       \\
         Probabilistic CCA & Yes                             & Yes                              & Yes                       \\
         Probabilistic rCCA & Yes                             & Yes                              & Yes                       \\
+        \hline
     \end{tabular}
     \label{table:data-generation-methods-properties}
 \end{table}
@@ -168,16 +169,18 @@ Despite various models for PLS regression, a canonical probabilistic model for C
 \begin{table}[h]
     \centering
     \caption{Summary of Data Generation Methods}
-    \begin{tabular}{l|l|l|l}
-        \textbf{Method} & \textbf{Joint Covariance}  \\
+    \begin{tabular}{l|c|}
+        Method & Joint Covariance  \\
         \hline
-        Witten&\(\begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{0} \\ \bold{0} \end{bmatrix}, \begin{bmatrix} \bold{W_1W_1^T} + \sigma_1^2\bold{I} & \bold{W_1W_2^T} \\ \bold{W_2W_1^T} & \bold{W_2W_2^T} + \sigma_2^2\bold{I} \end{bmatrix} \right)\)\\
-        Covariance&\(\begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{0} \\ \bold{0} \end{bmatrix}, \begin{bmatrix} \bold{\Sigma_{11}} & \bold{\Sigma_{12}} \\ \bold{\Sigma_{21}} & \bold{\Sigma_{22}} \end{bmatrix} \right)\)\\
-        Probabilistic CCA&\(\begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{\mu_1} \\ \bold{\mu_2} \end{bmatrix}, \begin{bmatrix} \bold{W_1W_1^T} + \bold{\Psi_1} & \bold{W_1W_2^T} \\ \bold{W_2W_1^T} & \bold{W_2W_2^T} + \bold{\Psi_2} \end{bmatrix} \right)\)\\
-        Probabilistic rCCA&\(\begin{bmatrix} \bold{X_1} \\ \bold{X_2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \bold{\mu_1} \\ \bold{\mu_2} \end{bmatrix}, \begin{bmatrix} \bold{W_1W_1^T} + \bold{\Psi_1} + \bold{\Sigma_1^2} & \bold{W_1W_2^T} \\ \bold{W_2W_1^T} & \bold{W_2W_2^T} + \bold{\Psi_2} + \bold{\Sigma_2^2} \end{bmatrix} \right)\)\\
+        Witten & \( \begin{bmatrix} X\sps{1} \\ X\sps{2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} 0 \\ 0 \end{bmatrix}, \begin{bmatrix} W\sps{1}W\spstop{1} + \sigma_1^2 I & W\sps{1}W\spstop{2} \\ W\sps{2}W\spstop{1} & W\sps{2}W\spstop{2} + \sigma_2^2 I \end{bmatrix} \right) \) \\
+        Covariance & \( \begin{bmatrix} X\sps{1} \\ X\sps{2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} 0 \\ 0 \end{bmatrix}, \begin{bmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{bmatrix} \right) \) \\
+        Probabilistic CCA & \( \begin{bmatrix} X\sps{1} \\ X\sps{2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \mu^{1} \\ \mu^{2} \end{bmatrix}, \begin{bmatrix} W\sps{1}W\spstop{1} + \Psi_1 & W\sps{1}W\spstop{2} \\ W\sps{2}W\spstop{1} & W\sps{2}W\spstop{2} + \Psi_2 \end{bmatrix} \right) \) \\
+        Probabilistic rCCA & \( \begin{bmatrix} X\sps{1} \\ X\sps{2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \mu^{1} \\ \mu^{2} \end{bmatrix}, \begin{bmatrix} W\sps{1}W\spstop{1} + \Psi_1 + \Sigma_1^2 & W\sps{1}W\spstop{2} \\ W\sps{2}W\spstop{1} & W\sps{2}W\spstop{2} + \Psi_2 + \Sigma_2^2 \end{bmatrix} \right) \) \\
+        \hline
     \end{tabular}
     \label{table:data-generation-methods}
 \end{table}
+
 
 \section{Our contribution: Clarifying the use of weights and loadings in CCA}\label{sec:our-contribution:-clarifying-the-use-of-weights-and-loadings-in-cca}
 
@@ -208,11 +211,11 @@ Consider the probabilistic CCA model described in section \ref{subsec:probabilis
         % nodes
         \node[latent, align=center, minimum size=2cm] (Z) {Severity};
         %
-        \node[obs, below left=of Z, minimum size=2cm] (X_1) {Neuroimage};%
-        \node[obs, below right=of Z, minimum size=2cm] (X_2) {Behaviour};%
+        \node[obs, below left=of Z, minimum size=2cm] (X\sps{1}) {Neuroimage};%
+        \node[obs, below right=of Z, minimum size=2cm] (X\sps{2}) {Behaviour};%
         % edges
-        \edge{Z} {X_1}
-        \edge{Z} {X_2}}
+        \edge{Z} {X\sps{1}}
+        \edge{Z} {X\sps{2}}}
     \caption[Latent Variable Model of Mental Health]{\textit{\textbf{Latent Variable Model of Mental Health:}} From this perspective the neuroimaging modality and behavioural data are both considered to have been generated with distributions conditioned on the severity of a mental health condition}\label{fig:mentalhealthselfsupervised}
 \end{figure}
 
@@ -226,8 +229,8 @@ Both the forward and backward models provide analytical forms for the joint cova
 
 \begin{align}
     \Sigma &= \begin{bmatrix}
-        \bold{W_1W_1^T} + \bold{\Psi_1} & \bold{W_1W_2^T} \\
-        \bold{W_2W_1^T} & \bold{W_2W_2^T} + \bold{\Psi_2}
+        \bold{W\sps{1}W\spstop{1}} + \bold{\Psi_1} & \bold{W\sps{1}W\spstop{2}} \\
+        \bold{W\sps{2}W\spstop{1}} & \bold{W\sps{2}W\spstop{2}} + \bold{\Psi_2}
     \end{bmatrix} = \begin{bmatrix}
         \bold{\Sigma_1} & \bold{\Sigma_1}\sum_k \rho_k u_{1_k}^\top u_{2_k} \bold{\Sigma_2}  \\
         \bold{\Sigma_2}\sum_k \rho_k u_{2_k}^\top u_{1_k} \bold{\Sigma_1} & \bold{\Sigma_1}
@@ -239,14 +242,14 @@ Here, $\rho_k$ represents the $k$th canonical correlation, and $u_{i_k}$ denotes
 Our crucial insight lies in the relationship between the weights of the forward and backward models, which can be expressed as:
 
 \begin{align}
-    \bold{W_1W_2^T} &= \bold{\Sigma_1}\sum_k \rho_k u_{1_k}^\top u_{2_k} \bold{\Sigma_2}
+    \bold{W\sps{1}W\spstop{2}} &= \bold{\Sigma_1}\sum_k \rho_k u_{1_k}^\top u_{2_k} \bold{\Sigma_2}
 \end{align}
 
 For a single latent variable, this leads to the following relationships:
 
 \begin{align}
-    \bold{w_1} &= p_1\bold{\Sigma_1} u_{1_1}^\top \\
-    \bold{w_2} &= p_2\bold{\Sigma_2} u_{2_1}^\top
+    \bold{W\sps{1}} &= p_1\bold{\Sigma_1} u_{1_1}^\top \\
+    \bold{W\sps{2}} &= p_2\bold{\Sigma_2} u_{2_1}^\top
 \end{align}
 
 Here, $p_i$ represents scalar constants, and it's important to note that the product of these constants, $\prod_i p_i$ equals $\rho$.
@@ -356,10 +359,6 @@ Grid search is used for hyperparameter tuning for Elastic CCA and SCCA\_PMD mode
 \subsubsection{Evaluation Metrics}
 
 The models are evaluated based on their correlation score on a validation set comprising 20\% of the original data. Additionally, the weights of each model are visualized for interpretability.
-
-\section{Results and Discussion}
-
-\subsection{Performance Comparison}
 
 \subsection{True Weights for Context}
 
@@ -507,9 +506,6 @@ FRALS functions as a sparse version of RCCA in this context.
 \label{fig:brain}
 \end{figure}
 
-\section{Discussion}
-
-
 \section{Limitations}\label{sec:limitations}
 
 While FRALS offers promising performance in terms of out-of-sample correlation, it does come with significant drawbacks, the most noteworthy being its computational inefficiency. Below, we outline the primary factors contributing to the slow speed of FRALS and provide some insights into the computational bottlenecks.
@@ -520,9 +516,6 @@ One of the major constraints of FRALS is the time complexity involved in solving
 \subsection{Changing Regression Targets}\label{subsec:changing-regression-targets}
 Adding to the computational burden is the fact that the regression targets, i.e., the projections of the other view, are not static but change dynamically throughout the algorithm's run.
 Each update to the least squares solution consequently alters the global objective, leading to a constantly shifting landscape that the algorithm needs to navigate.
-
-
-
 
 
 \subsection{Conclusions and Further Work}
