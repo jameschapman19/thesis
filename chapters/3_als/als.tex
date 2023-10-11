@@ -182,11 +182,13 @@ Despite various models for PLS regression, a canonical probabilistic model for C
 \end{table}
 
 
-\section{Our contribution: Clarifying the use of weights and loadings in CCA}\label{sec:our-contribution:-clarifying-the-use-of-weights-and-loadings-in-cca}
+\section{Contributions}\label{sec:contributions}
+
+\subsection{Clarifying the use of weights and loadings in CCA}
 
 Our first contribution is to clarify the use and intepretation of weights and loadings in CCA.
 
-\subsection{Forward and Backward Models}
+\subsubsection{Forward and Backward Models}
 
 At this stage we can consider the difference between forward and backward models in the context of CCA and PLS.
 In forward models we generate data from a known model and then try to recover the parameters of that model.
@@ -197,7 +199,7 @@ latent variables $\bold{Z}$ from the data $\bold{X_i}$.
 In the probabilistic models described in section \ref{subsec:probabilistic-cca-rcca-and-pls} we have forward models which
 generate data from the latent variables $\bold{Z}$.
 
-\subsection{Why is this important?}
+\subsubsection{Why is this important?}
 
 If we are solely interested in the latent variables $\boldsymbol{Z}$, then the backward models described in chapter \ref{chap:background} suffice for inferring them from the data.
 However, if we aim for a comprehensive understanding and interpretability of the model, it becomes vital to understand both forward and backward formulations.
@@ -259,19 +261,15 @@ It's worth noting that this revelation underscores the significance of covarianc
 Specifically, when the covariance matrices are identity matrices, the forward and backward weights become identical (up to scaling by $p$).
 Furthermore, it's important to recognize that sparse weights do not necessarily imply sparse loadings and vice versa, unless the covariance matrices themselves are identity matrices.
 
-We explore this relationship using simulated data in section \ref{sec:exp1}.
 
-\section{Experiment 1: Weights vs Loadings}\label{sec:exp1}
-
-The two methods we have described for generating simulated data
-
-\section{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least-squares-(frals)}
+\subsection{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least
+-squares-(frals)}
 We adopt an alternating minimization strategy to solve the CCA problem.
 The objective is to minimize the sum of squared Frobenius norms between the latent variables and their projections in each view.
 Regularization terms are added to the objective function to avoid overfitting.
 Our formulation allows the incorporation of any regularized least squares solver, making it extremely flexible.
 
-\subsection{Mathematical Formulation}
+\subsubsection{Mathematical Formulation}
 We can solve CCA by alternating minimization over each view, based on the alternating least squares form.
 This form finds a variable \( T \) that is close to the latent variables \( X\sps{1} U\sps{1} \), where \( X\sps{1} \), \( U\sps{1} \) are the matrix and weights for each view \( i \).
 The closer \( T \) is to \( X\sps{1} U\sps{1} \), the higher the correlation between them.
@@ -292,32 +290,28 @@ This means that \textbf{any regularized least squares solver} can be used to sol
 \end{gather*}
 
 
-\section{Experiment 2: Simulated Data Evaluation}\label{subsec:exp1}
+\section{Experiment 1: Weights vs Loadings}\label{sec:exp1}
 
-In this experiment, we evaluate several Sparse Canonical Correlation Analysis (CCA) variants using synthetic data generated with the FRALS framework.
+In this experiment, we generate data according to the probabilistic CCA model where we control the loadings as well
+as the joint covariance method where we control the weights and canonical correlations.
 
-Two of these variants, IPLS+ and ElasticNet, are implemented within the FRALS framework for added flexibility.
-We provide intuition for the comparison of these models:
+In doing so we will illustrate that
 
-- \textbf{IPLS+ (Sparse CCA via Iterative Penalized Least Squares with Positive Constraints):} IPLS+ assumes a prior about the data generation process, specifically that the true weights are positive.
-This prior matches the data generation process, making it more suitable for the given synthetic data.
-As a result, IPLS+ is expected to perform well as it aligns with the underlying data structure.
+\subsection{Set-Up}\label{subsec:set-up}
 
-- \textbf{ElasticNet:} ElasticNet, another model implemented using the FRALS framework, offers a combination of L1 (lasso) and L2 (ridge) regularization.
-While it provides flexibility in handling different types of data, it may not align with the specific prior assumption of positive weights in our synthetic data generation process.
+
+
+
+\section{Experiment 2: Regularized CCA with Simulated Data}
+
+\subsection{Set-Up}\label{subsec:set-up}
+In this experiment, we evaluate several Sparse Canonical Correlation Analysis (CCA) variants using synthetic data generated with the FRALS framework. The variants studied include IPLS+ and ElasticNet, both implemented within the FRALS framework for added flexibility.
+
+\subsubsection{Intuition for Model Comparison}
+IPLS+ assumes a prior about the data generation process, specifically that the true weights are positive, aligning with the synthetic data. ElasticNet, while flexible, may not align with this specific prior.
 
 \subsubsection{Simulated Data Generation}\label{subsubsec:simulated-data-generation}
-
-In this experiment, we evaluate several Sparse Canonical Correlation Analysis (CCA) variants using synthetic data generated with the FRALS framework.
-Two of these variants, IPLS+ and ElasticNet, are implemented within the FRALS framework for added flexibility.
-
-Therefore, we anticipate that IPLS+ may outperform ElasticNet due to its alignment with the prior assumptions about data generation.
-This experiment aims to validate this intuition by comparing the performance of these models and others.
-
-\subsubsection{Methodology}
-
-To carry out the experiment, we leverage the CCA-Zoo Python package.
-The synthetic data is generated using the \texttt{LinearSimulatedData} class from the package, with parameters set to emulate a high-dimensional feature space.
+The synthetic data is generated using the \texttt{LinearSimulatedData} class from the CCA-Zoo Python package, with parameters set to emulate a high-dimensional feature space.
 
 \begin{table}[h]
 \centering
@@ -336,7 +330,8 @@ Target correlation between views & 0.9 \\
 \label{table:experiment-parameters}
 \end{table}
 
-We employ several CCA variants for this experiment:
+\subsubsection{Methodology}
+We employ several CCA variants for this experiment, including Canonical Correlation Analysis (CCA), Partial Least Squares (PLS), and more. Grid search is employed for hyperparameter tuning for Elastic CCA and SCCA\_PMD models.
 
 \begin{table}[h]
 \centering
@@ -354,13 +349,11 @@ Elastic CCA \\
 \label{table:cca-variants}
 \end{table}
 
-Grid search is used for hyperparameter tuning for Elastic CCA and SCCA\_PMD models.
+\subsection{Results}
+\subsubsection{Performance Metrics}
+The models are evaluated based on their correlation score on a validation set comprising 20\% of the original data.
 
-\subsubsection{Evaluation Metrics}
-
-The models are evaluated based on their correlation score on a validation set comprising 20\% of the original data. Additionally, the weights of each model are visualized for interpretability.
-
-\subsection{True Weights for Context}
+\subsubsection{True Weights for Context}
 
 Figure~\ref{fig:True_weights} provides a ground truth reference for the weights in the true underlying signal, setting the context for our subsequent analysis.
 
@@ -371,12 +364,12 @@ Figure~\ref{fig:True_weights} provides a ground truth reference for the weights 
     \label{fig:True_weights}
 \end{figure}
 
-\subsection{Interpretation of Weight Plots}
+\subsubsection{Interpretation of Weight Plots}
 
 Figures~\ref{fig:CCA_weights} to~\ref{fig:IPLS+_weights} visualize the weights attributed to each feature by different models.
 Different colors indicate the indices of weights involved in the true signal (as shown in Figure~\ref{fig:True_weights}) and those not involved.
 
-\subsection{Performance Insights}
+\subsubsection{Performance Insights}
 
 \paragraph{Impact of Sparsity:}
 Figure~\ref{fig:PLS_weights} and Figure~\ref{fig:CCA_weights} display the weights for PLS and CCA, respectively.
@@ -437,26 +430,23 @@ As illustrated in Figure~\ref{fig:IPLS+_weights}, IPLS+ with a positive constrai
     \label{fig:IPLS+_weights}
 \end{figure}
 
-\subsection{Conclusion}
-
-The experimental results underscore the importance of incorporating sparsity and other domain-specific priors in multiview learning models.
-The interleaved figures and discussions affirm the need to align the model's objective with the characteristics of the underlying signal for effective feature selection and signal capture.
+\subsection{Discussion}
+Our results emphasize the importance of aligning the model's objective with the characteristics of the underlying signal for effective feature selection and signal capture. Sparsity and domain-specific priors play a significant role, with IPLS+ showing the best performance among the models tested due to its positive constraint.
 
 
+\section{Experiment 3: Regularized CCA with the Human Connectome Project (HCP) Data}
 
+The Human Connectome Project (HCP) provides high-dimensional, multimodal data that is challenging to model, making it an ideal testing ground for evaluating the flexibility and efficacy of our FRALS method.
 
-\subsection{Experiment 2: Human Connectome Project (HCP) Data Evaluation}
-
-\subsubsection{Experiment Design}
+\subsection{Set-Up}
 In our study, we used resting-state fMRI along with non-imaging subject measures from a total of 1003 healthy subjects, sourced from the 1200-subject data release of the Human Connectome Project (HCP). The dataset was divided into an 80\% training set and a 20\% testing set.
 To fine-tune the regularization of hyperparameters, cross-validation was employed within the training data.
 Our approach, dubbed Flexible Regularized Alternating Least Squares (FRALS) with elastic net regularization on both views, was compared against existing methods, namely separate PCA on each modality, Penalized Matrix Decomposition (PMD), and Ridge Regularized CCA (RCCA). The performance was evaluated based on out-of-sample correlations.
 
 \subsubsection{Performance Metrics}
-The primary metric for evaluating the performance of our FRALS model was out-of-sample canonical correlations.
-It was compared against PCA performed individually on each modality, as well as against PMD and RCCA\@.
+Out-of-sample canonical correlations were chosen as the primary metric as they provide a robust evaluation of how well the model generalizes to new, unseen data.
 
-\subsubsection{Performance Metrics}
+\subsection{Results}
 Our model, FRALS, demonstrated superior performance by achieving the highest out-of-sample canonical correlations among all models tested (see Figure~\ref{fig:performance}).
 
 \begin{figure}[h]
@@ -477,7 +467,6 @@ FRALS exhibited low or negative correlations with other models, highlighting its
 \caption{Left: Correlation matrix of the scores for each modality. Right: Correlation matrix of the brain loadings for each model.}
 \label{fig:similarities}
 \end{figure}
-
 
 \subsubsection{Behaviour and Brain Loadings}
 In terms of behavioral loadings, except for PCA, all models identified a latent variable that correlated positively with cognitive tests and negatively with cigarette, tobacco, or alcohol use.
@@ -506,19 +495,19 @@ FRALS functions as a sparse version of RCCA in this context.
 \label{fig:brain}
 \end{figure}
 
-\section{Limitations}\label{sec:limitations}
+\subsection{Discussion and Limitations}
 
 While FRALS offers promising performance in terms of out-of-sample correlation, it does come with significant drawbacks, the most noteworthy being its computational inefficiency. Below, we outline the primary factors contributing to the slow speed of FRALS and provide some insights into the computational bottlenecks.
 
-\subsection{Computational Time}\label{subsec:computational-time}
-One of the major constraints of FRALS is the time complexity involved in solving the regularized least squares regressions to completion. The algorithm’s iterative nature, which involves solving a sequence of regressions, makes it computationally intensive, particularly when dealing with high-dimensional data.
+\subsubsection{Computational Time}\label{subsec:computational-time}
+While computationally intensive, the flexibility of FRALS allows it to adapt better to the complexity inherent in real-world data sets, such as the HCP. This adaptability could be crucial when high predictive accuracy or interpretability is required.
 
-\subsection{Changing Regression Targets}\label{subsec:changing-regression-targets}
+\subsubsection{Changing Regression Targets}\label{subsec:changing-regression-targets}
 Adding to the computational burden is the fact that the regression targets, i.e., the projections of the other view, are not static but change dynamically throughout the algorithm's run.
 Each update to the least squares solution consequently alters the global objective, leading to a constantly shifting landscape that the algorithm needs to navigate.
 
 
-\subsection{Conclusions and Further Work}
+\section{Conclusions}
 The main idea of this chapter is to introduce FRALS, a novel approach in the realm of multiview learning that optimizes
 both flexibility and performance.
 Our experiments indicate that FRALS not only outperforms established methods like PCA, PMD, and RCCA in terms of out-of-sample canonical correlations but also captures novel and distinct aspects of brain-behavior associations.
@@ -528,14 +517,6 @@ Our findings also underline the importance of the parietal lobe in understanding
 FRALS emphasizes this region more compared to traditional methods like PCA and PMD. Future work should focus on understanding the specific functions and contributions of different brain regions captured by FRALS and how they relate to various behaviors.
 
 Given its promising initial results, the next step for FRALS would be its application to larger datasets and its adaptation for different kinds of biological and non-biological data to further evaluate its robustness and applicability.
-
-
-
-\section{Conclusion}
-
-We have introduced a flexible and efficient framework for regularized CCA that addresses the limitations of existing methods.
-Our framework is particularly well-suited for high-dimensional data and can be adapted to various types of regularization, offering an effective tool for uncovering complex relationships in multiview data.
-
 
 
 
