@@ -12,7 +12,7 @@
 
 % Controls how many subsections the document can take
 %  and how many of those will get put into the contents pages.
-\setcounter{secnumdepth}{2}
+\setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{2}
 
 % Places a dot after Chapter/Section/Subsection number in Table of Contents
@@ -31,19 +31,6 @@
 \renewcommand{\contentsname}{\normalfont\bfseries\LARGE{CONTENTS}}
 \renewcommand{\listfigurename}{\normalfont\bfseries\LARGE{LIST OF FIGURES}}
 \renewcommand{\listtablename}{\normalfont\bfseries\LARGE{LIST OF TABLES}}
-
-
-% Title Formatting customization
-\titleformat{\chapter}{\normalfont\bfseries\LARGE}{\thechapter.}{1em}{\MakeUppercase}
-
-\titleformat{\section}{\normalfont\bfseries\large}{\thesection.}{1em}{\MakeUppercase}
-\titlespacing*{\section} {0pt} {15pt} {15pt} % left, before, after
-
-\titleformat{\subsection}{\normalfont\bfseries\large}{\thesubsection.}{1em}{}
-\titlespacing*{\subsection} {0pt} {10pt} {10pt}
-
-\titleformat{\subsubsection}{\normalfont\bfseries\large}{}{1em}{}
-\titlespacing*{\subsubsection} {0pt} {10pt} {10pt}
 
 
 % HEADER AND FOOTER

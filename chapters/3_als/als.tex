@@ -7,23 +7,20 @@
 This chapter is an extension of work that I have previously presented in poster form at the OHBM conference.
 I have benefitted from constructive theoretical discussions with John Shawe-Taylor and Janaina Mourao-Miranda, as well as insights into result interpretation from Janaina and Rick Adams.
 
-The core focus of this part of my PhD research shifts towards understanding and improving the regularization in Canonical Correlation Analysis (CCA) models.
+The core focus of this part of my PhD research was understanding and improving the regularization in Canonical Correlation Analysis (CCA) models.
 Traditional CCA models often exhibit shortcomings when grappling with high-dimensional data, a challenge particularly acute in the context of brain-behavior studies.
-In response, this chapter introduces Flexible Regularized Alternating Least Squares (FRALS), an optimized framework for regularized CCA.
+Firstly, they are prone to overfitting, leading to spurious correlations and poor generalization.
+Secondly, even when the correlations are genuine, the models are often difficult to interpret, making it hard to draw meaningful conclusions. This is especially problematic in the context of brain-behavior studies, where the goal is to understand the relationship between brain activity and behavior and we are less interested in predicting the latent variables themselves.
 
 \subsection{Problem Statement}\label{subsec:problem-statement}
 
-Classical CCA methods struggle with high-dimensional data, leading to problems like overfitting and spurious conclusions.
-We aim to investigate the role of model priors in CCA by using simulated and real data to show that the best model performance is achieved when the model priors match the data-generating priors.
-Further, we delve into the implications of regularizing weights and loadings, arguing that regularized weights may
-improve out-of-sample correlation but are less interpretable than loadings.
+We aim to tackle two key challenges with traditional CCA methods: overfitting and lack of interpretability. By focusing on the role of model priors, we use simulated and real data to demonstrate how optimal performance is achieved when the model priors align with the data-generating priors. We also explore the trade-offs between regularizing weights for better out-of-sample correlations and maintaining interpretability.
 
 \subsection{Contributions}\label{subsec:contributions}
 
-This chapter brings several contributions to the field of multiview machine learning and specifically to the application of CCA in brain-behavior studies.
-First, we review existing methods for generating simulated data in CCA research and propose a new method based on the probabilistic model of CCA. We use this to justify focusing on the comparison of loadings rather than weights.
-Second, we introduce FRALS, a novel and flexible framework that allows for the utilization of any regularized least squares solver, thereby offering a more robust defense against overfitting.
-Our experimental results demonstrate that FRALS shows promise in terms of out-of-sample correlation but also reveal its computational limitations, serving as an educational stepping stone for future work in this area.
+Our contributions are twofold. First, we advocate for a more principled approach to data generation in CCA studies, highlighting the importance of understanding the underlying assumptions. This leads us to recommend focusing on loadings for interpretability when the goal is to understand associations rather than predict latent variables. 
+
+Second, we introduce Flexible Regularized Alternating Least Squares (FRALS), a flexible and robust framework that can incorporate any regularized least squares solver, thus providing an effective defense against overfitting. Our experiments reveal both the promising aspects of FRALS in terms of out-of-sample correlation and its computational limitations, offering a roadmap for future research in this area.
 
 
 \section{Background}\label{sec:background}

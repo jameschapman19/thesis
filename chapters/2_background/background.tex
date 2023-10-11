@@ -1,11 +1,6 @@
 \chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}
 \label{chap:background}
 \minitoc
-
-\chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}
-\label{chap:background}
-\minitoc
-
 \section{Introduction to Machine Learning and Multiview Learning}
 
 Machine learning automates data analysis, allowing models to learn patterns and make decisions. It is divided into three primary paradigms: supervised, unsupervised, and reinforcement learning. This thesis focuses on \textit{multiview machine learning}, a specialized domain dealing with data that contain multiple `views' or types of information. 
@@ -414,10 +409,10 @@ This method is particularly beneficial when \( p \)is large.
 Kernel Canonical Correlation Analysis (KCCA) extends CCA to capture nonlinear relationships. The optimization problem for KCCA is:
 
 \begin{align}
-    & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha_1^{\top}K_1^{\top}K_2\alpha_2  \}\\
+    & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha_1^{\top}K\spstop{1}K\sps{2}\alpha_2  \}\\
     & \text{subject to:} \notag\\
-    & \alpha_1^{\top}K_1^{\top}K_1\alpha_1=1 \notag\\
-    & \alpha_2^{\top}K_2^{\top}K_2\alpha_2=1 \notag
+    & \alpha_1^{\top}K\spstop{1}K\sps{1}\alpha_1=1 \notag\\
+    & \alpha_2^{\top}K\spstop{2}K\sps{2}\alpha_2=1 \notag
 \end{align}
 
 
@@ -539,6 +534,18 @@ Lastly, the sparse diagonal CCA proposed by \cite{asteris2016simple} is limited 
 
 These challenges collectively point to an urgent need for CCA models that are not only more interpretable and flexible but also computationally efficient for high-dimensional data.
 This need strongly motivates the contributions of the present thesis.
+
+
+\subsection{Non-linear CCA}
+
+\subsubsection{Kernel CCA}
+
+Kernel CCA (KCCA) is a non-linear extension of CCA that uses the kernel trick to find non-linear relationships between variables.
+
+\subsubsection{Deep CCA}
+
+Deep CCA (DCCA) is a non-linear extension of CCA that uses deep neural networks to find non-linear relationships between variables.
+
 
 
 \section{Multiview Learning in Neuroimaging}
