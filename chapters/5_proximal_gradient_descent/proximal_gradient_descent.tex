@@ -103,7 +103,7 @@ In summary, GraphNet offers a regularization technique that is not only sparse b
 This makes it a compelling choice for neuroimaging applications where a smooth representation of the brain is desired.
 
 
-\section{Methods}
+\section{Contributions}
 \subsection{Proximal CCA-EY}
 We introduce a formulation called Proximal CCA-EY that extends the Generalized Eigenvalue Problem (GEP) formulation for CCA. In this extended formulation, \( W = (W_1, W_2) \), with each set of weights potentially subject to a different regularization term.
 By adding regularization terms to the objective function, we can solve this regularized GEP using proximal gradient descent algorithms.
@@ -138,6 +138,24 @@ For \( L_1 \) regularization, \( \mathcal{R}_i(W_i) = \| W_i \|_1 \), and the pr
 \subsubsection{Total Variation Regularization}
 For Total Variation regularization, \( \mathcal{R}_i(W_i) = \text{TV}(W_i) \), where TV stands for the Total Variation.
 The corresponding proximal operator can be efficiently computed using existing methods.
+
+\subsection{ProxTorch}
+
+The field of constrained and regularized optimization has a range of software tools designed for specialized tasks \cite{Moolekamp, ParsimonY}. Some of these tools, such as PyProximal \cite{pyproximal}, are restricted to numpy-based computational environments. Meanwhile, PyTorch \cite{paszke2019pytorch}, a deep learning framework with dynamic computation graph and GPU support, did not offer native integration for proximal operators. 
+
+\texttt{ProxTorch} was developed to provide a comprehensive library of proximal operators that are compatible with PyTorch tensors. This compatibility allows for more streamlined development and optimization processes for models that incorporate proximal operators, all within the PyTorch framework.
+
+\subsubsection{GPU Acceleration}
+
+The performance of \texttt{ProxTorch} and \texttt{Nilearn} was compared, focusing on the Total Variation-L1 (TVL1) proximal operator. As indicated in Figure \ref{fig:proxtorch-benchmark}, \texttt{ProxTorch} facilitates TVL1 regularization with significant computational efficiency, particularly on large datasets, when GPU-accelerated.
+
+\begin{enumerate}
+    \item \textbf{On CPUs:} \texttt{ProxTorch} outperformed \texttt{Nilearn}, even in CPU-only settings.
+    
+    \item \textbf{GPU Acceleration:} GPU utilization led to a noticeable increase in performance scalability for \texttt{ProxTorch}, especially as the dimensions of the input data expanded. 
+    
+    \item \textbf{Data Scale:} The benefits of GPU acceleration were more pronounced with larger datasets, establishing \texttt{ProxTorch} as a viable option for large-scale, computationally intensive optimization problems involving TVL1 regularization.
+\end{enumerate}
 
 
 \section{Experiment 1: Simulated Data Experiments}
