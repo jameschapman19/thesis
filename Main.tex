@@ -31,8 +31,6 @@
 \renewcommand{\contentsname}{\normalfont\bfseries\LARGE{CONTENTS}}
 \renewcommand{\listfigurename}{\normalfont\bfseries\LARGE{LIST OF FIGURES}}
 \renewcommand{\listtablename}{\normalfont\bfseries\LARGE{LIST OF TABLES}}
-\renewcommand{\listpublicationsname}{\normalfont\bfseries\LARGE{LIST OF PUBLICATIONS}}
-
 
 % HEADER AND FOOTER
 \pagestyle{fancy}  % Set Page Style (Header and Footer Style)
@@ -120,20 +118,21 @@ This thesis contributes to the advancement of machine learning and biomedical da
 
 
 % -------------------  LIST OF Publication ---------------------
-\newpage
-\include{chapters/publications}
+% \newpage
+% \include{chapters/publications}
+% \addcontentsline{toc}{chapter}{Publications} % Add List of figures into 
 
 % -------------------  LIST OF FIGURES --------------------
 \newpage 
 % {\let\oldnumberline\numberline       % Uncomment to add the word 'Figure' to figure number in List of Figures
 %\renewcommand{\numberline}{\figurename~\oldnumberline}  
 \listoffigures%
-% \addcontentsline{toc}{chapter}{List of Figures} % Add List of figures into contents without any numeration 
+% \mtcaddchapter[List of Figures] % Add List of figures into contents without any numeration 
 
 % -------------------  LIST OF TABLES ---------------------
 \newpage
 \listoftables 
-% \addcontentsline{toc}{chapter}{List of Tables} % Add List of tables into contents without any numeration 
+% \mtcaddchapter[List of Tables] % Add List of tables into contents without any numeration 
 
 % -------------------  ACRONYMS ---------------------
 \newpage
@@ -150,13 +149,12 @@ This thesis contributes to the advancement of machine learning and biomedical da
 %\textbf{Keywords:} Machine Learning, Neuroimaging, Canonical Correlation Analysis
 
 
-
 % ------------------  CHAPTER START  --------------------
 \include{chapters/1_introduction/introduction}
 
-%\include{chapters/2_background/background}
+\include{chapters/2_background/background}
 %
-%\include{chapters/3_regularisation/regularisation}
+\include{chapters/3_regularisation/regularisation}
 %
 %\include{chapters/4_gradient_descent/gradient_descent}
 %
@@ -169,9 +167,9 @@ This thesis contributes to the advancement of machine learning and biomedical da
 
 % -------------------  BIBLIOGRAPHY ---------------------
 \newpage
-\addcontentsline{toc}{chapter}{References} % Adds References Section to Table of Contents
+% \nocite{*}
+% \mtcaddchapte[References] % Adds References Section to Table of 
 \printbibliography[title = {References}]
-
 
 \end{document}
 %  -------------------------------------------------

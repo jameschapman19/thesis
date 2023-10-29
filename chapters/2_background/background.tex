@@ -1,6 +1,6 @@
-\chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}
-\label{chap:background}
+\chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}\label{chap:background}
 \minitoc
+
 \section{Introduction to Machine Learning and Multiview Learning}
 
 Machine learning automates data analysis, allowing models to learn patterns and make decisions. It is divided into three primary paradigms: supervised, unsupervised, and reinforcement learning. This thesis focuses on \textit{multiview machine learning}, a specialized domain dealing with data that contain multiple `views' or types of information. 
@@ -400,7 +400,8 @@ However, this approach has computational complexity \(O(n^3)\)and may suffer fro
 
 \subsubsection{PCA-CCA}
 
-The primary advantage of using PCA-CCA is computational efficiency, especially for high-dimensional data.
+One way to reduce the complexity of solving GEPs is to use the PCA-CCA method, which first applies PCA to the data
+and then solves the GEP in the reduced space. The primary advantage of using PCA-CCA is computational efficiency, especially for high-dimensional data.
 The overall complexity of PCA-CCA is\(O(p^2K + p^3)\), where \( K \)is the number of reduced components.
 This method is particularly beneficial when \( p \)is large.
 
@@ -419,123 +420,6 @@ Kernel Canonical Correlation Analysis (KCCA) extends CCA to capture nonlinear re
 KCCA is computationally efficient for high-dimensional data (\(p>n\)) because its complexity scales with the number of samples\(n\), not the number of features\(p\).
 However, it requires access to all training data at test time, raising efficiency concerns.
 
-\subsection{Regularisation for High-Dimensional and Structured Data}
-
-Regularised solutions to the CCA problem are desirable both to provide a solution in the case where the number of features, \( p \) exceeds the number of observations, \( n \)as well as to improve the robustness of the projections in the case where we expect noisy observations \cite{branco2005robust} and/or to produce sparse solutions for better interpretability\cite{parkhomenko2009sparse}.
-
-\subsubsection{Ridge regularisation}\label{subsec:ridge-regularisation}
-
-Vinod proposed the `Canonical Ridge' which combined the PLS and CCA constraints in a single constrained optimisation \cite{vinod1976canonical}:
-
-\begin{align}
-     & u\sps{1}_{\text{opt}} = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} X\spstop{1} X\sps{2} u\sps{2} \} \\
-     & \text{subject to:} \notag \\
-     & (1 - \tau_1) u\spstop{1} X\spstop{1} X\sps{1} u\sps{1} + \tau_1 u\spstop{1} u\sps{1} = 1 \notag \\
-     & (1 - \tau_2) u\spstop{2} X\spstop{2} X\sps{2} u\sps{2} + \tau_2 u\spstop{2} u\sps{2} = 1 \notag
-\end{align}
-
-Where \( \tau_i \) is a mixing hyperparameter that makes the solution more or less CCA-like (\( c_i = 0 \)) or PLS-like (\( c_i = 1 \)) depending on the constraint.
-By once again forming the Lagrangian and taking partial derivatives, we have the first-order conditions:
-
-\begin{align}
-    & X\spstop{1} X\sps{2} u\sps{2} + \lambda_1 ((1-\tau_1) X\spstop{1} X\sps{1} u\sps{1} + \tau_1 u\sps{1} - 1) = 0 \\
-    & X\spstop{2} X\sps{1} u\sps{1} + \lambda_2 ((1-\tau_2) X\spstop{2} X\sps{2} u\sps{2} + \tau_2 u\sps{2} - 1) = 0
-\end{align}
-
-And this gives us the eigenvalue problems \cite{rosipal2005overview}:
-
-\begin{align}
-    & ((1-\tau_1) X\spstop{1} X\sps{1} + \tau_1 I)^{-1} X\spstop{1} X\sps{2} ((1-\tau_2) X\spstop{2} X\sps{2} + \tau_2 I)^{-1} X\spstop{2} X\sps{1} u\sps{1} = \lambda^2 u\sps{1} \notag \\
-    & ((1-\tau_2) X\spstop{2} X\sps{2} + \tau_2 I)^{-1} X\spstop{2} X\sps{1} ((1-\tau_1) X\spstop{1} X\sps{1} + \tau_1 I)^{-1} X\spstop{1} X\sps{2} u\sps{2} = \lambda^2 u\sps{2}
-\end{align}
-
-The main difference between this eigenvalue problem and the CCA eigenvalue problem is the substitution of the matrices \(X\spstop{1} X\sps{1}\) and \(X\spstop{2} X\sps{2}\) for the matrices \( ((1-\tau_1) X\spstop{1} X\sps{1} + \tau_1 I) \) and \( ((1-\tau_2) X\spstop{2} X\sps{2} + \tau_2 I) \).
-We can therefore see that this regularisation is equivalent to adding a constant to the diagonal of the covariance matrix \(X\spstop{i} X\sps{i}\).
-
-\subsubsection{Sparse CCA}
-
-Sparse CCA methods aim to find sparse vectors \(u\sps{1}\) and \(v\sps{2}\) that optimize the correlation while maintaining interpretability.
-
-\textbf{Sparse PLS: Penalized Matrix Decomposition}Witten's Penalized Matrix Decomposition (PMD) \cite{witten2009penalized} provides an approximate solution to the sparse CCA problem by altering the constraints of the classical CCA formulation.
-Specifically, PMD replaces the constraint \(u\spstop{1} X\sps{1} X\sps{1} u\sps{1}=1\) with \(u\spstop{1} u\sps{1} \leq 1\).
-The optimization problem for PMD is then given by:
-
-\begin{align}
-    \label{eq:pmd}
-    & u^{opt}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1} X\spstop{1} X\sps{2} u\sps{2} \} \\
-    & \text{subject to:} \notag \\
-    & u\spstop{1} u\sps{1} \leq 1 \notag \\
-    & u\spstop{2} u\sps{2} \leq 1 \notag \\
-    & P(u\sps{1}) \leq c_1 \notag \\
-    & P(u\sps{2}) \leq c_2 \notag
-\end{align}
-
-Penalized CCA Parkhomenko et al.\ \cite{parkhomenko2009sparse} also proposed a sparse CCA variant that
-operates directly on correlation matrices.
-Their optimization problem is formulated as:
-
-\begin{align}
-    \label{eq:pmd}
-    & u^{opt}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1} X\spstop{1} X\sps{2} u\sps{2} + P(u\sps{1})+ P(u\sps{2})\}\\
-    & \text{subject to:} \notag \\
-    & u\spstop{1} u\sps{1} \leq 1 \notag \\
-    & u\spstop{2} u\sps{2} \leq 1 \notag \\
-\end{align}
-
-Iterative Penalized Least Squares Some approaches to sparse Canonical Correlation Analysis (CCA) are related to alternating regression forms, such as sparse alternating regressions~\cite{wilms2015sparse}.
-Mai et al.~\cite{mai2019iterative} proved that these methods can yield true global solutions to projection-length constrained lasso regression problems.
-However, this holds true only for one-homogeneous penalties, meaning the regularization function must take the form \( P((\mu + 1)\theta) = (\mu + 1)P(\theta) \). Consequently, we need \( P(\theta) \) to be a one-homogeneous function to use regularized alternating least squares for solving regularized CCA objectives.
-
-\begin{align}
-    \label{eq:mai}
-    u^{opt} &= \underset{u}{\mathrm{argmin}} \left\{ \|Xu - y\|_2^2 + P(u) \right\} \\
-    &\text{subject to:} \notag \\
-    &u\spstop{1} X\spstop{1} X\sps{1} u\sps{1}=1 \notag
-\end{align}
-
-However, the one homogenous penalty in practice limits the flexibility of the method.
-For example, the elastic net penalty is not one-homogenous and therefore cannot be used with this method.
-
-\textbf{Sparse Diagonal CCA}\cite{asteris2016simple} propose a combinatorial algorithm for sparse diagonal CCA. Their algorithm operates on a low-rank approximation of the input data and scales linearly with the number of input variables.
-The algorithm precisely controls the sparsity of the extracted canonical vectors and offers data-dependent global approximation guarantees based on the spectrum of the input data.
-
-Formally, they optimize the following problem:
-
-\begin{align}
-    \label{eq:asteris}
-    u^{opt}&=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}X\spstop{1} X\sps{2}u\sps{2}\}\\ 
-    &\text{subject to:} \notag \\
-    &||u\sps{1}||_2 = 1 \\
-    &||u\sps{1}||_0 \leq s_x \\
-    &||u\sps{2}||_2 = 1 \\
-    &||u\sps{2}||_0 \leq s_y
-\end{align}
-
-Their approach balances between exhaustive search and thresholding methods by focusing on a principal subspace of the input matrix $\Sigma_{X\sps{1}X\sps{2}}$ spanned by its leading \( r \geq 1 \) singular vector pairs.
-This allows them to find an (approximately) optimal pair of supports without evaluating the entire set of possible supports, thus making it both efficient and parallelizable.
-
-\subsubsection{Critical Commentary on Existing Methods and Motivation for the Present Work}
-
-Existing methods in regularized Canonical Correlation Analysis (CCA) have provided valuable insights, but there is still much room for improvement, especially when handling high-dimensional data—a pressing concern that has garnered significant attention in contemporary research.
-
-Ridge CCA is a stabilizing force in the solution space but falls short in providing sparse solutions.
-This makes the interpretation of the canonical vectors challenging, a shortcoming that is especially glaring in high-dimensional settings where interpretability is crucial.
-Additionally, the method demands a careful selection of the regularization parameter, a process that is not always straightforward.
-
-PCA-CCA simplifies computational demands by first reducing dimensionality using PCA. However, this risks overlooking subtle but crucial relationships between variables, as it focuses on leading principal components.
-This method, too, faces the challenge of interpretability, a recurring theme in PCA-based approaches.
-
-Witten's PMD, despite its influence, effectively performs Sparse PLS, diverging from its initial framing as sparse CCA due to its use of an identity covariance assumption.
-Similarly, Penalized CCA \cite{parkhomenko2009sparse} hasn't gained substantial traction, possibly because its penalty terms make sparsity control cumbersome.
-This issue also manifests in the Iterative Penalized Least Squares (IPLS) approach, which adds another layer of complexity: the selection of appropriate regularization parameters.
-Moreover, the computational expense of solving high-dimensional IPLS problems is considerable, particularly when iterative steps are required.
-
-Lastly, the sparse diagonal CCA proposed by \cite{asteris2016simple} is limited in its ability to capture complex relationships between variables due to its assumption of diagonal covariance matrices.
-
-These challenges collectively point to an urgent need for CCA models that are not only more interpretable and flexible but also computationally efficient for high-dimensional data.
-This need strongly motivates the contributions of the present thesis.
-
-
 \subsection{Non-linear CCA}
 
 \subsubsection{Kernel CCA}
@@ -545,8 +429,6 @@ Kernel CCA (KCCA) is a non-linear extension of CCA that uses the kernel trick to
 \subsubsection{Deep CCA}
 
 Deep CCA (DCCA) is a non-linear extension of CCA that uses deep neural networks to find non-linear relationships between variables.
-
-
 
 \section{Multiview Learning in Neuroimaging}
 
