@@ -28,45 +28,17 @@ Sometimes a separate holdout set, distinct from the test set, is used for final 
 
 Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as 'views'. These techniques can be broadly classified into supervised, unsupervised, and self-supervised multiview learning, with some algorithms straddling the boundary between the two. 
 
-\begin{figure}
-    \centering
-    \begin{tikzpicture}[level distance=1.5cm,
-    level 1/.style={sibling distance=3cm},
-    level 2/.style={sibling distance=2cm}]
-    
-    \node {Multiview Machine Learning}
-        child {node {Supervised Multiview Learning}}
-        child {node {Unsupervised Multiview Learning}}
-        child {node {Self-Supervised Multiview Learning}
-            child {node {Pretext Tasks}}
-            child {node {Learning Representations}}
-            child {node {Learning Associations}}
-        };
-        
-    \end{tikzpicture}
-    \caption{Categories of Multiview Machine Learning}
-    \label{fig:multiview_ml}
-\end{figure}
-
 \subsubsection{Supervised Multiview Learning}
 
 In supervised multiview learning, one view serves as the input while the other view is treated as the target label. The algorithm learns to predict the target view based on the input view, leveraging the information from both to enhance the predictive performance. This approach is especially useful when each view contains complementary information that can improve the model's accuracy or robustness.
-
-\subsubsection{Unsupervised Multiview Learning}
-
-In unsupervised multiview learning, the primary focus is on capturing the inherent associations between different views without relying on explicit labels. For instance, Canonical Correlation Analysis (CCA) aims to find a common space where the correlation between different views is maximized. However, in this context, CCA does not inherently posit that these correlated views arise from a single latent source.
 
 \subsubsection{Self-Supervised Multiview Learning}
 
 Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels. The cornerstone of SSL is the concept of a `pretext task,' a learning task created from the data that trains the model to capture useful features or representations. In the context of multiview machine learning, self-supervised learning operates under the assumption that different views are generated from a common latent variable. The pretext task, in this case, is to predict these latent variables from the given views. This not only enables the model to learn associations between views but also allows it to derive robust and informative representations for subsequent tasks like classification or regression.
 
-\subsubsection{Blurred Boundaries}
-
-While these categorizations provide a useful framework, it is important to note that the boundaries between unsupervised and self-supervised multiview learning are not always distinct. Algorithms like CCA can be interpreted differently based on context and specific datasets. In certain scenarios, CCA may function in an unsupervised manner by learning associations between
-
 \section{Learning Representations: Definitions and Notation}
 
-Suppose we have a sequence of vector-valued random variables $X^{(i)} \in \R^{D_i}$ for $i \in \{1, \dots, I \}$
+Suppose we have a sequence of vector-valued random variables $X\sps{i} \in \R^{D_i}$ for $i \in \{1, \dots, I \}$
 We want to learn meaningful $K$-dimensional representations
 \begin{equation}\label{eq:general-form-of-representations}
     Z\sps{i} = f\sps{i}( X\sps{i}; \theta\sps{i}).
@@ -103,23 +75,25 @@ where $u_k$ are the orthonormal basis vectors:
 The primary goal of PCA is to maximize the variance of the projections \(Z_k\). Mathematically, this can be formulated
 as:
 \begin{align}
-    u_{\text{opt}} &= \underset{u}{\text{argmax}} \left( u^\top X^\top Xu \right) \\
+    u_{\text{opt}} &= \underset{u}{\text{argmax}} \left( u^\top \Sigma u \right) \\
     \text{subject to:} \notag \\
     u^\top u &= 1 \notag
 \end{align}
 
+Where \(\Sigma = \mathbb{E}[X^\top X]\) is the covariance matrix of the data. The solution to this optimization problem is the eigenvector associated with the largest eigenvalue of \(\Sigma\).
+
 \paragraph{Optimization and Solution}
 The Lagrangian for this problem is:
 \begin{equation}
-    f(u,\lambda) = u^\top X^\top Xu + \lambda(1 - u^\top u),
+    f(u,\lambda) = u^\top \Sigma u + \lambda(1 - u^\top u),
 \end{equation}
 where \(\lambda\) is the Lagrange multiplier. Differentiating the Lagrangian yields the first-order conditions:
 \begin{align}
-    X^\top X u &= \lambda u, \\
+    \Sigma u &= \lambda u, \\
     u^\top u &= 1.
 \end{align}
 
-This transforms the problem into an eigenvalue equation for the covariance matrix \(X^\top X\), which can be efficiently solved using standard libraries such as scikit-learn\cite{pedregosa2011scikit}.
+This transforms the problem into an eigenvalue equation for the covariance matrix \(\Sigma\), which can be efficiently solved using standard libraries such as scikit-learn\cite{pedregosa2011scikit}.
 
 The first principal component corresponds to the eigenvector associated with the largest eigenvalue \(\lambda\). Subsequent components are ordered by their corresponding eigenvalues.
 
@@ -131,7 +105,7 @@ data, PCA's main limitation arises: it only accounts for variance within a singl
 Partial Least Squares (PLS)\cite{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as `views". PLS can be seen as a generalization of PCA, where PCA becomes a special case when the two views are identical. The optimization problem for PLS can be formulated as:
 
 \begin{align}
-     u\sps{1}_{\text{opt}} &= \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} X\spstop{1} X\sps{2} u\sps{2} \} \\
+     u\sps{1}_{\text{opt}} &= \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} \Sigma_{12} u\sps{2} \} \\
      \text{subject to:} \notag \\
      u\spstop{1}u\sps{1} &= 1 \notag \\
      u\spstop{2}u\sps{2} &= 1 \notag
@@ -144,14 +118,14 @@ where \( X\sps{1} \in \mathbb{R}^{n \times p_1} \) and \( X\sps{2} \in \mathbb{R
 The Lagrangian for this optimization problem can be formulated as:
 
 \begin{equation}
-f(u\sps{1}, \lambda) = u\spstop{1} X\spstop{1} X\sps{2} u\sps{2} + \lambda_1 (1 - u\spstop{1}u\sps{1}) + \lambda_2 (1 - u\spstop{2}u\sps{2})
+f(u\sps{1}, \lambda) = u\spstop{1} \Sigma_{12} u\sps{2} + \lambda_1 (1 - u\spstop{1}u\sps{1}) + \lambda_2 (1 - u\spstop{2}u\sps{2})
 \end{equation}
 
 Upon deriving the first order conditions, we get:
 
 \begin{align}
-    X\spstop{2} X\sps{1} u\sps{1} &= \lambda_2 u\sps{2} \\
-    X\spstop{1} X\sps{2} u\sps{2} &= \lambda_1 u\sps{1} \\
+    \Sigma_{21} u\sps{1} &= \lambda_2 u\sps{2} \\
+    \Sigma_{12} u\sps{2} &= \lambda_1 u\sps{1} \\
     u\spstop{1}u\sps{1} &= 1 \\
     u\spstop{2}u\sps{2} &= 1
 \end{align}
@@ -159,11 +133,11 @@ Upon deriving the first order conditions, we get:
 By substituting the constraint conditions into these equations, we find that \( \lambda_1 = \lambda_2 = \lambda \) by symmetry. Further simplification yields:
 
 \begin{align}
-    X\spstop{2}X\sps{1} X\spstop{1} X\sps{2} u\sps{2} &= \lambda^2 u\sps{2} \\
-    X\spstop{1}X\sps{2} X\spstop{2} X\sps{1} u\sps{1} &= \lambda^2 u\sps{1}
+    \Sigma_{21} \Sigma_{12} u\sps{2} &= \lambda^2 u\sps{2} \\
+    \Sigma_{12} \Sigma_{21} u\sps{1} &= \lambda^2 u\sps{1}
 \end{align}
 
-Thus, solving these equations will yield the \( u\sps{1} \) and \( u\sps{2} \) vectors as the eigenvectors of \( X\spstop{1} X\sps{2} X\spstop{2} X\sps{1} \) and \( X\spstop{2} X\sps{1} X\spstop{1} X\sps{2} \), respectively \cite{hoskuldsson1988pls}.
+Thus, solving these equations will yield the \( u\sps{1} \) and \( u\sps{2} \) vectors as the eigenvectors of \( \Sigma_{12} \Sigma_{21} \) and \( \Sigma_{21} \Sigma_{12} \), respectively \cite{hoskuldsson1988pls}.
 
 \textbf{Limitations: } The problem with applying PLS to neuroimaging and behavioural modalities is that PLS is not scale invariant and
 is therefore biased towards the largest principal components in the data \cite{helmer2020stability}.
@@ -185,8 +159,8 @@ This nuance renders CCA invariant to feature scale. The optimization problem for
 \begin{align}
      & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}X\spstop{1}X\sps{2}u\sps{2} \} \\
      & \text{subject to:} \notag \\
-     & u\spstop{1}X\spstop{1}X\sps{1}u\sps{1}=1 \notag \\
-     & u\spstop{2}X\spstop{2}X\sps{2}u\sps{2}=1 \notag
+     & u\spstop{1}\Sigma_{11}u\sps{1}=1 \notag \\
+     & u\spstop{2}\Sigma_{22}u\sps{2}=1 \notag
 \end{align}
 
 Although non-convex, numerous methods exist for solving the CCA problem, such as eigenvalue problems, generalized eigenvalue problems, block coordinate descent via alternating least squares regressions \cite{golub1995canonical,sun2008least} , and gradient descent \cite{via2007learning}.
@@ -196,10 +170,10 @@ Although non-convex, numerous methods exist for solving the CCA problem, such as
 The first-order conditions derived in the same manner as the PLS case are:
 
 \begin{align}\label{CCA:FOCs}
-     & X\spstop{2}X\sps{1}u\sps{1}=\lambda\sps{2} X\spstop{2}X\sps{2}u\sps{2} \\
-     & X\spstop{1}X\sps{2}u\sps{2}=\lambda\sps{1} X\spstop{1}X\sps{1}u\sps{1} \\
-     & u\spstop{1}X\spstop{1}X\sps{1}u\sps{1}=1 \\
-     & u\spstop{2}X\spstop{2}X\sps{2}u\sps{2}=1
+     & \Sigma_{21}u\sps{1}=\lambda\sps{2} \Sigma_{22}u\sps{2} \\
+     & \Sigma_{12}u\sps{2}=\lambda\sps{1} \Sigma_{11}u\sps{1} \\
+     & u\spstop{1}\Sigma_{11}u\sps{1}=1 \\
+     & u\spstop{2}\Sigma_{22}u\sps{2}=1
 \end{align}
 
 Substituting the second two conditions into the first two, we get \(\lambda\sps{1}=\lambda\sps{2}=\lambda\). Then, recognizing \(X_i^{\top}X_i\) as the covariance matrix \(\Sigma_{ii}\) and \(X_i^{\top}X_j\) as the cross-covariance matrix \(\Sigma_{ij}\), we obtain another pair of eigenvalue problems:
@@ -209,13 +183,13 @@ Substituting the second two conditions into the first two, we get \(\lambda\sps{
      & \Sigma_{22}^{-1}\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}u\sps{2}=\lambda^2u\sps{2} \notag
 \end{align}
 
-An alternative form of the CCA problem can be developed by reparameterizing \(u\sps{i*}=(X\spstop{i}X\sps{i})^{-\frac{1}{2}}u\sps{i}\). The optimization problem then becomes:
+An alternative form of the CCA problem can be developed by reparameterizing \(u\sps{i*}=(\Sigma_{ii})^{-\frac{1}{2}}u\sps{i}\). The optimization problem then becomes:
 
 \begin{align}
-     & u\sps{*}_{\text{opt}}=\underset{u\spstop{*}}{\mathrm{argmax}}\{ u\spstop{1*}(X\spstop{1}X\sps{1})^{-\frac{1}{2}}X\spstop{1}X\sps{2}(X\spstop{2}X\sps{2})^{-\frac{1}{2}}u\sps{2*} \} \\
+     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}\Sigma_{11}^{-\frac{1}{2}}\Sigma_{12}\Sigma_{22}^{-\frac{1}{2}}u\sps{2} \} \\
      & \text{subject to:} \notag \\
-     & u\spstop{1*}u\sps{1*}=1 \notag \\
-     & u\spstop{2*}u\sps{1*}=1 \notag
+     & u\spstop{1}u\sps{1}=1 \notag \\
+     & u\spstop{2}u\sps{1}=1 \notag
 \end{align}
 
 This reparameterized form will later underpin Deep Canonical Correlation Analysis (DCCA).
@@ -228,7 +202,7 @@ We can also represent the system of equations in equation \ref{CCA:FOCs} as a ma
 
 \begin{align}
     \begin{pmatrix}
-        0                    & \Sigma_{12} \\
+        0 & \Sigma_{12} \\
         \Sigma_{21} & 0
     \end{pmatrix}
     \begin{pmatrix}
@@ -272,12 +246,12 @@ Thus, LDA can be thought of as a constrained form of CCA, tailored to classifica
 
 This perspective unifies the two algorithms and shows that the core objective—finding meaningful relationships or directions in the data—is shared between both CCA and LDA.
 
-\textbf{Multi-view CCA} is a straightforward extension of CCA to the case of 3-or more datasets.
+\textbf{Multiview CCA} is a straightforward extension of CCA to the case of 3-or more datasets.
 The optimization problem for MCCA can be stated as:
 \begin{align}
-     & u_{\text{opt}} = \underset{u}{\mathrm{argmax}} \sum_{i=1}^{m} \sum_{j=1, j \neq i}^{m} u\sps{i\top} X\sps{i\top} X\sps{j} u\sps{j} \\
+     & u_{\text{opt}} = \underset{u}{\mathrm{argmax}} \sum_{i=1}^{m} \sum_{j=1, j \neq i}^{m} u\spstop{i} \Sigma_{ij} u\sps{j} \\
      & \text{subject to:} \notag \\
-     & \sum_{i=1}^{m} u\sps{i\top} X\sps{i\top} X\sps{i} u\sps{i} = 1 \notag
+     & \sum_{i=1}^{m} u\spstop{i} \Sigma_{ii} u\sps{i} = 1 \notag
 \end{align}
 
 The generalized eigenvalue problem (GEP) can be written in matrix form as follows:
