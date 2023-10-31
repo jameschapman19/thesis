@@ -195,25 +195,26 @@ Most obviously, if two features are perfectly correlated, the model is not ident
 Regularization is a powerful tool for addressing these problems, and has been widely used in Linear Regression and Inverse Problems.
 Moreover, regularization can help us improve the interpretability of the results by encouraging sparsity in the weights and/or loadings.
 
-\subsubsection{Shrinkage Regularization and PLS}
+\subsubsection{Shrinkage Regularization}
 
-Shrinkage regularization is a simple and effective method for improving the performance of linear models in high-dimensional settings.
+Shrinkage regularization is an effective method for improving the performance of linear models in high-dimensional settings.
 Shrinkage methods bias models towards lower variance solutions by shrinking the model parameters (weights) towards zero.
-Shrinkage operates under the assumption that larger principal components are more likely to be signal than noise and therefore should be preserved, while smaller principal components are more likely to be noise and their associated parameters should be shrunk towards zero.
-Furthermore,
+Shrinkage regularization works on the premise that, generally, larger principal components are more likely to represent meaningful data patterns rather than noise.
 
-\textbf{PLS as shrinkage regularization}
+\paragraph{PLS as Shrinkage Regularization}
 
-PLS can be interpreted as a shrinkage method for CCA.
-We can explain this by considering an analogy between CCA and Linear Regression (indeed Linear Regression is a special case of CCA where $X\sps{2}$ has one feature).
+PLS can be interpreted as a form of shrinkage regularization applied to CCA. We can explain this by considering an analogy between CCA and Linear Regression (indeed Linear Regression is a special case of CCA where \(X^{(2)}\) has one feature).
+
 In Linear Regression, the ridge regression solution is given by:
-
 \begin{align}
-    \hat{\beta}_{\text{ridge}} = (\Sigma_{X,X} + \lambda I)^{-1} \Sigma_{X,y}
+    \hat{\beta}_{\text{ridge}} = ((1-\lambda)\Sigma_{X,X} + \lambda I)^{-1} \Sigma_{X,y}
 \end{align}
+Where \(\lambda\) is the regularization parameter between 0 and 1. The ridge penalty acts in two important ways:
+\begin{itemize}
+    \item It shrinks the weights towards zero.
+    \item It biases the solution to high covariance directions rather than high correlation directions.
+\end{itemize}
 
-Where $\lambda$ is the regularization parameter.
-The ridge penalty acts in two important ways: it shrinks the weights towards zero, and it biases the solution to high covariance directions rather than high correlation directions.
 As $\lambda$ becomes large, $\lim_{\lambda \to \infty} (\Sigma_{X,X} + \lambda I)^{-1} = (\lambda I)^{-1}$
 , so that $\hat{\beta}_{\text{ridge}}=\frac{\Sigma_{X,y}}{\lambda}$, which is precisely the covariance of the features of $X$ with $Y$ scaled by $\lambda$ (and shrunk towards zero for $\lambda \geq 1$).
 Notice that the ridge regression solution is no longer sensitive to the correlation of features in $X$.
@@ -221,26 +222,30 @@ Additionally, notice that for sufficiently large $\lambda$, $(\Sigma_{X,X} + \la
 
 Now consider the CCA problem.
 Firstly, recall that PLS and CCA are equivalent up to a scaling when the covariance matrices are identity matrices, a similar relationship to the relationship between Linear and Ridge Regression.
-Consider the form of CCA given in equation:
+Consider the form of CCA given in equation \ref{eq:cca}:
 
-\begin{align}\label
-     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}(\Sigma_{11}+ \lambda_1 I)^{-\frac{1}{2}}\Sigma_{12}(\Sigma_{22}+\lambda_2 I)^{-\frac{1}{2}}u\sps{2} \} \\
+\begin{align}\label{eq:cca}
+     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}(\Sigma_{11}+ c_1 I)^{-\frac{1}{2}}\Sigma_{12}(\Sigma_{22}+c_2 I)^{-\frac{1}{2}}u\sps{2} \} \\
      & \text{subject to:} \notag \\
-     & u\spstop{1}u\sps{1}=1, u\spstop{2}u\sps{1}=1 \notag
+     & u\spstop{1}u\sps{1}=1, u\spstop{2}u\sps{2}=1 \notag
 \end{align}
 
-As we increase $\lambda_1$ and $\lambda_2$, $\lim_{\lambda_i \to \infty} (\Sigma_{ii}+ \lambda_i I)^{-\frac{1}{2}}= (\lambda I)^{-1}$ so that the objective approaches:
+As we increase $c_1$ and $c_2$, $\lim_{c_i \to \infty} (\Sigma_{ii}+ c_i I)^{-\frac{1}{2}}= (c I)^{-1}$ so that the objective approaches:
 
 \begin{align}\label
-     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}(\lambda_1 I)^{-1}\Sigma_{12}(\lambda_2 I)^{-1}u\sps{2} \} \\
+     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}(c_1 I)^{-1}\Sigma_{12}(c_2 I)^{-1}u\sps{2} \} \\
         & \text{subject to:} \notag \\
         & u\spstop{1}u\sps{1}=1, u\spstop{2}u\sps{1}=1 \notag
 \end{align}
 
 Which is precisely the PLS objective and constraints with an arbitrary scaling of the covariance matrix $\Sigma_{12}$.
 For this reason, we can consider PLS as a shrinkage method for CCA equivalent to adding a very large ridge regularization.
+This has two important consequences: firstly, it biases the solution towards the largest principal components, and secondly, it is well defined even when the number of features exceeds the number of observations.
+However, PLS is not a nuanced as a tool for regularization because it offers limited control over the degree of regularization applied.
 
-\textbf{Ridge regularisation} Vinod proposed the `Canonical Ridge' which combined the PLS and CCA constraints in a single constrained optimisation~\cite{vinod1976canonical}:
+\paragraph{Ridge Regularisation}
+
+Vinod proposed the 'Canonical Ridge' which combined the PLS and CCA constraints in a single constrained optimisation~\cite{vinod1976canonical}:
 
 \begin{align}
      & u\sps{1}_{\text{opt}} = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} \hat{\Sigma_{12}} u\sps{2} \} \\
@@ -270,32 +275,74 @@ And this gives us the generalized eigenvalue problem~\cite{rosipal2005overview}:
 The main difference between this eigenvalue problem and the CCA eigenvalue problem is the substitution of the matrices \(\Sigma_{11}\) and \(\Sigma_{22}\) for the matrices \( ((1-c_1) \Sigma_{11} + c_1 I) \) and \( ((1-c_2) \Sigma_{22} + c_2 I) \).
 We can therefore see that this regularisation is equivalent to adding a constant `ridge' to the diagonal of the covariance matrix \(X\spstop{i} X\sps{i}\).
 
-\textbf{PCA-CCA} can be used as a regularisation method for CCA by using only the first \( k \) principal components of each view as the input to CCA.
+\paragraph{PCA-CCA}
+
+PCA-CCA can be used as a regularisation method for CCA by using only the first \( k \) principal components of each view as the input to CCA.
 This reduces the dimensionality of the data and can help to avoid overfitting.
 However, it also risks overlooking subtle but crucial relationships between variables, as it focuses on leading principal components.
 
 While PCA-CCA and rCCA are effective for finding signal in the presence of noise, they do not produce sparse
 solutions and so do not clearly lend themselves to interpretation.
 
-\subsubsection{Sparse PLS: Penalized Matrix Decomposition}
-Sparse CCA methods aim to find sparse vectors,\(u\sps{1}\) and \(u\sps{2}\)that optimize the correlation while maintaining interpretability. Witten's Penalized Matrix Decomposition (PMD) \cite{witten2009penalized} provides an approximate solution to the sparse CCA problem by altering the constraints of the classical CCA formulation.
+\paragraph{Visual Comparison of Shrinkage Techniques}
+
+The distinct effects of Ridge and PCA on the eigenvalues of the effective covariance matrices can be clearly visualized.
+As shown in Figure \ref{fig:shrinkage}, Ridge regularization uniformly reduces the magnitude of all principal components towards zero, with a proportionally greater effect on the smaller components.
+On the other hand, PCA-CCA, by focusing on leading principal components, only shrinks the smallest ones.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/regularisation/shrinkage/shrinkage.svg}
+    \caption{Comparison of the effect of OLS, Ridge, and PCA-CCA regularization on the eigenvalues of the covariance matrix.}
+    \label{fig:shrinkage}
+\end{figure}
+
+The visualization underscores the intrinsic nature of each regularization method:
+\begin{itemize}
+    \item \textbf{Unregularized}: Presents the unaltered spectrum, making it susceptible to noise but preserving potential subtle patterns.
+    \item \textbf{Ridge}: Applies consistent shrinkage across all components, reducing noise but possibly attenuating genuine signal.
+    \item \textbf{PCA}: Focuses on dominant patterns by shrinking smaller components, potentially missing subtle connections but offering a cleaner representation of strong associations.
+\end{itemize}
+The choice between these shrinkage techniques should in general be based on the nature of the data.
+We now transition to another essential regularization technique: sparse regularization.
+While shrinkage aims to prevent overfitting by pulling weight estimates towards zero to reduce variance, sparse regularization aims to set weights to zero with the added benefit of enhancing model interpretability.
+
+\subsubsection{Sparse Regularization}
+
+Sparse regularization is a powerful tool for improving the performance and interpretability of linear models.
+Sparse regularization encourages the model to use only a subset of the features, which can help to avoid overfitting and improve the interpretability of the model.
+Sparse regularization works on the premise that only a subset of the features are relevant to the model.
+Sparsity is typically achieved by adding either an L1 penalty or constraint \footnote{The L0 norm of the weight vector is the number of non-zero elements in the vector and is arguably a closer match to the goal, but the L0 norm is a) not a proper norm in the mathematical sense and b) not convex and so is difficult to optimize.}.
+The L1 penalty is defined as:
+
+\begin{align}
+    \|u\|_1 = \sum_i |u_i|
+\end{align}
+
+Intuitively, this is the sum of the absolute values of the elements of the vector.
+Now, with a foundational understanding of sparse regularization, we review a number of approaches to adding sparsity to the CCA problem.
+
+\paragraph{Sparse PLS: Penalized Matrix Decomposition}
+Penalized Matrix Decomposition (PMD) \cite{witten2009penalized} provides an approximate solution to the sparse CCA problem by altering the constraints of the classical CCA formulation.
 Specifically, PMD replaces the constraint \(u\spstop{1} \hat{\Sigma_{11}} u\sps{1} = 1\) with \(u\spstop{1} u\sps{1} \leq 1\).
 The optimization problem for PMD is then given by:
 
 \begin{align}
     & u^{opt}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1} \hat{\Sigma_{12}} u\sps{2} \} \\
     & \text{subject to:} \notag \\
-    & u\spstop{1} u\sps{1} \leq 1 \notag \\
-    & u\spstop{2} u\sps{2} \leq 1 \notag \\
-    & P(u\sps{1}) \leq c_1 \notag \\
-    & P(u\sps{2}) \leq c_2 \notag
+    & u\spstop{1} u\sps{1} \leq 1 , u\spstop{2} u\sps{2} \leq 1 \notag \\
+    & P(u\sps{1}) \leq c_1 , P(u\sps{2}) \leq c_2 \notag
 \end{align}
 
-Despite its influence, this method effectively performs Sparse PLS (SPLS) rather than sparse CCA, diverging from its
-initial framing as a sparse CCA method. For this reason, we refer to this method as SPLS in the rest of this thesis.
-There are a number of other sparse CCA methods that employ a similar assumption to SPLS\cite{parkhomenko2009sparse}.
+Despite its influence, this method effectively performs Sparse PLS (SPLS) rather than Sparse CCA as in the original work.
+For this reason, we refer to this method as SPLS in the rest of this thesis.
+There are a number of other sparse CCA methods that employ a similar assumption to SPLS\cite{parkhomenko2009sparse, waaijenborg2008quantifying}.
 
-\subsubsection{Sparse CCA: Least Squares Approaches}
+While SPLS is an extremely efficient method (it can be solved by iteratively multiplying $u\sps{1}$ by $\hat{\Sigma_{12}}$ and soft thresholding), it is clear that it is not always a good approximation to the sparse CCA problem.
+
+A number of approaches to Sparse CCA instead adopt a penalized least squares approach.
+
+\paragraph{Sparse CCA: Least Squares Approaches}
 
 It is well known that the CCA problem can be formulated as a constrained least squares problem with the intuition that
 for unit norm \(X\sps{1} u\sps{1}\) and \(X\sps{2} u\sps{2}\), correlation is maximized when the squared distance
@@ -336,13 +383,19 @@ alternative classical formulation of the CCA problem as a constrained least squa
 \end{gather*}
 
 Where \(U\sps{i}\) is the matrix of weights for the $i^{\text{th}}$ view and \(T\) is the matrix of latent variables. This
-approach has the benefit of being extendable to more than two views.
+approach has the benefit of being extendable to more than two views. The authors proposed to solve this problem using
+proximal gradient descent for penalties with a closed form proximal operator, such as the lasso penalty.
 
-These challenges collectively point to an urgent need for CCA models that are not only more interpretable and flexible but also computationally efficient for high-dimensional data.
+In this section, we have illustrated the benefits of shrinkage regularization (PCA-CCA, Ridge CCA, PLS) and sparse regularization (SPLS and Sparse CCA) for handling noisy and high-dimensional data with parsimonious solutions.
+In this chapter, we turn our attention to the problem of incorporating both tunable shrinkage and sparsity into the CCA problem for Brain-Behaviour associations.
 
 \section{Methods}
 
-In this section, we outline the methodologies employed in our study for Canonical Correlation Analysis (CCA) and related techniques. We begin with a description of Flexible Regularized Alternating Least Squares (FRALS), a versatile approach to solve the CCA problem. Following that, we discuss the experiment design, including data splitting, model selection, and comparisons. Additionally, we detail the generation of both simulated and real datasets used in our experiments, shedding light on their parameters and sources. This section serves as a comprehensive guide to the techniques and procedures underpinning our investigation.
+In this section, we outline the methodologies employed in our study for Canonical Correlation Analysis (CCA) and related techniques.
+We begin with a description of Flexible Regularized Alternating Least Squares (FRALS), a versatile approach to solve the CCA problem.
+Following that, we discuss the experiment design, including data splitting, model selection, and comparisons.
+Additionally, we detail the generation of both simulated and real datasets used in our experiments, shedding light on their parameters and sources.
+This section serves as a comprehensive guide to the techniques and procedures underpinning our investigation.
 
 \subsection{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least
 -squares-(frals)}

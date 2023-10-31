@@ -9,12 +9,6 @@ This is particularly striking given the widespread recognition that the availabi
 One glaring example of this trend is Sparse PLS. Despite its known limitations, Sparse PLS has effectively become the go-to method for sparse CCA applications, primarily due to its robust implementation in the R programming language.
 The discrepancy between the availability of multiview learning tools in R and Python has not only hindered the diversification of methodologies but also impeded the community from leveraging the more recent advances in the field.
 
-\subsection{Problem Statement}
-
-\subsection{Contributions}
-Recognizing the significance of this gap, we developed the \texttt{CCA-Zoo} Python package as a comprehensive solution tailored for multiview learning applications.
-
-
 \section{Background}
 
 In recent years, the research community has shown a heightened interest in multiview learning, as evident from the proliferation of scholarly articles and the diversification of use-cases ranging from bioinformatics to natural language processing.
@@ -26,7 +20,7 @@ This fragmentation has, in effect, created barriers to entry and possibly slowed
 
 The \texttt{CCA-Zoo} package aims to bridge this divide by offering a broad range of multiview learning algorithms, creating a unified platform that fosters both academic research and practical applications in Python.
 
-\section{Contributions}
+\section{Methods}
 
 In this section, we describe the implementation of \texttt{CCA-Zoo} and the design decisions that were made during its development.
 We will also demonstrate how the package is optimised for use with high-dimensional biomedical data.
@@ -63,11 +57,8 @@ In order to be compatible with the
 
 \subsubsection{Visualisation}
 
+\section{Benchmarking}
 
-\section{Experiments}
-\subsection{Experiment 1: Benchmarking CCA-Zoo against scikit-learn}
-
-\subsection{Benchmarking}
 \subsubsection{Objective}
 The objective of the benchmarking experiments is to compare the performance of \texttt{CCA-Zoo} against \texttt{scikit-learn}, focusing on the efficiency of Canonical Correlation Analysis (CCA) and Partial Least Squares (PLS) methods.
 We conducted experiments on synthetic datasets with varying dimensions to evaluate their average execution time.
@@ -116,4 +107,4 @@ These experiments underscore the capability of \texttt{CCA-Zoo} to handle high-d
 \subsection{Conclusion}
 
 \texttt{CCA-Zoo} has not only served as a tool for my research but aims to be a community resource that can accelerate research and application in multiview learning.
-Its design decisions, such as API compatibility and focus on both linear and deep models, reflect a comprehensive understanding of the challenges and opportunities in this field
+Its design decisions, such as API compatibility and focus on both linear and deep models, reflect a comprehensive understanding of the challenges and opportunities in this field.
