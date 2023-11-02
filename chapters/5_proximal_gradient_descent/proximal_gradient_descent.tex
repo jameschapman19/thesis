@@ -2,6 +2,26 @@
 \label{ch:proximal-gradient-descent}
 \minitoc
 
+% And this gives us the generalized eigenvalue problem~\citep{rosipal2005overview}:
+
+% \begin{align}
+%     \begin{pmatrix}
+%         0 & \hat{\Sigma_{12}} \\
+%         \hat{\Sigma_{21}} & 0 
+%     \end{pmatrix} \begin{pmatrix}
+%         u^{(1)} \\
+%         u^{(2)}
+%     \end{pmatrix}= \begin{pmatrix}
+%         (1-c_1)\hat{\Sigma_{11}} + c_1I & 0 \\
+%         0 & (1-c_2)\hat{\Sigma_{22}} + c_2I
+%     \end{pmatrix}\begin{pmatrix}
+%         u^{(1)} \\
+%         u^{(2)}
+%     \end{pmatrix}
+% \end{align}
+
+% The main difference between this eigenvalue problem and the CCA eigenvalue problem is the substitution of the matrices \(\Sigma_{11}\) and \(\Sigma_{22}\) for the matrices \( ((1-c_1) \Sigma_{11} + c_1 I) \) and \( ((1-c_2) \Sigma_{22} + c_2 I) \).
+% We can therefore see that this regularisation is equivalent to adding a constant `ridge' to the diagonal of the covariance matrix \(X\spstop{i} X\sps{i}\).
 
 \section{Introduction}
 
@@ -141,7 +161,7 @@ The corresponding proximal operator can be efficiently computed using existing m
 
 \subsection{ProxTorch}
 
-The field of constrained and regularized optimization has a range of software tools designed for specialized tasks \cite{Moolekamp, ParsimonY}. Some of these tools, such as PyProximal \cite{pyproximal}, are restricted to numpy-based computational environments. Meanwhile, PyTorch \cite{paszke2019pytorch}, a deep learning framework with dynamic computation graph and GPU support, did not offer native integration for proximal operators. 
+The field of constrained and regularized optimization has a range of software tools designed for specialized tasks \citep{Moolekamp, ParsimonY}. Some of these tools, such as PyProximal \citep{pyproximal}, are restricted to numpy-based computational environments. Meanwhile, PyTorch \citep{paszke2019pytorch}, a deep learning framework with dynamic computation graph and GPU support, did not offer native integration for proximal operators. 
 
 \texttt{ProxTorch} was developed to provide a comprehensive library of proximal operators that are compatible with PyTorch tensors. This compatibility allows for more streamlined development and optimization processes for models that incorporate proximal operators, all within the PyTorch framework.
 

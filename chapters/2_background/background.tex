@@ -59,7 +59,7 @@ dimensions}, or \textbf{scores} depending on the context. We will sometimes cons
 
 \subsection{Principal Components Analysis}
 
-Principal Components Analysis (PCA)\cite{hotelling1933analysis} is a classical method in unsupervised machine learning for representation learning.
+Principal Components Analysis (PCA)\citep{hotelling1933analysis} is a classical method in unsupervised machine learning for representation learning.
 It is widely used for dimensionality reduction and feature extraction.
 The primary goal of PCA is to transform the original high-dimensional data into a new coordinate system defined by orthogonal axes, capturing the most relevant aspects of the data.
 
@@ -93,7 +93,7 @@ where \(\lambda\) is the Lagrange multiplier. Differentiating the Lagrangian yie
     u^\top u &= 1.
 \end{align}
 
-This transforms the problem into an eigenvalue equation for the covariance matrix \(\Sigma\), which can be efficiently solved using standard libraries such as scikit-learn\cite{pedregosa2011scikit}.
+This transforms the problem into an eigenvalue equation for the covariance matrix \(\Sigma\), which can be efficiently solved using standard libraries such as scikit-learn\citep{pedregosa2011scikit}.
 
 The first principal component corresponds to the eigenvector associated with the largest eigenvalue \(\lambda\). Subsequent components are ordered by their corresponding eigenvalues.
 
@@ -102,7 +102,7 @@ data, PCA's main limitation arises: it only accounts for variance within a singl
 
 \subsection{Partial Least Squares}
 
-Partial Least Squares (PLS)\cite{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as `views". PLS can be seen as a generalization of PCA, where PCA becomes a special case when the two views are identical. The optimization problem for PLS can be formulated as:
+Partial Least Squares (PLS)\citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as `views". PLS can be seen as a generalization of PCA, where PCA becomes a special case when the two views are identical. The optimization problem for PLS can be formulated as:
 
 \begin{align}
      u\sps{1}_{\text{opt}} &= \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} \Sigma_{12} u\sps{2} \} \\
@@ -137,19 +137,19 @@ By substituting the constraint conditions into these equations, we find that \( 
     \Sigma_{12} \Sigma_{21} u\sps{1} &= \lambda^2 u\sps{1}
 \end{align}
 
-Thus, solving these equations will yield the \( u\sps{1} \) and \( u\sps{2} \) vectors as the eigenvectors of \( \Sigma_{12} \Sigma_{21} \) and \( \Sigma_{21} \Sigma_{12} \), respectively \cite{hoskuldsson1988pls}.
+Thus, solving these equations will yield the \( u\sps{1} \) and \( u\sps{2} \) vectors as the eigenvectors of \( \Sigma_{12} \Sigma_{21} \) and \( \Sigma_{21} \Sigma_{12} \), respectively \citep{hoskuldsson1988pls}.
 
 \textbf{Limitations: } The problem with applying PLS to neuroimaging and behavioural modalities is that PLS is not scale invariant and
-is therefore biased towards the largest principal components in the data \cite{helmer2020stability}.
+is therefore biased towards the largest principal components in the data \citep{helmer2020stability}.
 This is particularly problematic when there is a low signal to noise ratio since PLS may find directions in either dataset which correspond to the largest directions of noise in the other.
 Additionally, PLS assumes that the structures contributing to variance in both datasets are linearly related, which
-may not be the case in complex biological systems like the brain or in intricate behavioral patterns \cite{rosipal2005overview}.
+may not be the case in complex biological systems like the brain or in intricate behavioral patterns \citep{rosipal2005overview}.
 The linearity assumption can sometimes be overly restrictive, failing to capture more complicated, nonlinear relationships between the data modalities.
 Another issue is the lack of sparsity in the PLS solution.
-Traditional PLS methods do not provide sparse weight vectors, which makes the interpretation of results challenging in high-dimensional settings such as neuroimaging where only a subset of features might be relevant \cite{leurgans1993canonical}.
-There are sparse variants of PLS available, but these typically introduce additional complexity and may require fine-tuning of regularization parameters \cite{chun2010sparse}.
+Traditional PLS methods do not provide sparse weight vectors, which makes the interpretation of results challenging in high-dimensional settings such as neuroimaging where only a subset of features might be relevant \citep{leurgans1993canonical}.
+There are sparse variants of PLS available, but these typically introduce additional complexity and may require fine-tuning of regularization parameters \citep{chun2010sparse}.
 Furthermore, PLS can be sensitive to outliers, which are not uncommon in neuroimaging data due to motion artifacts or other sources of noise.
-Since the method aims to maximize covariance, extreme values in one dataset can disproportionately affect the resulting latent variables \cite{wold1975path}.
+Since the method aims to maximize covariance, extreme values in one dataset can disproportionately affect the resulting latent variables \citep{wold1975path}.
 
 \subsection{Canonical Correlation Analysis}\label{sec:cca}
 
@@ -163,7 +163,7 @@ This nuance renders CCA invariant to feature scale. The optimization problem for
      & u\spstop{2}\Sigma_{22}u\sps{2}=1 \notag
 \end{align}
 
-Although non-convex, numerous methods exist for solving the CCA problem, such as eigenvalue problems, generalized eigenvalue problems, block coordinate descent via alternating least squares regressions \cite{golub1995canonical,sun2008least} , and gradient descent \cite{via2007learning}.
+Although non-convex, numerous methods exist for solving the CCA problem, such as eigenvalue problems, generalized eigenvalue problems, block coordinate descent via alternating least squares regressions \citep{golub1995canonical,sun2008least} , and gradient descent \citep{via2007learning}.
 
 \subsubsection{Eigenvalue Problem}
 
@@ -407,14 +407,14 @@ Deep CCA (DCCA) is a non-linear extension of CCA that uses deep neural networks 
 \section{Multiview Learning in Neuroimaging}
 
 There have been a number of applications of CCA and related methods to multiview problems in neuroimaging.
-Using resting state fMRI data, modes of correlation have been found that relate to differences in sex and age relating to drug and alcohol abuse, depression and self harm \cite{mihalik2019brain}.
-A similar mode relating to `positive-negative' wellbeing has been found across studies \cite{smith2015positive}suggesting that mental wellbeing has a relationship (though not necessarily causally) with functional connectivity between networks in the brain.
+Using resting state fMRI data, modes of correlation have been found that relate to differences in sex and age relating to drug and alcohol abuse, depression and self harm \citep{mihalik2019brain}.
+A similar mode relating to `positive-negative' wellbeing has been found across studies \citep{smith2015positive}suggesting that mental wellbeing has a relationship (though not necessarily causally) with functional connectivity between networks in the brain.
 Later in this dissertation we will replicate and build on the findings from this paper by using regularised and non-linear CCA methods.
 
 CCA has also been used as a preprocessing step in order to identify groups of subjects in the latent variable space.
-In particular, CCA and clustering have been used to identify depression using fMRI data\cite{dinga2019evaluating} \cite{drysdale2017resting}.
-CCA has also been used in the manner we described to denoise two views of a dataset such as separate measures of neuroimaging data \cite{zhuang2020technical} to remove artefacts.
-Deep CCA has recently been used to extract features for the diagnosis of schizophrenia\cite{qi2016deep}.
+In particular, CCA and clustering have been used to identify depression using fMRI data\citep{dinga2019evaluating} \citep{drysdale2017resting}.
+CCA has also been used in the manner we described to denoise two views of a dataset such as separate measures of neuroimaging data \citep{zhuang2020technical} to remove artefacts.
+Deep CCA has recently been used to extract features for the diagnosis of schizophrenia\citep{qi2016deep}.
 
 
 
