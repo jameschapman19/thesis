@@ -67,12 +67,12 @@ First, we present GEP-GH.
     Moreover, the maximum value is precisely $\sum_{j=1}^k \lambda_j^2$, where $(\lambda_j)$ are the generalised eigenvalues.
 \end{restatable}
 
-\subsection{Proof of Proposition \ref{prop:GHA-charac}}
+\subsection{Proof of Proposition~ref{prop:GHA-charac}}
 
 \subsection{GEP-EY: an unconstrained objective for GEPs}
 
 First, we present GEP-EY, a formulation of GEP problems by matrix analysis which permits efficient optimization by gradient descent.
-This is summarised by proposition \ref{prop:EY-charac}, a consequence of applying the Eckhart-Young-Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. Detailed statements and proofs can be found in supplement \ref{supp:proofs}.
+This is summarised by proposition~ref{prop:EY-charac}, a consequence of applying the Eckhart-Young-Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. Detailed statements and proofs can be found in supplement~ref{supp:proofs}.
 
 \begin{restatable}[Eckhart-Young inspired objective for GEPs]{proprep}{EYcharac}
     \label{prop:EY-charac}
@@ -84,13 +84,13 @@ This is summarised by proposition \ref{prop:EY-charac}, a consequence of applyin
 \end{restatable}
 
 
-In the following sections, we describe a number of algorithms for solving GEPs using proposition \ref{prop:EY-charac}.
+In the following sections, we describe a number of algorithms for solving GEPs using proposition~ref{prop:EY-charac}.
 These will be denoted with \textbf{EY} and \textbf{GHA}.
 
 \subsection{Stochastic Optimization}
 
 We next show how GEP-EY and CCA-SVD can be efficiently optimized using stochastic methods, which makes them suitable for large-scale and online settings.
-Suppose we have an unbiased estimate $\hat{A}$ for $A$ and a pair of independent and unbiased estimates $(\hat{B},\hat{B}')$ of the matrix $B$ (for example obtained from a minibatch); then one can estimate the objective in proposition \ref{prop:constr-charac} by:
+Suppose we have an unbiased estimate $\hat{A}$ for $A$ and a pair of independent and unbiased estimates $(\hat{B},\hat{B}')$ of the matrix $B$ (for example obtained from a minibatch); then one can estimate the objective in proposition~ref{prop:constr-charac} by:
 \begin{align}
     \hat{\mathcal{U}}^\text{GEP-EY}(W) \defeq \tr \left( 2\, W^T \hat{A} W - \left(W^T \hat{B} W\right) \left(W^T \hat{B}' W\right) \right)
 \end{align}
@@ -104,11 +104,11 @@ which we can differentiate to give a gradient estimate:
 
 By the independence of $(\hat{B},\hat{B}')$ both of these estimates are unbiased.
 
-The unbiased estimate immediately leads to Algorithm \ref{alg:Delta}.
+The unbiased estimate immediately leads to Algorithm~ref{alg:Delta}.
 The key advantage of this is that the computational complexity of the algorithm is only $\mathcal{O}(b d k)$; this is far less than the $\mathcal{O}(N d^2)$ complexity of any methods which evaluate the matrices $A,B$ on the full batch.
 
 \textit{Why is the complexity so low?} Because $A,B$ are linear functions of covariance matrices, we can construct our unbiased estimates by plugging in sample covariances on a minibatch.
-These estimates will then be low rank; indeed we can factorise these estimates in the form $\hat{M} \hat{M}^T$ where $\hat{M} \in \R^{d \times b}$. The dominant cost in evaluating $\mathcal{U}^\text{GEP-EY}$ is then just the matrix multiplications of the form $\hat{M}^T W$; see supplement \ref{supp:analyticsubspace} for full details.
+These estimates will then be low rank; indeed we can factorise these estimates in the form $\hat{M} \hat{M}^T$ where $\hat{M} \in \R^{d \times b}$. The dominant cost in evaluating $\mathcal{U}^\text{GEP-EY}$ is then just the matrix multiplications of the form $\hat{M}^T W$; see supplement~ref{supp:analyticsubspace} for full details.
 
 \begin{algorithm}
     \caption{GEP-EY: A Stochastic Gradient Descent Algorithm for GEP subspace}
@@ -139,12 +139,12 @@ of 1200 video clips from the TRECVID 2003 conference, each annotated with 101 la
 \textbf{Split CIFAR}: The CIFAR-10 dataset \citep{krizhevsky2009learning} consists of 60,000 32x32 colour images in 10
 classes, with 6000 images per class. There are 50,000 training images and 10,000 test images. We split the images into two halves.
 
-In this section, we compare GEP-GD and CCA-SVD to $\gamma$-EigenGame \citep{gemp2022generalized} and SGHA \citep{chen2019constrained} for approximating CCA in the stochastic setting. Replicating the experiment in \citep{meng2021online, gemp2022generalized}, we optimize for the top-4 CCA subspace for the MediaMill and Split CIFAR (left and right halves of CIFAR-10 images) datasets. We use a minibatch size 100 and train for one epoch across 5 random seeds (with 1 standard deviation error bars in the plots). We use the Scipy \citep{virtanen2020scipy} package to solve the full batch GEPs as a ground truth value and use the proportion of correlation captured (PCC) captured by the learnt subspace as compared to this ground truth (defined in supplement \ref{supp:experimental details}). Unlike \citep{gemp2022generalized}, we do not perform PCA on the data before applying the CCA methods but instead, for the MNIST data, we add gaussian noise to avoid zero variance subspaces in $X$ and $Y$. This makes our task more challenging, as performing PCA simplifies the problem by substituting $B$ for the identity matrix $I$. This explains the decrease in performance of $\gamma$-EigenGame as compared to their original work.
+In this section, we compare GEP-GD and CCA-SVD to $\gamma$-EigenGame \citep{gemp2022generalized} and SGHA \citep{chen2019constrained} for approximating CCA in the stochastic setting. Replicating the experiment in \citep{meng2021online, gemp2022generalized}, we optimize for the top-4 CCA subspace for the MediaMill and Split CIFAR (left and right halves of CIFAR-10 images) datasets. We use a minibatch size 100 and train for one epoch across 5 random seeds (with 1 standard deviation error bars in the plots). We use the Scipy \citep{virtanen2020scipy} package to solve the full batch GEPs as a ground truth value and use the proportion of correlation captured (PCC) captured by the learnt subspace as compared to this ground truth (defined in supplement~ref{supp:experimental details}). Unlike \citep{gemp2022generalized}, we do not perform PCA on the data before applying the CCA methods but instead, for the MNIST data, we add gaussian noise to avoid zero variance subspaces in $X$ and $Y$. This makes our task more challenging, as performing PCA simplifies the problem by substituting $B$ for the identity matrix $I$. This explains the decrease in performance of $\gamma$-EigenGame as compared to their original work.
 
 
 \subsection{Results}
 
-Figure \ref{fig:ccaiter} shows that both of our methods outperform SGHA and $\gamma$-EigenGame on both datasets in terms of speed of convergence and achieve near-optimal performance in terms of PCC after just one epoch. All of the algorithms share the same complexity per iteration so that these results are also representative in terms of runtime. This demonstrates the effectiveness and superiority of our method for solving CCA in the stochastic setting.
+Figure~ref{fig:ccaiter} shows that both of our methods outperform SGHA and $\gamma$-EigenGame on both datasets in terms of speed of convergence and achieve near-optimal performance in terms of PCC after just one epoch. All of the algorithms share the same complexity per iteration so that these results are also representative in terms of runtime. This demonstrates the effectiveness and superiority of our method for solving CCA in the stochastic setting.
 
 \begin{figure}%[H]
     \centering
@@ -167,7 +167,7 @@ Figure \ref{fig:ccaiter} shows that both of our methods outperform SGHA and $\ga
 \subsubsection{Stochastic CCA Minibatch Size}
 In this section, we take a closer look at how minibatch sizes impact the performance of our method in the stochastic CCA setting. We maintain a constraint of single epoch training. This means that when we use smaller minibatches, the number of training steps increases correspondingly.
 
-Our experiments, as displayed in Figure \ref{fig:minibatch size ablation}, show that our method performs well across a range of minibatch sizes. Notably, it achieves high performance even when the minibatch size is nearly equivalent to the number of components.
+Our experiments, as displayed in Figure~ref{fig:minibatch size ablation}, show that our method performs well across a range of minibatch sizes. Notably, it achieves high performance even when the minibatch size is nearly equivalent to the number of components.
 
 This indicates that our method can learn effectively from a limited number of samples. It suggests the possibility of applying our method to analyse large datasets on devices with restricted memory, by processing small minibatches of data sequentially. This robustness to minibatch size could potentially make our method a viable solution for large-scale data analysis where computational resources are limited.
 
@@ -216,9 +216,9 @@ The only other large-scale PLS analysis on the UK Biobank used a federated appro
 We present the first stochastic PLS analysis on large-scale biomedical data.
 
 We ran GEP-EY with minibatch size 500 on brain imaging (82 regional volumes) and genetics (582,565 variants) data for 33,333 subjects; a massive amount of data that challenges existing methods.
-See supplement (Section \ref{sec:ukbb_preprocessing}) for data pre-processing details.
-We see strong validation correlation between all 10 corresponding pairs of vectors in the PLS subspace and weak cross correlation, indicating that our model learnt a coherent and orthogonal subspace of covariation (Figure \ref{fig:UKBB_corr}), a remarkable feat for such high-dimensional data.
-We found that the PLS brain subspace was associated with genetic risk measures for several disorders (Figure \ref{fig:genetic_risk}), suggesting that the PLS subspace encodes relevant information for genetic disease risk, a significant finding for biomedical research.
+See supplement (Section~ref{sec:ukbb_preprocessing}) for data pre-processing details.
+We see strong validation correlation between all 10 corresponding pairs of vectors in the PLS subspace and weak cross correlation, indicating that our model learnt a coherent and orthogonal subspace of covariation (Figure~ref{fig:UKBB_corr}), a remarkable feat for such high-dimensional data.
+We found that the PLS brain subspace was associated with genetic risk measures for several disorders (Figure~ref{fig:genetic_risk}), suggesting that the PLS subspace encodes relevant information for genetic disease risk, a significant finding for biomedical research.
 
 
 % First Figure
