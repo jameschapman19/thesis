@@ -1,0 +1,223 @@
+\chapter{Gradient Descent: Accelerating CCA for Large Datasets}\label{ch:gradient_descent}
+The content of this chapter is based on a series of papers~\citep{chapman2022generalized, chapman2023efficient} as well as a NeurIPS workshop paper~\citep{chapman2023neurips}.
+
+I am grateful to my co-authors Lennie Wells and Ana Lawry Aguila for their contributions to this work.
+In particular, Lennie's mathematical expertise improved the theoretical grounding of the idea greatly and Ana's access to the UK Biobank dataset enabled the application of our methods to a real-world biomedical dataset.
+\minitoc
+
+\section{Introduction} %Introduce the problem statement and its importance
+
+CCA methods learn highly correlated representations of multi-view data.
+The original CCA method of \citet{hotelling1933analysis} learns low-dimensional representations from linear transformations.
+Notable extensions to ridge-regularized CCA \citep{vinod1976canonical}, Partial Least Squares (PLS), and multi-view CCA  \citep{wong2021deep} allow one to use CCA in high dimensional regimes, and with three or more views of data.
+More recently, a variety of Deep CCA methods \citep{andrew2013deep} have been proposed which learn representations obtained from non-linear transformations of the data, parameterized by deep neural networks; Deep CCA has seen excellent empirical results, and is so foundational for deep multi-view learning that it secured a runner-up position for the test-of-time award at ICML 2023 \citep{ICML2023TOT}.
+
+However, there are significant computational challenges when applying these CCA methods to large scale data.
+Classical algorithms for linear CCA methods require computing full covariance matrices and so scale quadratically with dimension, becoming intractable for many large-scale datasets of practical interest.
+There is therefore great interest in approximating solutions for CCA in stochastic or data-streaming settings \citep{arora2012stochastic}.
+Large scale data also challenges existing full-batch algorithms for Deep CCA, and their stochastic counterparts are not only complex to implement but also difficult to train \citep{wang2015stochastic}.
+% want to say something about downstream tasks, not sure how best to
+
+Self-supervised learning (SSL) methods are now state of the art in image classification.
+% need citation
+They also learn useful representations of data, usually from pretext tasks or objectives that exploit some inherent structure or property of the data.
+Remarkably, SSL methods can even perform zero-shot classification: where the representations are learnt without any explicit labels or supervision \citep{balestriero2023cookbook}.
+Of particular interest to us is the so-called CCA family %\cite{balestriero2023cookbook}
+of SSL methods.
+Like CCA, these aim to transform a pair of views of data to a pair of similar representations.
+It is known that a number of algorithms in this class are closely related to CCA \citep{balestriero2022contrastive}, notably including Barlow Twins \citep{zbontar2021barlow} and VICReg \citep{bardes2021vicreg}.
+However, the specific details of this relationship are poorly understood.
+
+In \cref{sec:background-unified} we provide a unified approach to all the CCA methods introduced above, emphasizing objectives which are functions of the joint distributions of the transformed variables.
+% These methods all learn transformations optimizing some function of the joint distribution of the transformed variables.
+Versions of all the linear CCA methods can be defined by solutions to certain Generalized Eigenvalue Problems (GEPs); this provides a particularly convenient way to relate a large number of equivalent objectives.
+
+Section \ref{sec:contributions} outlines our core conceptual contributions.
+Firstly, with \cref{prop:EY-charac} we present an unconstrained loss function that characterizes solutions to GEPs; this is based on the Eckhart--Young inequality and has appealing geometrical properties.
+We apply this to the GEP formulation of CCA and construct unbiased estimates of the loss and its gradients from mini-batches of data.
+These loss functions can therefore be optimized out-of-the-box using standard frameworks for deep learning. % and gradient descent-based optimisers.
+This immediately gives a unified family of algorithms for CCA, Deep CCA, and indeed SSL.
+
+Our CCA algorithms dominate existing state-of-the-art methods across a wide range of benchmarks, presented in \cref{Experiments}.
+For stochastic CCA, our method not only converges faster but also achieves higher correlation scores than existing techniques.
+For Deep CCA and Deep Multiview CCA our unbiased stochastic gradients yield significantly better validation correlations and allow the use of smaller mini-batches in memory constrained applications.
+We also demonstrate how useful our algorithms are in practice with an pioneering real-world case study. We apply stochastic Partial Least Squares (PLS) to an extremely high-dimensional dataset from the UK Biobank dataset -- all executed on a standard laptop.
+Our algorithm opens the door to problems previously deemed intractable in biomedical data analytics.
+Finally, our SSL method achieves comparable performance to VICReg and Barlow Twins, despite having no hyperparameters in the objective.
+This frees computational resources to tune more critical hyperparameters, such as architecture, optimizer or augmentations.
+In addition, our method appears more robust to these other hyperparameters, has a clear theoretical foundation, and naturally generalizes to the multi-view setting.
+Furthermore, we also provide the first rigorous proofs that Barlow Twins and VICReg are equivalent to CCA in the linear case, opening up avenues to better theoretical understanding.
+
+\section{Background}
+\subsection{A unified approach to the CCA family}\label{sec:background-unified}
+
+Suppose we have a sequence of vector-valued random variables $X^{(i)} \in \R^{D_i}$ for $i \in \{1, \dots, I \}$\footnote{Yes, there are I (eye) views}.
+We want to learn meaningful $K$-dimensional representations
+\begin{equation}\label{eq:general-form-of-representations}
+    Z\sps{i} = f\sps{i}( X\sps{i}; \theta\sps{i}).
+\end{equation}
+For convenience, define $D = \sum_{i=1}^I D_i$ and $\theta = \left(\theta\sps{i}\right)_{i=1}^I$.
+Without loss of generality take $D_1 \geq D_2 \geq \cdots \geq D_I$.
+We will consistently use the subscripts $i,j \in [I]$ for views;
+$d \in [D_i]$ for dimensions of input variables;
+and $l,k \in [K]$ for dimensions of representations - i.e. to subscript dimensions of $Z\sps{i}, f\sps{i}$.
+Later on we will introduce total number of samples $N$ and mini-batch size $M$.
+%so we will subscript samples with $n,m$ respectively.
+% don't know if actually ended up using this, so can comment out if not!
+
+\subsection{Background: GEPs in linear algebra}
+A Generalized Eigenvalue Problem (GEP) is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}.
+They are usually characterized by the set of solutions to the equation:
+\begin{align}\label{eq:igep}
+Au=\lambda Bu
+\end{align}
+with $\lambda \in \R, u \in \R^D$, called (generalized) eigenvalue and (generalized) eigenvector respectively. We shall only consider the case where $B$ is positive definite to avoid degeneracy.
+Then the GEP becomes equivalent to an eigendecomposition of the symmetric matrix $B^\mhalf A B^\mhalf$. This is key to the proof of our new characterization.
+In addition, one can find a basis of eigenvectors spanning $\R^d$.
+%the eigenvectors are not always unique, but the eigenvalues $\lambda_1 \geq \dots \geq \lambda_d$ are.
+We define a \textit{top-$k$ subspace} to be one spanned by some set of eigenvectors {$u_1,\dots,u_K$} with the top-$K$ associated eigenvalues $\lambda_1 \geq \dots \geq \lambda_K$.
+We say a matrix $U \in \R^{D \times K}$ \textit{defines} a top-$K$ subspace if its columns span one.
+%hoping this finesses non-uniqueness for main text.
+GEPs have a rich geometric structure, and lead to many alternative characterizations; for context we state a standard constrained characterization \citep{stewart_matrix_1990}.
+
+\begin{restatable}[Constrained objective for GEPs]{proprep}{GEPconstrained}
+\label{prop:GEP-constrained}
+    The top-$k$ subspace of the GEP $(A,B)$ can be characterized by the following maximization \begin{equation}\label{eq:gep-constrained-subspace-formulation}
+        \max_{U \in \R^{d\times k}} \tr(U^{\top} A U) \quad \text{ subject to: }  U^{\top} B U = I_K.
+        \end{equation}
+    Moreover, the maximal value of this objective is $\sum_{k=1}^K \lambda_k$.
+\end{restatable}
+
+\subsection{The CCA Family}\label{sec:CCA Definition}
+The classical notion CCA \citep{hotelling1992relations} considers two views, $I=2$, and constrains the representations to be linear transformations
+\begin{equation}\label{eq:cca-linear-function-def}
+    Z\sps{i}_k = \langle u_k\sps{i} , X\sps{i} \rangle.
+\end{equation}
+
+The objective is to find the \textit{weights} or \textit{canonical directions} $u_k\sps{i}$ which maximize the \textit{canonical correlations} $\rho_k = \Corr(Z\sps{1}_k, Z\sps{2}_k)$
+sequentially, subject to orthogonality with the previous pairs of the transformed variables.
+It is well known that CCA is equivalent to a singular value decomposition (SVD) of the matrix $\Var(X\sps{1})^\mhalf \Cov(X\sps{1}, X\sps{2}) \Var(X\sps{2})^\mhalf$.
+It is slightly less well known \citep{borga_learning_1998} that this is equivalent to a GEP where:
+\begin{equation}\label{eq:cca-GEV}\small
+	A = \begin{pmatrix} 0 &\Cov(X\sps{1}, X\sps{2}) \\ \Cov(X\sps{2}, X\sps{1}) & 0 \end{pmatrix}, \quad
+	B = \begin{pmatrix}\Var(X\sps{1}) & 0 \\ 0 & \Var(X\sps{2}) \end{pmatrix}, \quad
+	u =\begin{pmatrix}	u\sps{1} \\ u\sps{2} \end{pmatrix}.
+\end{equation}
+
+CCA therefore has notions of uniqueness similar to those for SVD or GEPs: the weights are not in general unique, but the canonical correlations $1 \geq \rho_1 \geq \rho_2 \geq \dots \geq 0$ are unique \citep{mills1988calculation}. Therefore, we can write:
+%\footnote{Slightly abusing notation: $\CCA_K$ is a function of the joint distribution $\mathcal{L}_{X\sps{1}, \sps{2}}$ not of the random vectors themselves}:
+\begin{align}\label{eq:cca-vector-of-correlations-def}\small
+    \CCA_K(X^{(1)},X^{(2)}) \defeq (\rho_k)_{k=1}^K
+    %= \sigma_{1, \dots, K} \left(\Var(X\sps{1})^\mhalf \Cov(X\sps{1}, X\sps{2}) \Var(X\sps{2})^\mhalf\right).
+\end{align}
+
+\textbf{Unified GEP formulation:}
+this GEP formulation of MCCA can be presented in a unified framework generalizing CCA and ridge-regularized extensions. Indeed, we now take $A,B \in \R^{D \times D}$ to be block matrices $A = (A\sps{ij})_{i,j=1}^I, B_\alpha = (B_\alpha\sps{ij})_{i,j=1}^I$ where the diagonal blocks of $A$ are zero, the off-diagonal blocks of $B$ are zero, and the remaining blocks are defined by:
+\begin{align}\label{eq:gep-most-general-formulation}%\small
+    A^{(ij)} &= \Cov(X\sps{i}, X\sps{j}) \text{ for } i \neq j, \quad % \text{ for } i,j \in [I], ; \:\:
+    B_\alpha^{(ii)} = \alpha_i I_{D_i} + (1-\alpha_i) \Var(X\sps{i})  %\text{ for } i \in [I]
+\end{align}
+Where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters: taking $\alpha_i = 0 \: \forall i$ recovers CCA and $\alpha = 1 \: \forall i$ recovers PLS.
+We may omit the subscript $\alpha$ when $\alpha=0$ and we recover the `pure CCA' setting; in this case, following \cref{eq:cca-vector-of-correlations-def} we can define $\MCCA_K(X\sps{1},\dots,X\sps{I})$ to be the vector of the top-$K$ generalized eigenvalues.
+% This can also be posed as a GEP where $A, B$ are block matrices analogous to those in \cref{eq:cca-GEV}\footnote{I.e. $A$ has zeros on the diagonal blocks and $\Cov(X\sps{i}, X\sps{j})$ on the off-diagonal blocks; $B$ has zeros off the diagonal and $\Var(X\sps{i}, X\sps{i})$ on the diagonal blocks.}
+
+
+\textbf{Deep CCA:} was originally introduced in \cite{andrew2013deep}; this was extended to an GEP-based formulation of \textbf{Deep Multi-view CCA} (DMCCA) in \cite{somandepalli2019multimodal}. This can be defined using our $\MCCA$ notation as maximizing
+\begin{align}\label{eq:DMCCA-def}
+    \norm{\MCCA_K\left(Z\sps{1}, ... Z\sps{I}\right)}_2
+    %=\norm{V(\theta)^\mhalf C(\theta) V(\theta)^\mhalf}_F
+\end{align}
+over parameters $\theta$ of neural networks defining the representations $Z\sps{i}=f\sps{i}(X\sps{i};\theta\sps{i})$ for $i\in[I]$.
+% which of course generalizes Andrew version
+% $\norm{\CCA_K\left(Z\sps{1}, Z\sps{2}\right)}_2 =
+%     \norm{\Var(Z\sps{1})^\mhalf \Cov(Z\sps{1}, Z\sps{2}) \Var(Z\sps{2})^\mhalf}_F$
+
+\subsection{Related Work}
+
+To the best of our knowledge, the state-of-the-art in Stochastic PLS and CCA are the subspace Generalized Hebbian Algorithm (\textbf{SGHA}) of \citep{chen2019constrained} and \textbf{$\gamma$-EigenGame} from \citep{gemp20,gemp2021}.
+Specifically, SGHA utilizes a Lagrange multiplier heuristic along with saddle-point analysis, albeit with limited convergence guarantees.
+EigenGame focuses on top-k subspace learning but introduces an adaptive whitening matrix in the stochastic setting with an additional hyperparameter.
+
+\section{Methods}
+
+In this section, we introduce a new class of algorithms based on matrix analysis results which allow us to efficiently solve a number of interesting problems including but not limited to CCA, PLS, DCCA, and SSL.
+
+\subsection{GEP-GHA}
+First, we present GEP-GH.
+
+\begin{restatable}[Eckhart-Young inspired objective for GEPs]{proprep}{GHAcharac}
+    \label{prop:GHA-charac}
+    The top-$k$ subspace of the GEP $(A,B)$ can be characterised by maximising the following objective over $W \in \R^{d \times k}$:
+    \begin{align}
+        \mathcal{U}^\text{GEP-GHA}(W) \defeq \tr \left( 2\, W^T A W - \left(W^T A W\right) \left(W^T B W\right) \right)
+    \end{align}
+    Moreover, the maximum value is precisely $\sum_{j=1}^k \lambda_j^2$, where $(\lambda_j)$ are the generalised eigenvalues.
+\end{restatable}
+
+\subsection{Proof of Proposition~\ref{prop:GHA-charac}}
+
+\subsection{GEP-EY: an unconstrained objective for GEPs}
+
+First, we present GEP-EY, a formulation of GEP problems by matrix analysis which permits efficient optimization by gradient descent.
+This is summarised by proposition~\ref{prop:EY-charac}, a consequence of applying the Eckhart-Young-Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. Detailed statements and proofs can be found in supplement~\ref{supp:proofs}.
+
+\begin{restatable}[Eckhart-Young inspired objective for GEPs]{proprep}{EYcharac}
+    \label{prop:EY-charac}
+    The top-$k$ subspace of the GEP $(A,B)$ can be characterised by maximising the following objective over $W \in \R^{d \times k}$:
+    \begin{align}
+        \mathcal{U}^\text{GEP-EY}(W) \defeq \tr \left( 2\, W^T A W - \left(W^T B W\right) \left(W^T B W\right) \right)
+    \end{align}
+    Moreover, the maximum value is precisely $\sum_{j=1}^k \lambda_j^2$, where $(\lambda_j)$ are the generalised eigenvalues.
+\end{restatable}
+
+In the following sections, we describe a number of algorithms for solving GEPs using proposition~\ref{prop:EY-charac}.
+These will be denoted with \textbf{EY} and \textbf{GHA}.
+
+\subsection{Stochastic Optimization}
+
+We next show how GEP-EY and CCA-SVD can be efficiently optimized using stochastic methods, which makes them suitable for large-scale and online settings.
+Suppose we have an unbiased estimate $\hat{A}$ for $A$ and a pair of independent and unbiased estimates $(\hat{B},\hat{B}')$ of the matrix $B$ (for example obtained from a minibatch); then one can estimate the objective in proposition~\ref{prop:constr-charac} by:
+\begin{align}
+    \hat{\mathcal{U}}^\text{GEP-EY}(W) \defeq \tr \left( 2\, W^T \hat{A} W - \left(W^T \hat{B} W\right) \left(W^T \hat{B}' W\right) \right)
+\end{align}
+which we can differentiate to give a gradient estimate:
+\begin{align}\label{eq:GEP-EY-grad}
+    \hat{\Delta}^{\text{GEP-EY}}(W)
+    \defeq \nabla_W \hat{\mathcal{U}}^\text{GEP-EY}(W)
+    % old = 4 \left\{ \hat{A} W - \hat{B} W \left(W^T \hat{B}' W \right) \right\}
+    = 2 \left\{ 2 \hat{A} W - \hat{B} W \left(W^T \hat{B}' W \right) - \hat{B}' W \left(W^T \hat{B} W \right) \right\}
+\end{align}
+
+By the independence of $(\hat{B},\hat{B}')$ both of these estimates are unbiased.
+
+The unbiased estimate immediately leads to Algorithm~\ref{alg:Delta}.
+The key advantage of this is that the computational complexity of the algorithm is only $\mathcal{O}(b d k)$; this is far less than the $\mathcal{O}(N d^2)$ complexity of any methods which evaluate the matrices $A,B$ on the full batch.
+
+\textit{Why is the complexity so low?} Because $A,B$ are linear functions of covariance matrices, we can construct our unbiased estimates by plugging in sample covariances on a minibatch.
+These estimates will then be low rank; indeed we can factorise these estimates in the form $\hat{M} \hat{M}^T$ where $\hat{M} \in \R^{d \times b}$. The dominant cost in evaluating $\mathcal{U}^\text{GEP-EY}$ is then just the matrix multiplications of the form $\hat{M}^T W$; see supplement~\ref{supp:analyticsubspace} for full details.
+
+\begin{algorithm}
+    \caption{GEP-EY: A Stochastic Gradient Descent Algorithm for GEP subspace}
+    \label{alg:Delta}
+    \begin{algorithmic}
+        \STATE {\bfseries Input:} data stream $Z_t$ consisting of B samples from $z_n$. Learning rate $(\eta_t)_t$. Number of time steps $T$. Number of eigenvectors to compute $k$.
+        \STATE {\bfseries Initialise:} $(\hat{\mathbf {W}})_{i=1}^K$ with random uniform entries
+        \FOR{$t=1$ {\bfseries to} $T$}
+        \STATE Construct an independent unbiased estimate of $\hat{A}$ and two independent unbiased estimates of $\hat{B}$ from $Z_t$
+        \STATE $\hat{\mathbf {W}} \leftarrow \hat{\mathbf {W}}+\eta_{t} \hat{\Delta}^{\text{GEP-EY}}$
+        \COMMENT{As defined in (\ref{eq:GEP-EY-grad})}
+        \ENDFOR
+    \end{algorithmic}
+\end{algorithm}
+
+
+\section{Conclusion}
+
+We presented a new unconstrained objective to characterise GEPs; this immediately gave efficient algorithms to solve many subspace learning methods in the stochastic setting with SGD.
+Crucially, the gradient estimates are unbiased and cheap to compute.
+Moreover, the only hyperparameter is the choice of optimiser.
+We will later show how this work can be adapted and applied to optimise regularised GEPs and, in particular, CCA.
+
+\appendix
+
+\section{Appendix}
