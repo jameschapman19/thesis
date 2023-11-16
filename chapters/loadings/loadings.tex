@@ -1,10 +1,9 @@
-\chapter{Regularization and the Interpretation of CCA Weights and Loadings}\label{chap:als}
+\graphicspath{{chapters/loadings/}}
+\chapter{Regularization and the Interpretation of CCA Weights and Loadings}\label{chap:loadings}
 \minitoc
 % chktex-file 44
 % chktex-file 3
-
-
-\section{Introduction}\label{sec:introduction}
+\section{Introduction}
 
 The application of Canonical Correlation Analysis (CCA) methods to practical problems often involves two key aspects: predicting latent variables associated with different views, and understanding the nature of the relationship between these views.
 This dichotomy in goals bears resemblance to the distinction between machine learning and probabilistic or statistical approaches to the CCA problem.
@@ -21,7 +20,7 @@ We demonstrate that these approaches are more aligned than previously thought.
 While sparse regularization of CCA weights can lead to sparse estimates of generative model loadings in some conditions, it doesn't always ensure sparse loadings, especially under anisotropic noise (i.e. noise correlated between features).
 Furthermore, regularization can enhance performance in low SNR scenarios, but using the PLS objective can introduce bias, emphasizing dominant principal components and overshadowing subtler correlations.
 
-\section{Background:Generative Perspectives on CCA}\label{sec:background}
+\section{Background:Generative Perspectives on CCA}
 
 Understanding the data generation process in Canonical Correlation Analysis (CCA) and Partial Least Squares (PLS) is pivotal for many reasons.
 It influences the choice of appropriate models, evaluation metrics, and sheds light on the underlying structure and dependencies between views.
@@ -150,13 +149,13 @@ This comparison highlights the differences in how these methods model the relati
 \hline
 \textbf{} & \textbf{Method} & \textbf{Within-view Covariance} $\boldsymbol{\Sigma_{ii}}$ & \textbf{Between-view Covariance} $\boldsymbol{\Sigma_{12}}$ \\
 \hline
-\multirow{2}{*}{\rotatebox[origin=c]{90}{Explicit}} & Probabilistic CCA & $W^{(i)}W^{(i)\top} + \Psi_i$ & $W^{(1)}W^{(2)\top}$ \\
+\multirow{2}{*}{\rotatebox[origin=c]{90}{Explicit}} & Probabilistic CCA & $W^{(i)}W^{(i)\top} + \Psi_i$ & $W\sps{1}W^{(2)\top}$ \\
 \cline{2-4}
-& GFA & $W^{(1)}W^{(1)\top} + \sigma^{(1)} I$ & $W^{(1)}W^{(2)\top}$ \\
+& GFA & $W\sps{1}W^{(1)\top} + \sigma\sps{1} I$ & $W\sps{1}W^{(2)\top}$ \\
 \hline
-\multirow{2}{*}{\rotatebox[origin=c]{90}{Implicit}} & Joint Covariance & $\Sigma_{ii}$ & $\sum_{k=1}^{K}\rho_k\Sigma_{11}u^{(1)}_{k}u^{(2)\top}_k\Sigma_{22}$ \\
+\multirow{2}{*}{\rotatebox[origin=c]{90}{Implicit}} & Joint Covariance & $\Sigma_{ii}$ & $\sum_{k=1}^{K}\rho_k\Sigma_{11}u\sps{1}_{k}u^{(2)\top}_k\Sigma_{22}$ \\
 \cline{2-4}
-& Joint Covariance (Identity) & $I$ & $\sum_{k=1}^{K}\rho_ku^{(1)}_{k}u^{(2)\top}_k$ \\
+& Joint Covariance (Identity) & $I$ & $\sum_{k=1}^{K}\rho_ku\sps{1}_{k}u^{(2)\top}_k$ \\
 \hline
 \end{tabular}
 \label{table:covariance-structures}
@@ -194,25 +193,154 @@ With this comprehensive understanding of data generation methods, we now transit
 
 \section{Methods}
 
-In this section, we outline the methodologies employed in our study for Canonical Correlation Analysis (CCA) and related techniques.
-We then outline our experimental design, which assesses the performance of FRALS and other CCA variants on both simulated and real datasets, aiming to understand weight and loading interpretations and the effects of regularization on model performance and clarity.
+In this section, we make a mathematical argument for the use of loadings over weights for the interpretation of CCA models.
+We then outline our experimental design, which assesses the performance of FRALS and other CCA variants on simulated datasets, aiming to understand weight and loading interpretations of regularized CCA methods.
 Lastly, we specify the parameters and sources of the datasets used.
 
-\subsection{The predictive framework for CCA}\label{subsec:the-predictive-framework-for-cca}
 
-To evaluate the performance of CCA models, we employ a standard predictive framework.
-We split the data into training and test sets using a 80:20 split, and use the training set to fit the model.
-We then use the test set to evaluate the model's performance.
-Where relevant, pre-processing is performed on the training set and the same pre-processing is applied to the test set.
-This is important to avoid data leakage, where information from the test set is used to fit the model.
+\subsection{An argument for the use of Loadings}\label{subsec:an-argument-for-the-use-of-loadings}
 
-\subsubsection{Model Selection}
+Canonical Correlation Analysis (CCA) can be solved in the principal component space. Consider the singular value decomposition (SVD) of the data matrices:
 
-For the models that require hyperparameter tuning, we use a grid search to find the best hyperparameters.
-Specifically, we use 5-fold cross-validation to evaluate the performance of a model with a given set of hyperparameters on 5 different splits of the training data with non-overlapping validation sets.
-We optimise for the hyperparameters that give the best average out of sample correlation.
+\begin{align}
+    X^{i} = U^{i}\Sigma^{i}V^{i\top} \label{eq:svd}
+\end{align}
 
-\subsubsection{Model Comparisons}
+Here, $U^{i}$ and $V^{i}$ are the left and right singular vectors of $X^{i}$ respectively, and $\Sigma^{i}$ is a diagonal matrix of singular values. 
+The intuition behind this decomposition is that we are representing the data matrix in terms of its fundamental components: the direction of maximum variance (captured by $U^{i}$ and $V^{i}$) and the scale of these directions (captured by $\Sigma^{i}$).
+
+Substituting Equation \ref{eq:svd} into the CCA objective function, we have:
+
+\begin{align}
+    \max_{u^{1}, u^{2}} \Corr(X^{1}u^{1}, X^{2}u^{2}) &= \max_{u^{1}, u^{2}} \Corr(U^{1}\Sigma^{1}V^{1\top}u^{1}, U^{2}\Sigma^{2}V^{2\top}u^{2}) \label{eq:cca_obj}
+\end{align}
+
+Reparameterizing the weights as $v^{i} = \Sigma^{i}V^{i\top}u^{i}$, we obtain:
+
+\begin{align}
+    \max_{v^{1}, v^{2}} \Corr(U^{1}v^{1}, U^{2}v^{2}) \label{eq:reparam}
+\end{align}
+
+This reparameterization simplifies the optimization problem by reducing it to finding correlations between transformed variables, which is computationally more feasible but also gives us a convenient way to understand how the weights and loadings of CCA models change under different transformations of the data.
+
+\textbf{Definition:} \textit{Loadings} are defined using the reparameterized weights as follows:
+
+\begin{align}
+    w^{i}_j = \Corr(X^{i}_j, U^{i}v^{i}) = \frac{\Cov(X^{i}_j, U^{i}v^{i})}{\sqrt{\Var(X^{i}_j)}\sqrt{\Var(U^{i}v^{i})}} \label{eq:loading_def}
+\end{align}
+
+By convention, and without loss of generality, we standardize the latent variables to have unit variance:
+
+\begin{align}
+    w^{i}_j = \frac{\Cov(X^{i}_j, U^{i}v^{i})}{\sqrt{\Var(X^{i}_j)}} \label{eq:standardized_loading}
+\end{align}
+
+Intuitively, loadings measure how much each original feature contributes to the latent variables, providing insight into the structure of the data.
+
+\subsubsection{Invariance to Scale}\label{subsubsec:invariance-to-scale}
+
+\begin{lemma}
+Scaling the columns of the data matrix does not affect the left singular vectors $U^{i}$.
+\end{lemma}
+
+\begin{proof}
+Scale the columns of the data with a matrix $C$, for full scaling, \( C \) has all elements as \( c \), and for partial scaling, the first \( N \) elements are \( c \) and the rest are 1. The transformed dataset is \( X^{1'} = X^{1}C \):
+
+\begin{align}
+    X^{1'} = U^{i}\Sigma^{i}V^{i\top}C \label{eq:scaled_data}
+\end{align}
+
+The impact of the scaling matrix $C$ is as follows:
+\begin{itemize}
+\item The scaling affects the right singular vectors $V^i$ and the singular values in $\Sigma^i$.
+\item The left singular vectors $U^i$ remain unaffected by the column-wise scaling.
+\end{itemize}
+
+Therefore, the modified equation can be represented as:
+\begin{equation}
+X^{1'} = U^i \Sigma^{i'} (V^{i'})^T \label{eq:modified_svd}
+\end{equation}
+\end{proof}
+
+\paragraph{Intuition}
+Scaling the data is like changing the units of measurement. 
+It stretches or compresses the data but does not change the direction in which the data varies the most, which is what the left singular vectors $U^i$ capture.
+
+\paragraph{Weights change}
+
+From the earlier relationship, the weights post-scaling are:
+
+\begin{align}
+    u^{i'} = V^{i'}(\Sigma^{i'})^{-1}v^{i} \label{eq:weights_change}
+\end{align}
+
+\paragraph{Loadings are invariant}
+
+Since loadings are correlations between the original features and the latent variables, they are invariant to scaling of the data. 
+This follows from the definition of correlation and the unchanged latent variables:
+
+\begin{align}
+    w^{i}_j = \Corr(X^{i'}_j, U^{i}v^{i}) = \Corr(C_{jj}X^{i}_j, U^{i}v^{i}) = \Corr(X^{i}_j, U^{i}v^{i}) \label{eq:loading_invariant}
+\end{align}
+
+\paragraph{Intuition}
+The loadings remain the same because scaling the data does not change the relative contributions of each feature to the latent variables.
+
+\subsubsection{Invariance to Repeated Columns}\label{subsubsec:invariance-to-repeated-columns}
+
+\begin{lemma}
+Adding repeated columns to the data matrix does not affect the left singular vectors $U^{i}$.
+\end{lemma}
+
+\begin{proof}
+Consider adding repeated columns to the data matrix \( X^{i} \). Let the transformed dataset be \( X^{i''} \), where some columns of \( X^{i} \) are duplicated. The SVD of \( X^{i''} \) can be represented as:
+
+\begin{align}
+    X^{i''} = U^{i''}\Sigma^{i''}V^{i''\top} \label{eq:svd_repeated}
+\end{align}
+
+\paragraph{Impact on SVD Components}
+Adding repeated columns affects the singular values and right singular vectors, but not the left singular vectors. Therefore, \( U^{i''} = U^{i} \), as the row space of \( X^{i} \) and \( X^{i''} \) remains the same.
+
+\paragraph{Weights are Underdetermined}
+With repeated columns, the weights \( u^{i''} \) in the transformed space are underdetermined since the column space has redundant dimensions. However, the specific solution for \( u^{i''} \) will depend on the method used for computing the SVD.
+
+\paragraph{Loadings Remain Invariant}
+The loadings, defined as correlations between original features and latent variables, remain invariant. The redundancy in columns does not affect these correlations.
+
+\begin{align}
+    w^{i}_j = \Corr(X^{i''}_j, U^{i}v^{i}) = \Corr(X^{i}_j, U^{i}v^{i}) \label{eq:loading_invariant_repeated}
+\end{align}
+\end{proof}
+
+\subsubsection{Invariance to Repeated Linear Combinations of Columns}\label{subsubsec:invariance-to-linear-combinations}
+
+\begin{lemma}
+Adding linear combinations of columns to the data matrix does not affect the left singular vectors $U^{i}$.
+\end{lemma}
+
+\begin{proof}
+Now, consider adding columns that are linear combinations of existing columns in \( X^{i} \) to form \( X^{i'''} \). The SVD of \( X^{i'''} \) is:
+
+\begin{align}
+    X^{i'''} = U^{i'''}\Sigma^{i'''}V^{i'''\top} \label{eq:svd_linear_combinations}
+\end{align}
+
+\paragraph{Impact on SVD Components}
+Adding linear combinations of columns affects the right singular vectors and singular values, similar to the case with repeated columns. The left singular vectors \( U^{i'''} \) remain the same as \( U^{i} \), since the row space is unaffected.
+\end{proof}
+
+\paragraph{Weights are Underdetermined}
+The weights \( u^{i'''} \) are underdetermined in the transformed space due to the added linear dependencies in the columns. The specific weights will depend on the SVD computation approach.
+
+\paragraph{Loadings Remain Invariant}
+The loadings, as before, remain unchanged due to the invariance of the row space and the definition of correlation:
+
+\begin{align}\label{eq:loading_invariant_linear_combinations}
+    w^{i}_j = \Corr(X^{i'''}_j, U^{i}v^{i}) = \Corr(X^{i}_j, U^{i}v^{i})
+\end{align}
+
+\subsection{Model Comparisons}
 We employ several CCA variants for this experiment, including Canonical Correlation Analysis (CCA), Partial Least Squares (PLS), and more.
 
 \begin{table}[h]
@@ -234,10 +362,10 @@ FRALS - Elastic & Elastic & \(\alpha_1, \alpha_2, \text{l1}_1, \text{l1}_2\)   \
 \hline
 Principal Component Analysis & PCA & -  \\
 \hline
-\end{tabular}\label{table:cca-variants}
+\end{tabular}
 \end{table}
 
-\subsection{Datasets}\label{subsec:datasets}
+\subsection{Datasets}
 
 We used 8 datasets in our experiments, including 6 simulated datasets and 2 real datasets.
 The simulated datasets were generated using the methods described in section~\ref{subsec:generative-perspectives-on-cca} and the real datasets were sourced from the Human Connectome Project (HCP) and the Alzheimer's Disease Neuroimaging Initiative (ADNI).
@@ -252,16 +380,18 @@ We utilized 50 training and 50 test samples for each of 10 independent random dr
 In line with the Joint Covariance method described in section~\ref{subsubsec:a-joint-covariance-matrix-perspective}, we generated data under two scenarios:
 \begin{itemize}
     \item Using identity covariance matrices, aligning with the 'Implicit' latent variable model (Joint Covariance (Identity)) where true weights are equivalent to true loadings.
-    \item Employing non-identity covariance matrices, consistent with the 'Implicit' latent variable model (Joint Covariance (Non-Identity)) where true weights differ from true loadings, usually resulting in non-sparse weights.
+    \item Employing non-identity covariance matrices, consistent with the `Implicit` latent variable model (Joint Covariance (Non-Identity)) where true weights differ from true loadings, usually resulting in non-sparse weights.
 \end{itemize}
 The true loadings are defined as the product of the true weights and the true population within-view covariance matrix.
-For each model, we estimated model loadings using the pseudo-inverse\footnote{Defined as $A^+ = (A^\top A)^{-1} A^\top$, it inverts the closest matrix to $A$ in a least squares sense}. of the sample covariance matrix.
+For each model, we estimated model loadings using the pseudo-inverse\footnote{Defined as $A^+ = (A^\top A)^{-1} A^\top$, it inverts the closest matrix to $A$ in a least squares sense} of the sample covariance matrix.
 
 \paragraph{Latent Variables and Sparse Loadings:}
-We generated data with sparse loadings using the Probabilistic CCA and GFA models, as outlined in section~\ref{subsubsec:a-probabilistic-latent-variable-perspective-on-cca}. Notably:
+We generated data with sparse loadings using the Probabilistic CCA and GFA models, as outlined in section~\ref{subsubsec:a-probabilistic-latent-variable-perspective-on-cca}. 
+Notably:
 \begin{itemize}
-    \item The Probabilistic CCA model, which falls under 'Explicit' latent variable models, uses random covariance matrices. Here, the true weights are estimated via the pseudo-inverse due to generally non-invertible covariance matrices.
-    \item In the GFA model (also an 'Explicit' model), which employs invertible identity covariance matrices, the true weights are directly equatable to true loadings, with half of the true loadings set to zero.
+    \item The Probabilistic CCA model, which falls under 1Explicit' latent variable models, uses random covariance matrices. 
+    \item Here, the true weights are estimated via the pseudo-inverse due to generally non-invertible covariance matrices.
+    \item In the GFA model (also an `Explicit` model), which employs invertible identity covariance matrices, the true weights are directly equatable to true loadings, with half of the true loadings set to zero.
 \end{itemize}
 The signal-to-noise ratio was calibrated to mirror the correlations observed in the Joint Covariance method, with the sum of the signal's eigenvalues being twice that of the noise.
 The true weights were defined as the product of the true loadings and the inverse of the true population within-view covariance matrix.
@@ -282,59 +412,6 @@ Sparsity in View 1 & 0.5 \\
 Sparsity in View 2 & 0.5 \\
 \hline
 \end{tabular}\label{tab:simulated-data-parameters}
-\end{table}
-
-\subsubsection{Real Data}
-
-The real datasets employed in our experiments comprise the HCP and ADNI data.
-These datasets provide insights into brain functionality and behavior from different perspectives.
-We chose the HCP and the ADNI datasets based on 2 recent landmark studies and the tutorial paper this chapter is loosely related to \cite{mihalik2022canonical}.
-
-\paragraph{The Human Connectome Project (HCP)} offers publicly available resting-state functional MRI (rs-fMRI) and non-imaging measures like demographics, psychometrics, and other behavioral measures.
-Specifically, we sourced data from 1003 subjects out of the 1200-subject data release of the HCP.
-This dataset is constructed using brain connectivity features of the thoroughly processed rs-fMRI data.
-This processing results in 19,900 brain variables for every subject.
-Additionally, there are 145 non-imaging measures employed.
-Notably, nine confounding variables were regressed out from both data modalities.
-Each variable was standardized for zero mean and unit variance.
-More details can be found in \cite{smith2015positive, mihalik2022canonical}.
-We summarize the parameters of the HCP data in table~\ref{tab:hcp-parameters}.
-
-\begin{table}
-\centering
-\caption{HCP Data Parameters}
-\begin{tabular}{| l | l |}
-\hline
-\textbf{Parameter} & \textbf{Value} \\
-\hline
-Number of samples (\textit{n}) & 1003 \\
-Number of features in View 1 (\textit{p}) & 19900 \\
-Number of features in View 2 (\textit{q}) & 145 \\
-\hline
-\end{tabular}\label{tab:hcp-parameters}
-\end{table}
-
-\paragraph{The ADNI} database is found at \url{adni.loni.usc.edu}.
-Launched in 2003, ADNI's main objective is to assess the combination of serial MRI, PET (Positron emission tomography), biological markers, and clinical and neuropsychological assessment in tracking the progression of Mild Cognitive Impairment (MCI) and early Alzheimer’s disease.
-For our experiments, we used a subset of 592 unique subjects from the ADNI. The MRI scans underwent a series of processing stages, yielding a grey matter probability map.
-The Mini-Mental State Examination (MMSE) scores were employed to investigate the association with the grey matter maps.
-Composed of a series of brief tasks, the MMSE evaluates various cognitive domains including memory, attention, language, and visuospatial skills.
-The MMSE is a widely used test for assessing cognitive impairment.
-The MMSE scores range from 0 to 30, with lower scores indicating more severe cognitive impairment.
-We summarize the parameters of the ADNI data in table~\ref{tab:adni-parameters}.
-
-\begin{table}
-\centering
-\caption{ADNI Data Parameters}
-\begin{tabular}{| l | l |}
-\hline
-\textbf{Parameter} & \textbf{Value} \\
-\hline
-Number of samples (\textit{n}) & 592 \\
-Number of features in View 1 (\textit{p}) & 168130 \\
-Number of features in View 2 (\textit{q}) & 31 \\
-\hline
-\end{tabular}\label{tab:adni-parameters}
 \end{table}
 
 \section{Results}
@@ -363,29 +440,29 @@ This suggests that the random covariance scenario results in a higher signal-to-
 \centering
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/regularization/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_joint}
+\includesvg[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_implicit}
 \caption{Identity Covariance Matrices}
 \end{subfigure}
 %
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/regularization/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_joint}
+\includesvg[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_implicit}
 \caption{Random Covariance Matrices}
 \end{subfigure}
-\caption{Weights and Loadings for Implicit Latent Variable Data Generation.}\label{fig:joint-identity-weights-loadings}
+\caption{Weights and Loadings for Implicit Latent Variable Data Generation.}
 \end{figure}
 
 \begin{figure}
 \centering
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/regularization/simulated/low/Train_Test_Scores_Identity_Covariance_joint.svg}
+\includesvg[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Identity_Covariance_implicit.svg}
 \caption{Identity Covariance Matrices}
 \end{subfigure}
 %
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/regularization/simulated/low/Train_Test_Scores_Random_Covariance_joint.svg}
+\includesvg[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Random_Covariance_implicit.svg}
 \caption{Random Covariance Matrices}
 \end{subfigure}
 \caption{Test Scores for Implicit Latent Variable Data Generation.}\label{fig:joint-scores}
@@ -404,13 +481,13 @@ However, this does illustrate that priors on weights do not translate well to pr
 \centering
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/regularization/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_latent_variable}
+\includesvg[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_explicit}
 \caption{GFA (Identity Noise)}
 \end{subfigure}
 %
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/regularization/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_latent_variable}
+\includesvg[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_explicit}
 \caption{Probabilistic CCA (Random Noise)}
 \end{subfigure}
 \caption{Weights and Loadings for Explicit Latent Variable Data Generation Models.}\label{fig:latent-variable-weights-loadings}
@@ -420,20 +497,19 @@ However, this does illustrate that priors on weights do not translate well to pr
 \centering
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/regularization/simulated/low/Train_Test_Scores_Identity_Covariance_latent_variable.svg}
+\includesvg[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Identity_Covariance_explicit.svg}
 \caption{GFA}
 \end{subfigure}
 %
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/regularization/simulated/low/Train_Test_Scores_Random_Covariance_latent_variable.svg}
+\includesvg[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Random_Covariance_explicit.svg}
 \caption{Probabilistic CCA}
 \end{subfigure}
 \caption{Test Scores for Explicit Latent Variable Data Generation Models.}\label{fig:latent-variable-scores}
 \end{figure}
 
 \paragraph{Measuring the Identitiness of the Covariance Matrices}
-
 The theory we developed in section~\ref{subsec:generative-perspectives-on-cca} suggests that the identitiness of the covariance matrices is crucial for understanding how imposing sparsity on the weights imposes a prior belief in sparsity on the more biologically interesting loadings.
 We can measure the identitiness of the covariance matrices by looking at the eigenvalues of the covariance matrices.
 If the eigenvalues of the sample covariance matrix are all close to 1, then the sample covariance matrix is close to identity.
@@ -444,49 +520,78 @@ On the other hand, these plots (shown for 10 random samples) show that all of th
 
 \begin{figure}
 \centering
-\includegraphics[width=0.8\linewidth]{figures/regularization/covariance/simulated_covariance_eigenvalues_low}
+\includegraphics[width=0.8\linewidth]{figures/covariance/simulated_covariance_eigenvalues_low}
 \caption{Eigenvalues of the covariance matrices for the simulated datasets.}\label{fig:covariance-eigenvalues-simulated-low}
 \end{figure}
 
-\subsection{High-Dimensional Simulated Data}
-In this section we consider only the latent variable models in order to ensure we have a sufficient signal-to-noise ratio to compare the models as we are deliberately undersampled.
-Figure~\ref{fig:latent-variable-weights-loadings-high}a once again shows that PCA is a useful baseline for multiview data under an isotropic noise model, even in the high-dimensional setting.
-On the other hand, CCA cannot recover any signal when it is overparameterized.
-Ridge CCA and PLS perform similarly, perhaps because the only identifiable signal is the PLS signal (since the CCA signal is not identifiable).
-Figure~\ref{fig:latent-variable-weights-loadings-high}b illustrates clearly that both RCCA and ElasticNet with their tunable L2 regularization both outperform PLS and SPLS with fixed and maximal L2 regularization.
-It appears that in high dimensions correlated noise is a significant problem for PLS (and therefore SPLS) when used as regularized CCA models, even though the models are identifiable.
+
+\subsection{Repeated Columns}\label{subsec:repeated-columns}
 
 \begin{figure}
 \centering
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/regularization/simulated/high/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_latent_variable}
-\caption{Identity Covariance Latent Variable}
+\includesvg[width=\linewidth]{figures/simulated/repeated/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_implicit}
+\caption{Identity Covariance Matrices}
 \end{subfigure}
 %
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/regularization/simulated/high/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_latent_variable}
-\caption{Random Covariance Latent Variable}
+\includesvg[width=\linewidth]{figures/simulated/repeated/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_implicit}
+\caption{Random Covariance Matrices}
 \end{subfigure}
-\caption{Weights and Loadings for High-Dimensional Explicit Latent Variable Data Generation.}\label{fig:latent-variable-weights-loadings-high}
+\caption{Weights and Loadings for Implicit Latent Variable Data Generation.}
 \end{figure}
 
 \begin{figure}
 \centering
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/regularization/simulated/high/Train_Test_Scores_Identity_Covariance_latent_variable.svg}
-\caption{}
+\includesvg[width=\linewidth]{figures/simulated/repeated/Train_Test_Scores_Identity_Covariance_implicit.svg}
+\caption{Identity Covariance Matrices}
 \end{subfigure}
-%
-\begin{subfigure}{0.49\linewidth}
-\centering
-\includesvg[width=\linewidth]{figures/regularization/simulated/high/Train_Test_Scores_Random_Covariance_latent_variable.svg}
-\caption{}
-\end{subfigure}
-\caption{Test Scores for High-Dimensional Explicit Latent Variable Data Generation Models.}\label{fig:latent-variable-scores-high}
 \end{figure}
+%
+
+%\subsection{High-Dimensional Simulated Data}
+%In this section we consider only the latent variable models in order to ensure we have a sufficient signal-to-noise ratio to compare the models as we are deliberately undersampled.
+%Figure~\ref{fig:latent-variable-weights-loadings-high}a once again shows that PCA is a useful baseline for multiview data under an isotropic noise model, even in the high-dimensional setting.
+%On the other hand, CCA cannot recover any signal when it is overparameterized.
+%Ridge CCA and PLS perform similarly, perhaps because the only identifiable signal is the PLS signal (since the CCA signal is not identifiable).
+%Figure~\ref{fig:latent-variable-weights-loadings-high}b illustrates clearly that both RCCA and ElasticNet with their tunable L2 regularization both outperform PLS and SPLS with fixed and maximal L2 regularization.
+%It appears that in high dimensions correlated noise is a significant problem for PLS (and therefore SPLS) when used as regularized CCA models, even though the models are identifiable.
+%
+%\begin{figure}
+%\centering
+%\begin{subfigure}{0.49\linewidth}
+%\centering
+%\includesvg[width=\linewidth]{figures/simulated/high/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_explicit}
+%\caption{Identity Covariance Latent Variable}
+%\end{subfigure}
+%%
+%\begin{subfigure}{0.49\linewidth}
+%\centering
+%\includesvg[width=\linewidth]{figures/simulated/high/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_explicit}
+%\caption{Random Covariance Latent Variable}
+%\end{subfigure}
+%\caption{Weights and Loadings for High-Dimensional Explicit Latent Variable Data Generation.}\label{fig:latent-variable-weights-loadings-high}
+%\end{figure}
+%
+%\begin{figure}
+%\centering
+%\begin{subfigure}{0.49\linewidth}
+%\centering
+%\includesvg[width=\linewidth]{figures/simulated/high/Train_Test_Scores_Identity_Covariance_explicit.svg}
+%\caption{}
+%\end{subfigure}
+%%
+%\begin{subfigure}{0.49\linewidth}
+%\centering
+%\includesvg[width=\linewidth]{figures/simulated/high/Train_Test_Scores_Random_Covariance_explicit.svg}
+%\caption{}
+%\end{subfigure}
+%\caption{Test Scores for High-Dimensional Explicit Latent Variable Data Generation Models.}\label{fig:latent-variable-scores-high}
+%\end{figure}
 
 %\paragraph{Identitiness of the Covariance Matrices}
 %
@@ -494,204 +599,78 @@ It appears that in high dimensions correlated noise is a significant problem for
 %
 %\begin{figure}
 %\centering
-%\includegraphics[width=0.8\linewidth]{figures/regularization/covariance/simulated_covariance_eigenvalues_high}
+%\includegraphics[width=0.8\linewidth]{figures/covariance/simulated_covariance_eigenvalues_high}
 %\caption{Eigenvalues of the covariance matrices for the simulated datasets.}\label{fig:covariance-eigenvalues-simulated-high}
 %\end{figure}
 
 \newpage
 \subsection{Human Connectome Project (HCP) Data}
 
-Next, we consider the results of applying the various CCA variants to the HCP data.
-Since the HCP data is high-dimensional, we drop CCA from the analysis since it would produce random results.
-
-\subsubsection{Out of Sample Correlation}
-
-The Elastic Net did not improve upon Ridge CCA in terms of holdout correlation captured (Figure~\ref{fig:performance}).
-However, both Ridge CCA and ElasticNet outperformed PLS and SPLS.
-This suggests that tunable L2 regularization is important, even for very high-dimensional data.
-SPLS does however outperform PLS.
-
-\begin{figure}
-\centering
-\includegraphics[width=0.5\linewidth]{figures/regularization/hcp/holdout_correlations}
-\caption{Out-of-sample canonical correlations for each model.}
-\end{figure}
+Next, we revisit the results from the previous chapter on the HCP data.
+However this time we focus on the loadings rather than the weights.
 
 \subsubsection{Behaviour Weights and Loadings}
 
-Figure\ref{fig:behaviour} plots the top 8 positive and negative non-imaging loadings and their associated weights for each model\footnote{This can and does mean for example that a zero weight may have a non-zero loading!}.
-This is to illustrate some of the effects we have observed in the previous section.
-PCA finds a mode of variation in the behavioural data that is positively correlated with psychiatric and life function tests and negatively correlated with a number of emotion and personality tests.
-The RCCA and ElasticNet models find a mode of variation in the behavioural data that is negatively correlated with the Line Orientation test and to a lesser extent smoking and positively correlated with a number of other cognitive tests.
-The PLS model finds a mode of variation in the behavioural data that is somewhat similar to the `good-bad' mode in\cite{smith2015positive} with a positive correlation with agreeableness, vocabulary tests, and feelings about ones' life and a strong negative correlation with smoking, rule-breaking, and antisocial personality traits.
-The SPLS mode is similar but selects out the rule-breaking and antisocial personality traits in favour of the vocabulary tests and smoking.
+
 
 \begin{figure}
 \centering
-\includegraphics[width=0.8\linewidth]{figures/regularization/hcp/PCA behaviour weights and loadings}
-\includegraphics[width=0.8\linewidth]{figures/regularization/hcp/RCCA behaviour weights and loadings}
-\includegraphics[width=0.8\linewidth]{figures/regularization/hcp/ElasticNet behaviour weights and loadings}
-\includegraphics[width=0.8\linewidth]{figures/regularization/hcp/PLS behaviour weights and loadings}
-\includegraphics[width=0.8\linewidth]{figures/regularization/hcp/SPLS behaviour weights and loadings}
-\caption{Top 8 positive and negative non-imaging loadings for each model}\label{fig:behaviour}
+\includegraphics[width=0.8\linewidth]{figures/hcp/PCA behaviour weights and loadings}
+\includegraphics[width=0.8\linewidth]{figures/hcp/RCCA behaviour weights and loadings}
+\includegraphics[width=0.8\linewidth]{figures/hcp/ElasticNet behaviour weights and loadings}
+\includegraphics[width=0.8\linewidth]{figures/hcp/PLS behaviour weights and loadings}
+\includegraphics[width=0.8\linewidth]{figures/hcp/SPLS behaviour weights and loadings}
+\caption{Top 8 positive and negative non-imaging loadings for each model}
 \end{figure}
 
 \subsubsection{Brain Connectivity Weights and Loadings}
 
-In this section, we use two different methods to visualize the brain connectivity weights and loadings.
-The first method is to use chord diagrams to visualize the top 8 positive and negative brain weights and loadings for each model.
-This approach is inspired by the chord diagrams used in \cite{smith2015positive}.
-The second method is to use surface maps to visualize the brain connectivity weights and loadings.
-This approach has been used by both \cite{ferreira2022hierarchical} and \cite{smith2015positive}.
-
-\paragraph{Chord Diagrams}
-We grouped the nodes of the connectivity matrix of our data into 7 parcels according to the Yeo 7 network parcellation\cite{yeo2011organization}.
-These are then arranged around the circumference of the chord diagram using the Nichord package\cite{bogdan2023connsearch}.
-The plots then show the 8 strongest positive and negative weights or loadings for each model as `chords'.
-The chord diagrams in Figure~\ref{fig:chord_weights} and Figure~\ref{fig:chord_loadings} show the top 8 positive and negative brain weights and loadings for each model.
-
-\textcolor{red} Need to find something biologically useful to say about these.
-
 \begin{figure}
 \centering
-\includegraphics[width=0.49\linewidth]{figures/regularization/hcp/RCCA brain weights}
-\includegraphics[width=0.49\linewidth]{figures/regularization/hcp/ElasticNet brain weights}
-\includegraphics[width=0.49\linewidth]{figures/regularization/hcp/PLS brain weights}
-\includegraphics[width=0.49\linewidth]{figures/regularization/hcp/SPLS brain weights}
-\includegraphics[width=0.49\linewidth]{figures/regularization/hcp/PCA brain weights}
-\caption{Chord diagrams of the top 8 positive and negative brain weights for each model.}\label{fig:chord_weights}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=0.49\linewidth]{figures/regularization/hcp/RCCA brain loadings}
-\includegraphics[width=0.49\linewidth]{figures/regularization/hcp/ElasticNet brain loadings}
-\includegraphics[width=0.49\linewidth]{figures/regularization/hcp/PLS brain loadings}
-\includegraphics[width=0.49\linewidth]{figures/regularization/hcp/SPLS brain loadings}
-\includegraphics[width=0.49\linewidth]{figures/regularization/hcp/PCA brain loadings}
+\includegraphics[width=0.49\linewidth]{figures/hcp/RCCA brain loadings}
+\includegraphics[width=0.49\linewidth]{figures/hcp/ElasticNet brain loadings}
+\includegraphics[width=0.49\linewidth]{figures/hcp/PLS brain loadings}
+\includegraphics[width=0.49\linewidth]{figures/hcp/SPLS brain loadings}
+\includegraphics[width=0.49\linewidth]{figures/hcp/PCA brain loadings}
 \caption{Chord diagrams of the top 8 positive and negative brain loadings for each model.}\label{fig:chord_loadings}
 \end{figure}
 
-\paragraph{Surface Map Parcellations}
-The brain surface plots in Figure~\ref{fig:brain} represent maps of brain connection strength increases/decreases, which
-were obtained by weighting each node’s parcel map with the GFA edge-strengths summed across the edges
-connected to the node.
-In Figure~\ref{fig:brain}, we show increases on the left and decreases on the right.
-
-\textcolor{red} Need to find something biologically useful to say about these.
-%
-%\begin{figure}
-%\centering
-%\includegraphics[width=\linewidth]{figures/regularization/hcp/PCA brain loadings surface}
-%\includegraphics[width=\linewidth]{figures/regularization/hcp/RCCA brain loadings surface}
-%\includegraphics[width=\linewidth]{figures/regularization/hcp/ElasticNet brain loadings surface}
-%\includegraphics[width=\linewidth]{figures/regularization/hcp/PLS brain loadings surface}
-%\includegraphics[width=\linewidth]{figures/regularization/hcp/SPLS brain loadings surface}
-%\caption{Map of CCA connection strength variations, with each node’s parcel map weighted by CCA edge-strength changes across edges involving that node.}\label{fig:brain}
-%\end{figure}
-
-\subsubsection{Sparsity of Weights}
-
-Table \ref{tab:brain-behaviour-weights-hcp} shows the number of non-zero weights for each model.
-We can see that tuned SPLS and Elastic Net do find sparse weights, but given the minimal difference in performance, it is not convincing evidence that this is a useful property.
-
-\begin{table}[h]
-\centering
-\caption{Number of non-zero weights for each model.}
-\begin{tabular}{|c|c|c|}
-\hline
-Model &  Brain Weights &  Behaviour Weights \\
-\hline
-PCA        &            300 &                145 \\
-RCCA       &            300 &                145 \\
-Elastic Net &            241 &                 96 \\
-PLS        &            300 &                145 \\
-SPLS       &            118 &                 56 \\
-\hline
-\end{tabular}\label{tab:brain-behaviour-weights-hcp}
-\end{table}
-
 \newpage
-\subsection{Alzheimer's Disease Neuroimaging Initiative (ADNI) Data}\label{subsec:adni}
+\subsection{Alzheimer's Disease Neuroimaging Initiative (ADNI) Data}
 
-We now turn to the ADNI data where our analysis is similar but visualized differently.
-This is because the ADNI data contains structural MRI data rather than functional MRI data.
-
-\subsubsection{Out of Sample Correlation}
-
-In this experiment, the Elastic Net model outperformed all other models in terms of out-of-sample correlation (Figure~\ref{fig:performance}).
-The RCCA model also outperformed the PLS and SPLS models while SPLS outperformed PLS.
-Suprisingly, PCA performed almost as well as PLS.
-
-\begin{figure}
-\centering
-\includegraphics[width=0.5\linewidth]{figures/regularization/adni/holdout_correlations}
-\caption{Out-of-sample canonical correlations for each model.}\label{fig:performance}
-\end{figure}
+We now consider the ADNI data.
+Once again, we focus on the loadings rather than the weights.
 
 \subsubsection{Behaviour Weights and Loadings}
 
-As for the HCP data, Figure \ref{fig:adni-beh} plot the top 8 positive and negative non-imaging loadings and their associated weights for each model.
-Some of the identified behavioural loadings including a number of orientation tests are similar across all of the models including even PCA.
-This is indicative of the strong shared signal between the behavioural data and the brain structure data.
-SPLS and Elastic Net both hone in on the orientation and recall tests in the weight space which appears also to translate to the loadings space.
-The RCCA and Elastic Net models are suprisingly different in both the weight and loadings space, with the RCCA loading on a couple of attention and calculation tests in addition to the ubiquitous orientation and recall tests.
+
 
 \begin{figure}
 \centering
-\includegraphics[width=0.8\linewidth]{figures/regularization/adni/PCA behaviour weights and loadings}
-\includegraphics[width=0.8\linewidth]{figures/regularization/adni/RCCA behaviour weights and loadings}
-\includegraphics[width=0.8\linewidth]{figures/regularization/adni/ElasticNet behaviour weights and loadings}
-\includegraphics[width=0.8\linewidth]{figures/regularization/adni/PLS behaviour weights and loadings}
-\includegraphics[width=0.8\linewidth]{figures/regularization/adni/SPLS behaviour weights and loadings}
-\caption{Bar plots of the behaviour weights and loadings for each model.}\label{fig:adni-beh}
+\includegraphics[width=0.8\linewidth]{figures/adni/PCA behaviour weights and loadings}
+\includegraphics[width=0.8\linewidth]{figures/adni/RCCA behaviour weights and loadings}
+\includegraphics[width=0.8\linewidth]{figures/adni/ElasticNet behaviour weights and loadings}
+\includegraphics[width=0.8\linewidth]{figures/adni/PLS behaviour weights and loadings}
+\includegraphics[width=0.8\linewidth]{figures/adni/SPLS behaviour weights and loadings}
+\caption{Bar plots of the behaviour weights and loadings for each model.}
 \end{figure}
 
 \subsubsection{Brain Structure Weights and Loadings}
 
-We plot the weights and loadings as a mosaic plot with 3 slices in each direction in Figure~\ref{fig:adni-brain}.
-Previous work using SPLS with the ADNI dataset identified the same striking pattern of weights with the model strikingly selecting the hippocampal weights\cite{monteiro2016multiple}.
-While the Elastic Net has a less visually appealing selection of weights, with a honeycomb pattern near the edges of the brain, the hippocampal region is more clearly loaded on in the loadings space (and likewise for RCCA).
-It is noticeable that PCA, PLS and SPLS both weights in the same direction whereas RCCA and Elastic Net weight different regions with opposite signs.
-
 \begin{figure}
 \centering
-\includegraphics[width=0.45\linewidth]{figures/regularization/adni/PCA brain loadings mosaic}
-\includegraphics[width=0.45\linewidth]{figures/regularization/adni/PCA brain weights mosaic}
-\includegraphics[width=0.45\linewidth]{figures/regularization/adni/RCCA brain loadings mosaic}
-\includegraphics[width=0.45\linewidth]{figures/regularization/adni/RCCA brain weights mosaic}
-\includegraphics[width=0.45\linewidth]{figures/regularization/adni/ElasticNet brain loadings mosaic}
-\includegraphics[width=0.45\linewidth]{figures/regularization/adni/ElasticNet brain weights mosaic}
-\includegraphics[width=0.45\linewidth]{figures/regularization/adni/PLS brain loadings mosaic}
-\includegraphics[width=0.45\linewidth]{figures/regularization/adni/PLS brain weights mosaic}
-\includegraphics[width=0.45\linewidth]{figures/regularization/adni/SPLS brain loadings mosaic}
-\includegraphics[width=0.45\linewidth]{figures/regularization/adni/SPLS brain weights mosaic}
+\includegraphics[width=0.45\linewidth]{figures/adni/PCA brain loadings mosaic}
+\includegraphics[width=0.45\linewidth]{figures/adni/PCA brain weights mosaic}
+\includegraphics[width=0.45\linewidth]{figures/adni/RCCA brain loadings mosaic}
+\includegraphics[width=0.45\linewidth]{figures/adni/RCCA brain weights mosaic}
+\includegraphics[width=0.45\linewidth]{figures/adni/ElasticNet brain loadings mosaic}
+\includegraphics[width=0.45\linewidth]{figures/adni/ElasticNet brain weights mosaic}
+\includegraphics[width=0.45\linewidth]{figures/adni/PLS brain loadings mosaic}
+\includegraphics[width=0.45\linewidth]{figures/adni/PLS brain weights mosaic}
+\includegraphics[width=0.45\linewidth]{figures/adni/SPLS brain loadings mosaic}
+\includegraphics[width=0.45\linewidth]{figures/adni/SPLS brain weights mosaic}
 \caption{Statistical maps of brain structure loadings and weights for each model.}\label{fig:adni-brain}
 \end{figure}
-
-\subsubsection{Sparsity of Weights}
-
-Table~\ref{tab:brain-behaviour-weights-adni} once again shows the number of non-zero weights for each model.
-We can see that tuned SPLS and Elastic Net once again identify sparse weights.
-In this case, the difference in performance is more convincing and suggests that this sparsity is less spuriously induced than for the HCP data.
-This is supported by the fact that Elastic Net and SPLS models find a similar level of sparsity in the brain weights.
-On the other hand SPLS finds a much sparser set of behavioural weights.
-
-\begin{table}[h]
-\centering
-\caption{Number of non-zero weights for each model.}
-\begin{tabular}{|c|c|c|}
-\hline
-Model &  Brain Weights &  Behaviour Weights \\
-\hline
-PCA        &         168130 &                 31 \\
-RCCA       &         168130 &                 31 \\
-Elastic Net &          59617 &                 17 \\
-PLS        &         168130 &                 31 \\
-SPLS       &          74995 &                 10 \\
-\hline
-\end{tabular}\label{tab:brain-behaviour-weights-adni}
-\end{table}
 
 \subsubsection{Identitiness of Covariance Matrices}
 In this section, we consider the identitiness of the covariance matrices for the HCP and ADNI datasets.
@@ -699,7 +678,7 @@ Figure \ref{fig:covariance-eigenvalues-real} shows the eigenvalues of the covari
 From Figure \ref{fig:covariance-eigenvalues-real}, we can see that the eigenvalues of the covariance matrices for the ADNI data are much closer to the ideal for identity covariance than for the HCP data.
 \begin{figure}
 \centering
-\includegraphics[width=0.8\linewidth]{figures/regularization/covariance/hcp_adni_covariance_eigenvalues}
+\includegraphics[width=0.8\linewidth]{figures/covariance/hcp_adni_covariance_eigenvalues}
 \caption{Eigenvalues of the covariance matrices for the HCP and ADNI datasets.}\label{fig:covariance-eigenvalues-real}
 \end{figure}
 
@@ -709,24 +688,22 @@ From Figure \ref{fig:covariance-matrices-real}, we can see the block structure o
 \centering
 \begin{subfigure}{0.66\linewidth}
 \centering
-\includegraphics[width=\linewidth]{figures/regularization/covariance/HCP_covariance}
+\includegraphics[width=\linewidth]{figures/covariance/HCP_covariance}
 \caption{HCP}
 \end{subfigure}
 %
 \begin{subfigure}{0.33\linewidth}
 \centering
-\includegraphics[width=\linewidth]{figures/regularization/covariance/ADNI_covariance}
+\includegraphics[width=\linewidth]{figures/covariance/ADNI_covariance}
 \caption{ADNI}
 \end{subfigure}
 \caption{Covariance matrices for the HCP and ADNI datasets.}
 \label{fig:covariance-matrices-real}
 \end{figure}
 
-This suggests that the only dataset and view where we can expect sparsity on the weights to imply sparsity on the loadings is the ADNI data and is consistent with the results we have seen in the previous section, that sparsity improves performance in the ADNI data but not in the HCP data.
-
 \section{Discussion and Limitations}
 
-In this section, we discuss the implications of our findings as well as the limitations of our study and the proposed FRALS method, some of which we address in later chapters of this thesis.
+In this section, we discuss the implications of our findings as well as the limitations of our study.
 
 \subsection{Discussion}
 
@@ -736,14 +713,15 @@ We have gone a step further than \cite{haufe2014interpretation} by showing that 
 
 \paragraph{Sparsity on the weights does not imply sparsity on the loadings:}
 
-On the other hand, our results raise the question of whether sparsity on the weights makes sense in the first place.
+On the other hand, our results raise whether sparsity on the weights makes sense in the first place.
 For latent variable models of brain-behaviour associations, we have argued that the loadings are the more biologically relevant quantity.
 Since in practice, identity covariance is rarely a good assumption, the weights and loadings are not equivalent.
 This means that sparsity on the weights does not imply sparsity on the loadings, and so we should not expect sparsity on the weights to lead to more interpretable loadings.
 A practical step this implies is \textit{to ensure that the data covariances are at least close to identity before applying sparse CCA methods}.
 
 \paragraph{Identitiness of real covariance matrices:} Between the HCP and ADNI datasets, only the ADNI data had eigenvalue spectra that were reasonably close to those of an identity matrix.
-This suggests that the only dataset and view where we can expect sparsity on the weights to imply sparsity on the loadings is the ADNI data and is consistent with the results we have seen in the previous section, that sparsity improves performance in the ADNI data but not in the HCP data.
+This suggests that the only dataset and view where we can expect sparsity on the weights to imply sparsity on the loadings is the ADNI data.
+This is consistent with the results we have seen in the previous section, that sparsity improves performance in the ADNI data but not in the HCP data.
 Furthermore, the loadings and weights are much more similar to each other in the ADNI data than in the HCP data, supporting the idea that the ADNI weights are themselves somewhat interpretable as estimates of the biologically relevant loadings.
 Finally, in the well understood Alzheimer's disease data, we know that the identified weights (and loadings) are consistent with the known biology of the disease.
 
@@ -775,25 +753,10 @@ We could in principle apply the soft-thresholding operator to the estimated load
 However we would need to be careful to ensure that the sample covariance matrix is invertible in order to get back to the weights.
 This is of course not guaranteed in the small sample setting.
 
-\subsection{Experiment Limitations}
-
-\paragraph{Non-Gaussian Data:} The simulated data was generated from a Gaussian distribution.
-This is a limitation of our study, and it would be interesting to see how the models perform on non-Gaussian data.
-In particular, biomedical data typically contain categorical and even binary variables, and so it would be interesting to see how the models perform on such data.
-We show an example of the Orientation category scores in the ADNI data in Figure~\ref{fig:adni-behavioural-data}.
-
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{figures/regularization/adni/Orientation}
-\caption{Histogram of the Orientation test scores in the ADNI data.}\label{fig:adni-behavioural-data}
-\end{figure}
-
-\section{Conclusion}\label{sec:conclusion}
+\section{Conclusion}
 
 In this chapter, we have explored the performance of several CCA variants on simulated and real data.
 We have shown that the choice of CCA variant can have a significant impact on the results.
 We have also shown that the identitiness of the covariance matrices is crucial for understanding how imposing sparsity on the weights imposes a prior belief in sparsity on the more biologically interesting loadings.
 We described a way to check the identitiness of the covariance matrices by looking at the eigenvalues of the covariance matrices and comparing to the ideal case.
-We have also shown that FRALS can be a useful tool for brain-behaviour studies, but that it is computationally expensive.
-
 In the next chapter, we address the scalability of CCA and its variants by introducing a novel algorithm based on gradient descent.

@@ -67,33 +67,33 @@
 
 % ------------------  TITLE PAGE -------------------
 \begin{titlepage}
-\begin{center}
-    % Title
-    {\LARGE\textbf{Towards Scalable, Flexible, and Interpretable Self-Supervised Learning from Multiview Biomedical Data}
-\author{James Chapman\\
-    % Subtitle
-    \\}}
+    \begin{center}
+        % Title
+        {\LARGE\textbf{Towards Scalable, Flexible, and Interpretable Self-Supervised Learning from Multiview Biomedical Data}
+            \author{James Chapman\\
+                % Subtitle
+                \\}}
 
-    \vspace{0.8cm}
-    by\\
-    \vspace{0.8cm}
+        \vspace{0.8cm}
+        by\\
+        \vspace{0.8cm}
 
-    % Author
-    {\LARGE\textbf{James Chapman\\}}
-    % Date
-    \vspace{1.5cm}
-    {\LARGE\textbf{January 2022}}
+        % Author
+        {\LARGE\textbf{James Chapman\\}}
+        % Date
+        \vspace{1.5cm}
+        {\LARGE\textbf{January 2022}}
 
-    \vfill
+        \vfill
 
-    \textbf{\setstretch{2.0}       
-    PhD Thesis\\
-    \vspace{1cm}
-    i4health CDT\\
-    University College London\\}
+        \textbf{\setstretch{2.0}
+            PhD Thesis\\
+            \vspace{1cm}
+            i4health CDT\\
+            University College London\\}
 
-    \vspace{2cm}
-\end{center}
+        \vspace{2cm}
+    \end{center}
 \end{titlepage}
 
 \onehalfspacing
@@ -120,7 +120,7 @@
 % \addcontentsline{toc}{chapter}{Publications} % Add List of figures into 
 
 % -------------------  LIST OF FIGURES --------------------
-\newpage 
+\newpage
 % {\let\oldnumberline\numberline       % Uncomment to add the word 'Figure' to figure number in List of Figures
 %\renewcommand{\numberline}{\figurename~\oldnumberline}  
 \listoffigures%
@@ -128,7 +128,7 @@
 
 % -------------------  LIST OF TABLES ---------------------
 \newpage
-\listoftables 
+\listoftables
 % \mtcaddchapter[List of Tables] % Add List of tables into contents without any numeration 
 
 % -------------------  ACRONYMS ---------------------
@@ -140,18 +140,21 @@
 
 % ------------------  TABLE OF CONTENTS --------------------
 \dominitoc% Initialization
-\tableofcontents 
+\tableofcontents
 
 
 %\textbf{Keywords:} Machine Learning, Neuroimaging, Canonical Correlation Analysis
 
 
 % ------------------  CHAPTER START  --------------------
-% \include{chapters/1_introduction/introduction}
+\include{chapters/introduction/introduction}
 
-% \include{chapters/2_background/background}
+\include{chapters/background/background}
 %
-\include{chapters/3_regularization/regularization}
+\include{chapters/regularization/regularization}
+
+\include{chapters/loadings/loadings}
+
 %
 %\include{chapters/4_gradient_descent/gradient_descent}
 %
