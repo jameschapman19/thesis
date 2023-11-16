@@ -6,37 +6,25 @@
         "**/.idea": true,
         "**.xml": true,
         "**.log": true,
+        "**.iml": true,
+        "**.acn": true,
+        "**.acr": true,
+        // "**/**.aux": true,
+        "**.bbl": true,
+        "**.glg": true,
+        "**.glo": true,
+        "**.gls": true,
+        "**.alg": true,
+        "**.bcf": true,
+        "**.maf": true,
+        "**.ist": true,
+        "**.mtc": true,
+        "**.mtc*": true,
+        "**.synctex.gz": true,
+        "**.glsdefs": true,
+        "**.lof": true,
+        "**.lot": true,
+        "**.toc": true,
+
     },
-    "latex-workshop.latex.tools": [
-        {
-            "name": "latexmk",
-            "command": "latexmk",
-            "args": [
-                "-shell-escape",
-                "-synctex=1",
-                "-interaction=nonstopmode",
-                "-file-line-error",
-                "-pdf",
-                "-outdir=%OUTDIR%",
-                "%DOC%"
-            ]
-        },
-        {
-            "name": "pdflatex",
-            "command": "pdflatex",
-            "args": [
-                "-synctex=1",
-                "-interaction=nonstopmode",
-                "-file-line-error",
-                "%DOC%"
-            ]
-        },
-        {
-            "name": "bibtex",
-            "command": "bibtex",
-            "args": [
-                "%DOCFILE%"
-            ]
-        }
-    ],
 }

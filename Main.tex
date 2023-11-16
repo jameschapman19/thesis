@@ -2,13 +2,15 @@
 % ------------------ DOCUMENT SETUP ------------------ 
 % The document class defines the document type (report) and sets the font size (10pt)
 \documentclass{report}
-
 % Optional math commands from https://github.com/goodfeli/dlbook_notation.
 \input{math_commands.tex}
 \author{James Chapman}
 
 % Inputs the Document Packages
 \input{_Packages}
+\usepackage[utf8]{inputenc}
+\usepackage[acronym]{glossaries}
+\makeglossaries
 
 % Mute tabular warnings
 % chktex-file 44 
@@ -55,15 +57,12 @@
 \numberwithin{table}{section}
 
 
-
-
-
-
 %  -------------------------------------------------
 %  --------- The document starts from here --------- 
 %  -------------------------------------------------
-
+\input{chapters/acronyms}
 \begin{document}
+
 
 % ------------------  TITLE PAGE -------------------
 \begin{titlepage}
@@ -100,7 +99,7 @@
 
 % ----------------------  ABSTRACT -----------------------
 \newpage
-% \include{chapters/abstract}
+\include{chapters/abstract}
 
 % ----------------------  IMPACT STATEMENT -----------------------
 % \newpage
@@ -121,22 +120,19 @@
 
 % -------------------  LIST OF FIGURES --------------------
 \newpage
-% {\let\oldnumberline\numberline       % Uncomment to add the word 'Figure' to figure number in List of Figures
-%\renewcommand{\numberline}{\figurename~\oldnumberline}  
-\listoffigures%
-% \mtcaddchapter[List of Figures] % Add List of figures into contents without any numeration 
+\listoffigures
 
-% -------------------  LIST OF TABLES ---------------------
+% % -------------------  LIST OF TABLES ---------------------
 \newpage
 \listoftables
-% \mtcaddchapter[List of Tables] % Add List of tables into contents without any numeration 
 
 % -------------------  ACRONYMS ---------------------
 \newpage
+\printglossary[type=\acronymtype]
+\printglossary
 
 % -------------------  NOTATION ---------------------
 \newpage
-
 
 % ------------------  TABLE OF CONTENTS --------------------
 \dominitoc% Initialization
@@ -150,7 +146,7 @@
 \include{chapters/introduction/introduction}
 
 \include{chapters/background/background}
-%
+% %
 \include{chapters/regularization/regularization}
 
 \include{chapters/loadings/loadings}
@@ -165,10 +161,10 @@
 %\include{chapters/7_discussion/discussion}
 
 % -------------------  BIBLIOGRAPHY ---------------------
-\newpage
+% \newpage
 % \nocite{*}
 % \mtcaddchapte[References] % Adds References Section to Table of 
-\printbibliography[title = {References}]
+% \printbibliography[title = {References}]
 
 \end{document}
 %  -------------------------------------------------

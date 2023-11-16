@@ -1,31 +1,37 @@
 \graphicspath{{chapters/loadings/}}
-\chapter{Regularization and the Interpretation of CCA Weights and Loadings}\label{chap:loadings}
+\chapter{Regularization and the Interpretation of \acrshort{cca} Weights and Loadings}\label{chap:loadings}
 \minitoc
 % chktex-file 44
 % chktex-file 3
+\epigraph{If you change the way you look at things, the things you look at change.}{\textit{Wayne Dyer}}
+\epigraph{He was constantly reminded of how startlingly different a place the world was when viewed from a point only three feet to the left.}{\textit{Douglas Adams}}
 \section{Introduction}
 
-The application of Canonical Correlation Analysis (CCA) methods to practical problems often involves two key aspects: predicting latent variables associated with different views, and understanding the nature of the relationship between these views.
-This dichotomy in goals bears resemblance to the distinction between machine learning and probabilistic or statistical approaches to the CCA problem.
+The application of Canonical Correlation Analysis (\acrshort{cca}) methods to practical problems often involves two key aspects: predicting latent variables associated with different views, and understanding the nature of the relationship between these views.
+This dichotomy in goals bears resemblance to the distinction between machine learning and probabilistic or statistical approaches to the \acrshort{cca} problem.
 Machine learning approaches prioritize (out-of-sample) prediction of latent variables for downstream tasks, while statistical approaches seek to infer the data generation process from latent variables to the observed data.
-Notably, the probabilistic approach to CCA focusses on the forward model from latent variables to observed data, while the machine learning approach focusses on the inverse model from observed data to latent variables.
-As a result the probabilistic CCA is parameterized by the \textit{loadings} (parameters that transform latent variables to observed data), while the machine learning approach is parameterized by \textit{weights} (parameters that transform obsevred data to latent variables).
+Notably, the probabilistic approach to \acrshort{cca} focusses on the forward model from latent variables to observed data, while the machine learning approach focusses on the inverse model from observed data to latent variables.
+As a result the probabilistic \acrshort{cca} is parameterized by the \textit{loadings} (parameters that transform latent variables to observed data), while the machine learning approach is parameterized by \textit{weights} (parameters that transform obsevred data to latent variables).
 We would ideally like to have the best possible prediction of the latent variables, while also being able to interpret the model and understand the relationship between the views.
 This implies that we would like to have models which are both good at prediction and have interpretable loadings that we can use to understand the relationship between the views via the data generation process.
-The importance of the loadings (associated with the `forward' model from latent variables to observed data) instead of weights (associated with the `backward' model from observed data to latent variables) for interpretability was highlighted by \cite{haufe2014interpretation} for linear models including SVM and Lasso, along with methods for transforming `backward' weights to `forward' loadings.
-We contribute to this line of work by demonstrating a similar relationship between the loadings and weights of CCA models, and showing that the loadings are more interpretable than the weights.
+The importance of the loadings (associated with the `forward' model from latent variables to observed data) instead of weights (associated with the `backward' model from observed data to latent variables) for interpretability was highlighted by \cite{haufe2014interpretation} for linear models including \acrshort{svm} and Lasso, along with methods for transforming `backward' weights to `forward' loadings.
+We contribute to this line of work by demonstrating a similar relationship between the loadings and weights of \acrshort{cca} models, and showing that the loadings are more interpretable than the weights.
 
-In this chapter, we reexamine the relationship between machine learning and probabilistic CCA approaches using simulated data.
+In this chapter, we reexamine the relationship between machine learning and probabilistic \acrshort{cca} approaches using simulated data.
 We demonstrate that these approaches are more aligned than previously thought.
-While sparse regularization of CCA weights can lead to sparse estimates of generative model loadings in some conditions, it doesn't always ensure sparse loadings, especially under anisotropic noise (i.e. noise correlated between features).
+While sparse regularization of \acrshort{cca} weights can lead to sparse estimates of generative model loadings in some conditions, it doesn't always ensure sparse loadings, especially under anisotropic noise (i.e. noise correlated between features).
 
-\section{Background:Generative Perspectives on CCA}
+\section{Background:Generative Perspectives on \acrshort{cca}}
 
-Understanding the data generation process in Canonical Correlation Analysis (CCA) and Partial Least Squares (PLS) is pivotal for many reasons.
+Understanding the data generation process in \acrshort{cca} and \acrshort{pls} is pivotal for many reasons.
 It influences the choice of appropriate models, evaluation metrics, and sheds light on the underlying structure and dependencies between views.
 Probabilistic formulations provide a principled framework to understand this process, helping us gauge the assumptions we make and the limitations these impose.
 
-\subsection{Probabilistic CCA and GFA (Explicit Latent Variable Models}\label{subsubsec:a-probabilistic-latent-variable-perspective-on-cca}
+\subsection{Probabilistic \acrshort{cca} and \acrshort{gfa} (Explicit Latent Variable Models)}\label{subsubsec:a-probabilistic-latent-variable-perspective}
+
+
+% #TODO: Weights are combinations of subsets of features in each view that covary/correlate
+% #TODO: Loadings are correlations of each feature with the latent variable
 
 Consider the graphical model depicted in Figure~\ref{fig:mentalhealthselfsupervised}.
 It comprises two distinct views: a neuroimaging modality and a behavioral modality.
@@ -58,14 +64,14 @@ The distributions of the two views are given by:
 Where \(z\) represents the latent variable (disease severity), \(x\sps{i}\) represents the $i^{\text{th}}$ view, \(W\sps{i}\) represents the model loadings, \(\mu\sps{i}\) represents the mean, and \(\Psi\sps{i}\) represents the noise covariance matrix for the $i^{\text{th}}$ view.
 Notice that if it were not for the view-specific noise, the two views would be perfectly correlated subject to a linear transformation.
 
-\citep{bach2005probabilistic} showed that the maximum likelihood solution for this model is equivalent to the solution of the CCA problem in the sense that the loadings are the same as the CCA weights multiplied by the covariance:
+\citep{bach2005probabilistic} showed that the maximum likelihood solution for this model is equivalent to the solution of the \acrshort{cca} problem in the sense that the loadings are the same as the \acrshort{cca} weights multiplied by the covariance:
 
 \begin{align}\label{eq:probabilistic-cca}
     \hat{W}\sps{i} = \Sigma_{ii} \hat{U}\sps{i} R
 \end{align}
 
-Where $R$ is an arbitrary rotation matrix and $\hat{U}\sps{i}$ is the matrix of CCA weights for the $i$th view.
-This implies that for invertible covariance matrices, we can access the `true' CCA weights by multiplying the loadings by the inverse of the covariance matrix:
+Where $R$ is an arbitrary rotation matrix and $\hat{U}\sps{i}$ is the matrix of \acrshort{cca} weights for the $i$th view.
+This implies that for invertible covariance matrices, we can access the `true' \acrshort{cca} weights by multiplying the loadings by the inverse of the covariance matrix:
 
 \begin{align}
     \hat{U}\sps{i} = \Sigma_{ii}^{-1} \hat{W}\sps{i}
@@ -73,24 +79,24 @@ This implies that for invertible covariance matrices, we can access the `true' C
 
 In practice we do not have access to the covariance matrices $\Sigma_{ii}$, so we must estimate them from the data using the sample covariance matrices $\hat{\Sigma}_{ii}$.
 
-Notice that for Identity covariance matrices, the CCA weights are the same as the loadings.
+Notice that for Identity covariance matrices, the \acrshort{cca} weights are the same as the loadings.
 Otherwise, there is a linear transformation between the two.
-For singular covariance matrices, the CCA weights are not uniquely defined.
+For singular covariance matrices, the \acrshort{cca} weights are not uniquely defined.
 
-Moreover, the mean of the posterior distribution of the latent variables is proportional to the mean of the CCA scores\citep{klami2013bayesian}.
-Group Factor Analysis (GFA) is a closely related model that assumes diagonal covariance in $\Psi\sps{i}$:
+Moreover, the mean of the posterior distribution of the latent variables is proportional to the mean of the \acrshort{cca} scores\citep{klami2013bayesian}.
+Group Factor Analysis (\acrshort{gfa}) is a closely related model that assumes diagonal covariance in $\Psi\sps{i}$:
 
 \begin{align}
     z& \sim \mathcal{N}(0, I)\\
     x\sps{i} & \sim \mathcal{N}(W\sps{i} z, \sigma\sps{i}I)
 \end{align}
 
-An interesting feature of the GFA model is that as the noise level approaches zero, the marginal distribution of the views is the same as the probabilistic PCA model for each view~\citep{tipping1999probabilistic}.
+An interesting feature of the \acrshort{gfa} model is that as the noise level approaches zero, the marginal distribution of the views is the same as the probabilistic PCA model for each view~\citep{tipping1999probabilistic}.
 This suggests that for small noise levels, we should in fact be able to recover much of the mutual information between the views by using PCA on each view separately.
 For this reason, we will use and recommend PCA as a baseline in our later experiments.
 Because the diagonal covariance assumption makes inference computationally cheaper, this line of work has been able to extend to incorporate sparsity on the loadings\citep{virtanen2011bayesian} as well as missing data~\citep{ferreira2022hierarchical}.
 
-By marginalizing out the latent variables of the generative CCA and GFA models, we can write down the joint distribution of the two views:
+By marginalizing out the latent variables of the generative \acrshort{cca} and \acrshort{gfa} models, we can write down the joint distribution of the two views:
 
 \begin{align}
     \begin{bmatrix} X\sps{1} \\ X\sps{2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \mu\sps{1} \\ \mu\sps{2} \end{bmatrix}, \begin{bmatrix} W\sps{1}W\spstop{1} + \Psi_1 & W\sps{1}W\spstop{2} \\ W\sps{2}W\spstop{1} & W\sps{2}W\spstop{2} + \Psi_2 \end{bmatrix} \right)
@@ -103,15 +109,15 @@ Specifically, the covariance matrix of the $i^{\text{th}}$ view is given by:
     \Sigma_{ii} = W\sps{i}W\spstop{i} + \Psi_i
 \end{align}
 
-While these generative models are well-grounded in biological processes and provide a clear latent variable perspective, their application in practice is limited compared to classical CCA.
+While these generative models are well-grounded in biological processes and provide a clear latent variable perspective, their application in practice is limited compared to classical \acrshort{cca}.
 This is primarily due to their computational intensity and the need for a careful selection of priors.
-Moreover, while these models can generate data with sparse loadings, generating data with sparse weights is challenging due to the dependence of CCA weights on the covariance matrices of the views.
+Moreover, while these models can generate data with sparse loadings, generating data with sparse weights is challenging due to the dependence of \acrshort{cca} weights on the covariance matrices of the views.
 
 \subsection{A Joint Covariance Matrix Perspective (Implicit Latent Variable Model)}\label{subsubsec:a-joint-covariance-matrix-perspective}
 
 In contrast to the explicit latent variable models discussed earlier, the joint covariance matrix perspective offers an implicit approach to understanding the data generation process.
 This method focuses on the covariance matrices of the views, rather than directly modeling latent variables.
-A key advantage of this perspective, particularly noted in the sparse CCA literature, is its ability to generate data with sparse weights.
+A key advantage of this perspective, particularly noted in the sparse \acrshort{cca} literature, is its ability to generate data with sparse weights.
 This is achieved by constructing the joint covariance matrix of the two views as follows:
 
 \begin{align}\label{eq:covariance}
@@ -148,9 +154,9 @@ This comparison highlights the differences in how these methods model the relati
 \hline
 \textbf{} & \textbf{Method} & \textbf{Within-view Covariance} $\boldsymbol{\Sigma_{ii}}$ & \textbf{Between-view Covariance} $\boldsymbol{\Sigma_{12}}$ \\
 \hline
-\multirow{2}{*}{\rotatebox[origin=c]{90}{Explicit}} & Probabilistic CCA & $W^{(i)}W^{(i)\top} + \Psi_i$ & $W\sps{1}W^{(2)\top}$ \\
+\multirow{2}{*}{\rotatebox[origin=c]{90}{Explicit}} & Probabilistic \acrshort{cca} & $W^{(i)}W^{(i)\top} + \Psi_i$ & $W\sps{1}W^{(2)\top}$ \\
 \cline{2-4}
-& GFA & $W\sps{1}W^{(1)\top} + \sigma\sps{1} I$ & $W\sps{1}W^{(2)\top}$ \\
+& \acrshort{gfa} & $W\sps{1}W^{(1)\top} + \sigma\sps{1} I$ & $W\sps{1}W^{(2)\top}$ \\
 \hline
 \multirow{2}{*}{\rotatebox[origin=c]{90}{Implicit}} & Joint Covariance & $\Sigma_{ii}$ & $\sum_{k=1}^{K}\rho_k\Sigma_{11}u\sps{1}_{k}u^{(2)\top}_k\Sigma_{22}$ \\
 \cline{2-4}
@@ -172,10 +178,10 @@ This distinction is crucial, especially in scenarios where the population covari
 \hline
 \textbf{} & \textbf{Method} & \textbf{Case} & \textbf{Weights} & \textbf{Loadings} \\
 \hline
-\multirow{4}{*}{\rotatebox[origin=c]{90}{Explicit}} & Probabilistic CCA & Population & $(W^{(i)}W^{(i)\top} + \Psi_i)^{-1}W^{(i)}$ & $W^{(i)}$ \\
+\multirow{4}{*}{\rotatebox[origin=c]{90}{Explicit}} & Probabilistic \acrshort{cca} & Population & $(W^{(i)}W^{(i)\top} + \Psi_i)^{-1}W^{(i)}$ & $W^{(i)}$ \\
                           &                   & Sample & $\hat{\Sigma_{ii}}^{-1}W^{(i)}$ & $W^{(i)}$ \\
 \cline{2-5}
-                          & GFA & Population & $(W^{(i)}W^{(i)\top} + I)^{-1}W^{(i)}$ & $W^{(i)}$ \\
+                          & \acrshort{gfa} & Population & $(W^{(i)}W^{(i)\top} + I)^{-1}W^{(i)}$ & $W^{(i)}$ \\
                           &     & Sample & $\hat{\Sigma_{ii}}^{-1}W^{(i)}$ & $W^{(i)}$ \\
 \hline
 \multirow{4}{*}{\rotatebox[origin=c]{90}{Implicit}} & Joint Covariance (Non-Identity) & Population & $U^{(i)}$ & $\Sigma_{ii}U^{(i)}$ \\
@@ -192,14 +198,14 @@ With this comprehensive understanding of data generation methods, we now transit
 
 \section{Methods}
 
-In this section, we make a mathematical argument for the use of loadings over weights for the interpretation of CCA models.
-We then outline our experimental design, which assesses the performance of FRALS and other CCA variants on simulated datasets, aiming to understand weight and loading interpretations of regularized CCA methods.
+In this section, we make a mathematical argument for the use of loadings over weights for the interpretation of \acrshort{cca} models.
+We then outline our experimental design, which assesses the performance of FRALS and other \acrshort{cca} variants on simulated datasets, aiming to understand weight and loading interpretations of regularized \acrshort{cca} methods.
 Lastly, we specify the parameters and sources of the datasets used.
 
 
 \subsection{An argument for the use of Loadings}\label{subsec:an-argument-for-the-use-of-loadings}
 
-Canonical Correlation Analysis (CCA) can be solved in the principal component space. Consider the singular value decomposition (SVD) of the data matrices:
+\acrshort{cca} can be solved in the principal component space. Consider the singular value decomposition (SVD) of the data matrices:
 
 \begin{align}
     X^{i} = U^{i}\Sigma^{i}V^{i\top} \label{eq:svd}
@@ -208,7 +214,7 @@ Canonical Correlation Analysis (CCA) can be solved in the principal component sp
 Here, $U^{i}$ and $V^{i}$ are the left and right singular vectors of $X^{i}$ respectively, and $\Sigma^{i}$ is a diagonal matrix of singular values. 
 The intuition behind this decomposition is that we are representing the data matrix in terms of its fundamental components: the direction of maximum variance (captured by $U^{i}$ and $V^{i}$) and the scale of these directions (captured by $\Sigma^{i}$).
 
-Substituting Equation \ref{eq:svd} into the CCA objective function, we have:
+Substituting Equation \ref{eq:svd} into the \acrshort{cca} objective function, we have:
 
 \begin{align}
     \max_{u^{1}, u^{2}} \Corr(X^{1}u^{1}, X^{2}u^{2}) &= \max_{u^{1}, u^{2}} \Corr(U^{1}\Sigma^{1}V^{1\top}u^{1}, U^{2}\Sigma^{2}V^{2\top}u^{2}) \label{eq:cca_obj}
@@ -220,7 +226,7 @@ Reparameterizing the weights as $v^{i} = \Sigma^{i}V^{i\top}u^{i}$, we obtain:
     \max_{v^{1}, v^{2}} \Corr(U^{1}v^{1}, U^{2}v^{2}) \label{eq:reparam}
 \end{align}
 
-This reparameterization simplifies the optimization problem by reducing it to finding correlations between transformed variables, which is computationally more feasible but also gives us a convenient way to understand how the weights and loadings of CCA models change under different transformations of the data.
+This reparameterization simplifies the optimization problem by reducing it to finding correlations between transformed variables, which is computationally more feasible but also gives us a convenient way to understand how the weights and loadings of \acrshort{cca} models change under different transformations of the data.
 
 \textbf{Definition:} \textit{Loadings} are defined using the reparameterized weights as follows:
 
@@ -340,22 +346,22 @@ The loadings, as before, remain unchanged due to the invariance of the row space
 \end{align}
 
 \subsection{Model Comparisons}
-We employ several CCA variants for this experiment, including Canonical Correlation Analysis (CCA), Partial Least Squares (PLS), and more.
+We employ several \acrshort{cca} variants for this experiment, including \acrshort{cca}, \acrshort{pls}, and more.
 
 \begin{table}[h]
 \centering
-\caption{Employed CCA Variants}
+\caption{Employed \acrshort{cca} Variants}
 \begin{tabular}{|l|l|l|l|}
 \hline
 \textbf{Model} & \textbf{Abbreviation} & \textbf{Hyperparameters}  \\
 \hline
-Canonical Correlation Analysis & CCA & -   \\
+Canonical Correlation Analysis & \acrshort{cca} & -   \\
 \hline
-Regularized CCA & RCCA & \(c_1, c_2\)   \\
+Regularized \acrshort{cca} & \acrshort{rcca} & \(c_1, c_2\)   \\
 \hline
-Partial Least Squares & PLS & -   \\
+Partial Least Squares & \acrshort{pls} & -   \\
 \hline
-Sparse PLS & SPLS & \(\tau_1, \tau_2\)   \\
+Sparse \acrshort{pls} & \acrshort{spls} & \(\tau_1, \tau_2\)   \\
 \hline
 FRALS - Elastic & Elastic & \(\alpha_1, \alpha_2, \text{l1}_1, \text{l1}_2\)   \\
 \hline
@@ -367,7 +373,7 @@ Principal Component Analysis & PCA & -  \\
 \subsection{Datasets}
 
 We used 8 datasets in our experiments, including 6 simulated datasets and 2 real datasets.
-The simulated datasets were generated using the methods described in section~\ref{subsec:generative-perspectives-on-cca} and the real datasets were sourced from the Human Connectome Project (HCP) and the Alzheimer's Disease Neuroimaging Initiative (ADNI).
+The simulated datasets were generated using the methods described in section~\ref{subsec:generative-perspectives} and the real datasets were sourced from the Human Connectome Project (\acrshort{hcp}) and the Alzheimer's Disease Neuroimaging Initiative (\acrshort{adni}).
 
 \subsubsection{Simulated Data}
 
@@ -385,12 +391,12 @@ The true loadings are defined as the product of the true weights and the true po
 For each model, we estimated model loadings using the pseudo-inverse\footnote{Defined as $A^+ = (A^\top A)^{-1} A^\top$, it inverts the closest matrix to $A$ in a least squares sense} of the sample covariance matrix.
 
 \paragraph{Latent Variables and Sparse Loadings:}
-We generated data with sparse loadings using the Probabilistic CCA and GFA models, as outlined in section~\ref{subsubsec:a-probabilistic-latent-variable-perspective-on-cca}. 
+We generated data with sparse loadings using the Probabilistic \acrshort{cca} and \acrshort{gfa} models, as outlined in section~\ref{subsubsec:a-probabilistic-latent-variable-perspective}. 
 Notably:
 \begin{itemize}
-    \item The Probabilistic CCA model, which falls under 1Explicit' latent variable models, uses random covariance matrices. 
+    \item The Probabilistic \acrshort{cca} model, which falls under 1Explicit' latent variable models, uses random covariance matrices. 
     \item Here, the true weights are estimated via the pseudo-inverse due to generally non-invertible covariance matrices.
-    \item In the GFA model (also an `Explicit` model), which employs invertible identity covariance matrices, the true weights are directly equatable to true loadings, with half of the true loadings set to zero.
+    \item In the \acrshort{gfa} model (also an `Explicit` model), which employs invertible identity covariance matrices, the true weights are directly equatable to true loadings, with half of the true loadings set to zero.
 \end{itemize}
 The signal-to-noise ratio was calibrated to mirror the correlations observed in the Joint Covariance method, with the sum of the signal's eigenvalues being twice that of the noise.
 The true weights were defined as the product of the true loadings and the inverse of the true population within-view covariance matrix.
@@ -416,7 +422,7 @@ Sparsity in View 2 & 0.5 \\
 \section{Results}
 
 In this section, we present the results of our experiments.
-We begin with the results of the low and high-dimensional simulated data experiments, followed by the results of the HCP and ADNI data.
+We begin with the results of the low and high-dimensional simulated data experiments, followed by the results of the \acrshort{hcp} and \acrshort{adni} data.
 
 \subsection{Low-Dimensional Data}
 
@@ -426,10 +432,10 @@ Note that because we multiply model weights by the sample covariance matrix to e
 The absolute values of the weights and loadings are plotted to compare with average values across five random draws from the distribution.
 
 \paragraph{Implicit Latent Variables (Sparse Weights):} Elastic regularization sets true zero weights close to zero and accurately retrieves true weights in both the identity (Figure~\ref{fig:joint-identity-weights-loadings}a) and non-identity (Figure~\ref{fig:joint-identity-weights-loadings}b) scenarios.
-Unregularized CCA and Ridge CCA are comparable to Elastic Net regularization but slightly worse in both scenarios (Figure \ref{fig:joint-scores})
-Figure~\ref{fig:joint-identity-weights-loadings}a highlights the disparity between PLS and RCCA compared to CCA.
-In particular, it is clear that the PLS and SPLS models have been skewed by the principal components.
-Furthermore, the SPLS does not result in appropriate shrinkage and identifies a number of false negatives.
+Unregularized \acrshort{cca} and Ridge \acrshort{cca} are comparable to Elastic Net regularization but slightly worse in both scenarios (Figure \ref{fig:joint-scores})
+Figure~\ref{fig:joint-identity-weights-loadings}a highlights the disparity between \acrshort{pls} and \acrshort{rcca} compared to \acrshort{cca}.
+In particular, it is clear that the \acrshort{pls} and \acrshort{spls} models have been skewed by the principal components.
+Furthermore, the \acrshort{spls} does not result in appropriate shrinkage and identifies a number of false negatives.
 This is perhaps suprising because all three problems are equivalent in the population setting (due to identical view covariances).
 The models diverge in a sample setting because of non-identical sample covariance matrices, underscoring the distinction between population and sample settings and the interpretation complexities in the latter.
 PCA performs well in the random covariance scenario, but poorly in the identity covariance scenario.
@@ -467,12 +473,12 @@ This suggests that the random covariance scenario results in a higher signal-to-
 \caption{Test Scores for Implicit Latent Variable Data Generation.}\label{fig:joint-scores}
 \end{figure}
 
-\paragraph{Explicit Latent Variables (Sparse Loadings):} A striking observation, though theoretically consistent, from Figure~\ref{fig:latent-variable-weights-loadings}a is that PCA almost perfectly recovers the true weights and loadings for the GFA model with identity noise covariance.
+\paragraph{Explicit Latent Variables (Sparse Loadings):} A striking observation, though theoretically consistent, from Figure~\ref{fig:latent-variable-weights-loadings}a is that PCA almost perfectly recovers the true weights and loadings for the \acrshort{gfa} model with identity noise covariance.
 Admittedly, we have chosen a reasonably high signal-to-noise ratio for this experiment, but this nonetheless demonstrates that PCA can be a useful baseline for multiview data under an isotropic latent variable noise model.
-Indeed, in the identity noise covariance scenario, all the models perform similarly (Figure~\ref{fig:latent-variable-scores}a) with the exception of CCA which appears to be unstable in this setting (Figure~\ref{fig:latent-variable-weights-loadings}a).
-In the random noise covariance scenario, PCA performs poorly, and CCA now performs well (Figure~\ref{fig:latent-variable-scores}b).
+Indeed, in the identity noise covariance scenario, all the models perform similarly (Figure~\ref{fig:latent-variable-scores}a) with the exception of \acrshort{cca} which appears to be unstable in this setting (Figure~\ref{fig:latent-variable-weights-loadings}a).
+In the random noise covariance scenario, PCA performs poorly, and \acrshort{cca} now performs well (Figure~\ref{fig:latent-variable-scores}b).
 Figure~\ref{fig:latent-variable-weights-loadings}b indicates that with anisotropic noise covariance, PCA no longer captures the true loadings.
-There is no strong evidence that SPLS or Elastic Net regularization outperform PLS or RCCA, respectively, in this setting.
+There is no strong evidence that \acrshort{spls} or Elastic Net regularization outperform \acrshort{pls} or \acrshort{rcca}, respectively, in this setting.
 This is unsurprising because the true weights are not sparse, and so the additional sparsity constraints do not help.
 However, this does illustrate that priors on weights do not translate well to priors on loadings.
 
@@ -481,13 +487,13 @@ However, this does illustrate that priors on weights do not translate well to pr
 \begin{subfigure}{0.49\linewidth}
 \centering
 \includegraphics[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_explicit}
-\caption{GFA (Identity Noise)}
+\caption{\acrshort{gfa} (Identity Noise)}
 \end{subfigure}
 %
 \begin{subfigure}{0.49\linewidth}
 \centering
 \includegraphics[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_explicit}
-\caption{Probabilistic CCA (Random Noise)}
+\caption{Probabilistic \acrshort{cca} (Random Noise)}
 \end{subfigure}
 \caption{Weights and Loadings for Explicit Latent Variable Data Generation Models.}\label{fig:latent-variable-weights-loadings}
 \end{figure}
@@ -497,19 +503,19 @@ However, this does illustrate that priors on weights do not translate well to pr
 \begin{subfigure}{0.49\linewidth}
 \centering
 \includegraphics[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Identity_Covariance_explicit}
-\caption{GFA}
+\caption{\acrshort{gfa}}
 \end{subfigure}
 %
 \begin{subfigure}{0.49\linewidth}
 \centering
 \includegraphics[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Random_Covariance_explicit}
-\caption{Probabilistic CCA}
+\caption{Probabilistic \acrshort{cca}}
 \end{subfigure}
 \caption{Test Scores for Explicit Latent Variable Data Generation Models.}\label{fig:latent-variable-scores}
 \end{figure}
 
 \paragraph{Measuring the Identitiness of the Covariance Matrices}
-The theory we developed in section~\ref{subsec:generative-perspectives-on-cca} suggests that the identitiness of the covariance matrices is crucial for understanding how imposing sparsity on the weights imposes a prior belief in sparsity on the more biologically interesting loadings.
+The theory we developed in section~\ref{subsec:generative-perspectives} suggests that the identitiness of the covariance matrices is crucial for understanding how imposing sparsity on the weights imposes a prior belief in sparsity on the more biologically interesting loadings.
 We can measure the identitiness of the covariance matrices by looking at the eigenvalues of the covariance matrices.
 If the eigenvalues of the sample covariance matrix are all close to 1, then the sample covariance matrix is close to identity.
 Departures from 1 indicate that the sample covariance matrix is not close to identity and imply multicollinearity in the data.
@@ -526,7 +532,7 @@ On the other hand, these plots (shown for 10 random samples) show that all of th
 
 \subsection{Repeated Columns}\label{subsec:repeated-columns}
 
-In this section, we explore the stability of weights and loadings in Canonical Correlation Analysis (CCA) models when faced with repeated columns in the data.
+In this section, we explore the stability of weights and loadings in \acrshort{cca} models when faced with repeated columns in the data.
 Our theoretical analysis suggests that while weights may vary and are arbitrary with repeated columns, loadings remain consistent.
 
 \begin{figure}
@@ -555,9 +561,9 @@ Our theoretical analysis suggests that while weights may vary and are arbitrary 
 \end{figure}
 
 Empirical results from our experiments validate this theoretical proposition.
-We observed that in PLS (Partial Least Squares) and SPLS (Sparse Partial Least Squares) models, which are significantly regularized (L2 regularization), the weights for repeated features tend to be uniform.
-However, in the case of CCA the weights applied to repeated features are almost completely arbitrary (see the scale).
-For Elastic and Ridge CCA, the weights applied to repeated features, though not identical, display greater stability due to shrinkage effects.
+We observed that in \acrshort{pls} and \acrshort{spls} models, which are significantly regularized (L2 regularization), the weights for repeated features tend to be uniform.
+However, in the case of \acrshort{cca} the weights applied to repeated features are almost completely arbitrary (see the scale).
+For Elastic and Ridge \acrshort{cca}, the weights applied to repeated features, though not identical, display greater stability due to shrinkage effects.
 In contrast, loadings for repeated features remained consistent across all tested models, reinforcing our theoretical stance on their preferential use for model interpretation in scenarios with repeated columns or near-repeated columns.
 
 %
@@ -565,10 +571,10 @@ In contrast, loadings for repeated features remained consistent across all teste
 %\subsection{High-Dimensional Simulated Data}
 %In this section we consider only the latent variable models in order to ensure we have a sufficient signal-to-noise ratio to compare the models as we are deliberately undersampled.
 %Figure~\ref{fig:latent-variable-weights-loadings-high}a once again shows that PCA is a useful baseline for multiview data under an isotropic noise model, even in the high-dimensional setting.
-%On the other hand, CCA cannot recover any signal when it is overparameterized.
-%Ridge CCA and PLS perform similarly, perhaps because the only identifiable signal is the PLS signal (since the CCA signal is not identifiable).
-%Figure~\ref{fig:latent-variable-weights-loadings-high}b illustrates clearly that both RCCA and ElasticNet with their tunable L2 regularization both outperform PLS and SPLS with fixed and maximal L2 regularization.
-%It appears that in high dimensions correlated noise is a significant problem for PLS (and therefore SPLS) when used as regularized CCA models, even though the models are identifiable.
+%On the other hand, \acrshort{cca} cannot recover any signal when it is overparameterized.
+%Ridge \acrshort{cca} and \acrshort{pls} perform similarly, perhaps because the only identifiable signal is the \acrshort{pls} signal (since the \acrshort{cca} signal is not identifiable).
+%Figure~\ref{fig:latent-variable-weights-loadings-high}b illustrates clearly that both \acrshort{rcca} and ElasticNet with their tunable L2 regularization both outperform \acrshort{pls} and \acrshort{spls} with fixed and maximal L2 regularization.
+%It appears that in high dimensions correlated noise is a significant problem for \acrshort{pls} (and therefore \acrshort{spls}) when used as regularized \acrshort{cca} models, even though the models are identifiable.
 %
 %\begin{figure}
 %\centering
@@ -613,9 +619,9 @@ In contrast, loadings for repeated features remained consistent across all teste
 %\end{figure}
 
 \newpage
-\subsection{Human Connectome Project (HCP) Data}
+\subsection{Human Connectome Project (\acrshort{hcp}) Data}
 
-Next, we revisit the results from the previous chapter on the HCP data.
+Next, we revisit the results from the previous chapter on the \acrshort{hcp} data.
 However this time we focus on the loadings rather than the weights.
 
 \subsubsection{Behaviour Weights and Loadings}
@@ -645,9 +651,9 @@ However this time we focus on the loadings rather than the weights.
 \end{figure}
 
 \newpage
-\subsection{Alzheimer's Disease Neuroimaging Initiative (ADNI) Data}
+\subsection{Alzheimer's Disease Neuroimaging Initiative (\acrshort{adni}) Data}
 
-We now consider the ADNI data.
+We now consider the \acrshort{adni} data.
 Once again, we focus on the loadings rather than the weights.
 
 \subsubsection{Behaviour Weights and Loadings}
@@ -682,13 +688,13 @@ Once again, we focus on the loadings rather than the weights.
 \end{figure}
 
 \subsubsection{Identitiness of Covariance Matrices}
-In this section, we consider the identitiness of the covariance matrices for the HCP and ADNI datasets.
-Figure \ref{fig:covariance-eigenvalues-real} shows the eigenvalues of the covariance matrices for the HCP and ADNI datasets while Figure \ref{fig:covariance-matrices-real} shows the covariance matrices themselves (with the ADNI brain covariance matrix left out due to its size).
-From Figure \ref{fig:covariance-eigenvalues-real}, we can see that the eigenvalues of the covariance matrices for the ADNI data are much closer to the ideal for identity covariance than for the HCP data.
+In this section, we consider the identitiness of the covariance matrices for the \acrshort{hcp} and \acrshort{adni} datasets.
+Figure \ref{fig:covariance-eigenvalues-real} shows the eigenvalues of the covariance matrices for the \acrshort{hcp} and \acrshort{adni} datasets while Figure \ref{fig:covariance-matrices-real} shows the covariance matrices themselves (with the \acrshort{adni} brain covariance matrix left out due to its size).
+From Figure \ref{fig:covariance-eigenvalues-real}, we can see that the eigenvalues of the covariance matrices for the \acrshort{adni} data are much closer to the ideal for identity covariance than for the \acrshort{hcp} data.
 \begin{figure}
 \centering
 \includegraphics[width=0.8\linewidth]{figures/covariance/hcp_adni_covariance_eigenvalues}
-\caption{Eigenvalues of the covariance matrices for the HCP and ADNI datasets.}\label{fig:covariance-eigenvalues-real}
+\caption{Eigenvalues of the covariance matrices for the \acrshort{hcp} and \acrshort{adni} datasets.}\label{fig:covariance-eigenvalues-real}
 \end{figure}
 
 From Figure \ref{fig:covariance-matrices-real}, we can see the block structure of the covariance matrices.
@@ -697,16 +703,16 @@ From Figure \ref{fig:covariance-matrices-real}, we can see the block structure o
 \centering
 \begin{subfigure}{0.66\linewidth}
 \centering
-\includegraphics[width=\linewidth]{figures/covariance/HCP_covariance}
-\caption{HCP}
+\includegraphics[width=\linewidth]{figures/covariance/hcp_covariance}
+\caption{\acrshort{hcp}}
 \end{subfigure}
 %
 \begin{subfigure}{0.33\linewidth}
 \centering
-\includegraphics[width=\linewidth]{figures/covariance/ADNI_covariance}
-\caption{ADNI}
+\includegraphics[width=\linewidth]{figures/covariance/adni_covariance}
+\caption{\acrshort{adni}}
 \end{subfigure}
-\caption{Covariance matrices for the HCP and ADNI datasets.}
+\caption{Covariance matrices for the \acrshort{hcp} and \acrshort{adni} datasets.}
 \label{fig:covariance-matrices-real}
 \end{figure}
 
@@ -716,7 +722,7 @@ In this section, we discuss the implications of our findings as well as the limi
 
 \subsection{Discussion}
 
-\paragraph{Interpreting the Forward and Backward Models of CCA:} Consistent with \cite{haufe2014interpretation}, we have shown that assumptions imposed on the weights of a model do not in general transfer to the loadings.
+\paragraph{Interpreting the Forward and Backward Models of \acrshort{cca}:} Consistent with \cite{haufe2014interpretation}, we have shown that assumptions imposed on the weights of a model do not in general transfer to the loadings.
 This is because the weights and loadings are only equivalent when the covariance matrices are identity.
 We have gone a step further than \cite{haufe2014interpretation} by showing that the identitiness of the covariance matrices is crucial for understanding how imposing sparsity on the weights imposes a prior belief in sparsity on the more biologically interesting loadings.
 
@@ -726,26 +732,26 @@ On the other hand, our results raise whether sparsity on the weights makes sense
 For latent variable models of brain-behaviour associations, we have argued that the loadings are the more biologically relevant quantity.
 Since in practice, identity covariance is rarely a good assumption, the weights and loadings are not equivalent.
 This means that sparsity on the weights does not imply sparsity on the loadings, and so we should not expect sparsity on the weights to lead to more interpretable loadings.
-A practical step this implies is \textit{to ensure that the data covariances are at least close to identity before applying sparse CCA methods}.
+A practical step this implies is \textit{to ensure that the data covariances are at least close to identity before applying sparse \acrshort{cca} methods}.
 
-\paragraph{Identitiness of real covariance matrices:} Between the HCP and ADNI datasets, only the ADNI data had eigenvalue spectra that were reasonably close to those of an identity matrix.
-This suggests that the only dataset and view where we can expect sparsity on the weights to imply sparsity on the loadings is the ADNI data.
-This is consistent with the results we have seen in the previous section, that sparsity improves performance in the ADNI data but not in the HCP data.
-Furthermore, the loadings and weights are much more similar to each other in the ADNI data than in the HCP data, supporting the idea that the ADNI weights are themselves somewhat interpretable as estimates of the biologically relevant loadings.
+\paragraph{Identitiness of real covariance matrices:} Between the \acrshort{hcp} and \acrshort{adni} datasets, only the \acrshort{adni} data had eigenvalue spectra that were reasonably close to those of an identity matrix.
+This suggests that the only dataset and view where we can expect sparsity on the weights to imply sparsity on the loadings is the \acrshort{adni} data.
+This is consistent with the results we have seen in the previous section, that sparsity improves performance in the \acrshort{adni} data but not in the \acrshort{hcp} data.
+Furthermore, the loadings and weights are much more similar to each other in the \acrshort{adni} data than in the \acrshort{hcp} data, supporting the idea that the \acrshort{adni} weights are themselves somewhat interpretable as estimates of the biologically relevant loadings.
 Finally, in the well understood Alzheimer's disease data, we know that the identified weights (and loadings) are consistent with the known biology of the disease.
 
 \paragraph{Sample versus Population Setting:} The results from the simulated data illustrate the disparities that can arise between population and sample settings.
-Although PLS, RCCA, and CCA are equivalent under isotropic noise in a population framework, experiments showed that their performance can vary substantially in a sample setting.
-In particular, this manifested as PLS underperforming RCCA and CCA under isotropic noise \textit{even though this is exactly the scenario where covariance identity holds and covariance thus equals correlation}.
-This is because the sample covariance matrix is not the same as the population covariance matrix and PLS is sensitive to even small differences in the principal components of the sample covariance matrix.
+Although \acrshort{pls}, \acrshort{rcca}, and \acrshort{cca} are equivalent under isotropic noise in a population framework, experiments showed that their performance can vary substantially in a sample setting.
+In particular, this manifested as \acrshort{pls} underperforming \acrshort{rcca} and \acrshort{cca} under isotropic noise \textit{even though this is exactly the scenario where covariance identity holds and covariance thus equals correlation}.
+This is because the sample covariance matrix is not the same as the population covariance matrix and \acrshort{pls} is sensitive to even small differences in the principal components of the sample covariance matrix.
 Furthermore, in limited sample sizes, our estimations of the covariance matrices are not accurate, and so the identitiness of the covariance matrices is not guaranteed.
 This generally resulted in poor estimation of loadings from model weights \textit{even when the weights themselves were estimated almost perfectly}.
 Therefore, it's crucial for researchers to recognize these nuances and adopt appropriate measures when extrapolating results, especially in brain-behavior studies where typically only one sample is available and often limited in size.
 
-\paragraph{Ridge CCA is typically much better than PLS across datasets:} Our results show that Ridge CCA is typically much better than PLS across datasets.
+\paragraph{Ridge \acrshort{cca} is typically much better than \acrshort{pls} across datasets:} Our results show that Ridge \acrshort{cca} is typically much better than \acrshort{pls} across datasets.
 Much like regularised regression, it is unusual to need to use maximal ridge regularization even in high dimensions.
-Our results in simulated data even cast doubt on the touted stability of PLS over CCA with respect to population CCA problem.
-This means that while PLS might be more stable for a given dataset, it is not necessarily more stable across random samples from the same population.
+Our results in simulated data even cast doubt on the touted stability of \acrshort{pls} over \acrshort{cca} with respect to population \acrshort{cca} problem.
+This means that while \acrshort{pls} might be more stable for a given dataset, it is not necessarily more stable across random samples from the same population.
 
 \paragraph{Can We Construct a Regularization Functional that Imposes Sparsity on the Loadings?}
 Finally, given our observations, a natural question to ask is whether we can construct a regularization functional that imposes sparsity on the loadings (instead of the weights).
@@ -764,8 +770,8 @@ This is of course not guaranteed in the small sample setting.
 
 \section{Conclusion}
 
-In this chapter, we have explored the performance of several CCA variants on simulated and real data.
-We have shown that the choice of CCA variant can have a significant impact on the results.
+In this chapter, we have explored the performance of several \acrshort{cca} variants on simulated and real data.
+We have shown that the choice of \acrshort{cca} variant can have a significant impact on the results.
 We have also shown that the identitiness of the covariance matrices is crucial for understanding how imposing sparsity on the weights imposes a prior belief in sparsity on the more biologically interesting loadings.
 We described a way to check the identitiness of the covariance matrices by looking at the eigenvalues of the covariance matrices and comparing to the ideal case.
-In the next chapter, we address the scalability of CCA and its variants by introducing a novel algorithm based on gradient descent.
+In the next chapter, we address the scalability of \acrshort{cca} and its variants by introducing a novel algorithm based on gradient descent.

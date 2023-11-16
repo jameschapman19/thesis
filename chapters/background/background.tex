@@ -1,17 +1,33 @@
 \graphicspath{{chapters/background/}}
 \chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}\label{chap:background}
 \minitoc
-
+\epigraph{Reading furnishes the mind only with materials of knowledge; it is thinking that makes what we read ours.}{John Locke}
 \section{Introduction to Machine Learning and Multiview Learning}
 
-Machine learning automates data analysis, allowing models to learn patterns and make decisions. It is divided into three primary paradigms: supervised, unsupervised, and reinforcement learning. This thesis focuses on \textit{multiview machine learning}, a specialized domain dealing with data that contain multiple `views' or types of information. 
+In this chapter, we gather the necessary background knowledge needed to motivate and understand the contributions of this thesis.
 
-\subsection{The Focus of Multiview Learning}
-
-Multiview learning is concerned with learning robust representations and identifying associations between different views. For example, in representing a person, the face image, voice, text, and gesture could be different views. These methods can be categorized as either unsupervised or self-supervised based on their goals and assumptions about the data-generating process.
+Machine learning enables models to automatically learn patterns and make decisions from data.
+Machine learning comprises three primary paradigms: supervised, self-supervised (in the past called unsupervised), and reinforcement learning, each distinct in its approach to learning from data.
+This thesis focuses on \textit{multiview machine learning}, which aims to develop robust representations by uncovering associations between various data types within datasets.
+These data types, known as 'views,' may include distinct sources of information such as MRI images, genomic data, and clinical records in the context of patient data analysis.
 
 \subsection{Machine Learning Vs Statistical Inference}
-Machine learning aims to optimize out-of-sample performance, typically measured on a designated test set that the algorithm has never seen before. This emphasis on generalization to new, unseen data distinguishes it from statistical inference, where the primary concern is parameter estimation within a given sample, and hypothesis testing to infer population parameters.
+The key distinctions between machine learning and statistical inference include:
+
+\begin{itemize}
+    \item \textbf{Machine Learning:}
+    \begin{itemize}
+        \item Focuses on optimizing out-of-sample performance.
+        \item Performance is typically measured using a test set not seen during training.
+        \item Prioritizes generalization to new, unseen data.
+    \end{itemize}
+    \item \textbf{Statistical Inference:}
+    \begin{itemize}
+        \item Concerned with parameter estimation within a sample.
+        \item Emphasizes hypothesis testing to infer population parameters.
+        \item Aims to provide insights about data samples to make inferences about a larger population.
+    \end{itemize}
+\end{itemize}
 
 \subsubsection{Training, Validation, and Test Sets}
 
@@ -60,11 +76,11 @@ dimensions}, or \textbf{scores} depending on the context. We will sometimes cons
 
 \subsection{Principal Components Analysis}
 
-Principal Components Analysis (PCA)\citep{hotelling1933analysis} is a classical method in unsupervised machine learning for representation learning.
+Principal Components Analysis (\acrshort{pca})\citep{hotelling1933analysis} is a classical method in unsupervised machine learning for representation learning.
 It is widely used for dimensionality reduction and feature extraction.
-The primary goal of PCA is to transform the original high-dimensional data into a new coordinate system defined by orthogonal axes, capturing the most relevant aspects of the data.
+The primary goal of \acrshort{pca} is to transform the original high-dimensional data into a new coordinate system defined by orthogonal axes, capturing the most relevant aspects of the data.
 
-In PCA, the representations are constrained to be linear transformations of the form:
+In \acrshort{pca}, the representations are constrained to be linear transformations of the form:
 \begin{equation}\label{eq:pca-linear-function-def}
     Z_k = X u_k,
 \end{equation}
@@ -73,7 +89,7 @@ where $u_k$ are the orthonormal basis vectors:
     u_k^\top u_l = \delta_{kl}.
 \end{equation}
 
-The primary goal of PCA is to maximize the variance of the projections \(Z_k\). Mathematically, this can be formulated
+The primary goal of \acrshort{pca} is to maximize the variance of the projections \(Z_k\). Mathematically, this can be formulated
 as:
 \begin{align}
     u_{\text{opt}} &= \underset{u}{\text{argmax}} \left( u^\top \Sigma u \right) \\
@@ -98,12 +114,12 @@ This transforms the problem into an eigenvalue equation for the covariance matri
 
 The first principal component corresponds to the eigenvector associated with the largest eigenvalue \(\lambda\). Subsequent components are ordered by their corresponding eigenvalues.
 
-\textbf{Limitations: }However, when applying PCA to datasets such as high-dimensional neuroimaging and behavioral
-data, PCA's main limitation arises: it only accounts for variance within a single dataset, potentially discarding features that are relevant for cross-modal analysis.
+\textbf{Limitations: }However, when applying \acrshort{pca} to datasets such as high-dimensional neuroimaging and behavioral
+data, \acrshort{pca}'s main limitation arises: it only accounts for variance within a single dataset, potentially discarding features that are relevant for cross-modal analysis.
 
 \subsection{Partial Least Squares}
 
-Partial Least Squares (PLS)\citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as `views". PLS can be seen as a generalization of PCA, where PCA becomes a special case when the two views are identical. The optimization problem for PLS can be formulated as:
+Partial Least Squares (PLS)\citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as `views". PLS can be seen as a generalization of \acrshort{pca}, where \acrshort{pca} becomes a special case when the two views are identical. The optimization problem for PLS can be formulated as:
 
 \begin{align}
      u\sps{1}_{\text{opt}} &= \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} \Sigma_{12} u\sps{2} \} \\
@@ -193,7 +209,7 @@ An alternative form of the CCA problem can be developed by reparameterizing \(u\
      & u\spstop{2}u\sps{2}=1 \notag
 \end{align}
 
-This reparameterized form will later underpin Deep Canonical Correlation Analysis (DCCA).
+This reparameterized form will later underpin Deep Canonical Correlation Analysis (\acrshort{dcca}).
 
 This form also shows that PLS and CCA can be made equivalent by whitening the data matrices before constructing the covariance matrix. When the number of features exceeds the number of samples (\(p>n\)), CCA becomes degenerate because the within-view covariance matrices cannot be inverted—contrasting with PLS, which is always computable.
 
@@ -248,7 +264,7 @@ Thus, LDA can be thought of as a constrained form of CCA, tailored to classifica
 This perspective unifies the two algorithms and shows that the core objective—finding meaningful relationships or directions in the data—is shared between both CCA and LDA.
 
 \textbf{Multiview CCA} is a straightforward extension of CCA to the case of 3-or more datasets.
-The optimization problem for MCCA can be stated as:
+The optimization problem for \acrshort{mcca} can be stated as:
 \begin{align}
      & u_{\text{opt}} = \underset{u}{\mathrm{argmax}} \sum_{i=1}^{m} \sum_{j=1, j \neq i}^{m} u\spstop{i} \Sigma_{ij} u\sps{j} \\
      & \text{subject to:} \notag \\
@@ -298,7 +314,7 @@ This dual perspective—considering both population and sample covariance matric
 
 \subsection{Multiple Effects, Orthogonality, and Deflation}\label{subsec:orthogonality}
 
-Understanding multiple correlated or covarying effects is fundamental in multivariate data analysis methods such as Principal Component Analysis (PCA), Partial Least Squares (PLS), and Canonical Correlation Analysis (CCA). Although these methods generally aim to find a single maximal correlation or covariance (referred to as the top-1 problem), they are capable of identifying more than one orthogonal effect, a scenario often termed the top-$k$ problem, where $k$ denotes the number of orthogonal effects desired.
+Understanding multiple correlated or covarying effects is fundamental in multivariate data analysis methods such as Principal Component Analysis (\acrshort{pca}), Partial Least Squares (PLS), and Canonical Correlation Analysis (CCA). Although these methods generally aim to find a single maximal correlation or covariance (referred to as the top-1 problem), they are capable of identifying more than one orthogonal effect, a scenario often termed the top-$k$ problem, where $k$ denotes the number of orthogonal effects desired.
 
 \subsection{Challenges in Identifying Multiple Components}
 
@@ -348,7 +364,7 @@ The challenges of high-dimensional data often manifest when solving Generalized 
 \subsubsection{Challenges in Solving Generalized Eigenvalue Problems}
 
 The GEP is often represented as \( Ax = \lambda Bx \), where \( A \)and \( B \)are matrices whose dimensions depend on the method in use.
-For instance, in PCA, \( A \) and \( B \)are \( p \times p \); in PLS and CCA, they are \( (p+q) \times (p+q) \).
+For instance, in \acrshort{pca}, \( A \) and \( B \)are \( p \times p \); in PLS and CCA, they are \( (p+q) \times (p+q) \).
 
 % Table summarizing the definitions of A and B for various methods
 \begin{table}[h]
@@ -357,7 +373,7 @@ For instance, in PCA, \( A \) and \( B \)are \( p \times p \); in PLS and CCA, t
         \hline
         Method & \( A \)&\( B \)&\( x \)& Dimensions\\
         \hline
-        PCA& \( \Sigma_{11} \)&\( I \)&\( u\sps{1} \)&\( p \times p \) \\
+        \acrshort{pca}& \( \Sigma_{11} \)&\( I \)&\( u\sps{1} \)&\( p \times p \) \\
         \hline
         LDA& \( S_B \)&\( S_W \)&\( u\sps{1} \)&\( p \times p \) \\
         \hline
@@ -373,16 +389,17 @@ For instance, in PCA, \( A \) and \( B \)are \( p \times p \); in PLS and CCA, t
 To solve the GEP, one common technique is to transform it into a standard eigenvalue problem\( B^{-\frac{1}{2}} A B^{-\frac{1}{2}} y = \lambda y \), followed by eigendecomposition.
 However, this approach has computational complexity \(O(n^3)\)and may suffer from numerical instability.
 
-\subsubsection{PCA-CCA}
+\subsubsection{\acrshort{pca}-CCA}
 
-One way to reduce the complexity of solving GEPs is to use the PCA-CCA method, which first applies PCA to the data
-and then solves the GEP in the reduced space. The primary advantage of using PCA-CCA is computational efficiency, especially for high-dimensional data.
-The overall complexity of PCA-CCA is\(O(p^2K + p^3)\), where \( K \)is the number of reduced components.
+One way to reduce the complexity of solving GEPs is to use the \acrshort{pca}-CCA method, which first applies \acrshort{pca} to the data
+and then solves the GEP in the reduced space. The primary advantage of using \acrshort{pca}-CCA is computational efficiency, especially for high-dimensional data.
+The overall complexity of \acrshort{pca}-CCA is\(O(p^2K + p^3)\), where \( K \)is the number of reduced components.
 This method is particularly beneficial when \( p \)is large.
 
-\subsubsection{KCCA}
+\subsubsection{\acrshort{kcca}}
 
-Kernel Canonical Correlation Analysis (KCCA) extends CCA to capture nonlinear relationships. The optimization problem for KCCA is:
+Kernel Canonical Correlation Analysis (\acrshort{kcca}) extends CCA to capture nonlinear relationships. 
+The optimization problem for \acrshort{kcca} is:
 
 \begin{align}
     & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha_1^{\top}K\spstop{1}K\sps{2}\alpha_2  \}\\
@@ -392,18 +409,18 @@ Kernel Canonical Correlation Analysis (KCCA) extends CCA to capture nonlinear re
 \end{align}
 
 
-KCCA is computationally efficient for high-dimensional data (\(p>n\)) because its complexity scales with the number of samples\(n\), not the number of features\(p\).
+\acrshort{kcca} is computationally efficient for high-dimensional data (\(p>n\)) because its complexity scales with the number of samples\(n\), not the number of features\(p\).
 However, it requires access to all training data at test time, raising efficiency concerns.
 
 \subsection{Non-linear CCA}
 
 \subsubsection{Kernel CCA}
 
-Kernel CCA (KCCA) is a non-linear extension of CCA that uses the kernel trick to find non-linear relationships between variables.
+Kernel CCA (\acrshort{kcca}) is a non-linear extension of CCA that uses the kernel trick to find non-linear relationships between variables.
 
 \subsubsection{Deep CCA}
 
-Deep CCA (DCCA) is a non-linear extension of CCA that uses deep neural networks to find non-linear relationships between variables.
+Deep CCA (\acrshort{dcca}) is a non-linear extension of CCA that uses deep neural networks to find non-linear relationships between variables.
 
 \section{Multiview Learning in Neuroimaging}
 

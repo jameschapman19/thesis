@@ -1,46 +1,41 @@
 \graphicspath{{chapters/introduction/}}
 \chapter{Introduction}\label{chap:introduction}
 
-\section{Setting the Stage: Biomedical Data and The Need for Effective Analytical Techniques}
+\epigraph{We are drowning in information, while starving for wisdom. The world henceforth will be run by synthesizers, people able to put together the right information at the right time, think critically about it, and make important choices wisely.}{\textit{E. O. Wilson}}
 
-The advent of modern technologies in biomedical research has led to an unprecedented surge in the quantity and complexity of data generated. From genomic sequences and proteomic profiles to neuroimaging and electronic health records, these multilayered datasets are a treasure trove of potential insights into disease processes and patient health. The ultimate goal of deciphering these intricate datasets is to enhance patient stratification processes, enabling a move towards personalised, precision healthcare. However, the analytical challenges posed by the scale, complexity, and heterogeneity of these datasets, coupled with the scarcity of labelled data, are significant.
+In an era marked by an overwhelming abundance of data, the ability to distill wisdom from information becomes not just a skill but a necessity. This thesis addresses the critical gap between the immense volumes of biomedical data available and our current capacity to synthesize this data into actionable insights for healthcare.
 
-In light of these challenges, the main idea of this thesis is to provide scalable, flexible, and interpretable methods in multiview self-supervised learning for biomedical data. Specifically, we propose new methodologies based on unsupervised and self-supervised learning to make sense of these large, unlabelled, and complex datasets. It presents a specific focus on Canonical Correlation Analysis (CCA), a widely used technique in the area of multi-view self-supervised learning (SSL), which, while powerful, comes with its own set of limitations when dealing with large-scale biomedical data.
+\section{Setting the Stage: The Challenge of Big Data in Biomedical Research}
 
-\section{Problem Statement: The Need for Scalable, Flexible, and Interpretable Multiview SSL Methods}
+The advent of advanced technologies in biomedical research has led to a deluge of data.
+From genomic sequences to patient health records, this data holds the key to unlocking mysteries of human health and disease.
+However, the challenge lies not in data collection but in its analysis and interpretation – in turning this vast information into wisdom.
 
-Despite the advantages offered by multiview SSL methods in handling complex and high-dimensional biomedical data, the existing methodologies face substantial limitations, particularly concerning scalability, flexibility, and interpretability. The computational costs of traditional algorithms for solving CCA and other generalized eigenvalue problems are prohibitive when dealing with large-scale datasets. This limitation directly impacts their scalability and applicability to modern biomedical datasets. Moreover, the inherent inflexibility of traditional methods fails to capture the nonlinear relationships often present in biomedical data.
+\textbf{This thesis presents innovative methodologies for scaling multimodal data fusion to massive datasets}, aiming to transform the way biomedical data is analyzed and understood.
+By leveraging advancements in self-supervised learning and data integration techniques, it seeks to bridge the gap between data abundance and knowledge creation.
 
 \section{Thesis Structure and Contributions}
 
-The main contributions of this thesis are threefold:
+This thesis offers three primary contributions:
 
 \begin{itemize}
-    \item A method for regularizing CCA with structured priors including the Elastic Net, improving the interpretability of the findings.
-    \item An argument for the use of loadings rather than weights in CCA, which are more interpretable and directly relate to the generative process we typically assume in biomedical data.
-    \item The introduction of a new formulation for CCA and generalized eigenvalue problems which can be solved via gradient descent, enabling the scaling of these methods to much larger datasets.
+    \item Developing a regularization method for CCA using structured priors, including the Elastic Net, to improve interpretability.
+    \item Proposing the use of loadings over weights in CCA for better interpretability and relevance to biomedical data generation processes.
+    \item Creating a new gradient descent-based formulation for CCA and generalized eigenvalue problems, suitable for large datasets.
 \end{itemize}
 
-In Chapter \ref{chap:background}, we will provide an in-depth literature review on multiview learning and self-supervised learning techniques, establishing a foundational understanding of these methodologies in the context of biomedical data.
+\subsection{Chapter Summaries}
 
-In Chapter \ref{chap:als}, This chapter explores the role of regularization in improving the performance and interpretation of Canonical
-Correlation Analysis (CCA) using data from the Human Connectome Project (HCP) and Alzheimer's Disease Neuroimaging Initiative (ADNI) datasets. Introduces new method based on alternating lest squares (ALS) for regularizing CCA with structured priors, including the Elastic Net. We show that this method improves the interpretability of the findings, and that the Elastic Net is particularly useful for identifying the most relevant features in the data.
+\textbf{Chapter \ref{chap:background}} reviews multiview and self-supervised learning techniques, focusing on their application in biomedical data.
 
-In Chapter \ref{chap:loadings}, We demonstrate a similar relationship between the loadings and weights of CCA models, and showing that the loadings are more interpretable than the weights.In this chapter, we reexamine the relationship between machine learning and probabilistic CCA approaches using simulated data.
-We demonstrate that these approaches are more aligned than previously thought.
+\textbf{Chapter \ref{chap:als}} introduces a method to regularize CCA using structured priors, demonstrated with Human Connectome Project and Alzheimer's Disease Neuroimaging Initiative data.
 
-In Chapter \ref{chap:gradient_descent}, Firstly, with \cref{prop:EY-charac} we present an unconstrained loss function that characterizes solutions to GEPs; this is based on the Eckhart--Young inequality and has appealing geometrical properties.
-We apply this to the GEP formulation of CCA and construct unbiased estimates of the loss and its gradients from mini-batches of data.
-These loss functions can therefore be optimized out-of-the-box using standard frameworks for deep learning. % and gradient descent-based optimisers.
-This immediately gives a unified family of algorithms for CCA, Deep CCA, and indeed SSL.
+\textbf{Chapter \ref{chap:loadings}} examines the relationship between loadings and weights in CCA, using simulated data to show the advantages of loadings for interpretability.
 
-Our CCA algorithms dominate existing state-of-the-art methods across a wide range of benchmarks, presented in \cref{Experiments}.
-For stochastic CCA, our method not only converges faster but also achieves higher correlation scores than existing techniques.
-For Deep CCA and Deep Multiview CCA our unbiased stochastic gradients yield significantly better validation correlations and allow the use of smaller mini-batches in memory constrained applications.
-We also demonstrate how useful our algorithms are in practice with an pioneering real-world case study. We apply stochastic Partial Least Squares (PLS) to an extremely high-dimensional dataset from the UK Biobank dataset -- all executed on a standard laptop.
+\textbf{Chapter \ref{chap:gradient_descent}} presents a new loss function for generalized eigenvalue problems, applicable to CCA and SSL methods, and demonstrates its effectiveness with various benchmarks.
 
-In Chapter \ref{chap:software}, we present CCA-Zoo, a Python package for CCA and multiview learning, which implements the methodologies proposed in this thesis. We show how this work filled a gap in the Python ecostystem, and how it will facilitate the adoption of these methods in the biomedical community.
+\textbf{Chapter \ref{chap:software}} introduces CCA-Zoo, a Python package implementing the methodologies of this thesis, and discusses its role in the Python ecosystem and biomedical research.
 
-In Chapter 7, we discuss the implications, challenges, and limitations of our work, and how they can be addressed in future research.
+\textbf{Chapter 7} discusses the implications, challenges, and future directions for the research presented in this thesis.
 
-Through these contributions, this thesis aims to bridge the gap between the potential of large-scale, complex biomedical data and the capabilities of existing analytical methodologies.
+This thesis aims to address the gap between the potential of biomedical data and the capabilities of current analytical methods.

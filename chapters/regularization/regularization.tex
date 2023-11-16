@@ -1,10 +1,10 @@
 \graphicspath{{chapters/regularization}}
-\chapter{Regularization and the Interpretation of CCA Weights and Loadings}\label{chap:als}
+\chapter{Regularization of CCA Models to add Structure}\label{chap:als}
 \minitoc
 % chktex-file 44 
 % chktex-file 3
-This chapter expands on my work previously showcased at the OHBM conference and draws connections to a tutorial paper I co-authored, where I contributed a number of simulations\citep{mihalik2022canonical}.
 
+\epigraph{The essence of strategy is choosing what not to do.}{\textit{Michael E. Porter}}
 \section{Introduction}\label{sec:introduction}
 
 This chapter explores the role of regularization in improving the performance and interpretation of Canonical
@@ -25,6 +25,8 @@ We apply FRALS with ElasticNet regularization to the Human Connectome Project (H
 We also show that the identified mode of variation is distinct from previous work which identified latent variables with loadings related to cognitive tests and negatively related to cigarette, tobacco or alcohol\citep{smith2015positive}.
 FRALS has stronger correlations with the Line Orientation test, which measures visuospatial abilities, and the parietal lobe, which is known to be involved in visuospatial processing.
 This further demonstrates the importance of matching the model to the data generation process with the appropriate regularization.
+
+This chapter expands on my work previously showcased at the OHBM conference and draws connections to a tutorial paper I co-authored, where I contributed a number of simulations\citep{mihalik2022canonical}.
 
 \section{Background: Regularization for High-Dimensional and Structured Data}\label{sec:background}
 
