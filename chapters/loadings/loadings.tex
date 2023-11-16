@@ -18,7 +18,6 @@ We contribute to this line of work by demonstrating a similar relationship betwe
 In this chapter, we reexamine the relationship between machine learning and probabilistic CCA approaches using simulated data.
 We demonstrate that these approaches are more aligned than previously thought.
 While sparse regularization of CCA weights can lead to sparse estimates of generative model loadings in some conditions, it doesn't always ensure sparse loadings, especially under anisotropic noise (i.e. noise correlated between features).
-Furthermore, regularization can enhance performance in low SNR scenarios, but using the PLS objective can introduce bias, emphasizing dominant principal components and overshadowing subtler correlations.
 
 \section{Background:Generative Perspectives on CCA}
 
@@ -440,13 +439,13 @@ This suggests that the random covariance scenario results in a higher signal-to-
 \centering
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_implicit}
+\includegraphics[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_implicit}
 \caption{Identity Covariance Matrices}
 \end{subfigure}
 %
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_implicit}
+\includegraphics[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_implicit}
 \caption{Random Covariance Matrices}
 \end{subfigure}
 \caption{Weights and Loadings for Implicit Latent Variable Data Generation.}
@@ -456,13 +455,13 @@ This suggests that the random covariance scenario results in a higher signal-to-
 \centering
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Identity_Covariance_implicit.svg}
+\includegraphics[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Identity_Covariance_implicit}
 \caption{Identity Covariance Matrices}
 \end{subfigure}
 %
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Random_Covariance_implicit.svg}
+\includegraphics[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Random_Covariance_implicit}
 \caption{Random Covariance Matrices}
 \end{subfigure}
 \caption{Test Scores for Implicit Latent Variable Data Generation.}\label{fig:joint-scores}
@@ -481,13 +480,13 @@ However, this does illustrate that priors on weights do not translate well to pr
 \centering
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_explicit}
+\includegraphics[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_explicit}
 \caption{GFA (Identity Noise)}
 \end{subfigure}
 %
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_explicit}
+\includegraphics[width=\linewidth]{figures/simulated/low/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_explicit}
 \caption{Probabilistic CCA (Random Noise)}
 \end{subfigure}
 \caption{Weights and Loadings for Explicit Latent Variable Data Generation Models.}\label{fig:latent-variable-weights-loadings}
@@ -497,13 +496,13 @@ However, this does illustrate that priors on weights do not translate well to pr
 \centering
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Identity_Covariance_explicit.svg}
+\includegraphics[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Identity_Covariance_explicit}
 \caption{GFA}
 \end{subfigure}
 %
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Random_Covariance_explicit.svg}
+\includegraphics[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Random_Covariance_explicit}
 \caption{Probabilistic CCA}
 \end{subfigure}
 \caption{Test Scores for Explicit Latent Variable Data Generation Models.}\label{fig:latent-variable-scores}
@@ -527,17 +526,20 @@ On the other hand, these plots (shown for 10 random samples) show that all of th
 
 \subsection{Repeated Columns}\label{subsec:repeated-columns}
 
+In this section, we explore the stability of weights and loadings in Canonical Correlation Analysis (CCA) models when faced with repeated columns in the data.
+Our theoretical analysis suggests that while weights may vary and are arbitrary with repeated columns, loadings remain consistent.
+
 \begin{figure}
 \centering
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/simulated/repeated/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_implicit}
+\includegraphics[width=\linewidth]{figures/simulated/repeated/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_implicit}
 \caption{Identity Covariance Matrices}
 \end{subfigure}
 %
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/simulated/repeated/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_implicit}
+\includegraphics[width=\linewidth]{figures/simulated/repeated/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_implicit}
 \caption{Random Covariance Matrices}
 \end{subfigure}
 \caption{Weights and Loadings for Implicit Latent Variable Data Generation.}
@@ -547,10 +549,17 @@ On the other hand, these plots (shown for 10 random samples) show that all of th
 \centering
 \begin{subfigure}{0.49\linewidth}
 \centering
-\includesvg[width=\linewidth]{figures/simulated/repeated/Train_Test_Scores_Identity_Covariance_implicit.svg}
+\includegraphics[width=\linewidth]{figures/simulated/repeated/Train_Test_Scores_Identity_Covariance_implicit}
 \caption{Identity Covariance Matrices}
 \end{subfigure}
 \end{figure}
+
+Empirical results from our experiments validate this theoretical proposition.
+We observed that in PLS (Partial Least Squares) and SPLS (Sparse Partial Least Squares) models, which are significantly regularized (L2 regularization), the weights for repeated features tend to be uniform.
+However, in the case of CCA the weights applied to repeated features are almost completely arbitrary (see the scale).
+For Elastic and Ridge CCA, the weights applied to repeated features, though not identical, display greater stability due to shrinkage effects.
+In contrast, loadings for repeated features remained consistent across all tested models, reinforcing our theoretical stance on their preferential use for model interpretation in scenarios with repeated columns or near-repeated columns.
+
 %
 
 %\subsection{High-Dimensional Simulated Data}
@@ -565,13 +574,13 @@ On the other hand, these plots (shown for 10 random samples) show that all of th
 %\centering
 %\begin{subfigure}{0.49\linewidth}
 %\centering
-%\includesvg[width=\linewidth]{figures/simulated/high/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_explicit}
+%\includegraphics[width=\linewidth]{figures/simulated/high/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_explicit}
 %\caption{Identity Covariance Latent Variable}
 %\end{subfigure}
 %%
 %\begin{subfigure}{0.49\linewidth}
 %\centering
-%\includesvg[width=\linewidth]{figures/simulated/high/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_explicit}
+%\includegraphics[width=\linewidth]{figures/simulated/high/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_explicit}
 %\caption{Random Covariance Latent Variable}
 %\end{subfigure}
 %\caption{Weights and Loadings for High-Dimensional Explicit Latent Variable Data Generation.}\label{fig:latent-variable-weights-loadings-high}
@@ -581,13 +590,13 @@ On the other hand, these plots (shown for 10 random samples) show that all of th
 %\centering
 %\begin{subfigure}{0.49\linewidth}
 %\centering
-%\includesvg[width=\linewidth]{figures/simulated/high/Train_Test_Scores_Identity_Covariance_explicit.svg}
+%\includegraphics[width=\linewidth]{figures/simulated/high/Train_Test_Scores_Identity_Covariance_explicit}
 %\caption{}
 %\end{subfigure}
 %%
 %\begin{subfigure}{0.49\linewidth}
 %\centering
-%\includesvg[width=\linewidth]{figures/simulated/high/Train_Test_Scores_Random_Covariance_explicit.svg}
+%\includegraphics[width=\linewidth]{figures/simulated/high/Train_Test_Scores_Random_Covariance_explicit}
 %\caption{}
 %\end{subfigure}
 %\caption{Test Scores for High-Dimensional Explicit Latent Variable Data Generation Models.}\label{fig:latent-variable-scores-high}

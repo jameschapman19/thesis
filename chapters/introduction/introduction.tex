@@ -13,28 +13,34 @@ Despite the advantages offered by multiview SSL methods in handling complex and 
 
 \section{Thesis Structure and Contributions}
 
-The main contributions of this thesis are threefold: 1) A scalable reformulation of Canonical Correlation Analysis (CCA); 2) Incorporation of regularization techniques for improved interpretability; and 3) Preliminary groundwork for extending these methods through deep learning.
+The main contributions of this thesis are threefold:
 
-In Chapter 2, we will provide an in-depth literature review on multiview learning and self-supervised learning techniques, establishing a foundational understanding of these methodologies in the context of biomedical data.
+\begin{itemize}
+    \item A method for regularizing CCA with structured priors including the Elastic Net, improving the interpretability of the findings.
+    \item An argument for the use of loadings rather than weights in CCA, which are more interpretable and directly relate to the generative process we typically assume in biomedical data.
+    \item The introduction of a new formulation for CCA and generalized eigenvalue problems which can be solved via gradient descent, enabling the scaling of these methods to much larger datasets.
+\end{itemize}
 
-In Chapter 3, we propose a novel formulation for CCA, introducing an approach to solve it by gradient descent. This methodology allows for scalable solutions by enabling stochastic gradient descent, thus overcoming the limitations of traditional full-batch algorithms.
+In Chapter \ref{chap:background}, we will provide an in-depth literature review on multiview learning and self-supervised learning techniques, establishing a foundational understanding of these methodologies in the context of biomedical data.
 
-In Chapter 4, we introduce regularization via proximal gradient descent into our framework. This addition allows us to incorporate structured priors into our model, improving the interpretability of our findings, and enhancing their relevance to the biomedical context.
+In Chapter \ref{chap:als}, This chapter explores the role of regularization in improving the performance and interpretation of Canonical
+Correlation Analysis (CCA) using data from the Human Connectome Project (HCP) and Alzheimer's Disease Neuroimaging Initiative (ADNI) datasets. Introduces new method based on alternating lest squares (ALS) for regularizing CCA with structured priors, including the Elastic Net. We show that this method improves the interpretability of the findings, and that the Elastic Net is particularly useful for identifying the most relevant features in the data.
 
-In Chapter 5, we show our approach can be extended to Deep CCA and Self-Supervised Learning more generally. While the sample sizes in biomedical research are still too small to apply these methods, we lay the groundwork for their potential incorporation into our framework in the future.
+In Chapter \ref{chap:loadings}, We demonstrate a similar relationship between the loadings and weights of CCA models, and showing that the loadings are more interpretable than the weights.In this chapter, we reexamine the relationship between machine learning and probabilistic CCA approaches using simulated data.
+We demonstrate that these approaches are more aligned than previously thought.
 
-In Chapter 6, we present CCA-Zoo, a Python package for CCA and multiview learning, which implements the methodologies proposed in this thesis. We show how this work filled a gap in the Python ecostystem, and how it will facilitate the adoption of these methods in the biomedical community.
+In Chapter \ref{chap:gradient_descent}, Firstly, with \cref{prop:EY-charac} we present an unconstrained loss function that characterizes solutions to GEPs; this is based on the Eckhart--Young inequality and has appealing geometrical properties.
+We apply this to the GEP formulation of CCA and construct unbiased estimates of the loss and its gradients from mini-batches of data.
+These loss functions can therefore be optimized out-of-the-box using standard frameworks for deep learning. % and gradient descent-based optimisers.
+This immediately gives a unified family of algorithms for CCA, Deep CCA, and indeed SSL.
+
+Our CCA algorithms dominate existing state-of-the-art methods across a wide range of benchmarks, presented in \cref{Experiments}.
+For stochastic CCA, our method not only converges faster but also achieves higher correlation scores than existing techniques.
+For Deep CCA and Deep Multiview CCA our unbiased stochastic gradients yield significantly better validation correlations and allow the use of smaller mini-batches in memory constrained applications.
+We also demonstrate how useful our algorithms are in practice with an pioneering real-world case study. We apply stochastic Partial Least Squares (PLS) to an extremely high-dimensional dataset from the UK Biobank dataset -- all executed on a standard laptop.
+
+In Chapter \ref{chap:software}, we present CCA-Zoo, a Python package for CCA and multiview learning, which implements the methodologies proposed in this thesis. We show how this work filled a gap in the Python ecostystem, and how it will facilitate the adoption of these methods in the biomedical community.
 
 In Chapter 7, we discuss the implications, challenges, and limitations of our work, and how they can be addressed in future research.
 
-The main contributions of this thesis are:
-
-\begin{itemize}
-    \item The introduction of a new formulation for CCA and generalized eigenvalue problems which can be solved via gradient descent, enabling the scaling of these methods to much larger datasets.
-    \item The integration of regularization into the proposed framework using proximal gradient descent, enabling the inclusion of structured priors and improving the interpretability of the findings.
-    \item Laying the groundwork for the potential incorporation of deep learning methods into the framework when the sample size permits, enabling the capture of non-linear associations in the data.
-    \item
-\end{itemize}
-
-Through these contributions, this thesis aims to bridge the gap between the latent potential of large-scale, complex biomedical data and the capabilities of existing analytical methodologies.
-In doing so, we take one step closer to truly personalized medicine.
+Through these contributions, this thesis aims to bridge the gap between the potential of large-scale, complex biomedical data and the capabilities of existing analytical methodologies.
