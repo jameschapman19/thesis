@@ -16,22 +16,22 @@ The key distinctions between machine learning and statistical inference include:
 
 \begin{itemize}
     \item \textbf{Machine Learning:}
-    \begin{itemize}
-        \item Focuses on optimizing out-of-sample performance.
-        \item Performance is typically measured using a test set not seen during training.
-        \item Prioritizes generalization to new, unseen data.
-    \end{itemize}
+          \begin{itemize}
+              \item Focuses on optimizing out-of-sample performance.
+              \item Performance is typically measured using a test set not seen during training.
+              \item Prioritizes generalization to new, unseen data.
+          \end{itemize}
     \item \textbf{Statistical Inference:}
-    \begin{itemize}
-        \item Concerned with parameter estimation within a sample.
-        \item Emphasizes hypothesis testing to infer population parameters.
-        \item Aims to provide insights about data samples to make inferences about a larger population.
-    \end{itemize}
+          \begin{itemize}
+              \item Concerned with parameter estimation within a sample.
+              \item Emphasizes hypothesis testing to infer population parameters.
+              \item Aims to provide insights about data samples to make inferences about a larger population.
+          \end{itemize}
 \end{itemize}
 
 \subsubsection{Training, Validation, and Test Sets}
 
-In machine learning, a dataset is often divided into three subsets: the training set, the validation set, and the test set. The training set is used to train the model; the validation set is used to fine-tune model parameters and for hyperparameter tuning; and the test set serves to evaluate the model's generalization performance. 
+In machine learning, a dataset is often divided into three subsets: the training set, the validation set, and the test set. The training set is used to train the model; the validation set is used to fine-tune model parameters and for hyperparameter tuning; and the test set serves to evaluate the model's generalization performance.
 
 \subsubsection{Cross-Validation}
 
@@ -43,7 +43,7 @@ Sometimes a separate holdout set, distinct from the test set, is used for final 
 
 \subsection{Types of Multiview Machine Learning}
 
-Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as 'views'. These techniques can be broadly classified into supervised, unsupervised, and self-supervised multiview learning, with some algorithms straddling the boundary between the two. 
+Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as 'views'. These techniques can be broadly classified into supervised, unsupervised, and self-supervised multiview learning, with some algorithms straddling the boundary between the two.
 
 \subsubsection{Supervised Multiview Learning}
 
@@ -67,16 +67,16 @@ $d \in [D_i]$ for dimensions of input variables;
 and $l,k \in [K]$ for dimensions of representations - i.e. to subscript dimensions of $Z\sps{i}, f\sps{i}$.
 Later on we will introduce total number of samples $N$.
 
-In this report, we will typically refer to $u_k$ as \textbf{weights}, $Z_k = X_k u_k$ as \textbf{representations},
-        \textbf{latent
-dimensions}, or \textbf{scores} depending on the context. We will sometimes consider the
-        matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of weights, and the
-        matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations. We will refer to $\mathbb{E
-        }[X_k^\top X_k] u_k$ as loadings.
+In this report, we will typically refer to $u_k$ as \textbf{\gls{weights}}, $Z_k = X_k u_k$ as \textbf{representations},
+\textbf{latent
+    dimensions}, or \textbf{scores} depending on the context. We will sometimes consider the
+matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of \gls{weights}, and the
+matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations. We will refer to $\mathbb{E
+    }[X_k^\top X_k] u_k$ as loadings.
 
 \subsection{Principal Components Analysis}
 
-Principal Components Analysis (\acrshort{pca})\citep{hotelling1933analysis} is a classical method in unsupervised machine learning for representation learning.
+Principal Components Analysis\cite{hotelling1933analysis} (\acrshort{pca}) is a classical method in unsupervised machine learning for representation learning.
 It is widely used for dimensionality reduction and feature extraction.
 The primary goal of \acrshort{pca} is to transform the original high-dimensional data into a new coordinate system defined by orthogonal axes, capturing the most relevant aspects of the data.
 
@@ -92,9 +92,9 @@ where $u_k$ are the orthonormal basis vectors:
 The primary goal of \acrshort{pca} is to maximize the variance of the projections \(Z_k\). Mathematically, this can be formulated
 as:
 \begin{align}
-    u_{\text{opt}} &= \underset{u}{\text{argmax}} \left( u^\top \Sigma u \right) \\
-    \text{subject to:} \notag \\
-    u^\top u &= 1 \notag
+    u_{\text{opt}} & = \underset{u}{\text{argmax}} \left( u^\top \Sigma u \right) \\
+    \text{subject to:} \notag                                                     \\
+    u^\top u       & = 1 \notag
 \end{align}
 
 Where \(\Sigma = \mathbb{E}[X^\top X]\) is the covariance matrix of the data. The solution to this optimization problem is the eigenvector associated with the largest eigenvalue of \(\Sigma\).
@@ -106,8 +106,8 @@ The Lagrangian for this problem is:
 \end{equation}
 where \(\lambda\) is the Lagrange multiplier. Differentiating the Lagrangian yields the first-order conditions:
 \begin{align}
-    \Sigma u &= \lambda u, \\
-    u^\top u &= 1.
+    \Sigma u & = \lambda u, \\
+    u^\top u & = 1.
 \end{align}
 
 This transforms the problem into an eigenvalue equation for the covariance matrix \(\Sigma\), which can be efficiently solved using standard libraries such as scikit-learn\citep{pedregosa2011scikit}.
@@ -119,13 +119,13 @@ data, \acrshort{pca}'s main limitation arises: it only accounts for variance wit
 
 \subsection{Partial Least Squares}
 
-Partial Least Squares (PLS)\citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as `views". PLS can be seen as a generalization of \acrshort{pca}, where \acrshort{pca} becomes a special case when the two views are identical. The optimization problem for PLS can be formulated as:
+Partial Least Squares (PLS)\citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as `views". \acrshort{pls} can be seen as a generalization of \acrshort{pca}, where \acrshort{pca} becomes a special case when the two views are identical. The optimization problem for \acrshort{pls} can be formulated as:
 
 \begin{align}
-     u\sps{1}_{\text{opt}} &= \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} \Sigma_{12} u\sps{2} \} \\
-     \text{subject to:} \notag \\
-     u\spstop{1}u\sps{1} &= 1 \notag \\
-     u\spstop{2}u\sps{2} &= 1 \notag
+    u\sps{1}_{\text{opt}} & = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} \Sigma_{12} u\sps{2} \} \\
+    \text{subject to:} \notag                                                                             \\
+    u\spstop{1}u\sps{1}   & = 1 \notag                                                                    \\
+    u\spstop{2}u\sps{2}   & = 1 \notag
 \end{align}
 
 where \( X\sps{1} \in \mathbb{R}^{n \times p_1} \) and \( X\sps{2} \in \mathbb{R}^{n \times p_2} \), meaning we have two views with the same number of samples but potentially different number of features.
@@ -135,61 +135,61 @@ where \( X\sps{1} \in \mathbb{R}^{n \times p_1} \) and \( X\sps{2} \in \mathbb{R
 The Lagrangian for this optimization problem can be formulated as:
 
 \begin{equation}
-f(u\sps{1}, \lambda) = u\spstop{1} \Sigma_{12} u\sps{2} + \lambda_1 (1 - u\spstop{1}u\sps{1}) + \lambda_2 (1 - u\spstop{2}u\sps{2})
+    f(u\sps{1}, \lambda) = u\spstop{1} \Sigma_{12} u\sps{2} + \lambda_1 (1 - u\spstop{1}u\sps{1}) + \lambda_2 (1 - u\spstop{2}u\sps{2})
 \end{equation}
 
 Upon deriving the first order conditions, we get:
 
 \begin{align}
-    \Sigma_{21} u\sps{1} &= \lambda_2 u\sps{2} \\
-    \Sigma_{12} u\sps{2} &= \lambda_1 u\sps{1} \\
-    u\spstop{1}u\sps{1} &= 1 \\
-    u\spstop{2}u\sps{2} &= 1
+    \Sigma_{21} u\sps{1} & = \lambda_2 u\sps{2} \\
+    \Sigma_{12} u\sps{2} & = \lambda_1 u\sps{1} \\
+    u\spstop{1}u\sps{1}  & = 1                  \\
+    u\spstop{2}u\sps{2}  & = 1
 \end{align}
 
 By substituting the constraint conditions into these equations, we find that \( \lambda_1 = \lambda_2 = \lambda \) by symmetry. Further simplification yields:
 
 \begin{align}
-    \Sigma_{21} \Sigma_{12} u\sps{2} &= \lambda^2 u\sps{2} \\
-    \Sigma_{12} \Sigma_{21} u\sps{1} &= \lambda^2 u\sps{1}
+    \Sigma_{21} \Sigma_{12} u\sps{2} & = \lambda^2 u\sps{2} \\
+    \Sigma_{12} \Sigma_{21} u\sps{1} & = \lambda^2 u\sps{1}
 \end{align}
 
 Thus, solving these equations will yield the \( u\sps{1} \) and \( u\sps{2} \) vectors as the eigenvectors of \( \Sigma_{12} \Sigma_{21} \) and \( \Sigma_{21} \Sigma_{12} \), respectively \citep{hoskuldsson1988pls}.
 
-\textbf{Limitations: } The problem with applying PLS to neuroimaging and behavioural modalities is that PLS is not scale invariant and
+\textbf{Limitations: } The problem with applying \acrshort{pls} to neuroimaging and behavioural modalities is that \acrshort{pls} is not scale invariant and
 is therefore biased towards the largest principal components in the data \citep{helmer2020stability}.
-This is particularly problematic when there is a low signal to noise ratio since PLS may find directions in either dataset which correspond to the largest directions of noise in the other.
-Additionally, PLS assumes that the structures contributing to variance in both datasets are linearly related, which
+This is particularly problematic when there is a low signal to noise ratio since \acrshort{pls} may find directions in either dataset which correspond to the largest directions of noise in the other.
+Additionally, \acrshort{pls} assumes that the structures contributing to variance in both datasets are linearly related, which
 may not be the case in complex biological systems like the brain or in intricate behavioral patterns \citep{rosipal2005overview}.
 The linearity assumption can sometimes be overly restrictive, failing to capture more complicated, nonlinear relationships between the data modalities.
-Another issue is the lack of sparsity in the PLS solution.
-Traditional PLS methods do not provide sparse weight vectors, which makes the interpretation of results challenging in high-dimensional settings such as neuroimaging where only a subset of features might be relevant \citep{leurgans1993canonical}.
-There are sparse variants of PLS available, but these typically introduce additional complexity and may require fine-tuning of regularization parameters \citep{chun2010sparse}.
-Furthermore, PLS can be sensitive to outliers, which are not uncommon in neuroimaging data due to motion artifacts or other sources of noise.
+Another issue is the lack of sparsity in the \acrshort{pls} solution.
+Traditional \acrshort{pls} methods do not provide sparse weight vectors, which makes the interpretation of results challenging in high-dimensional settings such as neuroimaging where only a subset of features might be relevant \citep{leurgans1993canonical}.
+There are sparse variants of \acrshort{pls} available, but these typically introduce additional complexity and may require fine-tuning of regularization parameters \citep{chun2010sparse}.
+Furthermore, \acrshort{pls} can be sensitive to outliers, which are not uncommon in neuroimaging data due to motion artifacts or other sources of noise.
 Since the method aims to maximize covariance, extreme values in one dataset can disproportionately affect the resulting latent variables \citep{wold1975path}.
 
 \subsection{Canonical Correlation Analysis}\label{sec:cca}
 
-In CCA, we aim to find the directions that maximize correlation, as opposed to maximizing covariance between two views of a dataset.
-This nuance renders CCA invariant to feature scale. The optimization problem for CCA can be expressed as:
+In \acrshort{cca}, we aim to find the directions that maximize correlation, as opposed to maximizing covariance between two views of a dataset.
+This nuance renders \acrshort{cca} invariant to feature scale. The optimization problem for \acrshort{cca} can be expressed as:
 
 \begin{align}
      & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}X\spstop{1}X\sps{2}u\sps{2} \} \\
-     & \text{subject to:} \notag \\
-     & u\spstop{1}\Sigma_{11}u\sps{1}=1 \notag \\
+     & \text{subject to:} \notag                                                                \\
+     & u\spstop{1}\Sigma_{11}u\sps{1}=1 \notag                                                  \\
      & u\spstop{2}\Sigma_{22}u\sps{2}=1 \notag
 \end{align}
 
-Although non-convex, numerous methods exist for solving the CCA problem, such as eigenvalue problems, generalized eigenvalue problems, block coordinate descent via alternating least squares regressions \citep{golub1995canonical,sun2008least} , and gradient descent \citep{via2007learning}.
+Although non-convex, numerous methods exist for solving the \acrshort{cca} problem, such as eigenvalue problems, generalized eigenvalue problems, block coordinate descent via alternating least squares regressions \citep{golub1995canonical,sun2008least} , and gradient descent \citep{via2007learning}.
 
 \subsubsection{Eigenvalue Problem}
 
-The first-order conditions derived in the same manner as the PLS case are:
+The first-order conditions derived in the same manner as the \acrshort{pls} case are:
 
 \begin{align}\label{CCA:FOCs}
      & \Sigma_{21}u\sps{1}=\lambda\sps{2} \Sigma_{22}u\sps{2} \\
      & \Sigma_{12}u\sps{2}=\lambda\sps{1} \Sigma_{11}u\sps{1} \\
-     & u\spstop{1}\Sigma_{11}u\sps{1}=1 \\
+     & u\spstop{1}\Sigma_{11}u\sps{1}=1                       \\
      & u\spstop{2}\Sigma_{22}u\sps{2}=1
 \end{align}
 
@@ -200,18 +200,18 @@ Substituting the second two conditions into the first two, we get \(\lambda\sps{
      & \Sigma_{22}^{-1}\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}u\sps{2}=\lambda^2u\sps{2} \notag
 \end{align}
 
-An alternative form of the CCA problem can be developed by reparameterizing \(u\sps{i*}=(\Sigma_{ii})^{-\frac{1}{2}}u\sps{i}\). The optimization problem then becomes:
+An alternative form of the \acrshort{cca} problem can be developed by reparameterizing \(u\sps{i*}=(\Sigma_{ii})^{-\frac{1}{2}}u\sps{i}\). The optimization problem then becomes:
 
 \begin{align}
      & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}\Sigma_{11}^{-\frac{1}{2}}\Sigma_{12}\Sigma_{22}^{-\frac{1}{2}}u\sps{2} \} \\
-     & \text{subject to:} \notag \\
-     & u\spstop{1}u\sps{1}=1 \notag \\
+     & \text{subject to:} \notag                                                                                                            \\
+     & u\spstop{1}u\sps{1}=1 \notag                                                                                                         \\
      & u\spstop{2}u\sps{2}=1 \notag
 \end{align}
 
 This reparameterized form will later underpin Deep Canonical Correlation Analysis (\acrshort{dcca}).
 
-This form also shows that PLS and CCA can be made equivalent by whitening the data matrices before constructing the covariance matrix. When the number of features exceeds the number of samples (\(p>n\)), CCA becomes degenerate because the within-view covariance matrices cannot be inverted—contrasting with PLS, which is always computable.
+This form also shows that \acrshort{pls} and \acrshort{cca} can be made equivalent by whitening the data matrices before constructing the covariance matrix. When the number of features exceeds the number of samples (\(p>n\)), \acrshort{cca} becomes degenerate because the within-view covariance matrices cannot be inverted—contrasting with \acrshort{pls}, which is always computable.
 
 \subsubsection{Generalized Eigenvalue Problems}
 
@@ -219,7 +219,7 @@ We can also represent the system of equations in equation~\ref{CCA:FOCs} as a ma
 
 \begin{align}
     \begin{pmatrix}
-        0 & \Sigma_{12} \\
+        0           & \Sigma_{12} \\
         \Sigma_{21} & 0
     \end{pmatrix}
     \begin{pmatrix}
@@ -229,8 +229,8 @@ We can also represent the system of equations in equation~\ref{CCA:FOCs} as a ma
     =
     \lambda
     \begin{pmatrix}
-        \Sigma_{11} & 0 \\
-        0                    & \Sigma_{22}
+        \Sigma_{11} & 0           \\
+        0           & \Sigma_{22}
     \end{pmatrix}
     \begin{pmatrix}
         u\sps{1} \\
@@ -238,14 +238,14 @@ We can also represent the system of equations in equation~\ref{CCA:FOCs} as a ma
     \end{pmatrix}
 \end{align}
 
-Which is of the form $\mathbf{A v} = \lambda \mathbf{B v}$. CCA is therefore often referred to as a generalized eigenvalue problem for which there are a number of publicly available solvers.
+Which is of the form $\mathbf{A v} = \lambda \mathbf{B v}$. \acrshort{cca} is therefore often referred to as a generalized eigenvalue problem for which there are a number of publicly available solvers.
 
-\subsubsection{LDA as a Special Case of CCA}
+\subsubsection{LDA as a Special Case of \acrshort{cca}}
 
 Linear Discriminant Analysis (LDA) can be viewed as a special case of Canonical Correlation Analysis (CCA) where \(X^{(2)}\) is a one-hot encoded matrix representing the class labels.
-This allows us to draw a connection between the unsupervised learning framework of CCA and the supervised framework of LDA, thus expanding the understanding of both algorithms.
+This allows us to draw a connection between the unsupervised learning framework of \acrshort{cca} and the supervised framework of LDA, thus expanding the understanding of both algorithms.
 
-\textbf{Intuition:} In LDA, the aim is to find a lower-dimensional subspace where the classes are maximally separated. This objective can be viewed through the lens of CCA, where the optimal directions \(u^{(1)}\) and \(u^{(2)}\) in the original and one-hot encoded spaces aim to maximize correlation. In the LDA context, \(u^{(1)}\) would maximize the separation between classes.
+\textbf{Intuition:} In LDA, the aim is to find a lower-dimensional subspace where the classes are maximally separated. This objective can be viewed through the lens of \acrshort{cca}, where the optimal directions \(u^{(1)}\) and \(u^{(2)}\) in the original and one-hot encoded spaces aim to maximize correlation. In the LDA context, \(u^{(1)}\) would maximize the separation between classes.
 
 Mathematically, LDA is reduced to solving a generalized eigenvalue problem involving the between-class scatter matrix \(S_B\) and the within-class scatter matrix \(S_W\):
 
@@ -257,42 +257,42 @@ Mathematically, LDA is reduced to solving a generalized eigenvalue problem invol
     \hat{S_W} = \sum_{i=1}^{c} \sum_{x \in X_i} (x - \mu_i)(x - \mu_i)\top
 \]
 
-\textbf{Connection to CCA:} When \(X^{(2)}\) is the one-hot encoded matrix of class labels, the CCA problem effectively tries to maximize the correlation between the feature vectors and their corresponding labels.
+\textbf{Connection to \acrshort{cca}:} When \(X^{(2)}\) is the one-hot encoded matrix of class labels, the \acrshort{cca} problem effectively tries to maximize the correlation between the feature vectors and their corresponding labels.
 This turns out to be equivalent to maximizing the between-class variance in LDA while minimizing the within-class variance.
-Thus, LDA can be thought of as a constrained form of CCA, tailored to classification tasks.
+Thus, LDA can be thought of as a constrained form of \acrshort{cca}, tailored to classification tasks.
 
-This perspective unifies the two algorithms and shows that the core objective—finding meaningful relationships or directions in the data—is shared between both CCA and LDA.
+This perspective unifies the two algorithms and shows that the core objective—finding meaningful relationships or directions in the data—is shared between both \acrshort{cca} and LDA.
 
-\textbf{Multiview CCA} is a straightforward extension of CCA to the case of 3-or more datasets.
+\textbf{Multiview \acrshort{cca}} is a straightforward extension of \acrshort{cca} to the case of 3-or more datasets.
 The optimization problem for \acrshort{mcca} can be stated as:
 \begin{align}
      & u_{\text{opt}} = \underset{u}{\mathrm{argmax}} \sum_{i=1}^{m} \sum_{j=1, j \neq i}^{m} u\spstop{i} \Sigma_{ij} u\sps{j} \\
-     & \text{subject to:} \notag \\
+     & \text{subject to:} \notag                                                                                               \\
      & \sum_{i=1}^{m} u\spstop{i} \Sigma_{ii} u\sps{i} = 1 \notag
 \end{align}
 
 The generalized eigenvalue problem (GEP) can be written in matrix form as follows:
 
 \begin{align}
-    \mathbf{A} \mathbf{U} &= \lambda \mathbf{B} \mathbf{U} \\
-    \mathbf{A} &= \begin{pmatrix}
-        0 & \Sigma_{12} & \cdots & \Sigma_{1m} \\
-        \Sigma_{21} & 0 & \cdots & \Sigma_{2m} \\
-        \vdots & \vdots & \ddots & \vdots \\
-        \Sigma_{m1} & \Sigma_{m2} & \cdots & 0
-    \end{pmatrix}, \\
-    \mathbf{B} &= \begin{pmatrix}
-        \Sigma_{11} & 0 & \cdots & 0 \\
-        0 & \Sigma_{22} & \cdots & 0 \\
-        \vdots & \vdots & \ddots & \vdots \\
-        0 & 0 & \cdots & \Sigma_{mm}
-    \end{pmatrix}, \\
-    \mathbf{U} &= \begin{pmatrix}
-        u\sps{1} \\
-        u\sps{2} \\
-        \vdots \\
-        u\sps{m}
-    \end{pmatrix}.
+    \mathbf{A} \mathbf{U} & = \lambda \mathbf{B} \mathbf{U}                    \\
+    \mathbf{A}            & = \begin{pmatrix}
+                                  0           & \Sigma_{12} & \cdots & \Sigma_{1m} \\
+                                  \Sigma_{21} & 0           & \cdots & \Sigma_{2m} \\
+                                  \vdots      & \vdots      & \ddots & \vdots      \\
+                                  \Sigma_{m1} & \Sigma_{m2} & \cdots & 0
+                              \end{pmatrix}, \\
+    \mathbf{B}            & = \begin{pmatrix}
+                                  \Sigma_{11} & 0           & \cdots & 0           \\
+                                  0           & \Sigma_{22} & \cdots & 0           \\
+                                  \vdots      & \vdots      & \ddots & \vdots      \\
+                                  0           & 0           & \cdots & \Sigma_{mm}
+                              \end{pmatrix}, \\
+    \mathbf{U}            & = \begin{pmatrix}
+                                  u\sps{1} \\
+                                  u\sps{2} \\
+                                  \vdots   \\
+                                  u\sps{m}
+                              \end{pmatrix}.
 \end{align}
 
 \subsection{Sample Covariance and Population Covariance}
@@ -308,7 +308,7 @@ Here, \(b\) denotes the size of the minibatch, and \(\mathbf{X}\sps{1} \in \math
 
 \textbf{Practical Implications:} Using sample covariance matrices introduces some estimation error but allows us to apply the methods in real-world scenarios where population-level data are unattainable. Additionally, the use of minibatches provides a computationally efficient way to estimate these covariances in large-scale problems, at the cost of some additional statistical noise.
 
-\textbf{Connection to Previous Methods:} The use of sample covariance matrices is directly applicable to algorithms like CCA and LDA. When replacing the population covariances \(\Sigma\sps{ij}\) with sample estimates, the optimization problems remain structurally similar but are solved using the sample data.
+\textbf{Connection to Previous Methods:} The use of sample covariance matrices is directly applicable to algorithms like \acrshort{cca} and LDA. When replacing the population covariances \(\Sigma\sps{ij}\) with sample estimates, the optimization problems remain structurally similar but are solved using the sample data.
 
 This dual perspective—considering both population and sample covariance matrices—enables a more robust and flexible approach to the methods discussed, bridging the gap between theoretical analysis and practical application.
 
@@ -355,7 +355,7 @@ The eigenvectors of covariance matrices in these methods are only defined up to 
 Given these complexities, this thesis adopts a subspace perspective, focusing on either the top-1 or top-$k$ solutions, considering these as the most reliable and interpretable representations of the data's underlying structure.
 This approach aims to mitigate the limitations of deflation methods and the non-uniqueness of solutions, providing a more robust framework for multivariate data analysis.
 
-\section{Open challenges in CCA}
+\section{Open challenges in \acrshort{cca}}
 
 \subsection{Efficient Algorithms for High-Dimensional Data}
 
@@ -364,22 +364,22 @@ The challenges of high-dimensional data often manifest when solving Generalized 
 \subsubsection{Challenges in Solving Generalized Eigenvalue Problems}
 
 The GEP is often represented as \( Ax = \lambda Bx \), where \( A \)and \( B \)are matrices whose dimensions depend on the method in use.
-For instance, in \acrshort{pca}, \( A \) and \( B \)are \( p \times p \); in PLS and CCA, they are \( (p+q) \times (p+q) \).
+For instance, in \acrshort{pca}, \( A \) and \( B \)are \( p \times p \); in \acrshort{pls} and \acrshort{cca}, they are \( (p+q) \times (p+q) \).
 
 % Table summarizing the definitions of A and B for various methods
 \begin{table}[h]
     \centering
     \begin{tabular}{|c|c|c|c|c|}
         \hline
-        Method & \( A \)&\( B \)&\( x \)& Dimensions\\
+        Method         & \( A \)                                                                                    & \( B \)                                                                & \( x \)                                                  & Dimensions               \\
         \hline
-        \acrshort{pca}& \( \Sigma_{11} \)&\( I \)&\( u\sps{1} \)&\( p \times p \) \\
+       \acrshort{pca} & \( \Sigma_{11} \)                                                                          & \( I \)                                                                & \( u\sps{1} \)                                           & \( p \times p \)         \\
         \hline
-        LDA& \( S_B \)&\( S_W \)&\( u\sps{1} \)&\( p \times p \) \\
+        LDA            & \( S_B \)                                                                                  & \( S_W \)                                                              & \( u\sps{1} \)                                           & \( p \times p \)         \\
         \hline
-        CCA& \( \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix} \)&\( \begin{pmatrix} \Sigma_{11} & 0 \\ 0 & \Sigma_{22} \end{pmatrix} \)&\( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \)&\( (p+q) \times (p+q) \) \\
+       \acrshort{cca} & \( \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} \Sigma_{11} & 0 \\ 0 & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p+q) \times (p+q) \) \\
         \hline
-        PLS& \( \begin{pmatrix} 0 & \Sigma_{12} \\ \Sigma_{21} & 0 \end{pmatrix} \)&\( I \)&\( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \)&\( (p+q) \times (p+q) \) \\
+       \acrshort{pls} & \( \begin{pmatrix} 0 & \Sigma_{12} \\ \Sigma_{21} & 0 \end{pmatrix} \)                     & \( I \)                                                                & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p+q) \times (p+q) \) \\
         \hline
     \end{tabular}
     \caption{Definitions and dimensions of \( A \)and \( B \)for different subspace learning methods.}
@@ -398,41 +398,41 @@ This method is particularly beneficial when \( p \)is large.
 
 \subsubsection{\acrshort{kcca}}
 
-Kernel Canonical Correlation Analysis (\acrshort{kcca}) extends CCA to capture nonlinear relationships. 
+Kernel Canonical Correlation Analysis (\acrshort{kcca}) extends \acrshort{cca} to capture nonlinear relationships.
 The optimization problem for \acrshort{kcca} is:
 
 \begin{align}
-    & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha_1^{\top}K\spstop{1}K\sps{2}\alpha_2  \}\\
-    & \text{subject to:} \notag\\
-    & \alpha_1^{\top}K\spstop{1}K\sps{1}\alpha_1=1 \notag\\
-    & \alpha_2^{\top}K\spstop{2}K\sps{2}\alpha_2=1 \notag
+     & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha_1^{\top}K\spstop{1}K\sps{2}\alpha_2  \} \\
+     & \text{subject to:} \notag                                                                                            \\
+     & \alpha_1^{\top}K\spstop{1}K\sps{1}\alpha_1=1 \notag                                                                  \\
+     & \alpha_2^{\top}K\spstop{2}K\sps{2}\alpha_2=1 \notag
 \end{align}
 
 
 \acrshort{kcca} is computationally efficient for high-dimensional data (\(p>n\)) because its complexity scales with the number of samples\(n\), not the number of features\(p\).
 However, it requires access to all training data at test time, raising efficiency concerns.
 
-\subsection{Non-linear CCA}
+\subsection{Non-linear \acrshort{cca}}
 
-\subsubsection{Kernel CCA}
+\subsubsection{Kernel \acrshort{cca}}
 
-Kernel CCA (\acrshort{kcca}) is a non-linear extension of CCA that uses the kernel trick to find non-linear relationships between variables.
+Kernel \acrshort{cca} (\acrshort{kcca}) is a non-linear extension of \acrshort{cca} that uses the kernel trick to find non-linear relationships between variables.
 
-\subsubsection{Deep CCA}
+\subsubsection{Deep \acrshort{cca}}
 
-Deep CCA (\acrshort{dcca}) is a non-linear extension of CCA that uses deep neural networks to find non-linear relationships between variables.
+Deep \acrshort{cca} (\acrshort{dcca}) is a non-linear extension of \acrshort{cca} that uses deep neural networks to find non-linear relationships between variables.
 
 \section{Multiview Learning in Neuroimaging}
 
-There have been a number of applications of CCA and related methods to multiview problems in neuroimaging.
+There have been a number of applications of \acrshort{cca} and related methods to multiview problems in neuroimaging.
 Using resting state fMRI data, modes of correlation have been found that relate to differences in sex and age relating to drug and alcohol abuse, depression and self harm \citep{mihalik2019brain}.
 A similar mode relating to `positive-negative' wellbeing has been found across studies \citep{smith2015positive}suggesting that mental wellbeing has a relationship (though not necessarily causally) with functional connectivity between networks in the brain.
-Later in this dissertation we will replicate and build on the findings from this paper by using regularised and non-linear CCA methods.
+Later in this dissertation we will replicate and build on the findings from this paper by using regularised and non-linear \acrshort{cca} methods.
 
 CCA has also been used as a preprocessing step in order to identify groups of subjects in the latent variable space.
-In particular, CCA and clustering have been used to identify depression using fMRI data\citep{dinga2019evaluating} \citep{drysdale2017resting}.
+In particular, \acrshort{cca} and clustering have been used to identify depression using fMRI data\citep{dinga2019evaluating} \citep{drysdale2017resting}.
 CCA has also been used in the manner we described to denoise two views of a dataset such as separate measures of neuroimaging data \citep{zhuang2020technical} to remove artefacts.
-Deep CCA has recently been used to extract features for the diagnosis of schizophrenia\citep{qi2016deep}.
+Deep \acrshort{cca} has recently been used to extract features for the diagnosis of schizophrenia\citep{qi2016deep}.
 
 
 

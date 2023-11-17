@@ -22,7 +22,7 @@ With this perspective in mind, we propose a flexible regularized alternating lea
 This is in contrast to much of the previous work on sparse Brain-Behavior analysis which has used a PLS objective with lasso constraints (SPLS), which inherits a bias towards the largest principal components from PLS.
 
 We apply FRALS with ElasticNet regularization to the Human Connectome Project (HCP) dataset, and show that it outperforms other CCA models in terms of out-of-sample canonical correlation.
-We also show that the identified mode of variation is distinct from previous work which identified latent variables with loadings related to cognitive tests and negatively related to cigarette, tobacco or alcohol\citep{smith2015positive}.
+We also show that the identified mode of variation is distinct from previous work which identified latent variables with \gls{weights} related to cognitive tests and negatively related to cigarette, tobacco or alcohol\citep{smith2015positive}.
 FRALS has stronger correlations with the Line Orientation test, which measures visuospatial abilities, and the parietal lobe, which is known to be involved in visuospatial processing.
 This further demonstrates the importance of matching the model to the data generation process with the appropriate regularization.
 
@@ -33,9 +33,9 @@ This chapter expands on my work previously showcased at the OHBM conference and 
 Like Linear Regression, Canonical Correlation Analysis does not have a unique solution when the number of features exceeds the number of observations in either view.
 More generally, as the number of features increases, the number of parameters in the model increases, and the model becomes more prone to overfitting particularly when the signal-to-noise ratio is low.
 Furthermore, when features are correlated, the estimates of the parameters become unstable.
-Most obviously, if two features are perfectly correlated, the model is not identifiable (has no unique solution) because we can swap the weights between the two features without changing the model.
+Most obviously, if two features are perfectly correlated, the model is not identifiable (has no unique solution) because we can swap the \gls{weights} between the two features without changing the model.
 Regularization is a powerful tool for addressing these problems, and has been widely used in Linear Regression and Inverse Problems.
-Moreover, regularization can help us improve the interpretability of the results by encouraging sparsity in the weights and/or loadings.
+Moreover, regularization can help us improve the interpretability of the results by encouraging sparsity in the weights.
 
 \subsubsection{Shrinkage Regularization}
 
@@ -54,7 +54,7 @@ In Linear Regression, the ridge regression solution is given by:
 Where \(c\) is the regularization parameter between 0 and 1\footnote{It is more common to see $(\Sigma_{X,X} + c I)^{-1} \Sigma_{X,y}$ but these are equivalent up to a scalar factor and this form helps us later on}.
 The ridge penalty acts in two important ways:
 \begin{itemize}
-    \item It shrinks the weights towards zero.
+    \item It shrinks the \gls{weights} towards zero.
     \item It biases the solution to high covariance directions rather than high correlation directions.
 \end{itemize}
 
@@ -129,7 +129,7 @@ The visualization underscores the intrinsic nature of each regularization method
 \end{itemize}
 The choice between these shrinkage techniques should in general be based on the nature of the data.
 We now transition to another essential regularization technique: sparse regularization.
-While shrinkage aims to prevent overfitting by pulling weight estimates towards zero to reduce variance, sparse regularization aims to set weights to zero with the added benefit of enhancing model interpretability.
+While shrinkage aims to prevent overfitting by pulling weight estimates towards zero to reduce variance, sparse regularization aims to set \gls{weights} to zero with the added benefit of enhancing model interpretability.
 
 \subsubsection{Sparse Regularization}
 
@@ -205,7 +205,7 @@ They use a classical CCA formulation, sometimes called the MAXVAR formulation, w
     \text{subject to: }T^\top T = I\\
 \end{align}
 
-In this formulation, \(U\sps{i}\) represents the weights for the $i^{\text{th}}$ view, and \(T\) denotes the latent variable matrix.
+In this formulation, \(U\sps{i}\) represents the \gls{weights} for the $i^{\text{th}}$ view, and \(T\) denotes the latent variable matrix.
 The premise is that when \(T\) closely mirrors \(X\sps{i} U\sps{i}\) across all \(i\), the scores correlate.
 Notably, this method is adaptable to multiple views.
 The authors employed proximal gradient descent for regularization, specifically suited for penalties like the lasso.
@@ -225,7 +225,7 @@ Lastly, we specify the parameters and sources of the datasets used.
 \subsection{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least
 -squares-(frals)}
 
-Consider the formulation in equation~\ref{eq:fu} for a single latent variable \(t\) with regularization $\lambda_i P_i$ on the weights \(u\sps{i}\).
+Consider the formulation in equation~\ref{eq:fu} for a single latent variable \(t\) with regularization $\lambda_i P_i$ on the \gls{weights} \(u\sps{i}\).
 
 \begin{align}
     \underset{u}{\mathrm{argmin}}\left\{\sum_i \|X\sps{i} u\sps{i} - t\|_2^2 + \textcolor{red}{\lambda_i P_i(u\sps{i})} \right\}\\
@@ -243,7 +243,7 @@ The first subproblem for the auxiliary variable \(t\):
 is a standard least squares problem, and can be solved in closed form by taking the average of $X\sps{i} u\sps{i}$ and normalizing.
 Recall from section~\ref{subsec:generative-perspectives-on-cca} that this makes $t$ an estimate of the latent variables.
 
-The second two subproblems are for the weights \(u\sps{i}\):
+The second two subproblems are for the \gls{weights} \(u\sps{i}\):
 
 \begin{align}
     \underset{u\sps{i}}{\mathrm{argmin}}\left\{\sum_i \|X\sps{i} u\sps{i} - t\|_2^2 + \textcolor{red}{\lambda_i P_i(u\sps{i})} \right\}\\
@@ -251,7 +251,7 @@ The second two subproblems are for the weights \(u\sps{i}\):
 
 Since the first subproblem is a regularized least squares problem, we can solve it using \textit{any regularized least squares solver}.
 This gives our framework the flexibility for users to choose any regularization function with an appropriate solver including those optimised for neuroimaging data\citep{Nilearn_contributors_Nilearn} or specialised hardware including GPU acceleration\footnote{In principle, one could even plug in a neural network by replacing $X\sps{i} u\sps{i}$ with a neural network $f(X\sps{i})$.}.
-In this work, we make use of the well-tested Elastic Net solver in the \texttt{scikit-learn} package~\citep{pedregosa2011scikit} where $P_i=\alpha_i \times \text{l1\_ratio} \|u\sps{i}\|_1 + \alpha_i \times (1-\text{l1\_ratio}) \|u\sps{i}\|^2_2$ so that we can tune the shrinkage and sparsity of the weights independently.
+In this work, we make use of the well-tested Elastic Net solver in the \texttt{scikit-learn} package~\citep{pedregosa2011scikit} where $P_i=\alpha_i \times \text{l1\_ratio} \|u\sps{i}\|_1 + \alpha_i \times (1-\text{l1\_ratio}) \|u\sps{i}\|^2_2$ so that we can tune the shrinkage and sparsity of the \gls{weights} independently.
 
 \subsection{The predictive framework for CCA}\label{subsec:the-predictive-framework-for-cca}
 
@@ -365,9 +365,9 @@ SPLS does however outperform PLS.
 \caption{Out-of-sample canonical correlations for each model.}
 \end{figure}
 
-\subsubsection{Behaviour Weights and Loadings}
+\subsubsection{Behaviour Weights}
 
-Figure\ref{fig:behaviour} plots the top 8 positive and negative non-imaging loadings and their associated weights for each model\footnote{This can and does mean for example that a zero weight may have a non-zero loading!}.
+Figure\ref{fig:behaviour} plots the top 8 positive and negative non-imaging \gls{weights} for each model.
 This is to illustrate some of the effects we have observed in the previous section.
 PCA finds a mode of variation in the behavioural data that is positively correlated with psychiatric and life function tests and negatively correlated with a number of emotion and personality tests.
 The RCCA and ElasticNet models find a mode of variation in the behavioural data that is negatively correlated with the Line Orientation test and to a lesser extent smoking and positively correlated with a number of other cognitive tests.
@@ -381,22 +381,22 @@ The SPLS mode is similar but selects out the rule-breaking and antisocial person
 \includegraphics[width=0.8\linewidth]{figures/hcp/ElasticNet behaviour weights}
 \includegraphics[width=0.8\linewidth]{figures/hcp/PLS behaviour weights}
 \includegraphics[width=0.8\linewidth]{figures/hcp/SPLS behaviour weights}
-\caption{Top 8 positive and negative non-imaging loadings for each model}\label{fig:behaviour}
+\caption{Top 8 positive and negative non-imaging \gls{weights} for each model}\label{fig:behaviour}
 \end{figure}
 
-\subsubsection{Brain Connectivity Weights and Loadings}
+\subsubsection{Brain Connectivity Weights}
 
-In this section, we use two different methods to visualize the brain connectivity weights and loadings.
-The first method is to use chord diagrams to visualize the top 8 positive and negative brain weights and loadings for each model.
+In this section, we use two different methods to visualize the brain connectivity weights.
+The first method is to use chord diagrams to visualize the top 8 positive and negative brain \gls{weights} for each model.
 This approach is inspired by the chord diagrams used in \cite{smith2015positive}.
-The second method is to use surface maps to visualize the brain connectivity weights and loadings.
+The second method is to use surface maps to visualize the brain connectivity weights.
 This approach has been used by both \cite{ferreira2022hierarchical} and \cite{smith2015positive}.
 
 \paragraph{Chord Diagrams}
 We grouped the nodes of the connectivity matrix of our data into 7 parcels according to the Yeo 7 network parcellation\cite{yeo2011organization}.
 These are then arranged around the circumference of the chord diagram using the Nichord package\cite{bogdan2023connsearch}.
-The plots then show the 8 strongest positive and negative weights or loadings for each model as `chords'.
-The chord diagrams in Figure~\ref{fig:chord_weights} and Figure~\ref{fig:chord_loadings} show the top 8 positive and negative brain weights and loadings for each model.
+The plots then show the 8 strongest positive and negative \gls{weights} for each model as `chords'.
+The chord diagrams in Figure~\ref{fig:chord_weights} show the top 8 positive and negative brain \gls{weights} for each model.
 
 \textcolor{red} Need to find something biologically useful to say about these.
 
@@ -407,7 +407,7 @@ The chord diagrams in Figure~\ref{fig:chord_weights} and Figure~\ref{fig:chord_l
 \includegraphics[width=0.49\linewidth]{figures/hcp/PLS brain weights}
 \includegraphics[width=0.49\linewidth]{figures/hcp/SPLS brain weights}
 \includegraphics[width=0.49\linewidth]{figures/hcp/PCA brain weights}
-\caption{Chord diagrams of the top 8 positive and negative brain weights for each model.}\label{fig:chord_weights}
+\caption{Chord diagrams of the top 8 positive and negative brain \gls{weights} for each model.}\label{fig:chord_weights}
 \end{figure}
 
 \paragraph{Surface Map Parcellations}
@@ -420,22 +420,22 @@ In Figure~\ref{fig:brain}, we show increases on the left and decreases on the ri
 %
 %\begin{figure}
 %\centering
-%\includegraphics[width=\linewidth]{figures/hcp/PCA brain loadings surface}
-%\includegraphics[width=\linewidth]{figures/hcp/RCCA brain loadings surface}
-%\includegraphics[width=\linewidth]{figures/hcp/ElasticNet brain loadings surface}
-%\includegraphics[width=\linewidth]{figures/hcp/PLS brain loadings surface}
-%\includegraphics[width=\linewidth]{figures/hcp/SPLS brain loadings surface}
+%\includegraphics[width=\linewidth]{figures/hcp/PCA brain weights surface}
+%\includegraphics[width=\linewidth]{figures/hcp/RCCA brain weights surface}
+%\includegraphics[width=\linewidth]{figures/hcp/ElasticNet brain weights surface}
+%\includegraphics[width=\linewidth]{figures/hcp/PLS brain weights surface}
+%\includegraphics[width=\linewidth]{figures/hcp/SPLS brain weights surface}
 %\caption{Map of CCA connection strength variations, with each node’s parcel map weighted by CCA edge-strength changes across edges involving that node.}\label{fig:brain}
 %\end{figure}
 
 \subsubsection{Sparsity of Weights}
 
-Table \ref{tab:brain-behaviour-weights-hcp} shows the number of non-zero weights for each model.
+Table \ref{tab:brain-behaviour-weights-hcp} shows the number of non-zero \gls{weights} for each model.
 We can see that tuned SPLS and Elastic Net do find sparse weights, but given the minimal difference in performance, it is not convincing evidence that this is a useful property.
 
 \begin{table}[h]
 \centering
-\caption{Number of non-zero weights for each model.}
+\caption{Number of non-zero \gls{weights} for each model.}
 \begin{tabular}{|c|c|c|}
 \hline
 Model &  Brain Weights &  Behaviour Weights \\
@@ -467,13 +467,13 @@ Suprisingly, PCA performed almost as well as PLS.
 \caption{Out-of-sample canonical correlations for each model.}\label{fig:performance}
 \end{figure}
 
-\subsubsection{Behaviour Weights and Loadings}
+\subsubsection{Behaviour Weights}
 
-As for the HCP data, Figure \ref{fig:adni-beh} plots the top 8 positive and negative non-imaging loadings and their associated weights for each model.
-Some of the identified behavioural loadings including a number of orientation tests are similar across all of the models, including even PCA.
+As for the HCP data, Figure \ref{fig:adni-beh} plots the top 8 positive and negative non-imaging \gls{weights} for each model.
+Some of the identified behavioural \gls{weights} including a number of orientation tests are similar across all of the models, including even PCA.
 This is indicative of the strong shared signal between the behavioural data and the brain structure data.
-SPLS and Elastic Net both hone in on the orientation and recall tests in the weight space, which appears also to translate to the loading space.
-The RCCA and Elastic Net models are suprisingly different in both the weight and loading space, with the RCCA loading on a couple of attention and calculation tests in addition to the ubiquitous orientation and recall tests.
+SPLS and Elastic Net both hone in on the orientation and recall tests in the weight space.
+The RCCA and Elastic Net models are suprisingly different in the weight space, with the RCCA \gls{weights} on a couple of attention and calculation tests in addition to the ubiquitous orientation and recall tests.
 
 \begin{figure}
 \centering
@@ -482,15 +482,15 @@ The RCCA and Elastic Net models are suprisingly different in both the weight and
 \includegraphics[width=0.8\linewidth]{figures/adni/ElasticNet behaviour weights}
 \includegraphics[width=0.8\linewidth]{figures/adni/PLS behaviour weights}
 \includegraphics[width=0.8\linewidth]{figures/adni/SPLS behaviour weights}
-\caption{Bar plots of the behaviour weights and loadings for each model.}\label{fig:adni-beh}
+\caption{Bar plots of the behaviour \gls{weights} for each model.}\label{fig:adni-beh}
 \end{figure}
 
-\subsubsection{Brain Structure Weights and Loadings}
+\subsubsection{Brain Structure Weights}
 
-We plot the weights and loadings as a mosaic plot with 3 slices in each direction in Figure~\ref{fig:adni-brain}.
-Previous work using SPLS with the ADNI dataset identified the same striking pattern of weights with the model strikingly selecting the hippocampal weights\cite{monteiro2016multiple}.
-While the Elastic Net has a less visually appealing selection of weights, with a honeycomb pattern near the edges of the brain, the hippocampal region is more clearly loaded on in the loadings space (and likewise for RCCA).
-It is noticeable that PCA, PLS and SPLS both weights in the same direction whereas RCCA and Elastic Net weight different regions with opposite signs.
+We plot the \gls{weights} as a mosaic plot with 3 slices in each direction in Figure~\ref{fig:adni-brain}.
+Previous work using SPLS with the ADNI dataset identified the same striking pattern of \gls{weights} with the model strikingly selecting the hippocampal weights\cite{monteiro2016multiple}.
+The Elastic Net has a less visually appealing selection of weights, with a honeycomb pattern near the edges of the brain and likewise for RCCA.
+It is noticeable that PCA, PLS and SPLS both \gls{weights} in the same direction whereas RCCA and Elastic Net weight different regions with opposite signs.
 
 \begin{figure}
 \centering
@@ -499,12 +499,12 @@ It is noticeable that PCA, PLS and SPLS both weights in the same direction where
 \includegraphics[width=0.45\linewidth]{figures/adni/ElasticNet brain weights mosaic}
 \includegraphics[width=0.45\linewidth]{figures/adni/PLS brain weights mosaic}
 \includegraphics[width=0.45\linewidth]{figures/adni/SPLS brain weights mosaic}
-\caption{Statistical maps of brain structure loadings and weights for each model.}
+\caption{Statistical maps of brain structure weights for each model.}
 \end{figure}
 
 \subsubsection{Sparsity of Weights}
 
-Table~\ref{tab:brain-behaviour-weights-adni} once again shows the number of non-zero weights for each model.
+Table~\ref{tab:brain-behaviour-weights-adni} once again shows the number of non-zero \gls{weights} for each model.
 We can see that tuned SPLS and Elastic Net once again identify sparse weights.
 In this case, the difference in performance is more convincing and suggests that this sparsity is less spuriously induced than for the HCP data.
 This is supported by the fact that Elastic Net and SPLS models find a similar level of sparsity in the brain weights.
@@ -512,7 +512,7 @@ On the other hand SPLS finds a much sparser set of behavioural weights.
 
 \begin{table}[h]
 \centering
-\caption{Number of non-zero weights for each model.}
+\caption{Number of non-zero \gls{weights} for each model.}
 \begin{tabular}{|c|c|c|}
 \hline
 Model & Brain Weights & Behaviour Weights \\

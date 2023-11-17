@@ -9,7 +9,6 @@
         "**.iml": true,
         "**.acn": true,
         "**.acr": true,
-        // "**/**.aux": true,
         "**.bbl": true,
         "**.glg": true,
         "**.glo": true,
@@ -25,6 +24,8 @@
         "**.lof": true,
         "**.lot": true,
         "**.toc": true,
-
+        "**.slo":true,
+        "**.sls":true,
+        "**.slg":true,
     },
 }
