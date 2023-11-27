@@ -11,36 +11,6 @@ Machine learning comprises three primary paradigms: supervised, self-supervised 
 This thesis focuses on \textit{multiview machine learning}, which aims to develop robust representations by uncovering associations between various data types within datasets.
 These data types, known as \gls{views} may include distinct sources of information such as MRI images, genomic data, and clinical records in the context of patient data analysis.
 
-\subsection{Machine Learning Vs Statistical Inference}
-The key distinctions between machine learning and statistical inference include:
-
-\begin{itemize}
-    \item \textbf{Machine Learning:}
-          \begin{itemize}
-              \item Focuses on optimizing out-of-sample performance.
-              \item Performance is typically measured using a test set not seen during training.
-              \item Prioritizes generalization to new, unseen data.
-          \end{itemize}
-    \item \textbf{Statistical Inference:}
-          \begin{itemize}
-              \item Concerned with parameter estimation within a sample.
-              \item Emphasizes hypothesis testing to infer population parameters.
-              \item Aims to provide insights about data samples to make inferences about a larger population.
-          \end{itemize}
-\end{itemize}
-
-\subsubsection{Training, Validation, and Test Sets}
-
-In machine learning, a dataset is often divided into three subsets: the training set, the validation set, and the test set. The training set is used to train the model; the validation set is used to fine-tune model parameters and for hyperparameter tuning; and the test set serves to evaluate the model's generalization performance.
-
-\subsubsection{Cross-Validation}
-
-Cross-validation is a technique used to assess the generalizability of the model by partitioning the original training dataset into a set of smaller train and test subsets. The model is trained on each combination of these subsets and validated on the remaining data. This provides multiple performance metrics, usually summarized by their mean and variance, offering a robust way to evaluate the model's out-of-sample performance.
-
-\subsubsection{Holdout Method}
-
-Sometimes a separate holdout set, distinct from the test set, is used for final model evaluation. This holdout set is not used during any part of the training or hyperparameter tuning process, serving as a final, unbiased performance metric.
-
 \subsection{Types of Multiview Machine Learning}
 
 Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as \gls{views}.
@@ -120,12 +90,10 @@ $d \in [D_i]$ for dimensions of input variables;
 and $l,k \in [K]$ for dimensions of representations - i.e. to subscript dimensions of $Z\sps{i}, f\sps{i}$.
 Later on we will introduce total number of samples $N$.
 
-In this report, we will typically refer to $u_k$ as \textbf{\gls{weights}}, $Z_k = X_k u_k$ as \textbf{representations},
-\textbf{latent
-    dimensions}, or \textbf{scores} depending on the context. We will sometimes consider the
-matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of \gls{weights}, and the
-matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations. We will refer to $\mathbb{E
-    }[X_k^\top X_k] u_k$ as loadings.
+In this report, we will typically refer to $u_k$ as \textbf{\gls{weights}}, $Z_k = X_k u_k$ as \gls{representations} or \gls{latent variables}, depending on the context. We will sometimes consider a
+matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of \gls{weights}, and a
+matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations.
+We will refer to $\Corr(X\sps{i}_j, Z_k)$ as the loadings of $X\sps{i}_j$ on $Z_k$.
 
 \subsection{Principal Components Analysis}
 
@@ -165,7 +133,7 @@ where \(\lambda\) is the Lagrange multiplier. Differentiating the Lagrangian yie
 
 This transforms the problem into an eigenvalue equation for the covariance matrix \(\Sigma\), which can be efficiently solved using standard libraries such as scikit-learn\citep{pedregosa2011scikit}.
 
-The first principal component corresponds to the eigenvector associated with the largest eigenvalue \(\lambda\). Subsequent components are ordered by their corresponding eigenvalues.
+The first principal component corresponds to the eigenvector associated with the largest eigenvalue \(\lambda\). Subsequent components are the remaining eigenvectors ordered by their corresponding eigenvalues.
 
 \textbf{Limitations: }However, when applying \acrshort{pca} to datasets such as high-dimensional neuroimaging and behavioral
 data, \acrshort{pca}'s main limitation arises: it only accounts for variance within a single dataset, potentially discarding features that are relevant for cross-modal analysis.
@@ -365,54 +333,75 @@ Here, \(b\) denotes the size of the minibatch, and \(\mathbf{X}\sps{1} \in \math
 
 This dual perspective—considering both population and sample covariance matrices—enables a more robust and flexible approach to the methods discussed, bridging the gap between theoretical analysis and practical application.
 
-\subsection{Multiple Effects, Orthogonality, and Deflation}\label{subsec:orthogonality}
 
-Understanding multiple correlated or covarying effects is fundamental in multivariate data analysis methods such as Principal Component Analysis (\acrshort{pca}), Partial Least Squares (PLS), and Canonical Correlation Analysis (CCA). Although these methods generally aim to find a single maximal correlation or covariance (referred to as the top-1 problem), they are capable of identifying more than one orthogonal effect, a scenario often termed the top-$k$ problem, where $k$ denotes the number of orthogonal effects desired.
+\section{Practical Frameworks for Multiview Learning}
 
-\subsubsection{Challenges in Identifying Multiple Components}
+\subsection{Machine Learning and Statistical Inference}
 
-Identifying multiple components using iterative methods introduces specific challenges.
-Firstly, to discover subsequent effects that are orthogonal to the maximally correlated or covarying one, a deflation step is commonly applied.
-This is essential because the second component is conditional on the first in deflation models, meaning that interpreting the second component as an independent form of variation becomes untenable if the wrong first component is identified.
+\subsubsection{Machine Learning Evaluation Framework}
 
-\subsubsection{Deflation Methods for Orthogonality}
+\paragraph{Training, Validation, and Test Sets}
 
-Two prevalent deflation methods, Hotelling's Deflation and Projection Deflation, serve to ensure the orthogonality of the components.
+In machine learning, data is typically partitioned into training, validation, and test sets, each serving a specific purpose in the model development process:
 
-\textbf{Hotelling's method}  is mainly used for methods based on the power method for the Singular Value
-Decomposition (SVD).
+\begin{itemize}
+\item Training Set: Used for fitting the model.
+\item Validation Set: Assists in model parameter tuning.
+\item Test Set: Evaluates the model's generalization capability.
+\end{itemize}
 
-\begin{align}
-     & d = \mathbf{w^{\top}_1X^{\top}_1X_2w_2}                                            \\
-     & \mathbf{\Sigma^{(i+1)}_{12}}= \mathbf{\Sigma^{(i)}_{12}} - d\mathbf{w_1w^{\top}_2}
-\end{align}
+\paragraph{Cross-Validation}
 
-\textbf{Projection Deflation} is common in algorithms like Wold's NIPALS and ensures that the projection vectors
-themselves are orthogonal. These methods work by systematically reducing the data dimensions, so that each new component is orthogonal to the ones found before it. However, these methods come with their own limitations and are sensitive to the condition of the original problem, including issues related to regularization.
+A fundamental technique in machine learning, cross-validation involves dividing the training dataset into smaller subsets for training and validation. This approach provides insights into the model's performance across different data segments.
 
-\begin{align}
-     & P(\mathbf{X})= \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X}
-\end{align}
+\paragraph{Holdout Method}
 
-\begin{align}
-     & P^\perp(\mathbf{X})= \mathbf{X} - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X} = (I - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top})X}
-\end{align}
+The holdout method involves using a separate dataset, not involved in training or validation, for final model assessment. This ensures an unbiased performance evaluation.
+
+\paragraph{Out of Sample Correlation}
+
+Specific to canonical correlation analysis, this involves measuring the correlation between latent variables in new datasets, assessing the model's ability to uncover relationships in unseen data.
+
+\paragraph{Downstream Tasks}
+
+Evaluating model performance on downstream tasks like classification or prediction can offer practical insights into the utility of the learned representations.
+
+\subsubsection{Statistical Inference Evaluation Framework}
+
+Statistical inference approaches provide a contrasting perspective to machine learning methods, focusing on understanding and quantifying the underlying data structure:
+
+\begin{itemize}
+\item Parameter Estimation: Involves estimating model parameters and their uncertainties.
+\item Hypothesis Testing: Assesses the statistical significance of the relationships found by the model.
+\item Confidence Intervals: Provide ranges within which the true parameter values are likely to fall, considering uncertainty.
+\item Permutation Testing: A non-parametric method that evaluates the significance of models by comparing model performance on original and randomly shuffled data.
+\end{itemize}
+
+\subsection{Components and Subspaces in CCA: A Subspace Perspective}
+
+\subsection{Components and Subspaces in CCA: A Subspace Perspective}
+
+\subsubsection{Context: Eigenvalue Problems in CCA}\label{subsec:orthogonality}
+
+While our focus so far has primarily been on the top-1 eigenvector-eigenvalue pair, it's important to note that the methodology also extends to the top-k subspace problem. This broader approach involves identifying the top-k eigenvectors and their corresponding eigenvalues.
+
+\subsubsection{Addressing the Top-k Problem}
+
+Transitioning from a focus on the top-1 component to exploring the top-k subspace introduces additional complexities. One common method to solve the top-k problem is to identify the top-1 component and then apply a deflation process to find subsequent orthogonal components. However, this is not the only approach, and other methods may also be employed.
+
+\subsubsection{Deflation Methods in Subspace Identification}
+
+While Hotelling's Deflation and Projection Deflation are crucial for ensuring orthogonality in the deflation process, it's important to recognize that they represent just one approach to identifying multiple components in CCA. These methods, although effective, can be sensitive to the initial conditions of the data and can influence the outcome of the top-k subspace identification.
 
 \subsubsection{Non-Uniqueness of Components}
 
-Another critical consideration is the non-uniqueness of the identified components.
-The eigenvectors of covariance matrices in these methods are only defined up to a sign, or up to an orthogonal transformation when eigenvalues are repeated. This lack of uniqueness can lead to inconsistencies, especially when comparing solutions across different samples or data folds.
+Furthermore, non-uniqueness is a significant challenge in CCA, particularly when eigenvectors have repeated eigenvalues. Imagine a scenario where the top-1 eigenvalue is repeated \(k\) times. In this case, there are \(k\) possible eigenvectors that can be associated with the top-1 eigenvalue. While this is unlikely to occur in practice, the eigenvalues can be very close to each other, leading to numerical instability and non-uniqueness in the components. Particularly true in cross-validation settings, this non-uniqueness can lead to instability in the components, complicating their interpretation and comparison across different data analyses.
 
-\paragraph{Thesis Approach: Top-1 and Top-$k$ Solutions}
+This non-uniqueness aligns with the probabilistic perspectives on PCA and CCA, where the latent variables are considered unique only up to a rotation. This perspective further reinforces the subspace approach, emphasizing the identification of a subspace rather than specific directions within it.
 
-Given these complexities, this thesis adopts a subspace perspective, focusing on either the top-1 or top-$k$ solutions, considering these as the most reliable and interpretable representations of the data's underlying structure.
-This approach aims to mitigate the limitations of deflation methods and the non-uniqueness of solutions, providing a more robust framework for multivariate data analysis.
+\paragraph{Thesis Approach: Concentrating on the Top-1 Component}
 
-\subsection{Measuring the Performance of Multiview Learning Methods}
-
-\subsubsection{Correlation}
-
-
+In this thesis, we focus on the top-1 component in CCA to align with and facilitate comparison with typical componentwise studies in brain-behavior research. This choice is driven by the complexity associated with the top-k problem and the variety of methods available to address it. Under the assumption of a significant eigengap\footnote{An 'eigengap' refers to the difference in magnitude between consecutive eigenvalues in an eigenvalue problem. A significant eigengap between the first and second eigenvalues suggests that the first eigenvalue (and its corresponding eigenvector) is distinctly more significant than the next, lending credence to its uniqueness and importance.}, the first component can be considered equivalent to the top-1 subspace. This equivalence allows for a clear and interpretable analysis, making the top-1 subspace a straightforward and reliable choice for studying multivariate data. It's important to note that while we focus on the top-1 component, the later sections of the thesis introduce a method for simultaneously solving the complete subspace, addressing broader subspace analyses.
 
 \section{Multiview Learning in Neuroimaging}
 
