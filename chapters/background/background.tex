@@ -1,7 +1,7 @@
 \graphicspath{{chapters/background/}}
 \chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}\label{chap:background}
 \minitoc
-\epigraph{Reading furnishes the mind only with materials of knowledge; it is thinking that makes what we read ours.}{John Locke}
+\epigraph{Principal Component Analysis is a dimensionally invalid method that gives people a delusion that they are doing something useful with their data. If you change the units that one of the variables is measured in, it will change all the “principal components”! It’s for that reason that I made no mention of PCA in my book. I am not a slavish conformist, regurgitating whatever other people think should be taught. I think before I teach.}{Professor David MacKay}
 \section{Introduction to Machine Learning and Multiview Learning}
 
 In this chapter, we gather the necessary background knowledge needed to motivate and understand the contributions of this thesis.
@@ -43,15 +43,69 @@ Sometimes a separate holdout set, distinct from the test set, is used for final 
 
 \subsection{Types of Multiview Machine Learning}
 
-Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as 'views'. These techniques can be broadly classified into supervised, unsupervised, and self-supervised multiview learning, with some algorithms straddling the boundary between the two.
+Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as `views'.
+
+\subsection{Conditional Independence, Causality, and Multiview Learning}
+
+Consider the graphical model depicted in Figure~\ref{fig:mentalhealthselfsupervised}.
+It comprises two distinct views: a brain modality and a behavioral modality.
+The graphical model assumes that the brain and behaviour are conditionally independent given the severity of an (unobserved or `latent') mental health condition.
+
+\begin{figure}
+    \centering
+    \tikz{
+        % nodes
+        \node[latent, align=center, minimum size=2cm] (Z) {Severity\\z};
+        %
+        \node[obs, below left=of Z, minimum size=2cm, align=center] (x1) {Brain\\$x^{(1)}$};
+        \node[obs, below right=of Z, minimum size=2cm, align=center] (x2) {Behaviour\\$x^{(2)}$};
+        % edges
+        \edge{Z} {x1}
+        \edge{Z} {x2}}
+    \caption[Latent Variable Model of Mental Health]{\textit{\textbf{Latent Variable Model of Mental Health:}} From this perspective the neuroimaging modality and behavioural data are both considered to have been generated with distributions conditioned on the severity of a mental health condition}\label{fig:mentalhealthselfsupervised}
+\end{figure}
+
+In multiview machine learning, the relationship between conditional independence and causality is nuanced but crucial.
+When examining dependencies between events, such as those observed between brain activity and behavior, several scenarios emerge:
+
+\begin{itemize}
+    \item direct causation (brain influencing behavior or vice versa or even both)
+    \item both being influenced by a common, possibly unobserved, cause
+    \item no direct causal link between them
+\end{itemize}
+
+Importantly, if a common cause does exist, conditioning on it renders brain and behavior independent; this 'screens off' their dependence, revealing key insights for our models\cite{reichenbach1956direction}.
+However, it is essential to recognize that the presence of a common latent variable, inferred from these views, does not automatically imply causality in the observed data.
+
+\subsubsection{Complementary and Redundant Information}
+The nature of the information provided by different views (such as neuroimaging and behavioral data) is critical in multiview machine learning.
+
+If these views contain redundant information about the latent variables, they can be used to denoise each other, enhancing the clarity and reliability of the data.
+This process exploits the overlap in information to correct or reduce noise and errors, a principle fundamental to many denoising techniques in machine learning.
+
+Conversely, if the views provide complementary information, they offer a richer and more complete understanding of the latent variables than either view alone.
+In this case, the integration of diverse but related datasets leads to more robust and insightful models.
+Complementary views expand our perspective, revealing aspects of the latent variables that are not apparent when views are considered in isolation.
+
+This understanding is critical in mental health research, where accurate interpretations of complex relationships are key.
+
+%These techniques can be broadly classified into supervised and self-supervised (or sometimes, equivalently, unsupervised) multiview learning, with some algorithms straddling the boundary between the two.
 
 \subsubsection{Supervised Multiview Learning}
 
-In supervised multiview learning, one view serves as the input while the other view is treated as the target label. The algorithm learns to predict the target view based on the input view, leveraging the information from both to enhance the predictive performance. This approach is especially useful when each view contains complementary information that can improve the model's accuracy or robustness.
+In supervised multiview learning, one view serves as the input while the other view is treated as the target label.
+The algorithm learns to predict the target view based on the input view, leveraging the information from both to enhance the predictive performance.
+This approach is especially useful when each view contains complementary information that can improve the model's accuracy or robustness.
 
 \subsubsection{Self-Supervised Multiview Learning}
 
-Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels. The cornerstone of SSL is the concept of a `pretext task,' a learning task created from the data that trains the model to capture useful features or representations. In the context of multiview machine learning, self-supervised learning operates under the assumption that different views are generated from a common latent variable. The pretext task, in this case, is to predict these latent variables from the given views. This not only enables the model to learn associations between views but also allows it to derive robust and informative representations for subsequent tasks like classification or regression.
+Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels.
+The cornerstone of SSL is the concept of a `pretext task,' a learning task created from the data that trains the model to capture useful features or representations.
+In the context of multiview machine learning, self-supervised learning often operates under the assumption that different views are generated from a common source.
+A natural pretext task, in this case, is to predict these source from the given views.
+This not only enables the model to learn associations between views but also allows it to derive robust and informative representations for subsequent tasks like classification or regression.
+This is particularly true if the source is unavailable at test time (and, in the case of latent variables, even at training time), but knowledge of the source is useful for downstream tasks.
+
 
 \section{Learning Representations: Definitions and Notation}
 

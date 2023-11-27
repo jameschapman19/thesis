@@ -3,25 +3,25 @@
 \minitoc
 % chktex-file 44 
 % chktex-file 3
-
-\epigraph{The essence of strategy is choosing what not to do.}{\textit{Michael E. Porter}}
 \section{Introduction}\label{sec:introduction}
 
 This chapter explores the role of regularization in improving the performance and interpretation of Canonical
 Correlation Analysis (CCA) using data from the Human Connectome Project (HCP) and Alzheimer's Disease Neuroimaging Initiative (ADNI) datasets.
 
 CCA models often exhibit shortcomings when dealing with high-dimensional data.
-This challenge is particularly acute in brain-behavior studies.
-In these studies, neuroimaging modalities typically have a much higher dimensionality than the available sample size.
+This challenge is particularly acute in brain-behavior studies where the dimensionality of neuroimaging data is often orders of magnitude larger than the number of subjects.
 In this context, CCA models are prone to overfitting, leading to spurious correlations and poor generalization.
 Regularization, having been extensively studied and well-understood in the contexts of Linear Regression and Inverse Problems, introduces a deliberate bias to guide models towards more generalizable solutions.
 This principle, when applied to CCA, offers a promising avenue for addressing its challenges, ensuring that the model does not overfit to the noise in the data but captures the true underlying patterns.
 Furthermore, regularization can help us improve the interpretability of the results most clearly by encouraging sparsity.
+However, due to the complexity of the CCA problem, regularization is not as straightforward as in Linear Regression.
+The most popular approaches to `sparse CCA' have, in practice, been based on Partial Least Squares (PLS), which simplifies the optimization problem but, as we shall see, causes the model to inherit a bias towards the largest principal components from PLS.
 
 With this perspective in mind, we propose a flexible regularized alternating least squares (FRALS) framework for CCA which allows us to incorporate any regularized least squares solver to efficiently implement a wide range of regularization functions, but in particular allows us to efficiently implement the elastic net penalty with controllable L2 and L1 penalties so that we can control the bias towards the largest principal components while still encouraging sparsity in the weights.
 This is in contrast to much of the previous work on sparse Brain-Behavior analysis which has used a PLS objective with lasso constraints (SPLS), which inherits a bias towards the largest principal components from PLS.
 
-We apply FRALS with ElasticNet regularization to the Human Connectome Project (HCP) dataset, and show that it outperforms other CCA models in terms of out-of-sample canonical correlation.
+We apply FRALS with ElasticNet regularization to Simulated Datasets as well as the Human Connectome Project (HCP) and Azlheimer's Disease Neuroimaging Initiative (ADNI) datasets.
+We show that it outperforms other CCA models in terms of out-of-sample canonical correlation.
 We also show that the identified mode of variation is distinct from previous work which identified latent variables with \gls{weights} related to cognitive tests and negatively related to cigarette, tobacco or alcohol\citep{smith2015positive}.
 FRALS has stronger correlations with the Line Orientation test, which measures visuospatial abilities, and the parietal lobe, which is known to be involved in visuospatial processing.
 This further demonstrates the importance of matching the model to the data generation process with the appropriate regularization.
@@ -84,14 +84,14 @@ As we increase $c$, $\lim_{c \to \infty} (\Sigma_{ii}+ c I)^{-\frac{1}{2}}= (c I
 Which is precisely the PLS objective and constraints with an arbitrary scaling of the covariance matrix $\Sigma_{12}$ by $\frac{1}{c^2}$.
 For this reason, we can consider PLS as a shrinkage method for CCA equivalent to adding a very large ridge regularization.
 This has two important consequences.
-Fortunately, it is well defined even when the number of features exceeds the number of observations so we can always apply PLS to high-dimensional data.
+Fortunately, it is well-defined even when the number of features exceeds the number of observations so we can always apply PLS to high-dimensional data.
 Unfortunately, it biases the solution towards the largest principal components.
-PLS is evidently not a nuanced as a tool for regularization because it offers no control over the degree of regularization applied.
-Just as one would rarely resort to maximally regularized ridge regression except in extremely low sample sizes, one should be cautious about using PLS to identifying mutually correlated latent variables.
+PLS is evidently not as nuanced a tool for regularization because it offers no control over the degree of regularization applied.
+Just as one would rarely resort to maximally regularized ridge regression except in extremely low sample sizes, one should be cautious about using PLS to identify mutually correlated latent variables.
 
 \paragraph{Ridge Regularization}
 
-For this reason,~\cite{vinod1976canonical} proposed the `Canonical Ridge' which combined the PLS and CCA constraints in a single constrained optimization:
+For this reason,~\cite{vinod1976canonical} proposed the \textit{Canonical Ridge}, which combined the PLS and CCA constraints in a single constrained optimization:
 
 \begin{align}
      & u\sps{1}_{\text{opt}} = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} \hat{\Sigma_{12}} u\sps{2} \} \\
@@ -111,9 +111,10 @@ solutions and so do not clearly lend themselves to interpretation.
 
 \paragraph{Visual Comparison of Shrinkage Techniques}
 
-The distinct effects of Ridge and PCA on the eigenvalues of the effective covariance matrices can be clearly visualized.
-As shown in Figure~\ref{fig:shrinkage}, Ridge regularization uniformly reduces the magnitude of all principal components towards zero, with a proportionally greater effect on the smaller components.
-On the other hand, PCA-CCA, by focusing on leading principal components, only shrinks the smallest ones.
+The distinct effects of Ridge and PCA on the eigenvalues of the effective covariance matrices can be clearly visualized with a simple visualisation.
+We plot the eigenvalues of covariance matrices as perceived by models with different regularization techniques \footnote{e.g. the eigenvalues of (1 - c_i) \hat{\Sigma_{ii}} + c_i I for ridge and \hat{\Sigma_{ii}} truncated to include only the largest $k$ principal components for PCA}.
+As shown in Figure~\ref{fig:shrinkage}, Ridge regularization reduces the magnitude of the largest eigenvalues in the effective covariance matrix towards 1, and increases the magnitude of the smallest eigenvalues towards 1.
+On the other hand, PCA-CCA, leaves the largest eigenvalues unchanged, and ignores the smallest eigenvalues (we could have represented this by setting them to infinity).
 
 \begin{figure}
     \centering
@@ -121,11 +122,14 @@ On the other hand, PCA-CCA, by focusing on leading principal components, only sh
     \caption{Comparison of the effect of OLS, Ridge, and PCA-CCA regularization on the eigenvalues of the covariance matrix.}\label{fig:shrinkage}
 \end{figure}
 
+When these effective covariance matrices are inverted to form the CCA objective, these effects are reversed.
+Ridge regularization increases the magnitude of the weights associated with the largest eigenvalues and decreases the magnitude of the smallest eigenvalues.
+PCA-CCA maintains the weights associated with the largest eigenvalues and sets the weights associated with the smallest eigenvalues to zero.
 The visualization underscores the intrinsic nature of each regularization method:
 \begin{itemize}
     \item \textbf{Unregularized}: Presents the unaltered spectrum, making it susceptible to noise but preserving potential subtle patterns.
-    \item \textbf{Ridge}: Applies consistent shrinkage across all components, reducing noise but possibly attenuating genuine signal.
-    \item \textbf{PCA}: Focuses on dominant patterns by shrinking smaller components, potentially missing subtle connections but offering a cleaner representation of strong associations.
+    \item \textbf{Ridge}: Warps the spectrum, shrinking the largest eigenvalues and expanding the smallest eigenvalues, potentially missing subtle patterns but offering a cleaner representation of stronger associations.
+    \item \textbf{PCA}: Truncates the spectrum, ignoring the smallest eigenvalues and preserving the largest eigenvalues, potentially missing subtle patterns but offering a cleaner representation of stronger associations.
 \end{itemize}
 The choice between these shrinkage techniques should in general be based on the nature of the data.
 We now transition to another essential regularization technique: sparse regularization.

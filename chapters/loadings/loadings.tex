@@ -3,23 +3,22 @@
 \minitoc
 % chktex-file 44
 % chktex-file 3
-\epigraph{If you change the way you look at things, the things you look at change.}{\textit{Wayne Dyer}}
-\epigraph{He was constantly reminded of how startlingly different a place the world was when viewed from a point only three feet to the left.}{\textit{Douglas Adams}}
+\epigraph{All models are wrong, some are useful.}{\textit{Douglas Adams}}
 \section{Introduction}
 
-The application of Canonical Correlation Analysis (\acrshort{cca}) methods to practical problems often involves two key aspects: predicting latent variables associated with different views, and understanding the nature of the relationship between these views.
+The application of Canonical Correlation Analysis (\acrshort{cca}) methods to practical problems often involves two key aspects: estimating latent variables associated with different views, and understanding the nature of the relationship between these views.
 This dichotomy in goals bears resemblance to the distinction between machine learning and probabilistic or statistical approaches to the \acrshort{cca} problem.
-Machine learning approaches prioritize (out-of-sample) prediction of latent variables for downstream tasks, while statistical approaches seek to infer the data generation process from latent variables to the observed data.
+Machine learning approaches prioritize (out-of-sample) estimation of latent variables for downstream tasks, while statistical approaches seek to infer the data generation process from latent variables to the observed data.
 Notably, the probabilistic approach to \acrshort{cca} focusses on the forward model from latent variables to observed data, while the machine learning approach focusses on the inverse model from observed data to latent variables.
-As a result the probabilistic \acrshort{cca} is parameterized by the \textit{loadings} (parameters that transform latent variables to observed data), while the machine learning approach is parameterized by \textit{weights} (parameters that transform obsevred data to latent variables).
-We would ideally like to have the best possible prediction of the latent variables, while also being able to interpret the model and understand the relationship between the views.
-This implies that we would like to have models which are both good at prediction and have interpretable \gls{loadings} that we can use to understand the relationship between the views via the data generation process.
+As a result the probabilistic \acrshort{cca} is parameterized by the \textit{loadings} (parameters that transform latent variables to observed data), while the machine learning approach is parameterized by \textit{weights} (parameters that transform observed data to latent variables).
+We would ideally like to have the best possible estimation of the latent variables, while also being able to interpret the model and understand the relationship between the views.
+This implies that we would like to have models which are both good at estimation and have interpretable \gls{loadings} that we can use to understand the relationship between the views via the data generation process.
 The importance of the \gls{loadings} (associated with the `forward' model from latent variables to observed data) instead of weights (associated with the `backward' model from observed data to latent variables) for interpretability was highlighted by \cite{haufe2014interpretation} for linear models including \acrshort{svm} and Lasso, along with methods for transforming `backward' weights to `forward' loadings.
 We contribute to this line of work by demonstrating a similar relationship between the \gls{loadings} and weights of \acrshort{cca} models, and showing that the \gls{loadings} are more interpretable than the weights.
 
 In this chapter, we reexamine the relationship between machine learning and probabilistic \acrshort{cca} approaches using simulated data.
 We demonstrate that these approaches are more aligned than previously thought.
-While sparse regularization of \acrshort{cca} weights can lead to sparse estimates of generative model \gls{loadings} in some conditions, it doesn't always ensure sparse loadings, especially under anisotropic noise (i.e. noise correlated between features).
+While sparse regularization of \acrshort{cca} weights can lead to sparse estimates of a generative model \gls{loadings} in some conditions, it doesn't always ensure sparse loadings, especially under anisotropic noise (i.e. noise correlated between features).
 
 \section{Background:Generative Perspectives on \acrshort{cca}}
 
@@ -29,16 +28,9 @@ Probabilistic formulations provide a principled framework to understand this pro
 
 \subsection{Probabilistic \acrshort{cca} and \acrshort{gfa} (Explicit Latent Variable Models)}\label{subsubsec:a-probabilistic-latent-variable-perspective}
 
-
-% #TODO: Weights are combinations of subsets of features in each view that covary/correlate
-% #TODO: Loadings are correlations of each feature with the latent variable
-
-Consider the graphical model depicted in Figure~\ref{fig:mentalhealthselfsupervised}.
-It comprises two distinct views: a neuroimaging modality and a behavioral modality.
-Both views are assumed to originate from a common latent variable, representing the severity of a mental health condition.
-The neuroimaging modality is generated via a linear model with added noise, while the behavioral modality similarly arises from a linear model with noise.
-Consequently, the brain and behavioral modalities exhibit correlation since they both derive from the same latent variable.
-In a statistical sense, they are conditionally independent, given the latent variable.
+Let's reconsider the graphical model depicted in Figure~\ref{fig:mentalhealthselfsupervisedrepeat}.
+Now we further assume that the brain is generated via a linear model with added noise, while the behavioral modality similarly arises from a linear model with noise.
+Once again they are conditionally independent, given the latent variable.
 
 \begin{figure}
     \centering
@@ -51,7 +43,7 @@ In a statistical sense, they are conditionally independent, given the latent var
         % edges
         \edge{Z} {x1}
         \edge{Z} {x2}}
-    \caption[Latent Variable Model of Mental Health]{\textit{\textbf{Latent Variable Model of Mental Health:}} From this perspective the neuroimaging modality and behavioural data are both considered to have been generated with distributions conditioned on the severity of a mental health condition}\label{fig:mentalhealthselfsupervised}
+    \caption[Latent Variable Model of Mental Health]{\textit{\textbf{Latent Variable Model of Mental Health:}} From this perspective the neuroimaging modality and behavioural data are both considered to have been generated with distributions conditioned on the severity of a mental health condition}\label{fig:mentalhealthselfsupervisedrepeat}
 \end{figure}
 
 The distributions of the two views are given by:
@@ -109,7 +101,7 @@ Specifically, the covariance matrix of the $i^{\text{th}}$ view is given by:
     \Sigma_{ii} = W\sps{i}W\spstop{i} + \Psi_i
 \end{align}
 
-While these generative models are well-grounded in biological processes and provide a clear latent variable perspective, their application in practice is limited compared to classical \acrshort{cca}.
+While these generative models are provide a clear interpretation of the data generation process and possible biological processes, their application in practice is limited compared to classical \acrshort{cca}.
 This is primarily due to their computational intensity and the need for a careful selection of priors.
 Moreover, while these models can generate data with sparse loadings, generating data with sparse weights is challenging due to the dependence of \acrshort{cca} weights on the covariance matrices of the views.
 
