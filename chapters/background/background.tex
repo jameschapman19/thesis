@@ -1,7 +1,7 @@
 \graphicspath{{chapters/background/}}
 \chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}\label{chap:background}
 \minitoc
-\epigraph{Principal Component Analysis is a dimensionally invalid method that gives people a delusion that they are doing something useful with their data. If you change the units that one of the variables is measured in, it will change all the “principal components”! It’s for that reason that I made no mention of PCA in my book. I am not a slavish conformist, regurgitating whatever other people think should be taught. I think before I teach.}{Professor David MacKay}
+%\epigraph{Principal Component Analysis is a dimensionally invalid method that gives people a delusion that they are doing something useful with their data. If you change the units that one of the variables is measured in, it will change all the “principal components”! It’s for that reason that I made no mention of PCA in my book. I am not a slavish conformist, regurgitating whatever other people think should be taught. I think before I teach.}{Professor David MacKay}
 \section{Introduction to Machine Learning and Multiview Learning}
 
 In this chapter, we gather the necessary background knowledge needed to motivate and understand the contributions of this thesis.
@@ -9,7 +9,7 @@ In this chapter, we gather the necessary background knowledge needed to motivate
 Machine learning enables models to automatically learn patterns and make decisions from data.
 Machine learning comprises three primary paradigms: supervised, self-supervised (in the past called unsupervised), and reinforcement learning, each distinct in its approach to learning from data.
 This thesis focuses on \textit{multiview machine learning}, which aims to develop robust representations by uncovering associations between various data types within datasets.
-These data types, known as 'views,' may include distinct sources of information such as MRI images, genomic data, and clinical records in the context of patient data analysis.
+These data types, known as \gls{views} may include distinct sources of information such as MRI images, genomic data, and clinical records in the context of patient data analysis.
 
 \subsection{Machine Learning Vs Statistical Inference}
 The key distinctions between machine learning and statistical inference include:
@@ -43,12 +43,12 @@ Sometimes a separate holdout set, distinct from the test set, is used for final 
 
 \subsection{Types of Multiview Machine Learning}
 
-Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as `views'.
+Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as \gls{views}.
 
 \subsection{Conditional Independence, Causality, and Multiview Learning}
 
 Consider the graphical model depicted in Figure~\ref{fig:mentalhealthselfsupervised}.
-It comprises two distinct views: a brain modality and a behavioral modality.
+It comprises two distinct \gls{views}: a brain modality and a behavioral modality.
 The graphical model assumes that the brain and behaviour are conditionally independent given the severity of an (unobserved or `latent') mental health condition.
 
 \begin{figure}
@@ -75,17 +75,17 @@ When examining dependencies between events, such as those observed between brain
 \end{itemize}
 
 Importantly, if a common cause does exist, conditioning on it renders brain and behavior independent; this 'screens off' their dependence, revealing key insights for our models\cite{reichenbach1956direction}.
-However, it is essential to recognize that the presence of a common latent variable, inferred from these views, does not automatically imply causality in the observed data.
+However, it is essential to recognize that the presence of a common latent variable, inferred from these \gls{views}, does not automatically imply causality in the observed data.
 
 \subsubsection{Complementary and Redundant Information}
-The nature of the information provided by different views (such as neuroimaging and behavioral data) is critical in multiview machine learning.
+The nature of the information provided by different \gls{views} (such as neuroimaging and behavioral data) is critical in multiview machine learning.
 
-If these views contain redundant information about the latent variables, they can be used to denoise each other, enhancing the clarity and reliability of the data.
+If these \gls{views} contain redundant information about the latent variables, they can be used to denoise each other, enhancing the clarity and reliability of the data.
 This process exploits the overlap in information to correct or reduce noise and errors, a principle fundamental to many denoising techniques in machine learning.
 
-Conversely, if the views provide complementary information, they offer a richer and more complete understanding of the latent variables than either view alone.
+Conversely, if the \gls{views} provide complementary information, they offer a richer and more complete understanding of the latent variables than either view alone.
 In this case, the integration of diverse but related datasets leads to more robust and insightful models.
-Complementary views expand our perspective, revealing aspects of the latent variables that are not apparent when views are considered in isolation.
+Complementary \gls{views} expand our perspective, revealing aspects of the latent variables that are not apparent when \gls{views} are considered in isolation.
 
 This understanding is critical in mental health research, where accurate interpretations of complex relationships are key.
 
@@ -101,11 +101,10 @@ This approach is especially useful when each view contains complementary informa
 
 Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels.
 The cornerstone of SSL is the concept of a `pretext task,' a learning task created from the data that trains the model to capture useful features or representations.
-In the context of multiview machine learning, self-supervised learning often operates under the assumption that different views are generated from a common source.
-A natural pretext task, in this case, is to predict these source from the given views.
-This not only enables the model to learn associations between views but also allows it to derive robust and informative representations for subsequent tasks like classification or regression.
+In the context of multiview machine learning, self-supervised learning often operates under the assumption that different \gls{views} are generated from a common source.
+A natural pretext task, in this case, is to predict these source from the given \gls{views}.
+This not only enables the model to learn associations between \gls{views} but also allows it to derive robust and informative representations for subsequent tasks like classification or regression.
 This is particularly true if the source is unavailable at test time (and, in the case of latent variables, even at training time), but knowledge of the source is useful for downstream tasks.
-
 
 \section{Learning Representations: Definitions and Notation}
 
@@ -116,7 +115,7 @@ We want to learn meaningful $K$-dimensional representations
 \end{equation}
 For convenience, define $D = \sum_{i=1}^I D_i$ and $\theta = \left(\theta\sps{i}\right)_{i=1}^I$.
 Without loss of generality take $D_1 \geq D_2 \geq \cdots \geq D_I$.
-We will consistently use the subscripts $i,j \in [I]$ for views;
+We will consistently use the subscripts $i,j \in [I]$ for \gls{views};
 $d \in [D_i]$ for dimensions of input variables;
 and $l,k \in [K]$ for dimensions of representations - i.e. to subscript dimensions of $Z\sps{i}, f\sps{i}$.
 Later on we will introduce total number of samples $N$.
@@ -173,7 +172,7 @@ data, \acrshort{pca}'s main limitation arises: it only accounts for variance wit
 
 \subsection{Partial Least Squares}
 
-Partial Least Squares (PLS)\citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as `views". \acrshort{pls} can be seen as a generalization of \acrshort{pca}, where \acrshort{pca} becomes a special case when the two views are identical. The optimization problem for \acrshort{pls} can be formulated as:
+Partial Least Squares (PLS)\citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as \gls{views}. \acrshort{pls} can be seen as a generalization of \acrshort{pca}, where \acrshort{pca} becomes a special case when the two \gls{views} are identical. The optimization problem for \acrshort{pls} can be formulated as:
 
 \begin{align}
     u\sps{1}_{\text{opt}} & = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} \Sigma_{12} u\sps{2} \} \\
@@ -182,7 +181,7 @@ Partial Least Squares (PLS)\citep{wold1975path} aims to maximize the shared cova
     u\spstop{2}u\sps{2}   & = 1 \notag
 \end{align}
 
-where \( X\sps{1} \in \mathbb{R}^{n \times p_1} \) and \( X\sps{2} \in \mathbb{R}^{n \times p_2} \), meaning we have two views with the same number of samples but potentially different number of features.
+where \( X\sps{1} \in \mathbb{R}^{n \times p_1} \) and \( X\sps{2} \in \mathbb{R}^{n \times p_2} \), meaning we have two \gls{views} with the same number of samples but potentially different number of features.
 
 \subsubsection{Eigenvalue Problem}
 
@@ -224,7 +223,7 @@ Since the method aims to maximize covariance, extreme values in one dataset can 
 
 \subsection{Canonical Correlation Analysis}\label{sec:cca}
 
-In \acrshort{cca}, we aim to find the directions that maximize correlation, as opposed to maximizing covariance between two views of a dataset.
+In \acrshort{cca}, we aim to find the directions that maximize correlation, as opposed to maximizing covariance between two \gls{views} of a dataset.
 This nuance renders \acrshort{cca} invariant to feature scale. The optimization problem for \acrshort{cca} can be expressed as:
 
 \begin{align}
@@ -409,11 +408,29 @@ The eigenvectors of covariance matrices in these methods are only defined up to 
 Given these complexities, this thesis adopts a subspace perspective, focusing on either the top-1 or top-$k$ solutions, considering these as the most reliable and interpretable representations of the data's underlying structure.
 This approach aims to mitigate the limitations of deflation methods and the non-uniqueness of solutions, providing a more robust framework for multivariate data analysis.
 
-\section{Open challenges in \acrshort{cca}}
+\section{Multiview Learning in Neuroimaging}
+
+There have been a number of applications of \acrshort{cca} and related methods to multiview problems in neuroimaging.
+Using resting state fMRI data, modes of correlation have been found that relate to differences in sex and age relating to drug and alcohol abuse, depression and self harm \citep{mihalik2019brain}.
+A similar mode relating to `positive-negative' wellbeing has been found across studies \citep{smith2015positive}suggesting that mental wellbeing has a relationship (though not necessarily causally) with functional connectivity between networks in the brain.
+Later in this dissertation we will replicate and build on the findings from this paper by using regularised and non-linear \acrshort{cca} methods.
+
+CCA has also been used as a preprocessing step in order to identify groups of subjects in the latent variable space.
+In particular, \acrshort{cca} and clustering have been used to identify depression using fMRI data\citep{dinga2019evaluating} \citep{drysdale2017resting}.
+CCA has also been used in the manner we described to denoise two \gls{views} of a dataset such as separate measures of neuroimaging data \citep{zhuang2020technical} to remove artefacts.
+Deep \acrshort{cca} has recently been used to extract features for the diagnosis of schizophrenia\citep{qi2016deep}.
+
+\section{Open challenges in Multiview Learning and CCA}
+
+\subsection{Interpretability and Regularization}
+
+
 
 \subsection{Efficient Algorithms for High-Dimensional Data}
 
-The challenges of high-dimensional data often manifest when solving Generalized Eigenvalue Problems (GEPs) for Canonical Correlation Analysis (CCA). The computational burden of solving these problems becomes daunting as the number of features grows. To combat this issue, various efficient algorithms have been developed to reduce the complexity. In this section, we will explore some of these strategies.
+The challenges of high-dimensional data often manifest when solving Generalized Eigenvalue Problems (GEPs) for Canonical Correlation Analysis (CCA). The computational burden of solving these problems becomes daunting as the number of features grows.
+To combat this issue, various efficient algorithms have been developed to reduce the complexity.
+In this section, we will explore some of these strategies.
 
 \subsubsection{Challenges in Solving Generalized Eigenvalue Problems}
 
@@ -446,22 +463,9 @@ However, this approach has computational complexity \(O(n^3)\)and may suffer fro
 \subsubsection{\acrshort{pca}-CCA}
 
 One way to reduce the complexity of solving GEPs is to use the \acrshort{pca}-CCA method, which first applies \acrshort{pca} to the data
-and then solves the GEP in the reduced space. The primary advantage of using \acrshort{pca}-CCA is computational efficiency, especially for high-dimensional data.
+and then solves the GEP in the reduced space.
+An important advantage of using \acrshort{pca}-CCA is computational efficiency, especially for high-dimensional data.
 The overall complexity of \acrshort{pca}-CCA is\(O(p^2K + p^3)\), where \( K \)is the number of reduced components.
-This method is particularly beneficial when \( p \)is large.
-
-\subsubsection{\acrshort{kcca}}
-
-Kernel Canonical Correlation Analysis (\acrshort{kcca}) extends \acrshort{cca} to capture nonlinear relationships.
-The optimization problem for \acrshort{kcca} is:
-
-\begin{align}
-     & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha_1^{\top}K\spstop{1}K\sps{2}\alpha_2  \} \\
-     & \text{subject to:} \notag                                                                                            \\
-     & \alpha_1^{\top}K\spstop{1}K\sps{1}\alpha_1=1 \notag                                                                  \\
-     & \alpha_2^{\top}K\spstop{2}K\sps{2}\alpha_2=1 \notag
-\end{align}
-
 
 \acrshort{kcca} is computationally efficient for high-dimensional data (\(p>n\)) because its complexity scales with the number of samples\(n\), not the number of features\(p\).
 However, it requires access to all training data at test time, raising efficiency concerns.
@@ -472,21 +476,16 @@ However, it requires access to all training data at test time, raising efficienc
 
 Kernel \acrshort{cca} (\acrshort{kcca}) is a non-linear extension of \acrshort{cca} that uses the kernel trick to find non-linear relationships between variables.
 
+\begin{align}
+     & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha_1^{\top}K\spstop{1}K\sps{2}\alpha_2  \} \\
+     & \text{subject to:} \notag                                                                                            \\
+     & \alpha_1^{\top}K\spstop{1}K\sps{1}\alpha_1=1 \notag                                                                  \\
+     & \alpha_2^{\top}K\spstop{2}K\sps{2}\alpha_2=1 \notag
+\end{align}
+
 \subsubsection{Deep \acrshort{cca}}
 
 Deep \acrshort{cca} (\acrshort{dcca}) is a non-linear extension of \acrshort{cca} that uses deep neural networks to find non-linear relationships between variables.
-
-\section{Multiview Learning in Neuroimaging}
-
-There have been a number of applications of \acrshort{cca} and related methods to multiview problems in neuroimaging.
-Using resting state fMRI data, modes of correlation have been found that relate to differences in sex and age relating to drug and alcohol abuse, depression and self harm \citep{mihalik2019brain}.
-A similar mode relating to `positive-negative' wellbeing has been found across studies \citep{smith2015positive}suggesting that mental wellbeing has a relationship (though not necessarily causally) with functional connectivity between networks in the brain.
-Later in this dissertation we will replicate and build on the findings from this paper by using regularised and non-linear \acrshort{cca} methods.
-
-CCA has also been used as a preprocessing step in order to identify groups of subjects in the latent variable space.
-In particular, \acrshort{cca} and clustering have been used to identify depression using fMRI data\citep{dinga2019evaluating} \citep{drysdale2017resting}.
-CCA has also been used in the manner we described to denoise two views of a dataset such as separate measures of neuroimaging data \citep{zhuang2020technical} to remove artefacts.
-Deep \acrshort{cca} has recently been used to extract features for the diagnosis of schizophrenia\citep{qi2016deep}.
 
 
 

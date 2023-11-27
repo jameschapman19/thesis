@@ -3,7 +3,7 @@
 \minitoc
 % chktex-file 44
 % chktex-file 3
-\epigraph{All models are wrong, some are useful.}{\textit{Douglas Adams}}
+\epigraph{Correlation does not imply causation.}{\textit{Anon.}}
 \section{Introduction}
 
 The application of Canonical Correlation Analysis (\acrshort{cca}) methods to practical problems often involves two key aspects: estimating latent variables associated with different views, and understanding the nature of the relationship between these views.
@@ -19,7 +19,7 @@ We contribute to this line of work by demonstrating a similar relationship betwe
 In this chapter, we reexamine the relationship between machine learning and probabilistic \acrshort{cca} approaches using simulated data.
 We demonstrate that these approaches are more aligned than previously thought.
 While sparse regularization of \acrshort{cca} weights can lead to sparse estimates of a generative model \gls{loadings} in some conditions, it doesn't always ensure sparse loadings, especially under anisotropic noise (i.e. noise correlated between features).
-
+\newpage
 \section{Background:Generative Perspectives on \acrshort{cca}}
 
 Understanding the data generation process in \acrshort{cca} and \acrshort{pls} is pivotal for many reasons.
@@ -187,7 +187,7 @@ This distinction is crucial, especially in scenarios where the population covari
 \end{table}
 
 With this comprehensive understanding of data generation methods, we now transition to examining the role of regularization in handling high-dimensional and structured data, a critical aspect in the effective application of these models.
-
+\newpage
 \section{Methods}
 
 In this section, we make a mathematical argument for the use of \gls{loadings} over weights for the interpretation of \acrshort{cca} models.
@@ -410,7 +410,7 @@ Sparsity in View 2 & 0.5 \\
 \hline
 \end{tabular}\label{tab:simulated-data-parameters}
 \end{table}
-
+\newpage
 \section{Results}
 
 In this section, we present the results of our experiments.
@@ -707,7 +707,7 @@ From Figure \ref{fig:covariance-matrices-real}, we can see the block structure o
 \caption{Covariance matrices for the \acrshort{hcp} and \acrshort{adni} datasets.}
 \label{fig:covariance-matrices-real}
 \end{figure}
-
+\newpage
 \section{Discussion and Limitations}
 
 In this section, we discuss the implications of our findings as well as the limitations of our study.
@@ -759,7 +759,7 @@ Which imposes an L1 penalty on the \gls{loadings} via an L1 penalty on the \gls{
 We could in principle apply the soft-thresholding operator to the estimated loadings.
 However we would need to be careful to ensure that the sample covariance matrix is invertible in order to get back to the weights.
 This is of course not guaranteed in the small sample setting.
-
+\newpage
 \section{Conclusion}
 
 In this chapter, we have explored the performance of several \acrshort{cca} variants on simulated and real data.

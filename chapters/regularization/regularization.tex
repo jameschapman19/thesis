@@ -27,7 +27,7 @@ FRALS has stronger correlations with the Line Orientation test, which measures v
 This further demonstrates the importance of matching the model to the data generation process with the appropriate regularization.
 
 This chapter expands on my work previously showcased at the OHBM conference and draws connections to a tutorial paper I co-authored, where I contributed a number of simulations\citep{mihalik2022canonical}.
-
+\newpage
 \section{Background: Regularization for High-Dimensional and Structured Data}\label{sec:background}
 
 Like Linear Regression, Canonical Correlation Analysis does not have a unique solution when the number of features exceeds the number of observations in either view.
@@ -112,7 +112,7 @@ solutions and so do not clearly lend themselves to interpretation.
 \paragraph{Visual Comparison of Shrinkage Techniques}
 
 The distinct effects of Ridge and PCA on the eigenvalues of the effective covariance matrices can be clearly visualized with a simple visualisation.
-We plot the eigenvalues of covariance matrices as perceived by models with different regularization techniques \footnote{e.g. the eigenvalues of (1 - c_i) \hat{\Sigma_{ii}} + c_i I for ridge and \hat{\Sigma_{ii}} truncated to include only the largest $k$ principal components for PCA}.
+We plot the eigenvalues of covariance matrices as perceived by models with different regularization techniques \footnote{e.g. the eigenvalues of $(1 - c_i) \hat{\Sigma_{ii}} + c_i I$ for ridge and $\hat{\Sigma_{ii}}$ truncated to include only the largest $k$ principal components for PCA}.
 As shown in Figure~\ref{fig:shrinkage}, Ridge regularization reduces the magnitude of the largest eigenvalues in the effective covariance matrix towards 1, and increases the magnitude of the smallest eigenvalues towards 1.
 On the other hand, PCA-CCA, leaves the largest eigenvalues unchanged, and ignores the smallest eigenvalues (we could have represented this by setting them to infinity).
 
@@ -152,7 +152,7 @@ Now, with a foundational understanding of sparse regularization, we review a num
 
 \paragraph{Sparse PLS: Penalized Matrix Decomposition}
 Penalized Matrix Decomposition (PMD)~\citep{witten2009penalized} provides an approximate solution to the sparse CCA problem by altering the constraints of the classical CCA formulation.
-Specifically, PMD replaces the constraints \(u\spstop{i} \hat{\Sigma_{ii}} u\sps{i} = 1\) with \(u\spstop{i} u\sps{i}= 1\) and additionally imposes.
+Specifically, PMD replaces the constraints \(u\spstop{i} \hat{\Sigma_{ii}} u\sps{i} = 1\) with the PLS constraints \(u\spstop{i} u\sps{i}= 1\) and additionally imposes \(\|u\spstop{i}\|_1 \leq \tau\).
 The optimization problem for PMD is then given by:
 
 \begin{align}
@@ -162,13 +162,11 @@ The optimization problem for PMD is then given by:
     & \|u\sps{1}\|_1 \leq \tau_1 , \|u\sps{2}\|_1 \leq \tau_2 \notag
 \end{align}
 
-Despite its influence, this method effectively performs Sparse PLS (SPLS) rather than Sparse CCA as in the original work.
-For this reason, we refer to this method as SPLS in the rest of this thesis.
-There are a number of other sparse CCA methods that employ a similar assumption to SPLS\citep{parkhomenko2009sparse, waaijenborg2008quantifying}.
+This Sparse PLS (SPLS) approximation has been highly influential as a form of Sparse CCA because it is extremely efficient method (it can be solved by the power method - iteratively multiplying $u\sps{1}$ by $\hat{\Sigma_{12}}$ - and soft thresholding).
+There are a number of other sparse CCA methods that employ the PLS approximation\citep{parkhomenko2009sparse, waaijenborg2008quantifying, lindenbaum2021l0}.
+However, while the PLS approximation is efficient, it means these methods inherit a bias towards the largest principal components from PLS.
 
-While SPLS is an extremely efficient method (it can be solved by iteratively multiplying $u\sps{1}$ by $\hat{\Sigma_{12}}$ and soft thresholding), it is clear that it is not always a good approximation to the sparse CCA problem.
-
-A number of approaches to Sparse CCA instead adopt a penalized least squares approach.
+To address these problems and truly tackle the sparse CCA optimization, another class of approaches have adopted a penalized least squares approach.
 
 \paragraph{Sparse CCA: Least Squares Approaches}
 
@@ -200,9 +198,7 @@ For example, the elastic net penalty is not one-homogenous and therefore cannot 
     kanatsoulis2018structured} proposed solving equation~\ref{eq:mai} for more general classes of $P$ using the
 alternating direction method of multipliers (ADMM)~\citep{boyd2011distributed}.
 
-The method most similar to ours is the sparse CCA by \cite{fu2017scalable}.
-They use a classical CCA formulation, sometimes called the MAXVAR formulation, which views the problem as a constrained least squares with an auxiliary representation $T$\citep{carroll1968generalization,kettenring1971canonical}.
-
+\cite{fu2017scalable} propose a regularized CCA based on an alternative classical CCA formulation, sometimes called the MAXVAR formulation, which views the problem as a constrained least squares with an auxiliary representation $T$\citep{carroll1968generalization,kettenring1971canonical}.
 
 \begin{align}\label{eq:fu}
     \underset{U, T}{\mathrm{argmin}}\left\{\sum_i \|X\sps{i} U\sps{i} - T\|_F^2\right\}\\
@@ -218,11 +214,11 @@ Specifically, the challenge lies in fusing shrinkage and sparsity within the CCA
 The solution?
 A method that employs readily available regularized regression solvers, allowing for flexible and tunable regularization in CCA.
 This leads us to introduce the Flexible Regularized Alternating Least Squares (FRALS).
-
+\newpage
 \section{Methods}
 
 In this section, we outline the methodologies employed in our study for Canonical Correlation Analysis (CCA) and related techniques.
-We first introduce the Flexible Regularized Alternating Least Squares (FRALS)—a versatile solution to the regularized CCA problem that incorporates various regularization functions, notably the elastic net penalty\cite{zou2005regularization}.
+We first introduce the Flexible Regularized Alternating Least Squares (FRALS)—a versatile solution to the regularized CCA problem that incorporates various regularization functions, notably the elastic net penalty\citep{zou2005regularization}.
 We then outline our experimental design, which assesses the performance of FRALS and other CCA variants, aiming to understand the effects of regularization on model performance and clarity.
 Lastly, we specify the parameters and sources of the datasets used.
 
@@ -305,7 +301,7 @@ We chose the HCP and the ADNI datasets based on 2 recent landmark studies and th
 \paragraph{The Human Connectome Project (HCP)} offers publicly available resting-state functional MRI (rs-fMRI) and non-imaging measures like demographics, psychometrics, and other behavioral measures.
 Specifically, we sourced data from 1003 subjects out of the 1200-subject data release of the HCP.
 This dataset is constructed using brain connectivity features of the thoroughly processed rs-fMRI data.
-This processing results in 19,900 brain variables for every subject.
+This processing results in 19,900 brain connectivity variables for every subject.
 Additionally, there are 145 non-imaging measures employed.
 Notably, nine confounding variables were regressed out from both data modalities.
 Each variable was standardized for zero mean and unit variance.
@@ -328,7 +324,7 @@ Number of features in View 2 (\textit{q}) & 145 \\
 
 \paragraph{The ADNI} database is found at \url{adni.loni.usc.edu}.
 Launched in 2003, ADNI's main objective is to assess the combination of serial MRI, PET (Positron emission tomography), biological markers, and clinical and neuropsychological assessment in tracking the progression of Mild Cognitive Impairment (MCI) and early Alzheimer’s disease.
-For our experiments, we used a subset of 592 unique subjects from the ADNI. The MRI scans underwent a series of processing stages, yielding a grey matter probability map.
+For our experiments, we used a subset of 592 unique subjects from the ADNI. The MRI scans underwent a series of processing stages, yielding a grey matter probability map (details are deffered to Appendix \ref{app:regularisation}).
 The Mini-Mental State Examination (MMSE) scores were employed to investigate the association with the grey matter maps.
 Composed of a series of brief tasks, the MMSE evaluates various cognitive domains including memory, attention, language, and visuospatial skills.
 The MMSE is a widely used test for assessing cognitive impairment.
@@ -349,6 +345,8 @@ Number of features in View 2 (\textit{q}) & 31 \\
 \end{tabular}\label{tab:adni-parameters}
 \end{table}
 
+\newpage
+\newpage
 \section{Results}
 
 \subsection{Human Connectome Project (HCP) Data}
@@ -375,7 +373,7 @@ Figure\ref{fig:behaviour} plots the top 8 positive and negative non-imaging \gls
 This is to illustrate some of the effects we have observed in the previous section.
 PCA finds a mode of variation in the behavioural data that is positively correlated with psychiatric and life function tests and negatively correlated with a number of emotion and personality tests.
 The RCCA and ElasticNet models find a mode of variation in the behavioural data that is negatively correlated with the Line Orientation test and to a lesser extent smoking and positively correlated with a number of other cognitive tests.
-The PLS model finds a mode of variation in the behavioural data that is somewhat similar to the `good-bad' mode in\cite{smith2015positive} with a positive correlation with agreeableness, vocabulary tests, and feelings about ones' life and a strong negative correlation with smoking, rule-breaking, and antisocial personality traits.
+The PLS model finds a mode of variation in the behavioural data that is somewhat similar to the `positive-negative' mode in \cite{smith2015positive} with a positive correlation with agreeableness, vocabulary tests, and feelings about ones' life and a strong negative correlation with smoking, rule-breaking, and antisocial personality traits.
 The SPLS mode is similar but selects out the rule-breaking and antisocial personality traits in favour of the vocabulary tests and smoking.
 
 \begin{figure}
@@ -397,8 +395,8 @@ The second method is to use surface maps to visualize the brain connectivity wei
 This approach has been used by both \cite{ferreira2022hierarchical} and \cite{smith2015positive}.
 
 \paragraph{Chord Diagrams}
-We grouped the nodes of the connectivity matrix of our data into 7 parcels according to the Yeo 7 network parcellation\cite{yeo2011organization}.
-These are then arranged around the circumference of the chord diagram using the Nichord package\cite{bogdan2023connsearch}.
+We grouped the nodes of the connectivity matrix of our data into 7 parcels according to the Yeo 7 network parcellation \cite{yeo2011organization}.
+These are then arranged around the circumference of the chord diagram using the Nichord package\citep{bogdan2023connsearch}.
 The plots then show the 8 strongest positive and negative \gls{weights} for each model as `chords'.
 The chord diagrams in Figure~\ref{fig:chord_weights} show the top 8 positive and negative brain \gls{weights} for each model.
 
@@ -414,13 +412,13 @@ The chord diagrams in Figure~\ref{fig:chord_weights} show the top 8 positive and
 \caption{Chord diagrams of the top 8 positive and negative brain \gls{weights} for each model.}\label{fig:chord_weights}
 \end{figure}
 
-\paragraph{Surface Map Parcellations}
-The brain surface plots in Figure~\ref{fig:brain} represent maps of brain connection strength increases/decreases, which
-were obtained by weighting each node’s parcel map with the GFA edge-strengths summed across the edges
-connected to the node.
-In Figure~\ref{fig:brain}, we show increases on the left and decreases on the right.
-
-\textcolor{red} Need to find something biologically useful to say about these.
+%\paragraph{Surface Map Parcellations}
+%The brain surface plots in Figure~\ref{fig:brain} represent maps of brain connection strength increases/decreases, which
+%were obtained by weighting each node’s parcel map with the GFA edge-strengths summed across the edges
+%connected to the node.
+%In Figure~\ref{fig:brain}, we show increases on the left and decreases on the right.
+%
+%\textcolor{red} Need to find something biologically useful to say about these.
 %
 %\begin{figure}
 %\centering
@@ -530,6 +528,8 @@ SPLS & 74995 & 10 \\
 \end{tabular}\label{tab:brain-behaviour-weights-adni}
 \end{table}
 
+\newpage
+\newpage
 \section{Discussion and Limitations}
 
 In this section, we discuss the implications of our findings as well as the limitations of our study and the proposed FRALS method, some of which we address in later chapters of this thesis.
@@ -558,9 +558,17 @@ For each iteration of the algorithm, we need to compute the least squares soluti
 This is a computationally expensive operation.
 It is the primary factor contributing to the slow speed of FRALS (depending on the experiment around 10 times slower than Ridge CCA).
 In the next chapter, we address this bottleneck by introducing a novel algorithm based on gradient descent.
-
+\newpage
 \section{Conclusion}\label{sec:conclusion}
 
 We have also shown that FRALS can be a useful tool for brain-behaviour studies, but that it is computationally expensive.
 
 In the next chapter,
+
+\appendix
+
+\section{Data Preprocessing}\label{app:regularisation}
+
+\subsection{HCP Data}
+
+\subsection{ADNI Data}
