@@ -298,7 +298,9 @@ The datasets employed in our experiments comprise the HCP and ADNI data.
 These datasets provide insights into brain functionality and behavior from different perspectives.
 We chose the HCP and the ADNI datasets based on 2 recent landmark studies and the tutorial paper this chapter is loosely related to \cite{mihalik2022canonical}.
 
-\paragraph{The Human Connectome Project (HCP)} offers publicly available resting-state functional MRI (rs-fMRI) and non-imaging measures like demographics, psychometrics, and other behavioral measures.
+\subsubsection{The Human Connectome Project (HCP)}
+
+The Human Connectome Project (HCP) offers publicly available resting-state functional MRI (rs-fMRI) and non-imaging measures like demographics, psychometrics, and other behavioral measures.
 Specifically, we sourced data from 1003 subjects out of the 1200-subject data release of the HCP.
 This dataset is constructed using brain connectivity features of the thoroughly processed rs-fMRI data.
 This processing results in 19,900 brain connectivity variables for every subject.
@@ -322,9 +324,11 @@ Number of features in View 2 (\textit{q}) & 145 \\
 \end{tabular}\label{tab:hcp-parameters}
 \end{table}
 
-\paragraph{The ADNI} database is found at \url{adni.loni.usc.edu}.
+\subsubsection{The Alzheimer's Disease Neuroimaging Initiative (ADNI)}
+
+The ADNI database is found at \url{adni.loni.usc.edu}.
 Launched in 2003, ADNI's main objective is to assess the combination of serial MRI, PET (Positron emission tomography), biological markers, and clinical and neuropsychological assessment in tracking the progression of Mild Cognitive Impairment (MCI) and early Alzheimer’s disease.
-For our experiments, we used a subset of 592 unique subjects from the ADNI. The MRI scans underwent a series of processing stages, yielding a grey matter probability map (details are deffered to Appendix \ref{app:regularisation}).
+For our experiments, we used a subset of 592 unique subjects from the ADNI. The MRI scans underwent a series of processing stages, yielding a grey matter probability map
 The Mini-Mental State Examination (MMSE) scores were employed to investigate the association with the grey matter maps.
 Composed of a series of brief tasks, the MMSE evaluates various cognitive domains including memory, attention, language, and visuospatial skills.
 The MMSE is a widely used test for assessing cognitive impairment.
@@ -564,11 +568,3 @@ In the next chapter, we address this bottleneck by introducing a novel algorithm
 We have also shown that FRALS can be a useful tool for brain-behaviour studies, but that it is computationally expensive.
 
 In the next chapter,
-
-\appendix
-
-\section{Data Preprocessing}\label{app:regularisation}
-
-\subsection{HCP Data}
-
-\subsection{ADNI Data}

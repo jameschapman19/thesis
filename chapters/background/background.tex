@@ -369,13 +369,13 @@ This dual perspective—considering both population and sample covariance matric
 
 Understanding multiple correlated or covarying effects is fundamental in multivariate data analysis methods such as Principal Component Analysis (\acrshort{pca}), Partial Least Squares (PLS), and Canonical Correlation Analysis (CCA). Although these methods generally aim to find a single maximal correlation or covariance (referred to as the top-1 problem), they are capable of identifying more than one orthogonal effect, a scenario often termed the top-$k$ problem, where $k$ denotes the number of orthogonal effects desired.
 
-\subsection{Challenges in Identifying Multiple Components}
+\subsubsection{Challenges in Identifying Multiple Components}
 
 Identifying multiple components using iterative methods introduces specific challenges.
 Firstly, to discover subsequent effects that are orthogonal to the maximally correlated or covarying one, a deflation step is commonly applied.
 This is essential because the second component is conditional on the first in deflation models, meaning that interpreting the second component as an independent form of variation becomes untenable if the wrong first component is identified.
 
-\subsection{Deflation Methods for Orthogonality}
+\subsubsection{Deflation Methods for Orthogonality}
 
 Two prevalent deflation methods, Hotelling's Deflation and Projection Deflation, serve to ensure the orthogonality of the components.
 
@@ -398,7 +398,7 @@ themselves are orthogonal. These methods work by systematically reducing the dat
      & P^\perp(\mathbf{X})= \mathbf{X} - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top}X} = (I - \frac{\mathbf{Xw}}{\|\mathbf{Xw}\|}\mathbf{w^{\top}X^{\top})X}
 \end{align}
 
-\subsection{Non-Uniqueness of Components}
+\subsubsection{Non-Uniqueness of Components}
 
 Another critical consideration is the non-uniqueness of the identified components.
 The eigenvectors of covariance matrices in these methods are only defined up to a sign, or up to an orthogonal transformation when eigenvalues are repeated. This lack of uniqueness can lead to inconsistencies, especially when comparing solutions across different samples or data folds.
@@ -407,6 +407,12 @@ The eigenvectors of covariance matrices in these methods are only defined up to 
 
 Given these complexities, this thesis adopts a subspace perspective, focusing on either the top-1 or top-$k$ solutions, considering these as the most reliable and interpretable representations of the data's underlying structure.
 This approach aims to mitigate the limitations of deflation methods and the non-uniqueness of solutions, providing a more robust framework for multivariate data analysis.
+
+\subsection{Measuring the Performance of Multiview Learning Methods}
+
+\subsubsection{Correlation}
+
+
 
 \section{Multiview Learning in Neuroimaging}
 

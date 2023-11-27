@@ -96,26 +96,25 @@
 
 \onehalfspacing
 
+% -------------------  DECLARATION ---------------------
+\newpage
+\include{chapters/declaration}
+
 % ----------------------  ABSTRACT -----------------------
 \newpage
 \include{chapters/abstract}
 
 % ----------------------  IMPACT STATEMENT -----------------------
-% \newpage
-% \chapter*{Impact Statement} % the Asterix (*) indicates that this section will be added to the table of contents but no number will be present beside it.
-% % \addcontentsline{toc}{chapter}{Impact}
+\newpage
+\include{chapters/impact}
 
-% This thesis contributes to the advancement of machine learning and biomedical data analysis by developing novel methods for multiview self-supervised learning that are scalable, flexible, and interpretable. The proposed methods can help researchers and practitioners to analyze complex and high-dimensional biomedical data more efficiently and effectively, and to discover new insights and opportunities for improving health outcomes. The proposed methods can also be applied to other domains where multiview data are available or desirable, such as natural language processing, computer vision, multimedia analysis, and social network analysis. This thesis also provides a valuable reference for future research on multiview self-supervised learning and related topics.
+% ----------------------  PUBLICATIONS -----------------------
+\newpage
+\include{chapters/publications}
 
 % -----------------  ACKNOWLEDGEMENTS  -------------------
 % \newpage
 % \include{chapters/acknowledgements}
-
-
-% -------------------  LIST OF Publication ---------------------
-% \newpage
-% \include{chapters/publications}
-% \addcontentsline{toc}{chapter}{Publications} % Add List of figures into 
 
 % -------------------  LIST OF FIGURES --------------------
 \newpage
@@ -161,6 +160,9 @@
 \include{chapters/software/software}
 %
 %\include{chapters/7_discussion/discussion}
+
+\appendix
+\include{chapters/regularization/appendix}
 
 % -------------------  BIBLIOGRAPHY ---------------------
 % \newpage
