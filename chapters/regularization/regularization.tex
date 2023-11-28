@@ -3,6 +3,8 @@
 \minitoc
 % chktex-file 44 
 % chktex-file 3
+
+\epigraph{All models are wrong, some are useful.}{\textit{G. Box}}
 \section{Introduction}\label{sec:introduction}
 
 This chapter explores the role of regularization in improving the performance and interpretation of Canonical
@@ -27,7 +29,7 @@ FRALS has stronger correlations with the Line Orientation test, which measures v
 This further demonstrates the importance of matching the model to the data generation process with the appropriate regularization.
 
 This chapter expands on my work previously showcased at the OHBM conference and draws connections to a tutorial paper I co-authored, where I contributed a number of simulations\citep{mihalik2022canonical}.
-\newpage
+
 \section{Background: Regularization for High-Dimensional and Structured Data}\label{sec:background}
 
 Like Linear Regression, Canonical Correlation Analysis does not have a unique solution when the number of features exceeds the number of observations in either view.
@@ -45,7 +47,7 @@ Shrinkage regularization works on the premise that, generally, larger principal 
 
 \paragraph{PLS as Shrinkage Regularization}
 
-PLS can be interpreted as a form of shrinkage regularization applied to CCA. We can explain this by considering an analogy between CCA and Linear Regression (indeed Linear Regression is a special case of CCA where \(X^{(2)}\) has one feature).
+PLS can be interpreted as a form of shrinkage regularization applied to CCA. We can explain this by considering an analogy between CCA and \textit{Linear Regression} (indeed Linear Regression is a special case of CCA where \(X^{(2)}\) has one feature).
 
 In Linear Regression, the ridge regression solution is given by:
 \begin{align}
@@ -86,12 +88,13 @@ For this reason, we can consider PLS as a shrinkage method for CCA equivalent to
 This has two important consequences.
 Fortunately, it is well-defined even when the number of features exceeds the number of observations so we can always apply PLS to high-dimensional data.
 Unfortunately, it biases the solution towards the largest principal components.
-PLS is evidently not as nuanced a tool for regularization because it offers no control over the degree of regularization applied.
-Just as one would rarely resort to maximally regularized ridge regression except in extremely low sample sizes, one should be cautious about using PLS to identify mutually correlated latent variables.
+Although one would rarely resort to maximally regularized ridge regression except in extremely low sample sizes or high-dimensional data, it has become almost standard practice to use PLS in neuroimaging and genetics.
+One of the core contributions of this chapter will be to demonstrate that PLS is usually a poor choice for regularization even in these very high-dimensional settings and that more nuanced regularization methods can offer significant improvements in performance and interpretability.
+PLS is evidently not a nuanced tool for regularization because it offers no control over the degree of regularization applied.
 
 \paragraph{Ridge Regularization}
 
-For this reason,~\cite{vinod1976canonical} proposed the \textit{Canonical Ridge}, which combined the PLS and CCA constraints in a single constrained optimization:
+For this reason,~\citet{vinod1976canonical} proposed the \textit{Canonical Ridge}, which combined the PLS and CCA constraints in a single constrained optimization:
 
 \begin{align}
      & u\sps{1}_{\text{opt}} = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} \hat{\Sigma_{12}} u\sps{2} \} \\
@@ -109,7 +112,7 @@ However, it also risks overlooking subtle but crucial relationships between vari
 While PCA-CCA and rCCA are effective for finding signal in the presence of noise, they do not produce sparse
 solutions and so do not clearly lend themselves to interpretation.
 
-\paragraph{Visual Comparison of Shrinkage Techniques}
+\paragraph{A Visual Comparison of Shrinkage Techniques}
 
 The distinct effects of Ridge and PCA on the eigenvalues of the effective covariance matrices can be clearly visualized with a simple visualisation.
 We plot the eigenvalues of covariance matrices as perceived by models with different regularization techniques \footnote{e.g. the eigenvalues of $(1 - c_i) \hat{\Sigma_{ii}} + c_i I$ for ridge and $\hat{\Sigma_{ii}}$ truncated to include only the largest $k$ principal components for PCA}.
@@ -162,7 +165,7 @@ The optimization problem for PMD is then given by:
     & \|u\sps{1}\|_1 \leq \tau_1 , \|u\sps{2}\|_1 \leq \tau_2 \notag
 \end{align}
 
-This Sparse PLS (SPLS) approximation has been highly influential as a form of Sparse CCA because it is extremely efficient method (it can be solved by the power method - iteratively multiplying $u\sps{1}$ by $\hat{\Sigma_{12}}$ - and soft thresholding).
+This Sparse PLS (SPLS) approximation has been highly influential as a form of Sparse CCA because it is extremely efficient method \footnote{it can be solved by a variant of the power method; iteratively multiplying $u\sps{1}$ by $\hat{\Sigma_{12}}$ and soft-thresholding}.
 There are a number of other sparse CCA methods that employ the PLS approximation\citep{parkhomenko2009sparse, waaijenborg2008quantifying, lindenbaum2021l0}.
 However, while the PLS approximation is efficient, it means these methods inherit a bias towards the largest principal components from PLS.
 
@@ -194,10 +197,11 @@ The penalty term can be any function that penalizes the norm of the vector \(u\)
 This means a sparse CCA based
 on alternating lasso regressions can be solved relatively efficiently using existing solvers.
 However, the one homogenous penalty in practice limits the flexibility of the method.
-For example, the elastic net penalty is not one-homogenous and therefore cannot be used with this method.\citep{
-    kanatsoulis2018structured} proposed solving equation~\ref{eq:mai} for more general classes of $P$ using the
-alternating direction method of multipliers (ADMM)~\citep{boyd2011distributed}.
+For example, the elastic net penalty is not one-homogenous and therefore cannot be used with this method.
+\citet{6556581} and \cite{Mullins2021} added ridge penalties to the subproblems to improve the conditioning of the problem in a way that could be considered a form of elastic net regularization but the subproblems no longer correctly optimize the global objective\footnote{when rescaling the penalized solutions back to unit variance}.
 
+\paragraph{Sparse CCA: Proximal Gradient Descent and ADMM}
+\citet{kanatsoulis2018structured} proposed solving equation~\ref{eq:mai} for more general classes of $P$ using the alternating direction method of multipliers (ADMM)~\citep{boyd2011distributed}.
 \cite{fu2017scalable} propose a regularized CCA based on an alternative classical CCA formulation, sometimes called the MAXVAR formulation, which views the problem as a constrained least squares with an auxiliary representation $T$\citep{carroll1968generalization,kettenring1971canonical}.
 
 \begin{align}\label{eq:fu}
@@ -209,6 +213,9 @@ In this formulation, \(U\sps{i}\) represents the \gls{weights} for the $i^{\text
 The premise is that when \(T\) closely mirrors \(X\sps{i} U\sps{i}\) across all \(i\), the scores correlate.
 Notably, this method is adaptable to multiple views.
 The authors employed proximal gradient descent for regularization, specifically suited for penalties like the lasso.
+While these methods are flexible, they don't have the plug-and-play nature of the penalized least squares methods.
+Not just a matter of convenience, this means that these methods are not compatible with existing solvers for regularized least squares problems like for example total variation regularisation solvers in nilearn, which are often highly optimized for specific problems and modalities.
+
 Having discussed the benefits of both shrinkage (e.g., PCA-CCA, Ridge CCA, PLS) and sparsity (SPLS, Sparse CCA) in handling high-dimensional, noisy data, a natural progression is to integrate these advantages.
 Specifically, the challenge lies in fusing shrinkage and sparsity within the CCA framework, enhancing the interpretability and performance of Brain-Behaviour association models.
 The solution?
@@ -222,36 +229,43 @@ We first introduce the Flexible Regularized Alternating Least Squares (FRALS)—
 We then outline our experimental design, which assesses the performance of FRALS and other CCA variants, aiming to understand the effects of regularization on model performance and clarity.
 Lastly, we specify the parameters and sources of the datasets used.
 
-\subsection{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least
--squares-(frals)}
+\subsection{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least-squares-(frals)}
 
-Consider the formulation in equation~\ref{eq:fu} for a single latent variable \(t\) with regularization $\lambda_i P_i$ on the \gls{weights} \(u\sps{i}\).
+The primary goal of our Flexible Regularized Alternating Least Squares (FRALS) framework is to provide a versatile and user-friendly interface for Canonical Correlation Analysis (CCA). This is achieved by designing the framework to be compatible with any scikit-learn compatible regularized least squares solver. This compatibility is pivotal as it allows researchers and practitioners to leverage the extensive range of solvers available in scikit-learn, a popular machine learning library in Python.
+
+This approach marks a significant departure from traditional methodologies in CCA, which often focused on developing or utilizing specific solvers tailored for particular types of data or computational constraints. By contrast, our FRALS framework democratizes access to advanced CCA techniques, allowing users to select solvers that best fit their specific data characteristics, computational needs, or familiarity. Such flexibility is particularly advantageous in interdisciplinary fields like neuroimaging, where diverse datasets and varying levels of technical expertise are common.
+
+For example, users dealing with high-dimensional, sparse neuroimaging data could opt for solvers optimized for such datasets, while those needing parallel computation for large data sets might choose solvers with GPU acceleration capabilities.
+In principle, FRALS can even be used with Neural Network-based solvers, which are becoming increasingly popular in machine learning\footnote{Though for reasons that will later become clear, we do not reccommend this!}.
+This adaptability enhances FRALS' accessibility and future-proofs the framework against evolving computational technologies and data analysis needs.
+
+In the technical implementation of FRALS, we consider the formulation for a single latent variable \(t\) with regularization \(\lambda_i P_i\) on the weights \(u^{(i)}\):
 
 \begin{align}
-    \underset{u}{\mathrm{argmin}}\left\{\sum_i \|X\sps{i} u\sps{i} - t\|_2^2 + \textcolor{red}{\lambda_i P_i(u\sps{i})} \right\}\\
+    \underset{u}{\mathrm{argmin}}\left\{\sum_i \|X^{(i)} u^{(i)} - t\|_2^2 + \textcolor{red}{\lambda_i P_i(u^{(i)})} \right\}\\
     \text{subject to: }t^\top t = 1\\
 \end{align}
 
-We can break this down into three subproblems.
-The first subproblem for the auxiliary variable \(t\):
+This problem can be decomposed into three subproblems. The first subproblem for the auxiliary variable \(t\):
 
 \begin{align}
-    \underset{t}{\mathrm{argmin}}\left\{\sum_i \|X\sps{i} u\sps{i} - t\|_2^2\right\}\\
+    \underset{t}{\mathrm{argmin}}\left\{\sum_i \|X^{(i)} u^{(i)} - t\|_2^2\right\}\\
     \text{subject to: }t^\top t = 1\\
 \end{align}
 
-is a standard least squares problem, and can be solved in closed form by taking the average of $X\sps{i} u\sps{i}$ and normalizing.
-Recall from section~\ref{subsec:generative-perspectives-on-cca} that this makes $t$ an estimate of the latent variables.
+is a standard least squares problem and can be solved in closed form by averaging \(X^{(i)} u^{(i)}\) and normalizing. This makes \(t\) an estimate of the latent variables, as recalled from section~\ref{subsec:generative-perspectives-on-cca}.
 
-The second two subproblems are for the \gls{weights} \(u\sps{i}\):
+The subproblems for the weights \(u^{(i)}\):
 
 \begin{align}
-    \underset{u\sps{i}}{\mathrm{argmin}}\left\{\sum_i \|X\sps{i} u\sps{i} - t\|_2^2 + \textcolor{red}{\lambda_i P_i(u\sps{i})} \right\}\\
+    \underset{u^{(i)}}{\mathrm{argmin}}\left\{\|X^{(i)} u^{(i)} - t\|_2^2 + \textcolor{red}{\lambda_i P_i(u^{(i)})} \right\}\\
 \end{align}
 
-Since the first subproblem is a regularized least squares problem, we can solve it using \textit{any regularized least squares solver}.
-This gives our framework the flexibility for users to choose any regularization function with an appropriate solver including those optimised for neuroimaging data\citep{Nilearn_contributors_Nilearn} or specialised hardware including GPU acceleration\footnote{In principle, one could even plug in a neural network by replacing $X\sps{i} u\sps{i}$ with a neural network $f(X\sps{i})$.}.
-In this work, we make use of the well-tested Elastic Net solver in the \texttt{scikit-learn} package~\citep{pedregosa2011scikit} where $P_i=\alpha_i \times \text{l1\_ratio} \|u\sps{i}\|_1 + \alpha_i \times (1-\text{l1\_ratio}) \|u\sps{i}\|^2_2$ so that we can tune the shrinkage and sparsity of the \gls{weights} independently.
+are regularized least squares problems that can be solved using any suitable regularized least squares solver.
+
+In this work, we employ the well-tested Elastic Net solver from the \texttt{scikit-learn} package~\citep{pedregosa2011scikit}, where \(P_i = \alpha_i \times \text{l1\_ratio} \|u^{(i)}\|_1 + \alpha_i \times (1-\text{l1\_ratio}) \|u^{(i)}\|_2^2\), allowing for independent tuning of shrinkage and sparsity of the weights.
+
+In summary, the FRALS framework represents a paradigm shift in CCA methodologies, offering a more inclusive and adaptable approach to multivariate data analysis, aligning with the dynamic nature of research in fields like neuroimaging and beyond.
 
 \subsection{The predictive framework for CCA}\label{subsec:the-predictive-framework-for-cca}
 
