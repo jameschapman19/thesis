@@ -12,8 +12,20 @@
 
 % LaTeX's main math package
 \usepackage{amsthm}
+% theorem environment definitions
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{example}{Example}[section]
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+% then restatable ones
+\usepackage{thmtools}
+\usepackage{thm-restate}
+\declaretheorem[name=Proposition,numberwithin=section]{proprep}
 \newtheorem{thm}{Theorem}
-\newtheorem{lemma}{Lemma}
 \usepackage[ruled,vlined]{algorithm2e}
 \usepackage{esvect}
 \usepackage{tikz}
@@ -79,7 +91,7 @@
 
 % Bibliography package
 % \usepackage[backend=biber,style=nature]{biblatex}
-\usepackage[natbib,style=authoryear]{biblatex}
+\usepackage[natbib,style=authoryear,natbib=true]{biblatex}
 \addbibresource{References.bib} % Add the .bib file that contains the references
 
 % This package provides an easy way to input latin sample text (for the template only)

@@ -507,32 +507,90 @@
 \DeclareMathOperator{\Tr}{Tr}
 \let\ab\allowbreak
 
-\newcommand{\tr}{\operatorname{trace}}
 \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
 \newcommand{\ppart}[1]{\textcolor{violet}{\max\Bigl(}{#1}\textcolor{violet}{,0\Bigr)}}
-\usepackage{bbm} 
-\newcommand{\ind}[1]{\mathbbm{1}_{\{{#1}\}}}  
+% bbm for indicator
+\usepackage{bbm}
+\newcommand{\ind}[1]{\mathbbm{1}_{\{{#1}\}}}
+\newcommand{\ones}[1]{\mathrm{1}_{{#1}}}
+\newcommand{\order}[1]{\mathcal{O}\left({#1}\right)}
+% mathtools for defeq and eqdef
 \usepackage{mathtools}
 \newcommand{\defeq}{\vcentcolon=}
-\newcommand{\eqdef}{=\vcentcolon}  
-\newcommand{\PD}[1]{\mathbf{S}^{#1}_{++}}
-\newcommand{\PSD}[1]{\mathbf{S}^{#1}_{+}}
+\newcommand{\eqdef}{=\vcentcolon}
+% xfrac
 \usepackage{xfrac}
 \newcommand{\mhalf}{{\shortminus \sfrac{1}{2}}}
-\newcommand{\half}{{\sfrac{1}{2}}}  
-\newcommand{\CCA}{\operatorname{CCA}}
-\newcommand{\Corr}{\operatorname{Corr}}
+\newcommand{\half}{{\sfrac{1}{2}}}
 \DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\newcommand{\tr}{\operatorname{trace}}
+\newcommand{\diag}{\operatorname{diag}}
+%\newcommand{\cspan}{{\operatorname{span}}}
+\newcommand{\cspan}[1]{{\operatorname{span}\{{#1}\}}}
+\newcommand{\PD}[1]{\mathbf{S}^{#1}_{++}}
+\newcommand{\PSD}[1]{\mathbf{S}^{#1}_{+}}
+
+\newcommand{\CCA}{\operatorname{CCA}}
+\newcommand{\MCCA}{\operatorname{MCCA}}
+\newcommand{\Corr}{\operatorname{Corr}}
+\newcommand{\empCov}{\widehat{\Cov}}
+\newcommand{\empVar}{\widehat{\Var}}
+\newcommand{\empCorr}{\widehat{\Corr}}
+
 \newcommand{\Sigxx}{\Sigma_{xx}}
 \newcommand{\Sigxy}{\Sigma_{xy}}
 \newcommand{\Sigyx}{\Sigma_{yx}}
 \newcommand{\Sigyy}{\Sigma_{yy}}
+
 \newcommand{\tilU}{\Tilde{U}}
 \newcommand{\tilV}{\Tilde{V}}
 \newcommand{\tilW}{\Tilde{W}}
-% Extra commands that Lennie had defined earlier required for appendix
+
+\newcommand{\X}{\mathbf{X}}
+\newcommand{\Y}{\mathbf{Y}}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Xb}{\mathbf{X}^{(b)}}
+\newcommand{\Yb}{\mathbf{Y}^{(b)}}
+\newcommand{\sps}[1]{^{(#1)}} % convenient super scripts
+\newcommand{\spsT}[1]{^{(#1)\,T}}
+% \newcommand{\Xs}[1]{X^{({#1})}}
+% \newcommand{\Zs}[1]{Z^{({#1})}}
+\newcommand{\ninv}{\tfrac{1}{N}}
+
+% Loss functions specific for this paper
 \newcommand{\LBT}{\mathcal{L}_\text{BT}}
 \newcommand{\LVR}{\mathcal{L}_\text{VR}}
+\newcommand{\barLVR}{\bar{\mathcal{L}}_\text{VR}}
+\newcommand{\barLBT}{\bar{\mathcal{L}}_\text{BT}}
+\newcommand{\LEY}{\mathcal{L}_\text{EY}}
+\newcommand{\LEYGEP}{\mathcal{L}_\text{EY-GEP}}
+\newcommand{\empLEY}{\hat{\mathcal{L}}_\text{EY}}
+\newcommand{\empLBT}{\hat{\mathcal{L}}_\text{BT}}
+\newcommand{\empLVR}{\hat{\mathcal{L}}_\text{VR}}
 
-\newcommand{\sps}[1]{^{(#1)}} % convenient super scripts
-\newcommand{\spstop}[1]{^{(#1)^{\top}}} % convenient super scripts
+
+% conditional expectations from
+% https://tex.stackexchange.com/questions/187162/vertical-bar-for-absolute-value-and-conditional-expectation/187363#187363
+% thank you to egreg!
+% then augmented with chatGPT to allow subscripts also
+% expect* gives automatic scaling, but warned to use sparingly
+
+\NewDocumentCommand{\expect}{e{^}e{_} s o >{\SplitArgument{1}{|}}m }{%
+  \mathbb{E}%     the expectation operator
+  \IfValueT{#1}{^{#1}}% previously had {\!} to add thin negative spacing before the superscript
+  \IfValueT{#2}{_{#2}}% previously had {\!} add thin negative spacing beforethe subscript
+  \IfBooleanTF{#3}{% *-variant for automatic scaling
+    \expectarg*{\expectvar#5}%
+  }{% no *-variant
+    \IfNoValueTF{#4}{% no optional argument for custom size
+      \expectarg{\expectvar#5}%
+    }{% optional argument for custom size
+      \expectarg[#4]{\expectvar#5}%
+    }%
+  }%
+}
+\NewDocumentCommand{\expectvar}{mm}{%
+  #1\IfValueT{#2}{\nonscript\;\delimsize\vert\nonscript\;#2}%
+}
+\DeclarePairedDelimiterX{\expectarg}[1]{[}{]}{#1}
+

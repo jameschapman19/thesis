@@ -1,9 +1,9 @@
 \graphicspath{{chapters/loadings/}}
-\chapter{Regularization and the Interpretation of \acrshort{cca} Weights and Loadings}\label{chap:loadings}
+\chapter{On Using Loadings to Understand CCA Models}\label{chap:loadings}
+\epigraph{Correlation does not imply causation.}{\textit{Anon.}}
 \minitoc
 % chktex-file 44
 % chktex-file 3
-\epigraph{Correlation does not imply causation.}{\textit{Anon.}}
 \section{Introduction}
 
 The application of Canonical Correlation Analysis (\acrshort{cca}) methods to practical problems often involves two key aspects: estimating latent variables associated with different views, and understanding the nature of the relationship between these views.
@@ -91,14 +91,14 @@ Because the diagonal covariance assumption makes inference computationally cheap
 By marginalizing out the latent variables of the generative \acrshort{cca} and \acrshort{gfa} models, we can write down the joint distribution of the two views:
 
 \begin{align}
-    \begin{bmatrix} X\sps{1} \\ X\sps{2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \mu\sps{1} \\ \mu\sps{2} \end{bmatrix}, \begin{bmatrix} W\sps{1}W\spstop{1} + \Psi_1 & W\sps{1}W\spstop{2} \\ W\sps{2}W\spstop{1} & W\sps{2}W\spstop{2} + \Psi_2 \end{bmatrix} \right)
+    \begin{bmatrix} X\sps{1} \\ X\sps{2} \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix} \mu\sps{1} \\ \mu\sps{2} \end{bmatrix}, \begin{bmatrix} W\sps{1}W\spsT{1} + \Psi_1 & W\sps{1}W\spsT{2} \\ W\sps{2}W\spsT{1} & W\sps{2}W\spsT{2} + \Psi_2 \end{bmatrix} \right)
 \end{align}
 
 Importantly, this shows us that the true covariance in each view is a function of the \gls{loadings} and the noise covariance matrix.
 Specifically, the covariance matrix of the $i^{\text{th}}$ view is given by:
 
 \begin{align}
-    \Sigma_{ii} = W\sps{i}W\spstop{i} + \Psi_i
+    \Sigma_{ii} = W\sps{i}W\spsT{i} + \Psi_i
 \end{align}
 
 While these generative models are provide a clear interpretation of the data generation process and possible biological processes, their application in practice is limited compared to classical \acrshort{cca}.
@@ -125,7 +125,7 @@ We can control the true signal by setting the active variables and correlations 
 Specifically we construct the between-view covariance matrices as follows:
 
 \begin{align}
-    \Sigma_{12}=\sum_{k=1}^{K}\rho_k\Sigma_{11}u\sps{1}_{k}u\spstop{2}_k\Sigma_{22}
+    \Sigma_{12}=\sum_{k=1}^{K}\rho_k\Sigma_{11}u\sps{1}_{k}u\spsT{2}_k\Sigma_{22}
 \end{align}
 
 Where $\rho_k$ is the $k^{\text{th}}$ canonical correlation and $u\sps{i}_k$ is the $k^{\text{th}}$ column of the matrix of weights $U\sps{i}$.

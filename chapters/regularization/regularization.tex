@@ -1,10 +1,9 @@
 \graphicspath{{chapters/regularization}}
-\chapter{Regularization of CCA Models to add Structure}\label{chap:als}
+\chapter{Regularization of CCA Models}\label{chap:als}
+\epigraph{All models are wrong, some are useful.}{\textit{G. Box}}
 \minitoc
 % chktex-file 44 
 % chktex-file 3
-
-\epigraph{All models are wrong, some are useful.}{\textit{G. Box}}
 \section{Introduction}\label{sec:introduction}
 
 This chapter explores the role of regularization in improving the performance and interpretation of Canonical
@@ -70,17 +69,17 @@ Firstly, recall that PLS and CCA are equivalent up to a scaling when the covaria
 Consider the well-known form of CCA given in equation~\ref{eq:cca}\citep{mihalik2022canonical} (formed by reparameterizing \(u\sps{i}=(\Sigma_{ii})^{-\frac{1}{2}}u\sps{i}\)):
 
 \begin{align}\label{eq:cca}
-     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}(\Sigma_{11}+ c I)^{-\frac{1}{2}}\Sigma_{12}(\Sigma_{22}+c I)^{-\frac{1}{2}}u\sps{2} \} \\
+     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spsT{1}(\Sigma_{11}+ c I)^{-\frac{1}{2}}\Sigma_{12}(\Sigma_{22}+c I)^{-\frac{1}{2}}u\sps{2} \} \\
      & \text{subject to:} \notag \\
-     & u\spstop{1}u\sps{1}=1, u\spstop{2}u\sps{2}=1 \notag
+     & u\spsT{1}u\sps{1}=1, u\spsT{2}u\sps{2}=1 \notag
 \end{align}
 
 As we increase $c$, $\lim_{c \to \infty} (\Sigma_{ii}+ c I)^{-\frac{1}{2}}= (c I)^{-1}$ so that the objective approaches:
 
 \begin{align}
-     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1}(c I)^{-1}\Sigma_{12}(c I)^{-1}u\sps{2} \} \\
+     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spsT{1}(c I)^{-1}\Sigma_{12}(c I)^{-1}u\sps{2} \} \\
         & \text{subject to:} \notag \\
-        & u\spstop{1}u\sps{1}=1, u\spstop{2}u\sps{1}=1 \notag
+        & u\spsT{1}u\sps{1}=1, u\spsT{2}u\sps{1}=1 \notag
 \end{align}
 
 Which is precisely the PLS objective and constraints with an arbitrary scaling of the covariance matrix $\Sigma_{12}$ by $\frac{1}{c^2}$.
@@ -97,10 +96,10 @@ PLS is evidently not a nuanced tool for regularization because it offers no cont
 For this reason,~\citet{vinod1976canonical} proposed the \textit{Canonical Ridge}, which combined the PLS and CCA constraints in a single constrained optimization:
 
 \begin{align}
-     & u\sps{1}_{\text{opt}} = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spstop{1} \hat{\Sigma_{12}} u\sps{2} \} \\
+     & u\sps{1}_{\text{opt}} = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spsT{1} \hat{\Sigma_{12}} u\sps{2} \} \\
      & \text{subject to:} \notag \\
-     & (1 - c_1) u\spstop{1} \hat{\Sigma_{11}} u\sps{1} + c_1 u\spstop{1} u\sps{1} = 1 \notag \\
-     & (1 - \tau_2) u\spstop{2} \hat{\Sigma_{22}} u\sps{2} + \tau_2 u\spstop{2} u\sps{2} = 1 \notag
+     & (1 - c_1) u\spsT{1} \hat{\Sigma_{11}} u\sps{1} + c_1 u\spsT{1} u\sps{1} = 1 \notag \\
+     & (1 - \tau_2) u\spsT{2} \hat{\Sigma_{22}} u\sps{2} + \tau_2 u\spsT{2} u\sps{2} = 1 \notag
 \end{align}
 
 Where $c_1$ and $\tau_2$ are the ridge regularization parameters for the first and second views respectively.
@@ -155,13 +154,13 @@ Now, with a foundational understanding of sparse regularization, we review a num
 
 \paragraph{Sparse PLS: Penalized Matrix Decomposition}
 Penalized Matrix Decomposition (PMD)~\citep{witten2009penalized} provides an approximate solution to the sparse CCA problem by altering the constraints of the classical CCA formulation.
-Specifically, PMD replaces the constraints \(u\spstop{i} \hat{\Sigma_{ii}} u\sps{i} = 1\) with the PLS constraints \(u\spstop{i} u\sps{i}= 1\) and additionally imposes \(\|u\spstop{i}\|_1 \leq \tau\).
+Specifically, PMD replaces the constraints \(u\spsT{i} \hat{\Sigma_{ii}} u\sps{i} = 1\) with the PLS constraints \(u\spsT{i} u\sps{i}= 1\) and additionally imposes \(\|u\spsT{i}\|_1 \leq \tau\).
 The optimization problem for PMD is then given by:
 
 \begin{align}
-    & u^{opt}=\underset{u}{\mathrm{argmax}}\{ u\spstop{1} \hat{\Sigma_{12}} u\sps{2} \} \\
+    & u^{opt}=\underset{u}{\mathrm{argmax}}\{ u\spsT{1} \hat{\Sigma_{12}} u\sps{2} \} \\
     & \text{subject to:} \notag \\
-    & u\spstop{1} u\sps{1} = 1 , u\spstop{2} u\sps{2} = 1 \notag \\
+    & u\spsT{1} u\sps{1} = 1 , u\spsT{2} u\sps{2} = 1 \notag \\
     & \|u\sps{1}\|_1 \leq \tau_1 , \|u\sps{2}\|_1 \leq \tau_2 \notag
 \end{align}
 
@@ -186,8 +185,8 @@ squares methods for sparse CCA\@.
     \label{eq:mai}
     u^{opt} &= \underset{u}{\mathrm{argmin}} \left\{ \|X\sps{1}u\sps{1} - X\sps{2}u\sps{2}\|_2^2 + P(u) \right\} \\
     &\text{subject to:} \notag \\
-    &u\spstop{1} \hat{\Sigma_{11}} u\sps{1}=1 \notag \\
-    &u\spstop{2} \hat{\Sigma_{22}} u\sps{2}=1 \notag
+    &u\spsT{1} \hat{\Sigma_{11}} u\sps{1}=1 \notag \\
+    &u\spsT{2} \hat{\Sigma_{22}} u\sps{2}=1 \notag
 \end{align}
 
 Where \(P(u)\) is a penalty function.
@@ -364,7 +363,6 @@ Number of features in View 2 (\textit{q}) & 31 \\
 \end{table}
 
 \newpage
-\newpage
 \section{Results}
 
 \subsection{Human Connectome Project (HCP) Data}
@@ -418,7 +416,7 @@ These are then arranged around the circumference of the chord diagram using the 
 The plots then show the 8 strongest positive and negative \gls{weights} for each model as `chords'.
 The chord diagrams in Figure~\ref{fig:chord_weights} show the top 8 positive and negative brain \gls{weights} for each model.
 
-\textcolor{red} Need to find something biologically useful to say about these.
+\textcolor{red}{Need to find something biologically useful to say about these.}
 
 \begin{figure}
 \centering
