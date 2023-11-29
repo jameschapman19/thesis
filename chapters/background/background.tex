@@ -24,7 +24,7 @@ This approach is especially useful when each view contains complementary informa
 
 \subsubsection{Self-Supervised Multiview Learning}
 
-Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels.
+Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels\citep{balestriero2023cookbook}.
 The cornerstone of SSL is the concept of a `pretext task,' a learning task created from the data that trains the model to capture useful features or representations.
 In the context of multiview machine learning, self-supervised learning often operates under the assumption that different \gls{views} are generated from a common source.
 A natural pretext task, in this case, is to predict or estimate this source from the given \gls{views}.
@@ -95,7 +95,7 @@ Later on we will introduce total number of samples $N$.
 In this report, we will typically refer to $u_k$ as \textit{\gls{weights}}, $Z_k = X_k u_k$ as \textit{\gls{representations}} or \textit{\gls{latent variables}}, depending on the context. We will sometimes consider a
 matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of \gls{weights}, and a
 matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations.
-We will refer to $\Corr(X\sps{i}_j, Z_k)$ as the \textit{\gls{loadings}} of $X\sps{i}_j$ on $Z_k$.
+We will refer to the Pearson correlation between features and their respective latent variable $\Corr(X\sps{i}_j, Z_k)$ as the \textit{\gls{loadings}} of $X\sps{i}_j$ on $Z_k$ \citep{rosipal2005overview}, noting that the same concept has also been referred to as \textit{structure correlations} \citep{meredith1964canonical}.
 
 \subsection{Principal Components Analysis}
 
@@ -479,8 +479,8 @@ In this section, we will explore some of these strategies.
 
 \subsubsection{Challenges in Solving Generalized Eigenvalue Problems}
 
-The GEP is often represented as \( Ax = \lambda Bx \), where \( A \) and \( B \) are matrices whose dimensions depend on the method in use.
-For instance, in \acrshort{pca}, \( A \) and \( B \) are \( p \times p \); in \acrshort{pls} and \acrshort{cca}, they are \( (p+q) \times (p+q) \).
+The GEP is often represented as \( Ax = \lambda Bx \), where \( A \) and \( B \) are matrices. To generalize the dimensions of these matrices, let's denote them as \( m \times m \). This dimension \( m \) can vary based on the specific method in use. For instance, in Principal Component Analysis (PCA), represented as \acrshort{pca}, \( m \) would be equal to \( p \) since \( A \) and \( B \) are \( p \times p \) matrices. In methods like Partial Least Squares (PLS) and Canonical Correlation Analysis (CCA), represented as \acrshort{pls} and \acrshort{cca} respectively, \( m \) would be \( p+q \), as \( A \) and \( B \) in these cases are \( (p+q) \times (p+q) \).
+
 
 % Table summarizing the definitions of A and B for various methods
 \begin{table}[h]
@@ -502,31 +502,43 @@ For instance, in \acrshort{pca}, \( A \) and \( B \) are \( p \times p \); in \a
     \label{tab:subspace}
 \end{table}
 
-To solve the GEP, one common technique is to transform it into a standard eigenvalue problem\( B^{-\frac{1}{2}} A B^{-\frac{1}{2}} y = \lambda y \), followed by eigendecomposition.
-However, this approach has computational complexity \(O(n^3)\)and may suffer from numerical instability.
+To solve the GEP, one common technique is to transform it into a standard eigenvalue problem \( B^{-\frac{1}{2}} A B^{-\frac{1}{2}} y = \lambda y \), followed by eigendecomposition. However, this approach has computational complexity \( O(m^3) \) and may suffer from numerical instability.
 
 \subsubsection{\acrshort{pca}-CCA}
 
-One way to reduce the complexity of solving GEPs is to use the \acrshort{pca}-CCA method, which first applies \acrshort{pca} to the data
-and then solves the GEP in the reduced space.
+One way to reduce the complexity of solving GEPs is to use the \acrshort{pca}-CCA method, which first applies \acrshort{pca} to the data and then solves the GEP in the reduced space.
 An important advantage of using \acrshort{pca}-CCA is computational efficiency, especially for high-dimensional data.
-The overall complexity of \acrshort{pca}-CCA is\(O(p^2K + p^3)\), where \( K \)is the number of reduced components.
+The overall complexity of \acrshort{pca}-CCA involves two main steps.
+First, applying PCA has a complexity of \( O(\max(p^3, q^3)) \), dominated by the larger of the two matrices.
+Second, solving the generalized eigenvalue problem in the reduced space with \( K \) components in each view leads to a complexity of \( O((2K)^3) \).
+Thus, the overall complexity of \acrshort{pca}-CCA is \( O(\max(p^3, q^3) + (2K)^3) \), which is significantly lower than the complexity of solving the GEP directly.
+Since CCA, ridge CCA, and PLS can all be solved in the principal component space, \acrshort{pca}-CCA can be used to compute solutions efficiently \textit{even if we keep all the principal components}.
+Most obviously, this is the case when the number of samples \( n \) is smaller than either of the number of features \( p \) or \( q \), i.e. \( n < p \) or \( n < q \).
+In this case the maximum number of principal components is \( K=n \), and the complexity of \acrshort{pca}-CCA is thus \( O(n^3) \), which is significantly lower than the complexity of solving the GEP directly.
+This approach has been employed to great effect in neuroimaging but suprisingly is not used even in the scikit-learn implementation of \acrshort{cca} \citep{pedregosa2011scikit}.
+Nonetheless, for the large sample sizes (desirable for machine learning frameworks as well as statistical power), the complexity of even \acrshort{pca}-CCA can render the problems nearly intractable.
 
-\acrshort{kcca} is computationally efficient for high-dimensional data (\(p>n\)) because its complexity scales with the number of samples\(n\), not the number of features\(p\).
-However, it requires access to all training data at test time, raising efficiency concerns.
+Kernel \acrshort{cca} (\acrshort{kcca}) also offers computational efficiency for high-dimensional data (\(p>n\)) as its complexity scales with the number of samples \(n\), not the number of features \(p\). 
+It casts the CCA optimisation as a dual problem:
+
+\begin{align}
+     & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha\sps{1}K\spsT{1}K\sps{2}\alpha\sps{2}  \} \\
+     & \text{subject to:} \notag                                                                                            \\
+     & \alpha\sps{1}K\spsT{1}K\sps{1}\alpha\sps{1}=1 \notag                                                                  \\
+     & \alpha\sps{2}K\spsT{2}K\sps{2}\alpha\sps{2}=1 \notag
+\end{align}
+
+Where \(\alpha\sps{1}=\)
+
+The kernel function in KCCA can be computed iteratively on pairwise comparisons of samples, allowing for memory efficiency by not requiring the entire dataset to be loaded into RAM. 
+This iterative approach uses slow hard drive memory access instead of RAM, making KCCA RAM memory-efficient but slower. 
+However, a significant drawback of KCCA is the need for access to all training data at test time, which raises concerns about efficiency and scalability.
 
 \subsection{Non-linear \acrshort{cca}}
 
-\subsubsection{Kernel \acrshort{cca}}
-
-Kernel \acrshort{cca} (\acrshort{kcca}) is a non-linear extension of \acrshort{cca} that uses the kernel trick to find non-linear relationships between variables.
-
-\begin{align}
-     & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha_1^{\top}K\spsT{1}K\sps{2}\alpha_2  \} \\
-     & \text{subject to:} \notag                                                                                            \\
-     & \alpha_1^{\top}K\spsT{1}K\sps{1}\alpha_1=1 \notag                                                                  \\
-     & \alpha_2^{\top}K\spsT{2}K\sps{2}\alpha_2=1 \notag
-\end{align}
+As is standard in Kernel methods, \acrshort{kcca} can be extended to non-linear \acrshort{cca} by using a non-linear kernel function \(k\).
+This allows for the discovery of non-linear relationships between the data modalities.
+However, the non-linear kernel function \(k\) is typically fixed a priori, which can be problematic since the optimal kernel function may be unknown.
 
 \subsubsection{Deep \acrshort{cca}}
 

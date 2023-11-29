@@ -4,6 +4,14 @@
 \minitoc
 % chktex-file 44
 % chktex-file 3
+\section{Preface}
+
+This chapter is based on observations made across a number of projects.
+While the work itself is unpublished, it has influenced , most notably by the use of loadings rather than weights for model interpretation in \citet{} where I contributed parts of the appendix and encouraged the use of loadings for model interpretation.
+
+This chapter makes the theoretical case for using loadings rather than weights for model interpretation in \acrshort{cca} and \acrshort{pls} models.
+It also presents a number of experiments demonstrating the relationship between loadings and weights in \acrshort{cca} models.
+
 \section{Introduction}
 
 The application of Canonical Correlation Analysis (\acrshort{cca}) methods to practical problems often involves two key aspects: estimating latent variables associated with different views, and understanding the nature of the relationship between these views.
@@ -557,6 +565,28 @@ We observed that in \acrshort{pls} and \acrshort{spls} models, which are signifi
 However, in the case of \acrshort{cca} the \gls{weights} applied to repeated features are almost completely arbitrary (see the scale).
 For Elastic and Ridge \acrshort{cca}, the \gls{weights} applied to repeated features, though not identical, display greater stability due to shrinkage effects.
 In contrast, \gls{loadings} for repeated features remained consistent across all tested models, reinforcing our theoretical stance on their preferential use for model interpretation in scenarios with repeated columns or near-repeated columns.
+
+
+\subsection{Brain-Behaviour Simulations}
+
+\begin{figure}
+\centering
+\begin{subfigure}{0.49\linewidth}
+\centering
+\includegraphics[width=\linewidth]{figures/simulated/snr/snr_vs_scores_facet_identity}
+\caption{Identity Covariance Matrices}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{subfigure}{0.49\linewidth}
+\centering
+\includegraphics[width=\linewidth]{figures/simulated/snr/snr_vs_scores_facet_identity}
+\caption{Random Covariance Matrices}
+\end{subfigure}
+\end{figure}
+
 
 %
 

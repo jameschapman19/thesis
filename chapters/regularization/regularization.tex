@@ -4,39 +4,43 @@
 \minitoc
 % chktex-file 44 
 % chktex-file 3
+\section*{Preface}
+
+This chapter expands on my work previously showcased at the OHBM conference and draws connections to a tutorial paper I co-authored, where I contributed a number of simulations \citep{mihalik2022canonical}.
+
+This chapter explores the role of regularization in improving the performance and interpretation of \acrshort{cca} using data from the Human Connectome Project (\acrshort{hcp}) and Alzheimer's Disease Neuroimaging Initiative (\acrshort{adni}) datasets.
+We develop a framework for regularized CCA which allows us to incorporate any regularized least squares solver to efficiently implement a wide range of regularization functions, but in particular allows us to efficiently implement the elastic net penalty with controllable L2 and L1 penalties so that we can control the bias towards the largest principal components while still encouraging sparsity in the weights in contrast to most previous work on sparse Brain-Behavior analysis which has used a PLS objective with lasso constraints (SPLS), which inherits a bias towards the largest principal components from PLS.
+
 \section{Introduction}\label{sec:introduction}
 
-This chapter explores the role of regularization in improving the performance and interpretation of Canonical
-Correlation Analysis (CCA) using data from the Human Connectome Project (HCP) and Alzheimer's Disease Neuroimaging Initiative (ADNI) datasets.
+Large datasets neuroimaging datasets including the Human Connectome Project (\acrshort{hcp}) and Alzheimer's Disease Neuroimaging Initiative (\acrshort{adni}) datasets as well as the UK Biobank and Adolescent Brain Cognitive Development (ABCD) datasets \footnote{Not covered in this chapter} appear to offer unprecedented opportunities for understanding the relationship between brain structure and function and behavior \citep{SMITH2018263,BZDOK2017549,wang2020finding}.
+Despite the impressive scale of these modern neuroimaging studies, the number of subjects is still often orders of magnitude smaller than the number of features in the data; the \acrshort{adni} dataset we use in this chapter, for example, has 592 subjects and 168,130 structural MRI voxels.
+In this context, CCA models are prone to overfitting, leading to spurious correlations and poor generalization \citep{helmer2020stability,mihalik2020multiple}.
 
-CCA models often exhibit shortcomings when dealing with high-dimensional data.
-This challenge is particularly acute in brain-behavior studies where the dimensionality of neuroimaging data is often orders of magnitude larger than the number of subjects.
-In this context, CCA models are prone to overfitting, leading to spurious correlations and poor generalization.
-Regularization, having been extensively studied and well-understood in the contexts of Linear Regression and Inverse Problems, introduces a deliberate bias to guide models towards more generalizable solutions.
-This principle, when applied to CCA, offers a promising avenue for addressing its challenges, ensuring that the model does not overfit to the noise in the data but captures the true underlying patterns.
-Furthermore, regularization can help us improve the interpretability of the results most clearly by encouraging sparsity.
+Regularization, having been extensively studied and well-understood in the contexts of Linear Regression and Inverse Problems \citep{engl1996regularization}, introduces a deliberate bias to guide models towards more generalizable solutions, can be a powerful tool for addressing these problems.
+Furthermore, regularization can help us improve the interpretability of the results by imposing structure on the solutions, perhaps most obviously by encouraging sparsity\citep{bzdok2019towards}.
 However, due to the complexity of the CCA problem, regularization is not as straightforward as in Linear Regression.
 The most popular approaches to `sparse CCA' have, in practice, been based on Partial Least Squares (PLS), which simplifies the optimization problem but, as we shall see, causes the model to inherit a bias towards the largest principal components from PLS.
 
 With this perspective in mind, we propose a flexible regularized alternating least squares (FRALS) framework for CCA which allows us to incorporate any regularized least squares solver to efficiently implement a wide range of regularization functions, but in particular allows us to efficiently implement the elastic net penalty with controllable L2 and L1 penalties so that we can control the bias towards the largest principal components while still encouraging sparsity in the weights.
 This is in contrast to much of the previous work on sparse Brain-Behavior analysis which has used a PLS objective with lasso constraints (SPLS), which inherits a bias towards the largest principal components from PLS.
 
-We apply FRALS with ElasticNet regularization to Simulated Datasets as well as the Human Connectome Project (HCP) and Azlheimer's Disease Neuroimaging Initiative (ADNI) datasets.
+We apply FRALS with ElasticNet regularization to Simulated Datasets as well as the \acrshort{hcp} and \acrshort{adni} datasets.
 We show that it outperforms other CCA models in terms of out-of-sample canonical correlation.
 We also show that the identified mode of variation is distinct from previous work which identified latent variables with \gls{weights} related to cognitive tests and negatively related to cigarette, tobacco or alcohol\citep{smith2015positive}.
 FRALS has stronger correlations with the Line Orientation test, which measures visuospatial abilities, and the parietal lobe, which is known to be involved in visuospatial processing.
-This further demonstrates the importance of matching the model to the data generation process with the appropriate regularization.
-
-This chapter expands on my work previously showcased at the OHBM conference and draws connections to a tutorial paper I co-authored, where I contributed a number of simulations\citep{mihalik2022canonical}.
 
 \section{Background: Regularization for High-Dimensional and Structured Data}\label{sec:background}
 
 Like Linear Regression, Canonical Correlation Analysis does not have a unique solution when the number of features exceeds the number of observations in either view.
 More generally, as the number of features increases, the number of parameters in the model increases, and the model becomes more prone to overfitting particularly when the signal-to-noise ratio is low.
-Furthermore, when features are correlated, the estimates of the parameters become unstable.
+Furthermore, when features are correlated, the estimates of the parameters become unstable due to multicollinearity \citep{}.
 Most obviously, if two features are perfectly correlated, the model is not identifiable (has no unique solution) because we can swap the \gls{weights} between the two features without changing the model.
 Regularization is a powerful tool for addressing these problems, and has been widely used in Linear Regression and Inverse Problems.
 Moreover, regularization can help us improve the interpretability of the results by encouraging sparsity in the weights.
+Regularization can be both explicit and implicit.
+Explicit regularization is achieved by adding a penalty term to the objective function, while implicit regularization is achieved by changing the optimization algorithm.
+In this section, we review a number of regularization techniques that have been applied to CCA and related methods.
 
 \subsection{Shrinkage Regularization}
 
@@ -104,7 +108,7 @@ For this reason,~\citet{vinod1976canonical} proposed the \textit{Canonical Ridge
 
 Where $c_1$ and $\tau_2$ are the ridge regularization parameters for the first and second views respectively.
 
-\paragraph{PCA-CCA} PCA can be used as a regularization method for CCA by using only the first \( k \) principal components of each view as the input to CCA.
+\paragraph{PCA-CCA} PCA be can be used as an implicit regularization method for CCA by using only the first \( k \) principal components of each view as the input to CCA.
 This reduces the dimensionality of the data and can help to avoid overfitting.
 However, it also risks overlooking subtle but crucial relationships between variables, as it focuses on leading principal components.
 
@@ -121,12 +125,12 @@ On the other hand, PCA-CCA, leaves the largest eigenvalues unchanged, and ignore
 \begin{figure}
     \centering
     \includegraphics[width=0.8\textwidth]{figures/shrinkage/shrinkage}
-    \caption{Comparison of the effect of OLS, Ridge, and PCA-CCA regularization on the eigenvalues of the covariance matrix.}\label{fig:shrinkage}
+    \caption{Comparison of the effect of OLS, Ridge, and PCA regularization on the eigenvalues of the covariance matrix.}\label{fig:shrinkage}
 \end{figure}
 
 When these effective covariance matrices are inverted to form the CCA objective, these effects are reversed.
 Ridge regularization increases the magnitude of the weights associated with the largest eigenvalues and decreases the magnitude of the smallest eigenvalues.
-PCA-CCA maintains the weights associated with the largest eigenvalues and sets the weights associated with the smallest eigenvalues to zero.
+PCA maintains the weights associated with the largest eigenvalues and sets the weights associated with the smallest eigenvalues to zero.
 The visualization underscores the intrinsic nature of each regularization method:
 \begin{itemize}
     \item \textbf{Unregularized}: Presents the unaltered spectrum, making it susceptible to noise but preserving potential subtle patterns.
@@ -307,21 +311,21 @@ Principal Component Analysis & PCA & -  \\
 
 \subsection{Datasets}\label{subsec:datasets}
 
-The datasets employed in our experiments comprise the HCP and ADNI data.
+The datasets employed in our experiments comprise the \acrshort{hcp} and \acrshort{adni} data.
 These datasets provide insights into brain functionality and behavior from different perspectives.
-We chose the HCP and the ADNI datasets based on 2 recent landmark studies and the tutorial paper this chapter is loosely related to \cite{mihalik2022canonical}.
+We chose the \acrshort{hcp} and the \acrshort{adni} datasets based on 2 recent landmark studies and the tutorial paper this chapter is loosely related to \cite{mihalik2022canonical}.
 
-\subsubsection{The Human Connectome Project (HCP)}
+\subsubsection{The Human Connectome Project (\acrshort{hcp})}
 
-The Human Connectome Project (HCP) offers publicly available resting-state functional MRI (rs-fMRI) and non-imaging measures like demographics, psychometrics, and other behavioral measures.
-Specifically, we sourced data from 1003 subjects out of the 1200-subject data release of the HCP.
+The \acrshort{hcp} offers publicly available resting-state functional MRI (rs-fMRI) and non-imaging measures like demographics, psychometrics, and other behavioral measures.
+Specifically, we sourced data from 1003 subjects out of the 1200-subject data release of the \acrshort{hcp}.
 This dataset is constructed using brain connectivity features of the thoroughly processed rs-fMRI data.
 This processing results in 19,900 brain connectivity variables for every subject.
 Additionally, there are 145 non-imaging measures employed.
 Notably, nine confounding variables were regressed out from both data modalities.
 Each variable was standardized for zero mean and unit variance.
 More details can be found in \cite{smith2015positive, mihalik2022canonical}.
-We summarize the parameters of the HCP data in table~\ref{tab:hcp-parameters}.
+We summarize the parameters of the \acrshort{hcp} data in table~\ref{tab:hcp-parameters}.
 
 \begin{table}
 \centering
@@ -339,14 +343,14 @@ Number of features in View 2 (\textit{q}) & 145 \\
 
 \subsubsection{The Alzheimer's Disease Neuroimaging Initiative (ADNI)}
 
-The ADNI database is found at \url{adni.loni.usc.edu}.
-Launched in 2003, ADNI's main objective is to assess the combination of serial MRI, PET (Positron emission tomography), biological markers, and clinical and neuropsychological assessment in tracking the progression of Mild Cognitive Impairment (MCI) and early Alzheimer’s disease.
-For our experiments, we used a subset of 592 unique subjects from the ADNI. The MRI scans underwent a series of processing stages, yielding a grey matter probability map
+The \acrshort{adni} database is found at \url{adni.loni.usc.edu}.
+Launched in 2003, \acrshort{adni}'s main objective is to assess the combination of serial MRI, PET (Positron emission tomography), biological markers, and clinical and neuropsychological assessment in tracking the progression of Mild Cognitive Impairment (MCI) and early Alzheimer’s disease.
+For our experiments, we used a subset of 592 unique subjects from the \acrshort{adni}. The MRI scans underwent a series of processing stages, yielding a grey matter probability map
 The Mini-Mental State Examination (MMSE) scores were employed to investigate the association with the grey matter maps.
 Composed of a series of brief tasks, the MMSE evaluates various cognitive domains including memory, attention, language, and visuospatial skills.
 The MMSE is a widely used test for assessing cognitive impairment.
 The MMSE scores range from 0 to 30, with lower scores indicating more severe cognitive impairment.
-We summarize the parameters of the ADNI data in table~\ref{tab:adni-parameters}.
+We summarize the parameters of the \acrshort{adni} data in table~\ref{tab:adni-parameters}.
 
 \begin{table}
 \centering
@@ -365,10 +369,10 @@ Number of features in View 2 (\textit{q}) & 31 \\
 \newpage
 \section{Results}
 
-\subsection{Human Connectome Project (HCP) Data}
+\subsection{\acrshort{hcp} Results}
 
-Next, we consider the results of applying the various CCA variants to the HCP data.
-Since the HCP data is high-dimensional, we drop CCA from the analysis since it would produce random results.
+Next, we consider the results of applying the various CCA variants to the \acrshort{hcp} data.
+Since the \acrshort{hcp} data is high-dimensional, we drop CCA from the analysis since it would produce random results.
 
 \subsubsection{Out of Sample Correlation}
 
@@ -468,10 +472,10 @@ SPLS & 118 & 56 \\
 \end{table}
 
 \newpage
-\subsection{Alzheimers Disease Neuroimaging Initiative (ADNI) Data}\label{subsec:adni}
+\subsection{\acrshort{adni} Results}\label{subsec:adni}
 
-We now turn to the ADNI data where our analysis is similar but visualized differently.
-This is because the ADNI data contains structural MRI data rather than functional MRI data.
+We now turn to the \acrshort{adni} data where our analysis is similar but visualized differently.
+This is because the \acrshort{adni} data contains structural MRI data rather than functional MRI data.
 
 \subsubsection{Out of Sample Correlation}
 
@@ -487,7 +491,7 @@ Suprisingly, PCA performed almost as well as PLS.
 
 \subsubsection{Behaviour Weights}
 
-As for the HCP data, Figure \ref{fig:adni-beh} plots the top 8 positive and negative non-imaging \gls{weights} for each model.
+As for the \acrshort{hcp} data, Figure \ref{fig:adni-beh} plots the top 8 positive and negative non-imaging \gls{weights} for each model.
 Some of the identified behavioural \gls{weights} including a number of orientation tests are similar across all of the models, including even PCA.
 This is indicative of the strong shared signal between the behavioural data and the brain structure data.
 SPLS and Elastic Net both hone in on the orientation and recall tests in the weight space.
@@ -506,7 +510,7 @@ The RCCA and Elastic Net models are suprisingly different in the weight space, w
 \subsubsection{Brain Structure Weights}
 
 We plot the \gls{weights} as a mosaic plot with 3 slices in each direction in Figure~\ref{fig:adni-brain}.
-Previous work using SPLS with the ADNI dataset identified the same striking pattern of \gls{weights} with the model strikingly selecting the hippocampal weights\cite{monteiro2016multiple}.
+Previous work using SPLS with the \acrshort{adni} dataset identified the same striking pattern of \gls{weights} with the model strikingly selecting the hippocampal weights\cite{monteiro2016multiple}.
 The Elastic Net has a less visually appealing selection of weights, with a honeycomb pattern near the edges of the brain and likewise for RCCA.
 It is noticeable that PCA, PLS and SPLS both \gls{weights} in the same direction whereas RCCA and Elastic Net weight different regions with opposite signs.
 
@@ -524,7 +528,7 @@ It is noticeable that PCA, PLS and SPLS both \gls{weights} in the same direction
 
 Table~\ref{tab:brain-behaviour-weights-adni} once again shows the number of non-zero \gls{weights} for each model.
 We can see that tuned SPLS and Elastic Net once again identify sparse weights.
-In this case, the difference in performance is more convincing and suggests that this sparsity is less spuriously induced than for the HCP data.
+In this case, the difference in performance is more convincing and suggests that this sparsity is less spuriously induced than for the \acrshort{hcp} data.
 This is supported by the fact that Elastic Net and SPLS models find a similar level of sparsity in the brain weights.
 On the other hand SPLS finds a much sparser set of behavioural weights.
 
