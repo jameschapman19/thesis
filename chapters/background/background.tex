@@ -19,12 +19,11 @@ These techniques can be broadly classified into supervised and self-supervised (
 \subsubsection{Supervised Multiview Learning}
 
 In supervised multiview learning, one view serves as the input while the other view is treated as the target label.
-The algorithm learns to predict the target view based on the input view, leveraging the information from both to enhance the predictive performance.
-This approach is especially useful when each view contains complementary information that can improve the model's accuracy or robustness.
+The algorithm learns to predict the target view based on the input view, leveraging the information from both to enhance the predictive performance \citep{zong2023self}.
 
 \subsubsection{Self-Supervised Multiview Learning}
 
-Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels\citep{balestriero2023cookbook}.
+Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels \citep{balestriero2023cookbook}.
 The cornerstone of SSL is the concept of a `pretext task,' a learning task created from the data that trains the model to capture useful features or representations.
 In the context of multiview machine learning, self-supervised learning often operates under the assumption that different \gls{views} are generated from a common source.
 A natural pretext task, in this case, is to predict or estimate this source from the given \gls{views}.
@@ -32,13 +31,16 @@ In the prediction setting, we might mask the source and train the model to predi
 In the estimation setting, we never directly observe the source, but we train the model to estimate it from the \gls{views}.
 In this case, the model is forced to learn the underlying structure of the data without any direct supervision.
 This not only enables the model to learn associations between \gls{views} but also allows it to derive robust and informative representations for subsequent tasks like classification or regression.
-This is particularly true if the source is unavailable at test time (and, in the case of latent variables, even at training time), but knowledge of the source is useful for downstream tasks.
+This is particularly true if the source is unavailable at test time when an application must rely on the \gls{views} alone to make predictions.
+In the case of latent variables, where the assumed source is unobserved, the model learns to estimate latent variables from the \gls{views} which are unavailable even at training time.
+These are usually much lower-dimensional than the original \gls{views}, and therefore provide a more compact and informative representation of the data.
+The models we deal with in this thesis are generally of this type.
 
 \subsection{Conditional Independence, Causality, and Multiview Learning}
 
 Consider the graphical model depicted in Figure~\ref{fig:mentalhealthselfsupervised}.
-It comprises two distinct \gls{views}: a brain modality and a behavioral modality.
-The graphical model assumes that the brain and behaviour are conditionally independent given the severity of an (unobserved or `latent') mental health condition.
+It comprises two distinct observed \gls{views}: a brain modality and a behavioral modality.
+The graphical represents the assumption that the brain and behaviour are conditionally independent given the severity of an unobserved `latent' mental health condition.
 
 \begin{figure}
     \centering
@@ -63,20 +65,22 @@ When examining dependencies between events, such as those observed between brain
     \item no direct causal link between them
 \end{itemize}
 
-Importantly, if a common cause does exist, conditioning on it renders brain and behavior independent; this 'screens off' their dependence, revealing key insights for our models\cite{reichenbach1956direction}.
+Importantly, if a common cause does exist, conditioning on it renders brain and behavior independent; this 'screens off' their dependence, revealing key insights for our models \citep{reichenbach1956direction}.
 However, it is essential to recognize that the presence of a common latent variable, inferred from these \gls{views}, does not automatically imply causality in the observed data.
 
 \subsubsection{Complementary and Redundant Information}
-The nature of the information provided by different \gls{views} (such as neuroimaging and behavioral data) is critical in multiview machine learning.
-
-If these \gls{views} contain redundant information about the latent variables, they can be used to denoise each other, enhancing the clarity and reliability of the data.
+The nature of the information provided by different \gls{views} (such as neuroimaging and behavioral data) is important for understanding multiview learning models.
+A particularly useful distinction is between \textit{complementary} and \textit{redundant} information \citep{nguyen2020multiview}.
+When views contain complementary information, they provide different perspectives on the same subject or sample.
+For example, we can understand different aspects of a mental health condition by examining both neuroimaging and behavioral data.
+On the other hand, when \gls{views} contain redundant information about the latent variables, they provide the same information from different perspectives.
+For example, a disease diagnosis might be encoded in both neuroimaging and blood test results.
+This does not make the \gls{views} useless, however, because they can be used to denoise each other, enhancing the clarity and reliability of the data. We can be more confident that a diagnosis is correct if it is supported by both neuroimaging and blood test results.
+A particularly famous example of this principle is the `Wisdom of Crowds' effect, where the average of multiple noisy estimates is more accurate than any individual estimate \citep{galton1907vox}.
 This process exploits the overlap in information to correct or reduce noise and errors, a principle fundamental to many denoising techniques in machine learning.
 
-Conversely, if the \gls{views} provide complementary information, they offer a richer and more complete understanding of the latent variables than either view alone.
-In this case, the integration of diverse but related datasets leads to more robust and insightful models.
-Complementary \gls{views} expand our perspective, revealing aspects of the latent variables that are not apparent when \gls{views} are considered in isolation.
-
-This understanding is critical in mental health research, where accurate interpretations of complex relationships are key.
+In this thesis we will work with Canonical Correlation Analysis, a multiview learning method which assumes that the \gls{views} contain complementary information about latent variables.
+The next section builds a formal understanding of the principles behind Canonical Correlation Analysis and its variants.
 
 \section{Learning Representations: Definitions and Notation}
 
@@ -92,7 +96,7 @@ $d \in [D_i]$ for dimensions of input variables;
 and $l,k \in [K]$ for dimensions of representations - i.e. to subscript dimensions of $Z\sps{i}, f\sps{i}$.
 Later on we will introduce total number of samples $N$.
 
-In this report, we will typically refer to $u_k$ as \textit{\gls{weights}}, $Z_k = X_k u_k$ as \textit{\gls{representations}} or \textit{\gls{latent variables}}, depending on the context. We will sometimes consider a
+In this report, when the functions $f$ are linear, we will typically refer to $u_k$ as \textit{\gls{weights}}, $Z_k = X_k u_k$ as \textit{\gls{representations}} or \textit{\gls{latent variables}}, depending on the context. We will sometimes consider a
 matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of \gls{weights}, and a
 matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations.
 We will refer to the Pearson correlation between features and their respective latent variable $\Corr(X\sps{i}_j, Z_k)$ as the \textit{\gls{loadings}} of $X\sps{i}_j$ on $Z_k$ \citep{rosipal2005overview}, noting that the same concept has also been referred to as \textit{structure correlations} \citep{meredith1964canonical}.
@@ -113,7 +117,7 @@ where $u_k$ are the orthonormal basis vectors such that:
     u_k^\top u_l = \delta_{kl} \text{ for } k \neq l.
 \end{equation}
 
-The primary goal of \acrshort{pca} is to maximize the variance of the projections \(Z_k\).
+The primary goal of \acrshort{pca} is to maximize the variance of the representations \(Z_k\).
 
 \subsubsection{Optimization and Solution}
 Mathematically, for the first principal component, this can be formulated as:
@@ -144,7 +148,7 @@ The first principal component therefore corresponds to the eigenvector associate
 
 \subsubsection{Limitations}
 However, when applying \acrshort{pca} to datasets such as high-dimensional neuroimaging and behavioral
-data, \acrshort{pca}'s main limitation arises: it only accounts for variance within a single dataset, potentially discarding features that are relevant for cross-modal analysis.
+data, \acrshort{pca}'s main limitation arises: it only accounts for variance within a single dataset, so it cannot take advantage of the redundancy in multiview data.
 
 \subsection{Partial Least Squares}
 
@@ -303,6 +307,7 @@ Which is once again of the form $A v = \lambda B v$. \acrshort{cca}, like \acrsh
 \subsection{Multiview \acrshort{cca}}
 
 Multiview \acrshort{cca} or \acrshort{mcca} is a straightforward extension of \acrshort{cca} to the case of 3-or more datasets.
+The goal is to find a set of directions \(u\sps{i}\) such that the pairwise correlations between the views are maximized.
 
 \subsubsection{Optimization and Solution}
 
@@ -318,25 +323,33 @@ The optimization problem for \acrshort{mcca} can be stated as:
 The generalized eigenvalue problem (GEP) for MCCA can be written in matrix form as follows:
 
 \begin{align}
-    \mathbf{A} \mathbf{U} & = \lambda \mathbf{B} \mathbf{U}                    \\
-    \mathbf{A}            & = \begin{pmatrix}
-                                  0           & \Sigma_{12} & \cdots & \Sigma_{1m} \\
-                                  \Sigma_{21} & 0           & \cdots & \Sigma_{2m} \\
-                                  \vdots      & \vdots      & \ddots & \vdots      \\
-                                  \Sigma_{m1} & \Sigma_{m2} & \cdots & 0
-                              \end{pmatrix}, \\
-    \mathbf{B}            & = \begin{pmatrix}
-                                  \Sigma_{11} & 0           & \cdots & 0           \\
-                                  0           & \Sigma_{22} & \cdots & 0           \\
-                                  \vdots      & \vdots      & \ddots & \vdots      \\
-                                  0           & 0           & \cdots & \Sigma_{mm}
-                              \end{pmatrix}, \\
-    \mathbf{U}            & = \begin{pmatrix}
-                                  u\sps{1} \\
-                                  u\sps{2} \\
-                                  \vdots   \\
-                                  u\sps{m}
-                              \end{pmatrix}.
+    \small
+    \begin{pmatrix}
+      0           & \Sigma_{12} & \cdots & \Sigma_{1m} \\
+      \Sigma_{21} & 0           & \cdots & \Sigma_{2m} \\
+      \vdots      & \vdots      & \ddots & \vdots      \\
+      \Sigma_{m1} & \Sigma_{m2} & \cdots & 0
+    \end{pmatrix}
+    \begin{pmatrix}
+          u\sps{1} \\
+          u\sps{2} \\
+          \vdots   \\
+          u\sps{m}
+    \end{pmatrix}.
+    =
+    \lambda
+    \begin{pmatrix}
+      \Sigma_{11} & 0           & \cdots & 0           \\
+      0           & \Sigma_{22} & \cdots & 0           \\
+      \vdots      & \vdots      & \ddots & \vdots      \\
+      0           & 0           & \cdots & \Sigma_{mm}
+    \end{pmatrix}
+    \begin{pmatrix}
+          u\sps{1} \\
+          u\sps{2} \\
+          \vdots   \\
+          u\sps{m}
+    \end{pmatrix}.
 \end{align}
 
 \subsection{Linear Discriminant Analysis LDA}
@@ -390,6 +403,29 @@ However, it is not yet clear how we should apply these methods to real-world dat
 
 \subsection{Machine Learning and Statistical Inference}
 
+Canonical Correlation Analysis (\acrshort{cca}) has been studied from both machine learning and statistical inference perspectives.
+In this section, we will explore the differences between these two approaches and their implications for multiview learning.
+
+\subsubsection{Statistical Inference Evaluation Framework}
+
+Statistical inference approaches provide a contrasting perspective to machine learning methods, focusing on understanding and quantifying the underlying data structure:
+
+\paragraph{Parameter Estimation}
+
+In statistical inference, parameter estimation involves estimating model parameters and their uncertainties. This process is fundamental to understanding the data and the model's fit.
+
+\paragraph{Hypothesis Testing}
+
+Hypothesis testing assesses the statistical significance of the relationships found by the model. It tests whether the observed data patterns are likely to have occurred under the null hypothesis.
+
+\paragraph{Confidence Intervals}
+
+Confidence intervals provide ranges within which the true parameter values are likely to fall, considering uncertainty. They are essential for understanding the reliability of parameter estimates.
+
+\paragraph{Permutation Testing}
+
+Permutation testing is a non-parametric method that evaluates the significance of models. It compares model performance on the original data with performance on randomly shuffled data, helping to ascertain the results' robustness.
+
 \subsubsection{Machine Learning Evaluation Framework}
 
 \paragraph{Training, Validation, and Test Sets}
@@ -417,17 +453,6 @@ Specific to canonical correlation analysis, this involves measuring the correlat
 \paragraph{Downstream Tasks}
 
 Evaluating model performance on downstream tasks like classification or prediction can offer practical insights into the utility of the learned representations.
-
-\subsubsection{Statistical Inference Evaluation Framework}
-
-Statistical inference approaches provide a contrasting perspective to machine learning methods, focusing on understanding and quantifying the underlying data structure:
-
-\begin{itemize}
-\item Parameter Estimation: Involves estimating model parameters and their uncertainties.
-\item Hypothesis Testing: Assesses the statistical significance of the relationships found by the model.
-\item Confidence Intervals: Provide ranges within which the true parameter values are likely to fall, considering uncertainty.
-\item Permutation Testing: A non-parametric method that evaluates the significance of models by comparing model performance on original and randomly shuffled data.
-\end{itemize}
 
 \subsection{Components and Subspaces in CCA: A Subspace Perspective}
 

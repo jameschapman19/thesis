@@ -1,6 +1,6 @@
 \graphicspath{{chapters/regularization}}
 \chapter{Regularization of CCA Models}\label{chap:als}
-\epigraph{All models are wrong, some are useful.}{\textit{G. Box}}
+%\epigraph{All models are wrong, some are useful.}{\textit{G. Box}}
 \minitoc
 % chktex-file 44 
 % chktex-file 3
@@ -8,14 +8,15 @@
 
 This chapter expands on my work previously showcased at the OHBM conference and draws connections to a tutorial paper I co-authored, where I contributed a number of simulations \citep{mihalik2022canonical}.
 
-This chapter explores the role of regularization in improving the performance and interpretation of \acrshort{cca} using data from the Human Connectome Project (\acrshort{hcp}) and Alzheimer's Disease Neuroimaging Initiative (\acrshort{adni}) datasets.
-We develop a framework for regularized CCA which allows us to incorporate any regularized least squares solver to efficiently implement a wide range of regularization functions, but in particular allows us to efficiently implement the elastic net penalty with controllable L2 and L1 penalties so that we can control the bias towards the largest principal components while still encouraging sparsity in the weights in contrast to most previous work on sparse Brain-Behavior analysis which has used a PLS objective with lasso constraints (SPLS), which inherits a bias towards the largest principal components from PLS.
+This chapter explores the role of regularization in improving the performance and interpretation of \acrshort{cca} using simulated and brain-behaviour data.
+We develop a framework for regularized CCA which allows us to incorporate any regularized least squares solver to efficiently implement a wide range of regularization functions using any scikit-learn compatible solver, but in particular allows us to efficiently implement the elastic net penalty with controllable L2 and L1 penalties so that we can control the bias towards the largest principal components while still encouraging sparsity in the weights in contrast to most previous work on sparse Brain-Behavior analysis which has used a PLS objective with lasso constraints (SPLS), which inherits a bias towards the largest principal components from PLS.
 
 \section{Introduction}\label{sec:introduction}
 
 Large datasets neuroimaging datasets including the Human Connectome Project (\acrshort{hcp}) and Alzheimer's Disease Neuroimaging Initiative (\acrshort{adni}) datasets as well as the UK Biobank and Adolescent Brain Cognitive Development (ABCD) datasets \footnote{Not covered in this chapter} appear to offer unprecedented opportunities for understanding the relationship between brain structure and function and behavior \citep{SMITH2018263,BZDOK2017549,wang2020finding}.
 Despite the impressive scale of these modern neuroimaging studies, the number of subjects is still often orders of magnitude smaller than the number of features in the data; the \acrshort{adni} dataset we use in this chapter, for example, has 592 subjects and 168,130 structural MRI voxels.
 In this context, CCA models are prone to overfitting, leading to spurious correlations and poor generalization \citep{helmer2020stability,mihalik2020multiple}.
+Given the reproducibility crisis in neuroscience \citep{button2013power}, it is important to ensure that our models generalize well to new data.
 
 Regularization, having been extensively studied and well-understood in the contexts of Linear Regression and Inverse Problems \citep{engl1996regularization}, introduces a deliberate bias to guide models towards more generalizable solutions, can be a powerful tool for addressing these problems.
 Furthermore, regularization can help us improve the interpretability of the results by imposing structure on the solutions, perhaps most obviously by encouraging sparsity\citep{bzdok2019towards}.
@@ -25,48 +26,72 @@ The most popular approaches to `sparse CCA' have, in practice, been based on Par
 With this perspective in mind, we propose a flexible regularized alternating least squares (FRALS) framework for CCA which allows us to incorporate any regularized least squares solver to efficiently implement a wide range of regularization functions, but in particular allows us to efficiently implement the elastic net penalty with controllable L2 and L1 penalties so that we can control the bias towards the largest principal components while still encouraging sparsity in the weights.
 This is in contrast to much of the previous work on sparse Brain-Behavior analysis which has used a PLS objective with lasso constraints (SPLS), which inherits a bias towards the largest principal components from PLS.
 
-We apply FRALS with ElasticNet regularization to Simulated Datasets as well as the \acrshort{hcp} and \acrshort{adni} datasets.
+We apply FRALS with ElasticNet regularization to the \acrshort{hcp} and \acrshort{adni} datasets.
 We show that it outperforms other CCA models in terms of out-of-sample canonical correlation.
 We also show that the identified mode of variation is distinct from previous work which identified latent variables with \gls{weights} related to cognitive tests and negatively related to cigarette, tobacco or alcohol\citep{smith2015positive}.
 FRALS has stronger correlations with the Line Orientation test, which measures visuospatial abilities, and the parietal lobe, which is known to be involved in visuospatial processing.
 
 \section{Background: Regularization for High-Dimensional and Structured Data}\label{sec:background}
 
-Like Linear Regression, Canonical Correlation Analysis does not have a unique solution when the number of features exceeds the number of observations in either view.
-More generally, as the number of features increases, the number of parameters in the model increases, and the model becomes more prone to overfitting particularly when the signal-to-noise ratio is low.
-Furthermore, when features are correlated, the estimates of the parameters become unstable due to multicollinearity \citep{}.
-Most obviously, if two features are perfectly correlated, the model is not identifiable (has no unique solution) because we can swap the \gls{weights} between the two features without changing the model.
-Regularization is a powerful tool for addressing these problems, and has been widely used in Linear Regression and Inverse Problems.
-Moreover, regularization can help us improve the interpretability of the results by encouraging sparsity in the weights.
-Regularization can be both explicit and implicit.
-Explicit regularization is achieved by adding a penalty term to the objective function, while implicit regularization is achieved by changing the optimization algorithm.
 In this section, we review a number of regularization techniques that have been applied to CCA and related methods.
+
+\subsection{The Bias-Variance Tradeoff}
+
+A key principle in machine learning is the bias-variance tradeoff.
+This concept posits that a tradeoff exists between the bias and variance of a model: high-bias models typically exhibit low variance, and vice versa.
+High-bias models are generally simpler and more stable, but they might oversimplify the problem, leading to underfitting.
+Conversely, low-bias, complex models are sensitive to data changes and prone to overfitting.
+As the number of features increases, there are more parameters to estimate, and models tend to become more complex, leading to higher variance and lower bias.
+This relationship highlights the importance of balancing model complexity to avoid overfitting, particularly in high-dimensional scenarios with a low signal-to-noise ratio \citep{mcintosh2021comparison}\footnote{It's worth noting that the number of model parameters, often used as a proxy for complexity, does not always directly correlate with model behavior, as illustrated by the `double descent' phenomenon.}.
+Regularization can be understood as a method for reducing the variance of a model by introducing a bias towards simpler models.
+This means regularization can improve the generalizability of models in high-dimensional settings.
+
+\paragraph{Implicit and Explicit Regularization}
+
+We can implement regularization in two different ways.
+\textit{Explicit} regularization is achieved by adding a penalty term to the objective function. Weights the objective function against a term that penalizes complexity.
+
+\textit{Implicit} regularization is achieved by changing the optimization algorithm.
 
 \subsection{Shrinkage Regularization}
 
-Shrinkage regularization is an effective method for improving the performance of linear models in high-dimensional settings.
-Shrinkage methods bias models towards lower variance solutions by shrinking the model parameters (weights) towards zero.
-Shrinkage regularization works on the premise that, generally, larger principal components are more likely to represent meaningful data patterns rather than noise.
+Shrinkage regularization is a form of regularization that penalizes the magnitude of the model parameters.
+This technique is particularly effective in enhancing the performance of linear models in situations characterized by high dimensionality, multicollinearity, or low signal-to-noise ratios.
 
-\paragraph{PLS as Shrinkage Regularization}
+In high-dimensional situations where the number of features exceeds the number of observations in either view, Like Linear Regression, Canonical Correlation Analysis is non-identifiable, meaning there is no unique solution.
+This is because we can find perfectly correlated latent variables using a linear combination of the features, but there are many different linear combinations that will achieve this.
+Some of these linear combinations will generalize better than others, but there is no way to distinguish between them using the training data alone.
 
-PLS can be interpreted as a form of shrinkage regularization applied to CCA. We can explain this by considering an analogy between CCA and \textit{Linear Regression} (indeed Linear Regression is a special case of CCA where \(X^{(2)}\) has one feature).
+Even in low-dimensional situations, if features exhibit multicollinearity, they can also be non-identifiable or, at best, estimates of the parameters are unstable.
+Mathematically, this is because in both cases the covariance matrix of the features is not full rank and therefore is not invertible (non-identifiable) or ill-conditioned (matrix inversion is unstable).
+To capture this intuition, if two features are perfectly correlated, the model is not identifiable (has no unique solution) because we can arbitrarily swap the \gls{weights} between the two features without changing the latent variables (\acrshort{cca}) or the predictions (regression).
+In practice, features are rarely perfectly correlated, but even when features are highly correlated, the model can be unstable \citep{mihalik2020multiple}, and small changes in the data can lead to large changes in the model parameters.
+Once again, some of these linear combinations will generalize better than others, but we might expect a model to generalize better if it spreads the \gls{weights} across the correlated features rather than concentrating them on a single feature.
+
+Finally, even in low-dimensional settings with little multicollinearity, the model parameters can sensitive to noise in the data, and once again small changes in the data can lead to large changes in the model parameters.
+For example, parameters associated with noisy features might `cancel out' in the training set, but not in the test set, leading to poor generalization.
+
+The premise of shrinkage regularization in all these cases is that the latent variables or predictions are too sensitive to small changes in the data because the model parameters are too large.
+Shrinkage regularization works by shrinking the model parameters towards zero, so that small changes in the data do not lead to large changes in the model estimates.
+
+\paragraph{PLS as Shrinkage Regularization} PLS can be interpreted as a form of shrinkage regularization applied to CCA. We can explain this by considering an analogy between CCA and \textit{Linear Regression}\footnote{indeed Linear Regression is a special case of CCA where \(X^{(2)}\) has one feature}.
 
 In Linear Regression, the ridge regression solution is given by:
 \begin{align}
     \hat{\beta}_{\text{ridge}} = ((1-c)\Sigma_{X,X} + c I)^{-1} \Sigma_{X,y}
 \end{align}
 Where \(c\) is the regularization parameter between 0 and 1\footnote{It is more common to see $(\Sigma_{X,X} + c I)^{-1} \Sigma_{X,y}$ but these are equivalent up to a scalar factor and this form helps us later on}.
-The ridge penalty acts in two important ways:
+The ridge penalty acts in three important ways:
 \begin{itemize}
     \item It shrinks the \gls{weights} towards zero.
+    \item It shrinks the \gls{weights} of correlated features towards each other.
     \item It biases the solution to high covariance directions rather than high correlation directions.
 \end{itemize}
 
 As $c$ becomes large, $\lim_{c \to \infty} (\Sigma_{X,X} + c I)^{-1} = (c I)^{-1}$
 , so that $\hat{\beta}_{\text{ridge}}=\frac{\Sigma_{X,y}}{c}$, which is precisely the covariance of the features of $X$ with $Y$ scaled by $c$ (and shrunk towards zero for $c \geq 1$).
 Notice that the ridge regression solution is no longer sensitive to the correlation of features in $X$.
-Additionally, notice that for sufficiently large $c$, $(\Sigma_{X,X} + c I)$ is invertible even if $\Sigma_{X,X}$ is not invertible, so that ridge regression can be well defined even when the number of features exceeds the number of observations.
+Additionally, notice that for sufficiently large $c$, $(\Sigma_{X,X} + c I)$ is invertible even if $\Sigma_{X,X}$ is not invertible, so that ridge regression is always identifiable even when the number of features exceeds the number of observations.
 
 Now consider the CCA problem.
 Firstly, recall that PLS and CCA are equivalent up to a scaling when the covariance matrices are identity matrices, a similar relationship to the relationship between Linear and Ridge Regression.
@@ -87,33 +112,32 @@ As we increase $c$, $\lim_{c \to \infty} (\Sigma_{ii}+ c I)^{-\frac{1}{2}}= (c I
 \end{align}
 
 Which is precisely the PLS objective and constraints with an arbitrary scaling of the covariance matrix $\Sigma_{12}$ by $\frac{1}{c^2}$.
-For this reason, we can consider PLS as a shrinkage method for CCA equivalent to adding a very large ridge regularization.
-This has two important consequences.
-Fortunately, it is well-defined even when the number of features exceeds the number of observations so we can always apply PLS to high-dimensional data.
-Unfortunately, it biases the solution towards the largest principal components.
-Although one would rarely resort to maximally regularized ridge regression except in extremely low sample sizes or high-dimensional data, it has become almost standard practice to use PLS in neuroimaging and genetics.
+For this reason, we can consider PLS as an explicit shrinkage method for CCA, equivalent to adding a maximal ridge regularization term.
+The downside of using PLS as a regularised CCA is precisely its very high bias.
+By strongly guiding the model towards high covariance solutions, it strongly biases the solution towards only the largest principal components.
+But what if the correlation between the views is not concentrated in the largest principal components?
+Although one would rarely resort to maximally regularized ridge regression except in extremely low sample sizes or high-dimensional data, it has become almost standard practice to use PLS in neuroimaging and genetics \citep{cruciani2022pls, krishnan2011partial}.
 One of the core contributions of this chapter will be to demonstrate that PLS is usually a poor choice for regularization even in these very high-dimensional settings and that more nuanced regularization methods can offer significant improvements in performance and interpretability.
 PLS is evidently not a nuanced tool for regularization because it offers no control over the degree of regularization applied.
 
-\paragraph{Ridge Regularization}
-
-For this reason,~\citet{vinod1976canonical} proposed the \textit{Canonical Ridge}, which combined the PLS and CCA constraints in a single constrained optimization:
+\paragraph{Ridge Regularization} For this reason, \citet{vinod1976canonical} proposed the \textit{Canonical Ridge} or \textit{Ridge CCA}, which combined the PLS and CCA constraints in a single constrained optimization:
 
 \begin{align}
      & u\sps{1}_{\text{opt}} = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spsT{1} \hat{\Sigma_{12}} u\sps{2} \} \\
      & \text{subject to:} \notag \\
      & (1 - c_1) u\spsT{1} \hat{\Sigma_{11}} u\sps{1} + c_1 u\spsT{1} u\sps{1} = 1 \notag \\
-     & (1 - \tau_2) u\spsT{2} \hat{\Sigma_{22}} u\sps{2} + \tau_2 u\spsT{2} u\sps{2} = 1 \notag
+     & (1 - c_2) u\spsT{2} \hat{\Sigma_{22}} u\sps{2} + c_2 u\spsT{2} u\sps{2} = 1 \notag
 \end{align}
 
 Where $c_1$ and $\tau_2$ are the ridge regularization parameters for the first and second views respectively.
+By tuning these parameters, we can control the degree of regularization applied to each view independently.
+If we set $c_1$ and $c_2$ to zero, we recover the standard CCA objective while if we set $c_1$ and $c_2$ to one, we recover the PLS objective.
+This allows us to interpolate between the two extremes, allowing us to control the level of shrinkage and therefore the level of bias towards the largest principal components
 
-\paragraph{PCA-CCA} PCA be can be used as an implicit regularization method for CCA by using only the first \( k \) principal components of each view as the input to CCA.
-This reduces the dimensionality of the data and can help to avoid overfitting.
-However, it also risks overlooking subtle but crucial relationships between variables, as it focuses on leading principal components.
+\paragraph{PCA-CCA} PCA be can be used as an implicit regularization method for CCA.
 
-While PCA-CCA and rCCA are effective for finding signal in the presence of noise, they do not produce sparse
-solutions and so do not clearly lend themselves to interpretation.
+Most obviously, by using only the first \( k \) principal components of each view as the input to CCA, we can reduce the dimensionality of the data and therefore reduce the number of parameters in the model.
+Moreover, by working with the principal components, we remove the correlation between the features, which can improve the conditioning of the problem.
 
 \paragraph{A Visual Comparison of Shrinkage Techniques}
 
@@ -137,14 +161,15 @@ The visualization underscores the intrinsic nature of each regularization method
     \item \textbf{Ridge}: Warps the spectrum, shrinking the largest eigenvalues and expanding the smallest eigenvalues, potentially missing subtle patterns but offering a cleaner representation of stronger associations.
     \item \textbf{PCA}: Truncates the spectrum, ignoring the smallest eigenvalues and preserving the largest eigenvalues, potentially missing subtle patterns but offering a cleaner representation of stronger associations.
 \end{itemize}
-The choice between these shrinkage techniques should in general be based on the nature of the data.
-We now transition to another essential regularization technique: sparse regularization.
-While shrinkage aims to prevent overfitting by pulling weight estimates towards zero to reduce variance, sparse regularization aims to set \gls{weights} to zero with the added benefit of enhancing model interpretability.
+
+However, while these shrinkage techniques can improve the performance of CCA, they do not obviously improve the interpretability of the results.
+Weights are shrunk towards zero, but they are not set to zero.
+This means that the model still uses all the features, and the results are not sparse.
 
 \subsection{Sparse Regularization}
 
 Sparse regularization is a powerful tool for improving the performance and interpretability of linear models.
-Sparse regularization encourages the model to use only a subset of the features, which can help to avoid overfitting and improve the interpretability of the model.
+Sparse regularization encourages the model to use only a subset of the features, which can both help to avoid overfitting and improve the interpretability of the model.
 Sparse regularization works on the premise that only a subset of the features are relevant to the model.
 Sparsity is typically achieved by adding either an L1 penalty or constraint\footnote{The L0 norm of the weight vector is the number of non-zero elements in the vector and is arguably a closer match to the goal, but the L0 norm is (a) not a proper norm in the mathematical sense and (b) not convex and so is difficult to optimize.}.
 The L1 penalty is defined as:
@@ -168,7 +193,7 @@ The optimization problem for PMD is then given by:
     & \|u\sps{1}\|_1 \leq \tau_1 , \|u\sps{2}\|_1 \leq \tau_2 \notag
 \end{align}
 
-This Sparse PLS (SPLS) approximation has been highly influential as a form of Sparse CCA because it is extremely efficient method \footnote{it can be solved by a variant of the power method; iteratively multiplying $u\sps{1}$ by $\hat{\Sigma_{12}}$ and soft-thresholding}.
+This Sparse PLS (SPLS) approximation has been highly influential as a form of Sparse CCA because it is extremely computationally efficient method \footnote{it can be solved by a variant of the power method; iteratively multiplying $u\sps{1}$ by $\hat{\Sigma_{12}}$ and soft-thresholding}.
 There are a number of other sparse CCA methods that employ the PLS approximation\citep{parkhomenko2009sparse, waaijenborg2008quantifying, lindenbaum2021l0}.
 However, while the PLS approximation is efficient, it means these methods inherit a bias towards the largest principal components from PLS.
 
@@ -219,44 +244,47 @@ The authors employed proximal gradient descent for regularization, specifically 
 While these methods are flexible, they don't have the plug-and-play nature of the penalized least squares methods.
 Not just a matter of convenience, this means that these methods are not compatible with existing solvers for regularized least squares problems like for example total variation regularisation solvers in nilearn, which are often highly optimized for specific problems and modalities.
 
-Having discussed the benefits of both shrinkage (e.g., PCA-CCA, Ridge CCA, PLS) and sparsity (SPLS, Sparse CCA) in handling high-dimensional, noisy data, a natural progression is to integrate these advantages.
-Specifically, the challenge lies in fusing shrinkage and sparsity within the CCA framework, enhancing the interpretability and performance of Brain-Behaviour association models.
+\paragraph{Structured Regularization}
+
+As highly structured data, linear models using both Structural and Functional \acrshort{mri} data have been shown to benefit from structured regularization methods but notably these methods have not been applied to CCA.
+Total variation regularization, which biases spatially neighboring weights to be similar, has been shown to improve the performance of PCA \citep{de2017structured} and regression \citep{michel2011total,dohmatob2014benchmarking, baldassarre2012structured}.
+Similarly, Laplacian (or \textit{GraphNet}) regularization, which induces a similar spatial bias with additional smoothness, has been shown to improve the performance of CCA on functional MRI data \citep{grosenick2013interpretable}.
+
+Having discussed the benefits of both shrinkage (e.g., PCA-CCA, Ridge CCA, PLS), sparsity (SPLS, Sparse CCA), and structure (Total Variation, Laplacian) in handling high-dimensional, noisy, and structured data, a natural progression is to integrate these advantages.
+Specifically, the challenge lies in creating a framework that allows for users to match the regularization method to their data and research question, enhancing the interpretability and performance of Brain-Behaviour association models.
 The solution?
 A method that employs readily available regularized regression solvers, allowing for flexible and tunable regularization in CCA.
-This leads us to introduce the Flexible Regularized Alternating Least Squares (FRALS).
+This leads us to propose the Flexible Regularized Alternating Least Squares (FRALS).
 \newpage
-\section{Methods}
+\section{Methods - Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least-squares-(frals)}
 
-In this section, we outline the methodologies employed in our study for Canonical Correlation Analysis (CCA) and related techniques.
-We first introduce the Flexible Regularized Alternating Least Squares (FRALS)—a versatile solution to the regularized CCA problem that incorporates various regularization functions, notably the elastic net penalty\citep{zou2005regularization}.
-We then outline our experimental design, which assesses the performance of FRALS and other CCA variants, aiming to understand the effects of regularization on model performance and clarity.
-Lastly, we specify the parameters and sources of the datasets used.
+The primary goal of our Flexible Regularized Alternating Least Squares framework is to provide a versatile and user-friendly interface for Canonical Correlation Analysis (CCA). This is achieved by designing the framework to be compatible with any scikit-learn compatible regularized least squares solver. This compatibility is pivotal as it allows researchers and practitioners to leverage the extensive range of solvers available in scikit-learn, a popular machine learning library in Python.
 
-\subsection{Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least-squares-(frals)}
-
-The primary goal of our Flexible Regularized Alternating Least Squares (FRALS) framework is to provide a versatile and user-friendly interface for Canonical Correlation Analysis (CCA). This is achieved by designing the framework to be compatible with any scikit-learn compatible regularized least squares solver. This compatibility is pivotal as it allows researchers and practitioners to leverage the extensive range of solvers available in scikit-learn, a popular machine learning library in Python.
-
-This approach marks a significant departure from traditional methodologies in CCA, which often focused on developing or utilizing specific solvers tailored for particular types of data or computational constraints. By contrast, our FRALS framework democratizes access to advanced CCA techniques, allowing users to select solvers that best fit their specific data characteristics, computational needs, or familiarity. Such flexibility is particularly advantageous in interdisciplinary fields like neuroimaging, where diverse datasets and varying levels of technical expertise are common.
+This approach marks a significant departure from traditional methodologies in CCA, which often focused on developing or utilizing specific solvers tailored for particular types of data or computational constraints.
+By contrast, \acrshort{frals} democratizes access to advanced CCA techniques, allowing users to select solvers that best fit their specific data characteristics, computational needs, or familiarity.
+Such flexibility is particularly advantageous in interdisciplinary fields like neuroimaging, where diverse datasets and varying levels of technical expertise are common.
 
 For example, users dealing with high-dimensional, sparse neuroimaging data could opt for solvers optimized for such datasets, while those needing parallel computation for large data sets might choose solvers with GPU acceleration capabilities.
-In principle, FRALS can even be used with Neural Network-based solvers, which are becoming increasingly popular in machine learning\footnote{Though for reasons that will later become clear, we do not reccommend this!}.
-This adaptability enhances FRALS' accessibility and future-proofs the framework against evolving computational technologies and data analysis needs.
+In principle, \acrshort{frals} can even be used with Neural Network-based solvers, which are becoming increasingly popular in machine learning\footnote{Though for reasons that will later become clear, we do not reccommend this!}.
+This adaptability enhances \acrshort{frals}' accessibility and future-proofs the framework against evolving computational technologies and data analysis needs.
 
-In the technical implementation of FRALS, we consider the formulation for a single latent variable \(t\) with regularization \(\lambda_i P_i\) on the weights \(u^{(i)}\):
+In the technical implementation of \acrshort{frals}, we consider the formulation for a single latent variable \(t\) with regularization \(\lambda_i P_i\) on the weights \(u^{(i)}\):
 
 \begin{align}
     \underset{u}{\mathrm{argmin}}\left\{\sum_i \|X^{(i)} u^{(i)} - t\|_2^2 + \textcolor{red}{\lambda_i P_i(u^{(i)})} \right\}\\
     \text{subject to: }t^\top t = 1\\
 \end{align}
 
-This problem can be decomposed into three subproblems. The first subproblem for the auxiliary variable \(t\):
+This problem can be decomposed into three subproblems.
+The first subproblem for the auxiliary variable \(t\):
 
 \begin{align}
     \underset{t}{\mathrm{argmin}}\left\{\sum_i \|X^{(i)} u^{(i)} - t\|_2^2\right\}\\
     \text{subject to: }t^\top t = 1\\
 \end{align}
 
-is a standard least squares problem and can be solved in closed form by averaging \(X^{(i)} u^{(i)}\) and normalizing. This makes \(t\) an estimate of the latent variables, as recalled from section~\ref{subsec:generative-perspectives-on-cca}.
+is a standard least squares problem and can be solved in closed form by averaging \(X^{(i)} u^{(i)}\) and normalizing.
+This makes \(t\) an estimate of the latent variables.
 
 The subproblems for the weights \(u^{(i)}\):
 
@@ -268,7 +296,11 @@ are regularized least squares problems that can be solved using any suitable reg
 
 In this work, we employ the well-tested Elastic Net solver from the \texttt{scikit-learn} package~\citep{pedregosa2011scikit}, where \(P_i = \alpha_i \times \text{l1\_ratio} \|u^{(i)}\|_1 + \alpha_i \times (1-\text{l1\_ratio}) \|u^{(i)}\|_2^2\), allowing for independent tuning of shrinkage and sparsity of the weights.
 
-In summary, the FRALS framework represents a paradigm shift in CCA methodologies, offering a more inclusive and adaptable approach to multivariate data analysis, aligning with the dynamic nature of research in fields like neuroimaging and beyond.
+In summary, the \acrshort{frals} framework represents a paradigm shift in CCA methodologies, offering a more inclusive and adaptable approach to multivariate data analysis, aligning with the dynamic nature of research in fields like neuroimaging and beyond.
+
+\section{Experiments}
+
+In this section, we outline the methodologies employed in our study of \acrshort{frals} and related techniques.
 
 \subsection{The predictive framework for CCA}\label{subsec:the-predictive-framework-for-cca}
 
@@ -292,19 +324,19 @@ We employ several CCA variants for this experiment, including Canonical Correlat
 \caption{Employed CCA Variants}
 \begin{tabular}{|l|l|l|l|}
 \hline
-\textbf{Model} & \textbf{Abbreviation} & \textbf{Hyperparameters}  \\
+\textbf{Model} & \textbf{Abbreviation} & \textbf{Hyperparameters} & \textbf{Hyperparameter Range}  \\
 \hline
-Canonical Correlation Analysis & CCA & -   \\
+Canonical Correlation Analysis & CCA & - & -  \\
 \hline
-Regularized CCA & RCCA & \(c_1, c_2\)   \\
+Regularized CCA & RCCA & \(c_1, c_2\)  & 0-1 (log scaled)  \\
 \hline
-Partial Least Squares & PLS & -   \\
+Partial Least Squares & PLS & - & -  \\
 \hline
-Sparse PLS & SPLS & \(\tau_1, \tau_2\)   \\
+Sparse PLS & SPLS & \(\tau_1, \tau_2\) & 0-1\footnote{As in \citet{witten2013package}, these are converted to 0-$\sqrt {\text{number of features}}$)} (log scaled)   \\
 \hline
-FRALS - Elastic & Elastic & \(\alpha_1, \alpha_2, \text{l1}_1, \text{l1}_2\)   \\
+FRALS - Elastic & Elastic & \(\alpha_1, \alpha_2, \text{l1}_1, \text{l1}_2\) & (1e-5,1e-1), (0-1)   \\
 \hline
-Principal Component Analysis & PCA & -  \\
+Principal Component Analysis & PCA & - & -  \\
 \hline
 \end{tabular}\label{table:cca-variants}
 \end{table}
@@ -313,7 +345,7 @@ Principal Component Analysis & PCA & -  \\
 
 The datasets employed in our experiments comprise the \acrshort{hcp} and \acrshort{adni} data.
 These datasets provide insights into brain functionality and behavior from different perspectives.
-We chose the \acrshort{hcp} and the \acrshort{adni} datasets based on 2 recent landmark studies and the tutorial paper this chapter is loosely related to \cite{mihalik2022canonical}.
+We chose the \acrshort{hcp} and the \acrshort{adni} datasets to facilitate comparison with two influential brain-behaviour studies \citep{smith2015positive, monteiro2016multiple} as well as the tutorial paper that this chapter is loosely related to \cite{mihalik2022canonical}.
 
 \subsubsection{The Human Connectome Project (\acrshort{hcp})}
 
