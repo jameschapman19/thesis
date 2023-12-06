@@ -551,10 +551,6 @@ Finally \ref{chap:deep} will also address the third challenge, extending \acrsho
 
 \subsection{Efficient Algorithms for High-Dimensional Data}
 
-The challenges of high-dimensional data often manifest when solving Generalized Eigenvalue Problems (GEPs) for Canonical Correlation Analysis (CCA). The computational burden of solving these problems becomes daunting as the number of features grows.
-To combat this issue, various efficient algorithms have been developed to reduce the complexity.
-In this section, we will explore some of these strategies.
-
 \subsubsection{Challenges in Solving Generalized Eigenvalue Problems}
 
 The GEP is often represented as \( Ax = \lambda Bx \), where \( A \) and \( B \) are matrices. To generalize the dimensions of these matrices, let's denote them as \( m \times m \). This dimension \( m \) can vary based on the specific method in use. For instance, in Principal Component Analysis (PCA), represented as \acrshort{pca}, \( m \) would be equal to \( p \) since \( A \) and \( B \) are \( p \times p \) matrices. In methods like Partial Least Squares (PLS) and Canonical Correlation Analysis (CCA), represented as \acrshort{pls} and \acrshort{cca} respectively, \( m \) would be \( p+q \), as \( A \) and \( B \) in these cases are \( (p+q) \times (p+q) \).
