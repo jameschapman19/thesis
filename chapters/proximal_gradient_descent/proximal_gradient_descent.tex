@@ -23,6 +23,7 @@
 % The main difference between this eigenvalue problem and the CCA eigenvalue problem is the substitution of the matrices \(\Sigma_{11}\) and \(\Sigma_{22}\) for the matrices \( ((1-c_1) \Sigma_{11} + c_1 I) \) and \( ((1-c_2) \Sigma_{22} + c_2 I) \).
 % We can therefore see that this regularisation is equivalent to adding a constant `ridge' to the diagonal of the covariance matrix \(X\spstop{i} X\sps{i}\).
 
+
 \section{Introduction}
 
 High-dimensional data are now more prevalent than ever, presenting both opportunities and challenges.
@@ -30,10 +31,12 @@ Canonical Correlation Analysis (CCA), despite its utility, struggles with high-d
 The CCA-EY formulation, introduced in the previous chapter, partially addresses these issues but leaves room for improvement, particularly for large-scale neuroimaging datasets.
 This chapter aims to bridge this gap by incorporating regularization techniques via proximal gradient descent.
 
+
 \section{Problem Statement}
 
 The application of CCA in high-dimensional settings, such as neuroimaging data containing tens of thousands of subjects and features, often leads to overfitting.
 While CCA-EY has mitigated some challenges, there remains a critical need for a methodology that can handle large-scale, high-dimensional data without sacrificing interpretability or computational efficiency.
+
 
 \section{Contributions}
 
@@ -48,6 +51,7 @@ Our contributions in this chapter are as follows:
 
 In summary, this chapter introduces a robust, scalable, and interpretable extension to the CCA-EY framework to better analyze high-dimensional, multimodal data.
 
+
 \section{Background}
 
 \subsection{Proximal Gradient Descent}
@@ -57,13 +61,13 @@ The general objective function can be expressed as \( f(x) + g(x) \), where \( f
 The algorithm iteratively updates \( x \) using the following equation:
 
 \[
-x^{(k+1)} = \text{prox}_{\alpha g} \left( x^{(k)} - \alpha \nabla f(x^{(k)}) \right)
+    x^{(k+1)} = \text{prox}_{\alpha g} \left( x^{(k)} - \alpha \nabla f(x^{(k)}) \right)
 \]
 
 Here, \( \alpha \) is the step size, \( \nabla f(x^{(k)}) \) is the gradient of \( f \) at \( x^{(k)} \), and \( \text{prox}_{\alpha g}(v) \) is the proximal operator defined as:
 
 \[
-\text{prox}_{\alpha g}(v) = \arg\min_{x} \left( g(x) + \frac{1}{2\alpha} \| x - v \|^2 \right)
+    \text{prox}_{\alpha g}(v) = \arg\min_{x} \left( g(x) + \frac{1}{2\alpha} \| x - v \|^2 \right)
 \]
 
 By combining the gradients of the smooth part \( f(x) \) and the proximal operator of the non-smooth part \( g(x) \), proximal gradient descent is capable of solving problems that are otherwise intractable using basic gradient descent.
@@ -73,19 +77,19 @@ By combining the gradients of the smooth part \( f(x) \) and the proximal operat
 Total Variation (TV) Regularization is a regularization technique often used for signal denoising and image reconstruction. The TV norm of a signal \( x \in \mathbb{R}^n \) is given by:
 
 \[
-\| x \|_{TV} = \sum_{i=1}^{n-1} |x_{i+1} - x_i|
+    \| x \|_{TV} = \sum_{i=1}^{n-1} |x_{i+1} - x_i|
 \]
 
 In a 2D image, the TV norm extends to:
 
 \[
-\| x \|_{TV} = \sum_{i,j} \sqrt{(x_{i+1,j} - x_{i,j})^2 + (x_{i,j+1} - x_{i,j})^2}
+    \| x \|_{TV} = \sum_{i,j} \sqrt{(x_{i+1,j} - x_{i,j})^2 + (x_{i,j+1} - x_{i,j})^2}
 \]
 
 When incorporated as a regularizer \( R(x) \) in an optimization problem, it typically takes the form:
 
 \[
-\min_{x} \; f(x) + \lambda \| x \|_{TV}
+    \min_{x} \; f(x) + \lambda \| x \|_{TV}
 \]
 
 where \( \lambda \) is the regularization parameter that controls the trade-off between the data fidelity term \( f(x) \) and the regularizer \( \| x \|_{TV} \).
@@ -101,13 +105,13 @@ This is where GraphNet—an extension of the Elastic-Net—comes into play.
 The graph Laplacian captures our intuition that voxels which are neighbors in both space and time should have similar activation levels:
 
 \[
-\text{GraphNet Penalty} = \lambda_{1} \lVert \beta \rVert_{1} + \lambda_{2} \beta^T G \beta
+    \text{GraphNet Penalty} = \lambda_{1} \lVert \beta \rVert_{1} + \lambda_{2} \beta^T G \beta
 \]
 
 Here, \(\beta(x, y, z, t)\) represents coefficients across the 4D spatio-temporal brain volume, and \(\lambda_{1}\) and \(\lambda_{2}\) are regularization parameters. When \(G = L\), the penalty term morphs into:
 
 \[
-\sum_{(i, j) \in \epsilon_{G}} (\beta_{i} - \beta_{j})^{2}
+    \sum_{(i, j) \in \epsilon_{G}} (\beta_{i} - \beta_{j})^{2}
 \]
 
 \textbf{Preserving Smoothness in the Brain}: One of the core advantages of using GraphNet in neuroimaging is its ability to maintain smoothness across the brain map.
@@ -124,6 +128,7 @@ This makes it a compelling choice for neuroimaging applications where a smooth r
 
 
 \section{Contributions}
+
 \subsection{Proximal CCA-EY}
 We introduce a formulation called Proximal CCA-EY that extends the Generalized Eigenvalue Problem (GEP) formulation for CCA. In this extended formulation, \( W = (W_1, W_2) \), with each set of weights potentially subject to a different regularization term.
 By adding regularization terms to the objective function, we can solve this regularized GEP using proximal gradient descent algorithms.
@@ -131,7 +136,7 @@ This approach permits the use of a variety of regularization functions, which we
 Algorithm details are similar to those shown in Algorithm 1 in the previous section, with additional steps to include the proximal operators corresponding to the chosen regularization terms for each \( W_i \).
 
 \begin{equation}
-\label{eq:proximal-CCA-EY}
+    \label{eq:proximal-CCA-EY}
     \mathcal{U}^{\text{Proximal CCA-EY}}(W_1, W_2) = \mathcal{L}^{\text{EY}}(W_1, W_2) + \lambda_1 \mathcal{R}_1(W_1) + \lambda_2 \mathcal{R}_2(W_2)
 \end{equation}
 
@@ -141,12 +146,12 @@ Specific implementations for \( L_1 \) and Total Variation regularizations are p
 The proximal gradient descent update for this problem is then given by:
 
 \begin{equation}
-\label{eq:proximal-update}
+    \label{eq:proximal-update}
     W_1^{(t+1)} = \text{prox}_{\alpha \lambda_1 \mathcal{R}_1}\left( W_1^{(t)} - \alpha \nabla_{W_1} \mathcal{L}^{\text{EY}}(W_1^{(t)}, W_2^{(t)}) \right)
 \end{equation}
 
 \begin{equation}
-\label{eq:proximal-update-W2}
+    \label{eq:proximal-update-W2}
     W_2^{(t+1)} = \text{prox}_{\alpha \lambda_2 \mathcal{R}_2}\left( W_2^{(t)} - \alpha \nabla_{W_2} \mathcal{L}^{\text{EY}}(W_1^{(t)}, W_2^{(t)}) \right)
 \end{equation}
 
@@ -161,7 +166,7 @@ The corresponding proximal operator can be efficiently computed using existing m
 
 \subsection{ProxTorch}
 
-The field of constrained and regularized optimization has a range of software tools designed for specialized tasks \citep{Moolekamp, ParsimonY}. Some of these tools, such as PyProximal \citep{pyproximal}, are restricted to numpy-based computational environments. Meanwhile, PyTorch \citep{paszke2019pytorch}, a deep learning framework with dynamic computation graph and GPU support, did not offer native integration for proximal operators. 
+The field of constrained and regularized optimization has a range of software tools designed for specialized tasks \citep{Moolekamp, ParsimonY}. Some of these tools, such as PyProximal \citep{pyproximal}, are restricted to numpy-based computational environments. Meanwhile, PyTorch \citep{paszke2019pytorch}, a deep learning framework with dynamic computation graph and GPU support, did not offer native integration for proximal operators.
 
 \texttt{ProxTorch} was developed to provide a comprehensive library of proximal operators that are compatible with PyTorch tensors. This compatibility allows for more streamlined development and optimization processes for models that incorporate proximal operators, all within the PyTorch framework.
 
@@ -171,33 +176,39 @@ The performance of \texttt{ProxTorch} and \texttt{Nilearn} was compared, focusin
 
 \begin{enumerate}
     \item \textbf{On CPUs:} \texttt{ProxTorch} outperformed \texttt{Nilearn}, even in CPU-only settings.
-    
-    \item \textbf{GPU Acceleration:} GPU utilization led to a noticeable increase in performance scalability for \texttt{ProxTorch}, especially as the dimensions of the input data expanded. 
-    
+
+    \item \textbf{GPU Acceleration:} GPU utilization led to a noticeable increase in performance scalability for \texttt{ProxTorch}, especially as the dimensions of the input data expanded.
+
     \item \textbf{Data Scale:} The benefits of GPU acceleration were more pronounced with larger datasets, establishing \texttt{ProxTorch} as a viable option for large-scale, computationally intensive optimization problems involving TVL1 regularization.
 \end{enumerate}
 
 
 \section{Experiment 1: Simulated Data Experiments}
+
 \subsection{Experiment Design}
 To validate our approach, we conduct experiments on synthetic and real-world datasets.
 We compare our Proximal CCA-EY algorithm against classical CCA and other existing regularized CCA methods in terms of their ability to find meaningful correlations and their resilience to overfitting.
 Furthermore, we demonstrate the scalability of our approach by applying it to large datasets.
 
 \subsection{Experiment 2: Total Variation Regularisation of Brain-Behaviour Assocations in the ADNI Data}
+
 \subsection{Experiment Design}
+
 \subsection{Results}
 
 \subsection{Experiment 3: Total Variation Regularisation of Brain-Behaviour Assocations in the ADNI Data}
+
 \subsection{Experiment Design}
 
 \subsection{Results}
 Our method outperforms existing methods in various aspects, including computation time, quality of correlated components, and robustness to overfitting.
 The flexibility to use different regularization terms makes our approach applicable to a variety of scenarios.
 
+
 \section{Conclusions}
 We have presented a novel method for implementing a flexible, scalable regularized CCA. The use of proximal gradient descent algorithms allows for efficient optimization, making our approach highly suitable for large-scale data analysis.
 Future work will focus on extending this approach to other variants of CCA and exploring different forms of regularization.
+
 
 \section{Discussion and Conclusion}
 

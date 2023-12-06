@@ -1,4 +1,6 @@
 \graphicspath{{chapters/gradient_descent/}}
+
+
 \chapter{Efficient Algorithms for the CCA Family: Unconstrained Losses with Unbiased Gradients}\label{chap:gradient_descent}
 \epigraph{It seems easier to train a bi-directional LSTM with attention than to compute the SVD of a large matrix.\cite{gemp}}{Chris Ré}
 \minitoc
@@ -11,93 +13,47 @@ In particular, Lennie's mathematical expertise improved the theoretical groundin
 In this thesis I include much of the work from these papers, but I exclude many of Lennie's extensive proofs where I can make no claim to have contributed beyond proofreading.
 It was a joy to bring this work to fruition and I am proud of the results we achieved.
 
+
 \section{Introduction}
 
+
 \section{Background: A unified approach to the CCA family}\label{sec:background-unified}
+So far in this thesis, we have considered only linear functions.
 
-Suppose we have a sequence of vector-valued random variables $X^{(i)} \in \R^{D\sps{i}}$ for $i \in \{1, \dots, I \}$\footnote{Yes, there are I (eye) views}.
-We want to learn meaningful $K$-dimensional representations
-\begin{equation}\label{eq:general-form-of-representations}
-    Z\sps{i} = f\sps{i}( X\sps{i}; \theta\sps{i}).
-\end{equation}
-For convenience, define $D = \sum_{i=1}^I D\sps{i}$ and $\theta = \left(\theta\sps{i}\right)_{i=1}^I$.
-%Without loss of generality take $D\sps{1} \geq D\sps{2} \geq \cdots \geq D\sps{I}$.
-We will consistently use the superscripts $i,j \in [I]$ for views
-%subscripts $d \in [D\sps{i}]$ for dimensions of input variables;
-and subscripts $l,k \in [K]$ for dimensions of representations - i.e. to subscript dimensions of $Z\sps{i}, f\sps{i}$.
-Later on we will introduce total number of samples $N$ and mini-batch size $M$.
-%so we will subscript samples with $n,m$ respectively.
-% don't know if actually ended up using this, so can comment out if not!
-
-\subsection{Background: GEPs in linear algebra}
-A Generalized Eigenvalue Problem (GEP) is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}. They are usually characterized by the set of solutions to the equation:
-\begin{align}\label{eq:igep}
-Au=\lambda Bu
-\end{align}
-with $\lambda \in \R, u \in \R^D$, called (generalized) eigenvalue and (generalized) eigenvector respectively. We shall only consider the case where $B$ is positive definite to avoid degeneracy.
-Then the GEP becomes equivalent to an eigen-decomposition of the symmetric matrix $B^\mhalf A B^\mhalf$. This is key to the proof of our new characterization.
-In addition, one can find a basis of eigenvectors spanning $\R^D$.
-%the eigenvectors are not always unique, but the eigenvalues $\lambda_1 \geq \dots \geq \lambda_d$ are.
-We define a \textit{top-$K$ subspace} to be one spanned by some set of eigenvectors {$u_1,\dots,u_K$} with the top-$K$ associated eigenvalues $\lambda_1 \geq \dots \geq \lambda_K$.
-We say a matrix $U \in \R^{D \times K}$ \textit{defines} a top-$K$ subspace if its columns span one.
-
-\subsection{The CCA Family}\label{sec:CCA-family}
-The classical notion CCA \citep{hotelling1992relations} considers two views, $I=2$, and constrains the representations to be linear transformations
-\begin{equation}\label{eq:cca-linear-function-def}
+\begin{equation}
+    \label{eq:cca-linear-function-def}
     Z\sps{i}_k = \langle u_k\sps{i} , X\sps{i} \rangle.
 \end{equation}
 
-The objective is to find the \textit{weights} or \textit{canonical directions} $u_k\sps{i}$ which maximize the \textit{canonical correlations} $\rho_k = \Corr(Z\sps{1}_k, Z\sps{2}_k)$
-sequentially, subject to orthogonality with the previous pairs of the transformed variables.
-It is well known that CCA is equivalent to a singular value decomposition (SVD) of the matrix $\Var(X\sps{1})^\mhalf \Cov(X\sps{1}, X\sps{2}) \Var(X\sps{2})^\mhalf$.
-It is slightly less well known \citep{borga_learning_1998} that this is equivalent to a GEP where:
-\begin{equation}\label{eq:cca-GEV}\small
-	A = \begin{pmatrix} 0 &\Cov(X\sps{1}, X\sps{2}) \\ \Cov(X\sps{2}, X\sps{1}) & 0 \end{pmatrix}, \quad
-	B = \begin{pmatrix}\Var(X\sps{1}) & 0 \\ 0 & \Var(X\sps{2}) \end{pmatrix}, \quad
-	u =\begin{pmatrix}	u\sps{1} \\ u\sps{2} \end{pmatrix}.
-\end{equation}
+\textbf{Stochastic PLS and CCA:}
+To the best of our knowledge, the state-of-the-art in Stochastic PLS and CCA are the subspace Generalized Hebbian Algorithm (\textbf{SGHA}) of \cite{chen2019constrained} and \textbf{$\gamma$-EigenGame} from \cite{gemp20,gemp2021}. Specifically, SGHA utilizes a Lagrange multiplier heuristic along with saddle-point analysis, albeit with limited convergence guarantees. EigenGame focuses on top-k subspace learning but introduces an adaptive whitening matrix in the stochastic setting with an additional hyperparameter. Both methods set the benchmarks we aim to compare against in the subsequent experimental section. Like our method, both can tackle other symmetric Generalized Eigenvalue Problems in principle.
 
-CCA therefore has notions of uniqueness similar to those for SVD or GEPs: the weights are not in general unique, but the canonical correlations $1 \geq \rho_1 \geq \rho_2 \geq \dots \geq 0$ are unique \citep{mills1988calculation}. Therefore, we can write:
-%\footnote{Slightly abusing notation: $\CCA_K$ is a function of the joint distribution $\mathcal{L}_{X\sps{1}, \sps{2}}$ not of the random vectors themselves}:
-\begin{align}\label{eq:cca-vector-of-correlations-def}\small
-    \CCA_K(X^{(1)},X^{(2)}) \defeq (\rho_k)_{k=1}^K
-    %= \sigma_{1, \dots, K} \left(\Var(X\sps{1})^\mhalf \Cov(X\sps{1}, X\sps{2}) \Var(X\sps{2})^\mhalf\right).
-\end{align}
+\textbf{DCCA and Deep Multiview CCA:}
+The deep canonical correlation analysis (DCCA) landscape comprises three principal approaches with inherent limitations. The first, known as the full-batch approach, uses analytic gradient derivations based on the full sample covariance matrix \citep{andrew2013deep}.
+% Lennie: could work in $\norm{\Var(Z\sps{1})^\mhalf \Cov(Z\sps{1}, Z\sps{2}) \Var(Z\sps{2})^\mhalf}_F$ here - what do you think James?
+The second involves applying the full batch objective to large mini-batches, an approach referred to as \textbf{DCCA-STOL} \citep{wang2015unsupervised}. However, this approach gives biased gradients and therefore requires batch sizes much larger than the representation size in practice. This is the approach taken by both \textbf{DMCCA} \citep{somandepalli2019multimodal} and \textbf{DGCCA} \citep{benton2017deep} . The final set of approaches use an adaptive whitening matrix \citep{wang2015stochastic, chang2018scalable} to mitigate the bias of the Deep CCA objective. However, the authors of \textbf{DCCA-NOI} highlight that the associated time constant complicates analysis and requires extensive tuning. These limitations make existing DCCA methods less practical and resource-efficient.
 
-
-\textbf{Sample CCA:} in practice we do not have access to the population distribution but to a finite number of samples; the classical estimator is defined by replacing the population covariances in \cref{eq:cca-GEV} with sample covariances.
-Unfortunately, this estimator breaks down when $N \leq \max(D\sps{1}, D\sps{2})$; giving arbitrary correlations of 1 and meaningless directions\footnote{WLOG take $D\sps{1} \geq \max(N, D\sps{2})$. Then for any given observations $\X\sps{1} \in \R^{N \times K}, \Z\sps{2}_k \in \R^N$ there exists some $u_k\sps{1}$ such that $\X\spsT{1} u_k\sps{1} = \Z\sps{2}_k$ - provided the observations of $\X\sps{1}$ are not linearly dependent - which is e.g. true with probability 1 when the observations are drawn from a continuous probability distribution.}.
-
-\textbf{Ridge-regularized CCA:} the most straightforward way to prevent this overfitting is to add a ridge regularizer \citep{vinod1976canonical}.
-Taking maximal ridge regularization recovers \textbf{Partial Least Squares PLS} \citep{mihalik2022canonical}, a widely used technique for multi-view learning.
-Even these simple modifications to CCA can be very effective at preventing overfitting in high dimensions \citep{mihalik2022canonical}.
-
-\textbf{Multi-view CCA (MCCA):} extends two-view CCA to deal with three or more views of data. Unfortunately, many of the different equivalent formulations of two-view CCA are no longer equivalent in the multi-view setting, so there are many different extensions to choose from; see \cref{sec:related-work}. Of most interest to us is the formulation of \cite{nielsen2002multiset, wong2021deep} that extends the GEP formulation of \cref{eq:cca-GEV}, which we next make precise and will simply refer to as MCCA from now.
-
-\textbf{Unified GEP formulation:}
-this GEP formulation of MCCA can be presented in a unified framework generalizing CCA and ridge-regularized extensions. Indeed, we now take $A,B_\alpha \in \R^{D \times D}$ to be block matrices $A = (A\sps{ij})_{i,j=1}^I, B_\alpha = (B_\alpha\sps{ij})_{i,j=1}^I$ where the diagonal blocks of $A$ are zero, the off-diagonal blocks of $B_\alpha$ are zero, and the remaining blocks are defined by:
-\begin{align}\label{eq:gep-most-general-formulation}%\small
-    A^{(ij)} &= \Cov(X\sps{i}, X\sps{j}) \text{ for } i \neq j, \quad % \text{ for } i,j \in [I], ; \:\:
-    B_\alpha^{(ii)} = \alpha_i I_{D\sps{i}} + (1-\alpha_i) \Var(X\sps{i})  %\text{ for } i \in [I]
-\end{align}
-Where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters: taking $\alpha_i = 0 \: \forall i$ recovers CCA and $\alpha = 1 \: \forall i$ recovers PLS.
-We may omit the subscript $\alpha$ when $\alpha=0$ and we recover the `pure CCA' setting; in this case, following \cref{eq:cca-vector-of-correlations-def} we can define $\MCCA_K(X\sps{1},\dots,X\sps{I})$ to be the vector of the top-$K$ generalized eigenvalues.
-
+\textbf{Self-Supervised Learning:}
+\textbf{Barlow Twins} and \textbf{VICReg} have come to be known as part of the canonical correlation family of algorithms \citep{balestriero2023cookbook}. Barlow Twins employs a redundancy reduction objective to make the representations of two augmented views both similar and decorrelated \citep{zbontar2021barlow}. Similarly, VICReg uses variance-invariance-covariance regularization, which draws upon canonical correlation principles, to achieve robust performance in diverse tasks \citep{bardes2021vicreg}. These methods serve as vital baselines for our experiments, owing to their foundational use of canonical correlation ideas.
 
 \textbf{Deep CCA:} was originally introduced in \cite{andrew2013deep}; this was extended to an GEP-based formulation of \textbf{Deep Multi-view CCA} (DMCCA) in \cite{somandepalli2019multimodal}. This can be defined using our $\MCCA$ notation as maximizing
-\begin{align}\label{eq:DMCCA-def}
+\begin{align}
+    \label{eq:DMCCA-def}
     \norm{\MCCA_K\left(Z\sps{1}, ... Z\sps{I}\right)}_2
 \end{align}
 over parameters $\theta$ of neural networks defining the representations $Z\sps{i}=f\sps{i}(X\sps{i};\theta\sps{i})$ for $i\in[I]$.
 
-\section{Novel Objectives and Algorithms}\label{sec:contributions}
+
+\section{Methods: Novel Objectives and Algorithms}\label{sec:contributions}
+
 \subsection{Unconstrained objective for GEPs}\label{sec:gep-ey-formulation}
 First, we present proposition \ref{prop:EY-charac}, a formulation of the top-$K$ subspace of GEP problems, which follows by applying the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. However, making this rigorous requires some technical care which we defer to the proof in supplement \ref{supp:proofs}.
 
 \begin{restatable}[Eckhart--Young inspired objective for GEPs]{proposition}{EYcharac}
-\label{prop:EY-charac}
+    \label{prop:EY-charac}
     The top-$K$ subspace of the GEP $(A,B)$ can be characterized by minimizing the following objective over $U \in \R^{D \times K}$:
-    \begin{align}\label{eq:EY-charac}
+    \begin{align}
+        \label{eq:EY-charac}
         \LEYGEP(U) \defeq \tr \left( - 2\,U^T A U + \left(U^T B U\right) \left(U^T B U\right) \right)
     \end{align}
     Moreover, the minimum value is precisely $- \sum_{k=1}^K \lambda_k^2$, where $(\lambda_k)$ are the generalized eigenvalues.
@@ -107,7 +63,8 @@ This objective also has appealing geometrical properties.
 It is closely related to a wide class of unconstrained objectives for PCA and matrix completion which have no spurious local optima \citep{ge_no_2017}, i.e. all local optima are in fact global optima.
 This implies that certain local search algorithms, such as stochastic gradient descent, should indeed converge to a global optimum.
 
-\begin{restatable}{proposition}{NoSpuriousLocalMinima}[No spurious local minima]\label{prop:no-spurious}
+\begin{restatable}{proposition}{NoSpuriousLocalMinima}[No spurious local minima]
+    \label{prop:no-spurious}
     The objective $\LEYGEP$ has no spurious local minima.
     That is, any matrix $\bar{U}$ that is a local minimum of $\LEYGEP$ must in fact be a global minimum.
 \end{restatable}
@@ -124,32 +81,37 @@ It is also possible to make this argument quantitative by proving a version of t
 \subsection{Corresponding Objectives for the CCA family}
 For the case of linear CCA we have $U^T A U = \sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j}), U^T B U = \sum_{i} \Var(Z\sps{i})$.
 To help us extend this to the general case of nonlinear transformations, \cref{eq:general-form-of-representations}, we define the analogous matrices of total between-view covariance and total within-view variance
-\begin{align}\label{eq:def-C-V-matrices}
+\begin{align}
+    \label{eq:def-C-V-matrices}
     \vphantom{\bigl(\bigr)} % increase vertical space
     C(\theta) = \sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j}), \quad
     V(\theta) = \sum_{i} \Var(Z\sps{i})
 \end{align}
 In the case of linear transformations, \cref{eq:cca-linear-function-def}, it makes sense to add a ridge penalty so we can define
-\begin{align}\label{eq:v-alpha-ridge-definition}
+\begin{align}
+    \label{eq:v-alpha-ridge-definition}
     V_\alpha(\theta) = \sum_i \alpha_i {U\spsT{i}} U\sps{i} +  (1 - \alpha_i) \Var(Z\sps{i})
 \end{align}
 This immediately leads to following unconstrained objective for the CCA-family of problems.
 \begin{definition}[Family of EY Objectives]
     Learn representations $Z\sps{i} = f\sps{i}( X\sps{i}; \theta\sps{i})$ minimizing
-    \begin{align}\label{eq:EY-loss-def-C-V}
+    \begin{align}
+        \label{eq:EY-loss-def-C-V}
         \LEY(\theta) = - 2 \tr C(\theta) + \norm{V_\alpha(\theta)}_F^2
     \end{align}
 \end{definition}
 
 \textbf{Unbiased estimates:}
 since empirical covariance matrices are unbiased, we can construct unbiased estimates to $C, V$ from a batch of transformed variables $\Z$.
-\begin{align}\label{eq:def-C-V-matrices-empirical}
+\begin{align}
+    \label{eq:def-C-V-matrices-empirical}
     \hat{C}(\theta)[\Z] = \sum_{i \neq j} \empCov(\Z\sps{i}, \Z\sps{j}), \quad
     \hat{V}(\theta)[\Z] = \sum_{i} \empVar(\Z\sps{i})
 \end{align}
 In the linear case we can construct $\hat{V}_\alpha(\theta)[\Z]$ analogously by plugging sample covariances into \cref{eq:v-alpha-ridge-definition}.
 Then if $\Z, \Z'$ are two independent batches of transformed variables, the batch loss
-\begin{align}\label{eq:empirical-EY-loss-estimate-def}
+\begin{align}
+    \label{eq:empirical-EY-loss-estimate-def}
     \empLEY[\Z, \Z'] \defeq - 2 \tr \hat{C}[\Z] + \langle \hat{V}_\alpha[\Z], \hat{V}_\alpha[\Z'] \rangle_F
 \end{align}
 gives an unbiased estimate of $\LEY(\theta)$.%\footnote{Where again $\alpha > 0$ only makes sense in the linear case, and otherwise we may omit the $\alpha$s}
@@ -160,41 +122,39 @@ We first define a very general algorithm using these estimates in Algorithm \ref
 In the next section we apply this algorithm to multi-view stochastic CCA and PLS, and Deep CCA.
 
 \begin{algorithm}
-   \caption{GEP-EY: General algorithm for learning correlated representations}
-   \label{alg:general}
-\begin{algorithmic}
-   \STATE {\bfseries Input:} data stream of mini-batches $(\X(b))_{b=1}^\infty$ where each consists of $M$ samples from the original dataset. Learning rate $(\eta_t)_t$. Number of time steps $T$. Class of functions $f(\cdot; \theta)$ whose outputs are differentiable with respect to $\theta$.
-   \STATE {\bfseries Initialize:} $\hat{\theta}$ with suitably random entries
-   \FOR{$t=1$ {\bfseries to} $T$}
-       \STATE Obtain two independent mini-batches \( \X(b), \X(b') \) by sampling \( b, b' \) independently
-       \STATE Compute batches of transformed variables $\Z(b) = f(\X(b); \theta), \Z(b') = f(\X(b'); \theta)$
-       %\STATE Construct unbiased estimates $C(\theta)[\Z], \hat{V}(\theta)[\Z], \hat{V}(\theta)[\Z']$ \COMMENT{As defined in \cref{eq:def-C-V-matrices-empirical}}
-       \STATE Estimate loss $\empLEY(\theta)$ using \cref{eq:empirical-EY-loss-estimate-def}
-       \STATE Obtain gradients by back-propagation and step with your favourite optimizer.
-   \ENDFOR
-\end{algorithmic}
+    \caption{GEP-EY: General algorithm for learning correlated representations}
+    \label{alg:general}
+    \begin{algorithmic}
+        \STATE {\bfseries Input:} data stream of mini-batches $(\X(b))_{b=1}^\infty$ where each consists of $M$ samples from the original dataset. Learning rate $(\eta_t)_t$. Number of time steps $T$. Class of functions $f(\cdot; \theta)$ whose outputs are differentiable with respect to $\theta$.
+        \STATE {\bfseries Initialize:} $\hat{\theta}$ with suitably random entries
+        \FOR{$t=1$ {\bfseries to} $T$}
+        \STATE Obtain two independent mini-batches \( \X(b), \X(b') \) by sampling \( b, b' \) independently
+        \STATE Compute batches of transformed variables $\Z(b) = f(\X(b); \theta), \Z(b') = f(\X(b'); \theta)$
+        %\STATE Construct unbiased estimates $C(\theta)[\Z], \hat{V}(\theta)[\Z], \hat{V}(\theta)[\Z']$ \COMMENT{As defined in \cref{eq:def-C-V-matrices-empirical}}
+        \STATE Estimate loss $\empLEY(\theta)$ using \cref{eq:empirical-EY-loss-estimate-def}
+        \STATE Obtain gradients by back-propagation and step with your favourite optimizer.
+        \ENDFOR
+    \end{algorithmic}
 \end{algorithm}
 
 \subsection{`EigenGame' Approach for Ordered Subspaces}\label{sec:gep-eg-formulation}
 
 We now present a second formulation of the top-$K$ subspace of a GEP, which is more closely related to the `EigenGame' approach of \cite{gemp20,gemp2021}.
 
-\section{A Constraint-Free Algorithm for GEPs}
-
 Our first proposed method solves the general form of the generalized eigenvalue problem in equation (\ref{eq:consgep}) for the top-k eigenvalues and their associated eigenvectors in parallel. We are thus interested in both the top-k subspace problem and the top-k eigenvectors themselves. Our method extends the Generalized Hebbian Algorithm to GEPs, and we thus refer to it as GHA-GEP.
 
 In the full-batch version of our algorithm when $A$ is known to be positive semidefinite, each eigenvector estimate has updates with the form
 
 \begin{align}
-\Delta_{i}^{\text{GHA-GEP-PSD}}
-&=
-\overbrace{A \hat{w}_{i}}^{\text{Reward}} - \overbrace{\sum_{j \leq i}B\hat{w}_{j}\textcolor{blue}{\left(\hat{w}_{j}^{\top} A \hat{w}_{i}\right)}}^{\text{Penalty}}
-&&=
-\overbrace{A \hat{w}_{i}}^{\text{Reward}} - \overbrace{B\hat{w}_{i}\textcolor{blue}{\left(\hat{w}_{i}^{\top} A \hat{w}_{i}\right)}}^{\text{Variance Penalty}} - \overbrace{\sum_{j < i}B\hat{w}_{j}\textcolor{blue}{\left(\hat{w}_{j}^{\top} A \hat{w}_{i}\right)}}^{\text{Orthogonality Penalty}} & \nonumber\\
-&=A \hat{w}_{i} - \sum_{j \leq i}B\hat{w}_{j}\textcolor{blue}{\Gamma_{ij}}
-&&=
-A \hat{w}_{i} - B\hat{w}_{i}\bGaminds{ii} - \sum_{j < i}B\hat{w}_{j}\bGaminds{ij}&
-\label{eq:psdupdate}
+    \Delta_{i}^{\text{GHA-GEP-PSD}}
+    &=
+    \overbrace{A \hat{w}_{i}}^{\text{Reward}} - \overbrace{\sum_{j \leq i}B\hat{w}_{j}\textcolor{blue}{\left(\hat{w}_{j}^{\top} A \hat{w}_{i}\right)}}^{\text{Penalty}}
+    &&=
+    \overbrace{A \hat{w}_{i}}^{\text{Reward}} - \overbrace{B\hat{w}_{i}\textcolor{blue}{\left(\hat{w}_{i}^{\top} A \hat{w}_{i}\right)}}^{\text{Variance Penalty}} - \overbrace{\sum_{j < i}B\hat{w}_{j}\textcolor{blue}{\left(\hat{w}_{j}^{\top} A \hat{w}_{i}\right)}}^{\text{Orthogonality Penalty}} & \nonumber\\
+    &=A \hat{w}_{i} - \sum_{j \leq i}B\hat{w}_{j}\textcolor{blue}{\Gamma_{ij}}
+    &&=
+    A \hat{w}_{i} - B\hat{w}_{i}\bGaminds{ii} - \sum_{j < i}B\hat{w}_{j}\bGaminds{ij}&
+    \label{eq:psdupdate}
 \end{align}
 
 where $\hat{w_j}$ is our estimator to the eigenvector associated with the $j^{\text{th}}$ largest eigenvalue and in the stochastic setting, we can replace $A$ and $B$ with their unbiased estimates $\hat{A}$ and $\hat{B}$.
@@ -203,61 +163,64 @@ We will use the notation $\textcolor{blue}{\Gamma_{ij}=\left(\hat{w}_{j}^{\top} 
 We also label the terms as rewards and penalties to facilitate discussion with respect to the EigenGame framework in Appendix \ref{sec:mueigengame} and recent work in self-supervised learning in Appendix \ref{sec:ssl}.
 
 However, when $A$ has negative eigenvalues, the iteration defined in (\ref{eq:psdupdate}) can `blow-up' from certain initial values. We therefore propose the following modification:
-\begin{equation}\label{eq:ourupdate}
-        \Delta_{i}^{\text{GHA-GEP}}=
-        A \hat{w}_{i} - B\hat{w}_{i}\,\textcolor{violet}{\max(}\bGaminds{ii}\textcolor{violet}{,0)} - \sum_{j < i}B\hat{w}_{j}\bGaminds{ij}
-    \end{equation}
+\begin{equation}
+    \label{eq:ourupdate}
+    \Delta_{i}^{\text{GHA-GEP}}=
+    A \hat{w}_{i} - B\hat{w}_{i}\,\textcolor{violet}{\max(}\bGaminds{ii}\textcolor{violet}{,0)} - \sum_{j < i}B\hat{w}_{j}\bGaminds{ij}
+\end{equation}
 Note that this reduces to (\ref{eq:psdupdate}) when $A$ is positive semi-definite. The following proposition, proved in Appendix \ref{app:gha-gep}, justifies this choice of update.
 
 \begin{restatable}[Unique stable stationary point]{proprep}{gepghastationary}
-\label{prop:gep-gha-stat}
-Given exact parents and assuming the top-k generalized eigenvalues
-of $A$ and $B$ are distinct and positive, the only stable stationary point of the iteration defined by (\ref{eq:ourupdate}) is the eigenvector $w_i$ (up to sign).
+    \label{prop:gep-gha-stat}
+    Given exact parents and assuming the top-k generalized eigenvalues
+    of $A$ and $B$ are distinct and positive, the only stable stationary point of the iteration defined by (\ref{eq:ourupdate}) is the eigenvector $w_i$ (up to sign).
 \end{restatable}
-
 
 \subsection{Defining Utilities and Pseudo-Utilities with Lagrangian Functions}
 
 Now observe that the updates (\ref{eq:psdupdate}) can be written as the gradients of a Lagrangian pseudo-utility function:
-\begin{align}\label{eq:lagrangeutils}
-\mathcal{PU}_{i}^{\text{GHA-GEP-PSD}}(w_i | w_{j<i}, \bGam )
-&=\tfrac{1}{2} \hat{w}_{i}^{\top}A\hat{w}_{i}
-+\tfrac{1}{2} \textcolor{blue}{\Gamma_{ii}} (1 - \hat{w}_{i}^{\top}B\hat{w}_{i})
--\sum_{j< i} \textcolor{blue}{\Gamma_{ij}} \hat{w}_{j}^{\top}B\hat{w}_{i}.
+\begin{align}
+    \label{eq:lagrangeutils}
+    \mathcal{PU}_{i}^{\text{GHA-GEP-PSD}}(w_i | w_{j<i}, \bGam )
+    &=\tfrac{1}{2} \hat{w}_{i}^{\top}A\hat{w}_{i}
+    +\tfrac{1}{2} \textcolor{blue}{\Gamma_{ii}} (1 - \hat{w}_{i}^{\top}B\hat{w}_{i})
+    -\sum_{j< i} \textcolor{blue}{\Gamma_{ij}} \hat{w}_{j}^{\top}B\hat{w}_{i}.
 \end{align}
 
 We show how this result is closely related to the pseudo-utility functions in \citet{chen2019constrained} and suggests an alternative pseudo-utility function for the work in \citet{gemp2021} in Appendix \ref{sec:pseudo-utils} which, unlike the original work, does not require stop gradient operators.
 
 If we plug in the relevant $w_i$ and $w_j$ terms into $\bGam$, we obtain the following utility function:
-\begin{align}\label{eq:game-utility-psd}
-\mathcal{U}_{i}^{\delta\text{-PSD}}(w_i ; w_{j<i})
-&=\tfrac{1}{2}\hat{w}_{i}^{\top}A\hat{w}_{i}
-+\tfrac{1}{2}\hat{w}_{i}^{\top}A\hat{w}_{i}\left(1-\hat{w}_{i}^{\top}B\hat{w}_{i}\right)
--\sum_{j< i} \hat{w}_{i}^{\top}A\hat{w}_{j} \hat{w}_{j}^{\top}B\hat{w}_{i} \nonumber \\
-&= (\hat{w}_{i}^{\top}A\hat{w}_{i})
-- \tfrac{1}{2} (\hat{w}_{i}^{\top}A\hat{w}_{i})(\hat{w}_{i}^{\top}B\hat{w}_{i})
-- \sum_{j< i} (\hat{w}_{i}^{\top}A\hat{w}_{j})( \hat{w}_{j}^{\top}B\hat{w}_{i})
+\begin{align}
+    \label{eq:game-utility-psd}
+    \mathcal{U}_{i}^{\delta\text{-PSD}}(w_i ; w_{j<i})
+    &=\tfrac{1}{2}\hat{w}_{i}^{\top}A\hat{w}_{i}
+    +\tfrac{1}{2}\hat{w}_{i}^{\top}A\hat{w}_{i}\left(1-\hat{w}_{i}^{\top}B\hat{w}_{i}\right)
+    -\sum_{j< i} \hat{w}_{i}^{\top}A\hat{w}_{j} \hat{w}_{j}^{\top}B\hat{w}_{i} \nonumber \\
+    &= (\hat{w}_{i}^{\top}A\hat{w}_{i})
+    - \tfrac{1}{2} (\hat{w}_{i}^{\top}A\hat{w}_{i})(\hat{w}_{i}^{\top}B\hat{w}_{i})
+    - \sum_{j< i} (\hat{w}_{i}^{\top}A\hat{w}_{j})( \hat{w}_{j}^{\top}B\hat{w}_{i})
 \end{align}
 
 Again, we apply a modification to prevent blow-up when $A$ has negative eigenvalues, giving utility
-\begin{align}\label{eq:game-utility}
-\mathcal{U}_{i}^{\delta}(w_i ; w_{j<i})
-&= (\hat{w}_{i}^{\top}A\hat{w}_{i})
-- \tfrac{1}{2} \textcolor{violet}{\max(}(\hat{w}_{i}^{\top}A\hat{w}_{i})\textcolor{violet}{,0)}\,(\hat{w}_{i}^{\top}B\hat{w}_{i})
-- \sum_{j< i} (\hat{w}_{i}^{\top}A\hat{w}_{j})( \hat{w}_{j}^{\top}B\hat{w}_{i})
+\begin{align}
+    \label{eq:game-utility}
+    \mathcal{U}_{i}^{\delta}(w_i ; w_{j<i})
+    &= (\hat{w}_{i}^{\top}A\hat{w}_{i})
+    - \tfrac{1}{2} \textcolor{violet}{\max(}(\hat{w}_{i}^{\top}A\hat{w}_{i})\textcolor{violet}{,0)}\,(\hat{w}_{i}^{\top}B\hat{w}_{i})
+    - \sum_{j< i} (\hat{w}_{i}^{\top}A\hat{w}_{j})( \hat{w}_{j}^{\top}B\hat{w}_{i})
 \end{align}
 
 A remarkable fact is that this utility function actually defines a solution to the GEP problem! We prove the following consistency result in Appendix \ref{nashproof}.
 
 \begin{restatable}[Unique utility maximiser]{proprep}{deltanash}
-\label{prop:delta-nash}
-Assuming the top-$i$ generalized eigenvalues of the GEP (\ref{eq:consgep}) are positive and distinct. Then the unique maximizer of the utility in (\ref{eq:game-utility}) for exact parents is precisely the $i^{th}$ eigenvector (up to sign).
+    \label{prop:delta-nash}
+    Assuming the top-$i$ generalized eigenvalues of the GEP (\ref{eq:consgep}) are positive and distinct. Then the unique maximizer of the utility in (\ref{eq:game-utility}) for exact parents is precisely the $i^{th}$ eigenvector (up to sign).
 \end{restatable}
 
 This utility function allows us to formalise $\Delta$-EigenGame, whose solution corresponds to the top-k solution of equation (\ref{eq:consgep}).
 
 \begin{definition}
-Let $\Delta$-EigenGame be the game with players $i \in \{1,...,k\}$, strategy space $\hat{w}_{i} \in \mathbb{R}^d$, where d is the dimensionality of A and B, and utilities $\mathcal{U}_{i}^{\delta}$ defined in equation (\ref{eq:game-utility}).
+    Let $\Delta$-EigenGame be the game with players $i \in \{1,...,k\}$, strategy space $\hat{w}_{i} \in \mathbb{R}^d$, where d is the dimensionality of A and B, and utilities $\mathcal{U}_{i}^{\delta}$ defined in equation (\ref{eq:game-utility}).
 \end{definition}
 
 An immediate corollary of Proposition \ref{prop:delta-nash} is:
@@ -268,7 +231,8 @@ An immediate corollary of Proposition \ref{prop:delta-nash} is:
 Furthermore, the penalty terms in the utility function (\ref{eq:lagrangeutils}) have a natural interpretation as a projection deflation as shown in appendix \ref{sec:defl}.
 
 Next note that it is easy to compute the derivative
-\begin{align}\label{eq:utility-update}
+\begin{align}
+    \label{eq:utility-update}
     \Delta_{i}^\delta
     &=
     \frac{\partial \mathcal{U}_{i}^{\delta}(w_i ; w_{j<i})}{\partial w_i} \\
@@ -285,7 +249,6 @@ We can use these gradients as updates step for an alternative algorithm for the 
 
 This paper is motivated by cases where the algorithm only has access to unbiased sample estimates of $A$ and $B$. These estimates, denoted $\hat{A}$ and $\hat{B}$, are therefore random variables. A nice property of both our proposed GHA-GEP and $\delta$-EigenGame is that $A$ and $B$ appear as multiplications in both of their updates (as opposed to as divisors). This means that we can simply substitute them for our unbiased estimates at each iteration. For the GHA-GEP algorithm this gives us updates based on stochastic unbiased estimates of the gradient
 
-
 \subsection{Applications to (multi-view) stochastic CCA and PLS, and Deep CCA}
 \begin{lemma}[Objective recovers GEP formulation of linear (multi-view) CCA]
     When the $f\sps{i}$ are linear, as in \cref{eq:cca-linear-function-def}, the population loss from \cref{eq:EY-loss-def-C-V} recovers MCCA as defined in \cref{sec:CCA-family}. %Moreover, the minimal loss value is precisely $-\norm{\MCCA_K(X)}$
@@ -298,7 +261,8 @@ This paper is motivated by cases where the algorithm only has access to unbiased
 Moreover, by following through the chain of back-propagation, we obtain gradient estimates in $\mathcal{O}(MKD)$ time.
 Indeed, we can obtain gradients for the transformed variables in $\mathcal{O}(M K^2)$ time so the dominant cost is then updating $U$; we flesh this out with full details in \cref{supp:fast-updates}.
 
-\begin{restatable}{lemma}{recoverDeepCCA}[Objective recovers Deep Multi-view CCA]\label{lem:recover-DeepCCA}
+\begin{restatable}{lemma}{recoverDeepCCA}[Objective recovers Deep Multi-view CCA]
+    \label{lem:recover-DeepCCA}
     Assume that there is a final linear layer in each neural network $f\sps{i}$.
     Then at any local optimum, $\hat{\theta}$, of the population problem, we have
     \begin{align*}
@@ -319,10 +283,12 @@ We make certain notions of this intuition precise for CCA and Deep CCA in \cref{
 
 To provide context for this proposal, we also explored in detail how VICReg and Barlow twins are related to CCA.
 For now we focus on VICReg, whose loss can be written as
-\begin{small}\begin{align*}
-    \mathcal{L}_\text{VR}(Z\sps{1}, Z\sps{2})
-    &= \gamma \mathbb{E} \norm{Z^{(1)} - Z^{(2)}}^2 + \sum_{i \in \{1,2\}} \bigg[\alpha \sum_{k=1}^K \left(1 \shortminus \sqrt{\Var(Z\sps{i}_i)}\right)_+ + \beta \sum_{\substack{k,l=1 \\ k \neq l}}^K \Cov(Z\sps{i}_k,Z\sps{i}_l)^2 \bigg]
-\end{align*}\end{small}%
+\begin{small}
+    \begin{align*}
+        \mathcal{L}_\text{VR}(Z\sps{1}, Z\sps{2})
+        &= \gamma \mathbb{E} \norm{Z^{(1)} - Z^{(2)}}^2 + \sum_{i \in \{1,2\}} \bigg[\alpha \sum_{k=1}^K \left(1 \shortminus \sqrt{\Var(Z\sps{i}_i)}\right)_+ + \beta \sum_{\substack{k,l=1 \\ k \neq l}}^K \Cov(Z\sps{i}_k,Z\sps{i}_l)^2 \bigg]
+    \end{align*}
+\end{small}%
 where $\alpha, \beta, \gamma > 0$ are tuning parameters and, as in the framework of \cref{sec:background-unified}, the $Z\sps{1}, Z\sps{2}$ are $K$-dimensional representations, parameterised by neural networks in \cref{eq:general-form-of-representations}.
 Our main conclusions regarding optima of the population loss are:
 \begin{itemize}
@@ -332,27 +298,14 @@ Our main conclusions regarding optima of the population loss are:
     \item VICReg can therefore be interpreted as a formulation of Deep CCA, but one that will not in general recover full rank representations.
 \end{itemize}
 
-% We believe versions of each of these conclusions also hold for Barlow twins, but can only prove a subset of the results at present.%, see \cref{supp:ssl-theory} for further discussion.
 We give full mathematical details and further discussion in \cref{supp:ssl-theory}.
 The analysis for Barlow twins is more difficult, but we present a combination of mathematical and empirical arguments which suggest all the same conclusions hold, again see \cref{supp:ssl-theory}.
 
-\section{Related Work}\label{sec:related-work}
-
-\textbf{Stochastic PLS and CCA:}
-To the best of our knowledge, the state-of-the-art in Stochastic PLS and CCA are the subspace Generalized Hebbian Algorithm (\textbf{SGHA}) of \cite{chen2019constrained} and \textbf{$\gamma$-EigenGame} from \cite{gemp20,gemp2021}. Specifically, SGHA utilizes a Lagrange multiplier heuristic along with saddle-point analysis, albeit with limited convergence guarantees. EigenGame focuses on top-k subspace learning but introduces an adaptive whitening matrix in the stochastic setting with an additional hyperparameter. Both methods set the benchmarks we aim to compare against in the subsequent experimental section. Like our method, both can tackle other symmetric Generalized Eigenvalue Problems in principle.
-
-\textbf{DCCA and Deep Multiview CCA:}
-The deep canonical correlation analysis (DCCA) landscape comprises three principal approaches with inherent limitations. The first, known as the full-batch approach, uses analytic gradient derivations based on the full sample covariance matrix \citep{andrew2013deep}.
-% Lennie: could work in $\norm{\Var(Z\sps{1})^\mhalf \Cov(Z\sps{1}, Z\sps{2}) \Var(Z\sps{2})^\mhalf}_F$ here - what do you think James?
-The second involves applying the full batch objective to large mini-batches, an approach referred to as \textbf{DCCA-STOL} \citep{wang2015unsupervised}. However, this approach gives biased gradients and therefore requires batch sizes much larger than the representation size in practice. This is the approach taken by both \textbf{DMCCA} \citep{somandepalli2019multimodal} and \textbf{DGCCA} \citep{benton2017deep} . The final set of approaches use an adaptive whitening matrix \citep{wang2015stochastic, chang2018scalable} to mitigate the bias of the Deep CCA objective. However, the authors of \textbf{DCCA-NOI} highlight that the associated time constant complicates analysis and requires extensive tuning. These limitations make existing DCCA methods less practical and resource-efficient.
-
-
-\textbf{Self-Supervised Learning:}
-\textbf{Barlow Twins} and \textbf{VICReg} have come to be known as part of the canonical correlation family of algorithms \citep{balestriero2023cookbook}. Barlow Twins employs a redundancy reduction objective to make the representations of two augmented views both similar and decorrelated \citep{zbontar2021barlow}. Similarly, VICReg uses variance-invariance-covariance regularization, which draws upon canonical correlation principles, to achieve robust performance in diverse tasks \citep{bardes2021vicreg}. These methods serve as vital baselines for our experiments, owing to their foundational use of canonical correlation ideas.
 
 \section{Experiments}\label{Experiments}
 
 % Stochastic CCA Section
+
 \subsection{Stochastic CCA}
 First, we compare our proposed method, CCA-EY, to the baselines of $\gamma$-EigenGame and SGHA.
 Our experimental setup is almost identical to that of \cite{meng2021online, gemp2022generalized}; unlike \cite{gemp2022generalized} we do not simplify the problem by first performing PCA on the data before applying the CCA methods, which explains the decrease in performance of $\gamma$-EigenGame compared to their original work.
@@ -360,19 +313,19 @@ All models are trained for a single epoch with varying mini-batch sizes ranging 
 
 \textbf{Parameters:} For each method, we searched over a hyperparameter grid using \citet{wandb}.
 
-\begin{table}[h!] 
-\centering 
-\begin{tabular}{|l|l|} 
-\hline Parameter & Values \\ 
-\hline minibatch size & 5,20,50,100 \\ 
-\hline components & 5 \\ 
-\hline epochs & 1 \\ 
-\hline seed & 1, 2, 3, 4, 5 \\ 
-\hline lr & 0.01, 0.001, 0.0001 \\ 
-\hline $\gamma$\footnotemark & 0.01,0.1,1,10 \\ 
-\hline 
-\end{tabular}
-\footnotetext{gamma is only used for $\gamma$-EigenGame}
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline Parameter             & Values              \\
+        \hline minibatch size        & 5,20,50,100         \\
+        \hline components            & 5                   \\
+        \hline epochs                & 1                   \\
+        \hline seed                  & 1, 2, 3, 4, 5       \\
+        \hline lr                    & 0.01, 0.001, 0.0001 \\
+        \hline $\gamma$\footnotemark & 0.01,0.1,1,10       \\
+        \hline
+    \end{tabular}
+    \footnotetext{gamma is only used for $\gamma$-EigenGame}
 \end{table}
 
 % In this section, we assess the performance of our proposed method, CCA-EY, against baseline techniques $\gamma$-EigenGame and SGHA. We draw upon the experimental setups detailed in \cite{meng2021online, gemp2022generalized}, zeroing in on the MediaMill dataset to evaluate top-5 canonical correlations. Our models are trained for a single epoch with varying mini-batch sizes ranging from 5 to 100. We utilize the Proportion of Correlation Captured (PCC), defined as \( \text{PCC} = \frac{\sum_{i=1}^k \rho_i}{\sum_{i=1}^k \rho_i^*} \), as our evaluation metric.
@@ -381,30 +334,47 @@ All models are trained for a single epoch with varying mini-batch sizes ranging 
 Figure \ref{fig:scca_mediamill} compares the algorithms on the MediaMill dataset. \cref{fig:corr_mediamill} shows that CCA-EY consistently outperforms both $\gamma$-EigenGame and SGHA in terms of PCC across all evaluated mini-batch sizes.
 \cref{fig:lr_mediamill} examines the learning curves for batch sizes 5 and 100 in more detail; CCA-EY appears to learn more slowly than SGHA at the start of the epoch, but clearly outperforms SGHA as the number of samples seen increases. $\gamma$-EigenGame significantly underperforms SGHA and CCA-EY, particularly for small batch sizes.
 
-\textbf{Further experiments:} we conduct analogous experiments on the Split CIFAR dataset in supplementary material \ref{supp:scca} and observe identical behaviour.
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/CCA/mediamill_models_different_batch_sizes}
+        \caption{}
+        \label{fig:corr_mediamill}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/CCA/mediamill_allbatchsizes_pcc}
+        \caption{}
+        \label{fig:lr_mediamill}
+    \end{subfigure}
+    \caption{Stochastic CCA on MediaMill using the Proportion of Correlation Captured (PCC) metric: (a) Across varying mini-batch sizes, trained for a single epoch, and (b) Training progress over a single epoch for mini-batch sizes 5, 100.
+    Shaded regions signify \(\pm\) one standard deviation around the mean of 5 runs.}\label{fig:scca_mediamill}
+\end{figure}
 
 \begin{figure}
-     \centering
-     \begin{subfigure}[b]{0.49\textwidth}
-         \centering
-         \includegraphics[width=\textwidth]{figures/CCA/mediamill_models_different_batch_sizes}
-         \caption{}
-         \label{fig:corr_mediamill}
-     \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{0.49\textwidth}
-         \centering
-         \includegraphics[width=\textwidth]{figures/CCA/mediamill_allbatchsizes_pcc}
-         \caption{}
-         \label{fig:lr_mediamill}
-     \end{subfigure}
-\caption{Stochastic CCA on MediaMill using the Proportion of Correlation Captured (PCC) metric: (a) Across varying mini-batch sizes, trained for a single epoch, and (b) Training progress over a single epoch for mini-batch sizes 5, 100.
-Shaded regions signify \(\pm\) one standard deviation around the mean of 5 runs.}\label{fig:scca_mediamill}
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/CCA/cifar_models_different_batch_sizes}
+        \caption{}
+        \label{fig:corr_cifar}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/CCA/cifar_allbatchsizes_pcc}
+        \caption{}
+        \label{fig:lr_cifar}
+    \end{subfigure}
+    \caption{Stochastic CCA on CIFAR using the Proportion of Correlation Captured (PCC) metric: (a) Across varying mini-batch sizes, trained for a single epoch, and (b) Training progress over a single epoch for mini-batch sizes 5, 100.
+    Shaded regions signify \(\pm\) one standard deviation around the mean of 5 runs.}\label{fig:scca_cifar}
 \end{figure}
 
 
-
 % Deep CCA Section
+
 \subsection{Deep CCA}\label{sec:experiments-DCCA}
 Second, we compare DCCA-EY against the DCCA methods described in \cref{sec:related-work}. The experimental setup is identical to that of \cite{wang2015stochastic}.
 We learn $K=50$ dimensional representations, using mini-batch sizes ranging from 20 to 100 and train for 50 epochs.
@@ -414,17 +384,17 @@ Because there is no longer a ground truth we have to use Total Correlation Captu
 
 \textbf{Parameters:} For each method, we searched over a hyperparameter grid using \citet{wandb}.
 
-\begin{table}[h!] 
-\centering 
-\begin{tabular}{|l|l|} 
-\hline Parameter & Values \\
-\hline minibatch size & 100, 50, 20 \\ 
-\hline lr & 1e-3, 1e-4, 1e-5 \\ 
-\hline $\rho$\footnotemark & 0.6, 0.8, 0.9 \\ 
-\hline epochs & 50 \\ 
-\hline 
-\end{tabular}
-\footnotetext{$\rho$ is only used for DCCA-NOI}
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline Parameter           & Values           \\
+        \hline minibatch size      & 100, 50, 20      \\
+        \hline lr                  & 1e-3, 1e-4, 1e-5 \\
+        \hline $\rho$\footnotemark & 0.6, 0.8, 0.9    \\
+        \hline epochs              & 50               \\
+        \hline
+    \end{tabular}
+    \footnotetext{$\rho$ is only used for DCCA-NOI}
 \end{table}
 
 \textbf{Observations:}
@@ -432,25 +402,46 @@ Figure \ref{fig: mnist} compares the methods on the splitMNIST dataset.
 DCCA-STOL captures significantly less correlation than the other methods, and breaks down when the mini-batch size is less than the dimension $K=50$ due to low rank empirical covariances.
 DCCA-NOI performs similarly to DCCA-EY but requires careful tuning of an additional hyperparameter, and shows significantly slower speed to convergence (Figure \ref{fig:lr_mnist}).
 
-\textbf{Further experiments:} we conduct analogous experiments on the XRMB dataset in supplementary material \ref{app:xrmb_results} and observe identical behaviour.
+Figure \ref{fig: xrmb} compares the methods on the XRMB dataset.
+DCCA-STOL captures significantly less correlation than the other methods, and breaks down when the mini-batch size is less than the dimension $K=50$ due to low rank empirical covariances.
+DCCA-NOI performs similarly to DCCA-EY but requires careful tuning of an additional hyperparameter, and shows significantly slower speed to convergence (Figure \ref{fig:lr_mnist}).
 
 \begin{figure}
-     \centering
-     \begin{subfigure}[b]{0.49\textwidth}
-         \centering
-         \includegraphics[width=\textwidth]{figures/DCCA/SplitMNIST_models_different_batch_sizes}
-         \caption{}
-         \label{fig:corr_mnist}
-     \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{0.49\textwidth}
-         \centering
-         \includegraphics[width=\textwidth]{figures/DCCA/SplitMNIST_allbatchsizes_pcc}
-         \caption{}
-         \label{fig:lr_mnist}
-     \end{subfigure}
-\caption{Deep CCA on SplitMNIST using the Validation TCC metric: (a) after training each model for 50 epochs with varying batch sizes; (b) learning progress over 50 epochs.}
-     \label{fig: mnist}
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/DCCA/SplitMNIST_models_different_batch_sizes}
+        \caption{}
+        \label{fig:corr_mnist}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/DCCA/SplitMNIST_allbatchsizes_pcc}
+        \caption{}
+        \label{fig:lr_mnist}
+    \end{subfigure}
+    \caption{Deep CCA on SplitMNIST using the Validation TCC metric: (a) after training each model for 50 epochs with varying batch sizes; (b) learning progress over 50 epochs.}
+    \label{fig: mnist}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/DCCA/XRMB_models_different_batch_sizes}
+        \caption{}
+        \label{fig:corr_xrmb}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/DCCA/XRMB_allbatchsizes_pcc}
+        \caption{}
+        \label{fig:lr_xrmb}
+    \end{subfigure}
+    \caption{Deep CCA on XRMB using the Validation TCC metric: (a) after training each model for 50 epochs with varying batch sizes; (b) learning progress over 50 epochs.}
+    \label{fig: xrmb}
 \end{figure}
 
 \subsection{Deep Multiview CCA: Robustness Across Different Batch Sizes}
@@ -462,16 +453,16 @@ using the notation of \cref{sec:background-unified}.
 
 \textbf{Parameters:} For each method, we searched over a hyperparameter grid using \citet{wandb}.
 
-\begin{table}[h!] 
-\centering 
-\begin{tabular}{|l|l|} 
-\hline Parameter & Values \\ 
-\hline minibatch size & 5,10,20,50,100,200 \\ 
-\hline components & 50 \\ 
-\hline epochs & 100 \\ 
-\hline lr & 0.01, 0.001, 0.0001, 0.00001 \\ 
-\hline 
-\end{tabular}
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline Parameter      & Values                       \\
+        \hline minibatch size & 5,10,20,50,100,200           \\
+        \hline components     & 50                           \\
+        \hline epochs         & 100                          \\
+        \hline lr             & 0.01, 0.001, 0.0001, 0.00001 \\
+        \hline
+    \end{tabular}
 \end{table}
 
 \textbf{Observations:}
@@ -482,22 +473,21 @@ Figure~\ref{fig:dmcca_lr} shows learning curves for batch sizes 50 and 100.
 DMCCA and DGCCA both quickly learn significant correlations but then plateau out; our method consistently improves, and significantly outperforms them by the end of training.
 
 \begin{figure}
-     \centering
-     \begin{subfigure}[b]{0.49\textwidth}
-         \centering
-         \includegraphics[width=\textwidth]{figures/DMCCA/mfeat_models_different_batch_sizes}
-         \caption{}\label{fig:dmcca_corr}
-     \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{0.49\textwidth}
-         \centering
-         \includegraphics[width=\textwidth]{figures/DMCCA/mfeat_allbatchsizes_pcc}
-         \caption{}\label{fig:dmcca_lr}
-     \end{subfigure}
-     \caption{Deep Multi-view CCA on mfeat using the Validation TMCC metric: (a) after training each model for 100 epochs with varying batch sizes; (b) learning progress over 100 epochs.}
-     \label{fig:dmcca}
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/DMCCA/mfeat_models_different_batch_sizes}
+        \caption{}\label{fig:dmcca_corr}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/DMCCA/mfeat_allbatchsizes_pcc}
+        \caption{}\label{fig:dmcca_lr}
+    \end{subfigure}
+    \caption{Deep Multi-view CCA on mfeat using the Validation TMCC metric: (a) after training each model for 100 epochs with varying batch sizes; (b) learning progress over 100 epochs.}
+    \label{fig:dmcca}
 \end{figure}
-
 
 \subsection{Stochastic PLS UK Biobank}
 Next, we demonstrate the scalability of our methods to extremely high-dimensional data by applying stochastic PLS to imaging genetics data from the UK Biobank \citep{sudlow2015uk}.
@@ -508,12 +498,12 @@ The only other analysis on the UK Biobank at comparable scale partitions the dat
 We ran PLS-EY with mini-batch size 500 on brain imaging (82 regional volumes) and genetics (582,565 variants) data for 33,333 subjects. See supplement (Section \ref{sec:ukbb_preprocessing}) for data pre-processing details.
 To our knowledge, this is the largest-scale PLS analysis of biomedical data to-date.
 
-\textbf{Further details:} The UK BioBank data consisted of real-valued continuous brain volumes and ordinal, integer genetic variants. 
-We used pre-processed (using FreeSurfer \citep{Fischl2012}) grey-matter volumes for 66 cortical (Desikan-Killiany atlas) and 16 subcortical brain regions and 582,565 autosomal genetic variants. 
-The affects of age, age squared, intracranial volume, sex, and the first 20 genetic principal components for population structure were removed from the brain features using linear regression to account for any confounding effects. 
-Each brain ROI was normalized by removing the mean and dividing the standard deviation. 
-We processed the genetics data using PLINK \citep{Purcell2007} keeping genetic variants with a minor allele frequency of at least 1\%  and a maximum missingness rate of 2\%. 
-We used mean imputation to fill in missing values and centered each variant. 
+\textbf{Further details:} The UK BioBank data consisted of real-valued continuous brain volumes and ordinal, integer genetic variants.
+We used pre-processed (using FreeSurfer \citep{Fischl2012}) grey-matter volumes for 66 cortical (Desikan-Killiany atlas) and 16 subcortical brain regions and 582,565 autosomal genetic variants.
+The affects of age, age squared, intracranial volume, sex, and the first 20 genetic principal components for population structure were removed from the brain features using linear regression to account for any confounding effects.
+Each brain ROI was normalized by removing the mean and dividing the standard deviation.
+We processed the genetics data using PLINK \citep{Purcell2007} keeping genetic variants with a minor allele frequency of at least 1\%  and a maximum missingness rate of 2\%.
+We used mean imputation to fill in missing values and centered each variant.
 
 To generate measures of genetic disease risk, we calculated polygenic risk scores using PRSice \citep{PRSice2014}. We calculated scores, with a p-value threshold of 0.05, using GWAS summary statistics for the following diseases; Alzheimer's \citep{Lambert2013}, Schizophrenia \citep{Trubetskoy2022}, Bipolar \citep{Mullins2021}, ADHD \citep{Demontis2023}, ALS \citep{Van_Rheenen2021}, Parkinson's \citep{Nalls2019}, and Epilepsy \citep{International_League_Against_Epilepsy_Consortium_on_Complex_Epilepsies2018}, using the referenced GWAS studies.
 
@@ -522,20 +512,20 @@ The GEP-EY PLS analysis was trained for 100 epochs using a learning rate of 0.00
 \textbf{Observations:} We see strong validation correlation between all 10 corresponding pairs of vectors in the PLS subspace and weak cross correlation, indicating that our model learnt a coherent and orthogonal subspace of covariation (Figure \ref{fig:UKBB_corr}), a remarkable feat for such high-dimensional data. We found that the PLS brain subspace was associated with genetic risk measures for several disorders (Figure \ref{fig:genetic_risk}), suggesting that the PLS subspace encodes relevant information for genetic disease risk, a significant finding for biomedical research.
 
 \begin{figure}
-\centering
-     \begin{subfigure}[b]{0.27\textwidth}
-         \centering
-          \includegraphics[width=\textwidth,trim={0.8cm 0cm 0.3cm 0cm}]{figures/UKBB/cross_corr.png}
-          \caption{}
-          \label{fig:UKBB_corr}
-     \end{subfigure}
-     \begin{subfigure}[b]{0.72\textwidth}
-         \centering
-          \includegraphics[width=\textwidth,trim={0.5cm 0cm 0.7cm 0cm}]{figures/UKBB/prs_correlations.png}
-          \caption{}
-          \label{fig:genetic_risk}
-     \end{subfigure}
-\caption{(a) Correlations between PLS components for UK Biobank. (b) Correlations between PLS brain components and genetic risk scores. AD=Alzheimer's disease, SCZ=Schizophrenia, BP=Bipolar, ADHD=Attention deficit hyperactivity disorder, ALS=Amyotrophic lateral sclerosis, PD=Parkinson's disease, EPI=Epilepsy. $\text{ns}: 0.05< p <= 1, \ast: 0.01< p <=0.05, \ast\ast: 0.001< p <= 0.01, \ast\ast\ast: 0.0001< p <= 0.001$.}
+    \centering
+    \begin{subfigure}[b]{0.27\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,trim={0.8cm 0cm 0.3cm 0cm}]{figures/UKBB/cross_corr.png}
+        \caption{}
+        \label{fig:UKBB_corr}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.72\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,trim={0.5cm 0cm 0.7cm 0cm}]{figures/UKBB/prs_correlations.png}
+        \caption{}
+        \label{fig:genetic_risk}
+    \end{subfigure}
+    \caption{(a) Correlations between PLS components for UK Biobank. (b) Correlations between PLS brain components and genetic risk scores. AD=Alzheimer's disease, SCZ=Schizophrenia, BP=Bipolar, ADHD=Attention deficit hyperactivity disorder, ALS=Amyotrophic lateral sclerosis, PD=Parkinson's disease, EPI=Epilepsy. $\text{ns}: 0.05< p <= 1, \ast: 0.01< p <=0.05, \ast\ast: 0.001< p <= 0.01, \ast\ast\ast: 0.0001< p <= 0.001$.}
 \end{figure}
 
 \subsection{Self-Supervised Learning with SSL-EY}
@@ -550,16 +540,17 @@ We predict labels via a linear probe on the learnt representations and evaluate 
     \centering
     \begin{tabular}{lcccc}
         \hline
-        Method & CIFAR-10 Top-1 & CIFAR-10 Top-5 & CIFAR-100 Top-1 & CIFAR-100 Top-5 \\
+        Method          & CIFAR-10 Top-1 & CIFAR-10 Top-5 & CIFAR-100 Top-1 & CIFAR-100 Top-5 \\
         \hline
-        Barlow Twins & \textbf{92.1} & 99.73 & \textbf{71.38} & \textbf{92.32} \\
-        VICReg & 91.68 & 99.66 & 68.56 & 90.76 \\
-        \textbf{SSL-EY} & 91.43 & \textbf{99.75} & 67.52 & 90.17 \\
+        Barlow Twins    & \textbf{92.1}  & 99.73          & \textbf{71.38}  & \textbf{92.32}  \\
+        VICReg          & 91.68          & 99.66          & 68.56           & 90.76           \\
+        \textbf{SSL-EY} & 91.43          & \textbf{99.75} & 67.52           & 90.17           \\
         \hline
     \end{tabular}
     \caption{Performance comparison of SSL methods on CIFAR-10 and CIFAR-100.}
     \label{tab:selfsup}
 \end{table}
+
 
 \section{Further Experiments with CIFAR-10 and CIFAR-100}\label{sec:experiments}
 
@@ -575,43 +566,44 @@ For this reason, in another set of experiments, we explored varying the projecto
     \centering
     \begin{tabular}{lcccc}
         \hline
-        Method & CIFAR-10 Top-1 & CIFAR-10 Top-5 & CIFAR-100 Top-1 & CIFAR-100 Top-5 \\
+        Method          & CIFAR-10 Top-1 & CIFAR-10 Top-5 & CIFAR-100 Top-1 & CIFAR-100 Top-5 \\
         \hline
-        Barlow Twins & \textbf{92.1} & 99.73 & \textbf{71.38} & \textbf{92.32} \\
-        VICReg & 91.68 & 99.66 & 68.56 & 90.76 \\
-        \textbf{SSL-EY} & 91.43 & \textbf{99.75} & 67.52 & 90.17 \\
+        Barlow Twins    & \textbf{92.1}  & 99.73          & \textbf{71.38}  & \textbf{92.32}  \\
+        VICReg          & 91.68          & 99.66          & 68.56           & 90.76           \\
+        \textbf{SSL-EY} & 91.43          & \textbf{99.75} & 67.52           & 90.17           \\
         \hline
-        SSL-EY No Proj. & 90.98 & 99.69 & 65.21 & 88.09\\
+        SSL-EY No Proj. & 90.98          & 99.69          & 65.21           & 88.09           \\
         \hline
     \end{tabular}
     \caption{Performance comparison of SSL methods on CIFAR-10 and CIFAR-100.}
     \label{tab:selfsup}
 \end{table}
 
-% \begin{figure}[H]
-% \centering
-%          % \includesvg[width=\textwidth]{figures/SSL/cifar100_top5_learning_curve.svg}
-%          \includesvg[width=0.57\textwidth]{figures/SSL/cifar100_learning_curve_log_error.svg}
-%          \caption{Learning curves for SSL-EY, Barlow Twins, and VICReg on CIFAR-100, showing performance across 1,000 epochs.}
-%          \label{fig:ssl learning curve cifar100 top5}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+% \includegraphics[width=\textwidth]{figures/SSL/cifar100_top5_learning_curve.svg}
+    \includegraphics[width=0.57\textwidth]{figures/SSL/cifar100_learning_curve_log_error}
+    \caption{Learning curves for SSL-EY, Barlow Twins, and VICReg on CIFAR-100, showing performance across 1,000 epochs.}
+    \label{fig:ssl learning curve cifar100 top5}
+\end{figure}
 
-% \begin{figure}[H]
-%      \begin{subfigure}[b]{0.47\textwidth}
-%     \centering
-%      \includesvg[width=\textwidth]{figures/SSL/cifar100_proj_dim_log_error.svg}
-%      \caption{}
-%      \label{fig: ssl projector dimensions 100}
-%      \end{subfigure}
-%       \begin{subfigure}[b]{0.47\textwidth}
-%          \centering
-%          \includesvg[width=\textwidth]{figures/SSL/cifar100_corr_vs_acc_log_error.svg}
-%          \caption{}
-%          \label{fig:ssl learning curve cifar100 vs corr}
-%      \end{subfigure}
-%     \caption{(a) Performance of SSL-EY with reduced projector size compared to Barlow Twins and VICReg. (b) SSL-EY's learned embeddings indicate untapped representation capacity.}
-%     \label{fig: ssl projector cifar 100}
-% \end{figure}
+\begin{figure}[H]
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/SSL/cifar100_proj_dim_log_error}
+        \caption{}
+        \label{fig: ssl projector dimensions 100}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/SSL/cifar100_corr_vs_acc_log_error}
+        \caption{}
+        \label{fig:ssl learning curve cifar100 vs corr}
+    \end{subfigure}
+    \caption{(a) Performance of SSL-EY with reduced projector size compared to Barlow Twins and VICReg. (b) SSL-EY's learned embeddings indicate untapped representation capacity.}
+    \label{fig: ssl projector cifar 100}
+\end{figure}
+
 
 \section{Conclusion}
 

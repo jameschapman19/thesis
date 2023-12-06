@@ -1,7 +1,10 @@
 \graphicspath{{chapters/software/}}
+
+
 \chapter{CCA-Zoo: A collection of Regularized, Deep Learning-based, Kernel, and Probabilistic methods in a scikit-learn style framework}\label{ch:ccazoo}
 
-% \epigraph{What I mean is that if you really want to understand something, the best way is to try and explain it to someone else. That forces you to sort it out in your mind. And the more slow and dim-witted your pupil, the more you have to break things down into more and more simple ideas. And that's really the essence of programming. By the time you've sorted out a complicated idea into little steps that even a stupid machine can deal with, you've learned something about it yourself.}{\textit{Douglas Adams}}
+% \epigraph{And that's really the essence of programming. By the time you've sorted out a complicated idea into little steps that even a stupid machine can deal with, you've learned something about it yourself.}{\textit{Douglas Adams}}
+
 
 \section{Introduction}
 
@@ -13,6 +16,7 @@ This is particularly striking given the widespread recognition that the availabi
 One glaring example of this trend is Sparse PLS. Despite its known limitations, Sparse PLS has effectively become the go-to method for sparse CCA applications, primarily due to its robust implementation in the R programming language.
 The discrepancy between the availability of multiview learning tools in R and Python has not only hindered the diversification of methodologies but also impeded the community from leveraging the more recent advances in the field.
 
+
 \section{Background}
 
 In recent years, the research community has shown a heightened interest in multiview learning, as evident from the proliferation of scholarly articles and the diversification of use-cases ranging from bioinformatics to natural language processing.
@@ -23,6 +27,7 @@ However, this posed a challenge for Python-oriented researchers and practitioner
 This fragmentation has, in effect, created barriers to entry and possibly slowed down the progress in applying multiview learning techniques in Python-based projects.
 
 The \texttt{CCA-Zoo} package aims to bridge this divide by offering a broad range of multiview learning algorithms, creating a unified platform that fosters both academic research and practical applications in Python.
+
 
 \section{Methods}
 
@@ -41,27 +46,6 @@ In particular, the \texttt{scikit-learn} API for fitting a model is \texttt{mode
 In multiview learning, we have multiple views of data \texttt{X}, and so we need to be able to fit a model with multiple views of data.
 For this reason, models in \texttt{CCA-Zoo} have a \texttt{fit} method that takes a list of views as input, i.e. \texttt{model.fit([X1, X2, X3], y)}.
 
-\subsection{Models}
-
-\subsubsection{Linear Models}
-
-\subsubsection{Deep Models}
-
-
-\subsubsection{Model Selection}
-
-Model selection and cross-validation are crucial steps to all of the models described in this thesis and in particular models with hyperparameters.
-In this section, we describe the model selection API in \texttt{CCA-Zoo} and how it is optimised for use with high-dimensional biomedical data.
-
-\subsubsection{Grid Search}
-
-In order to be compatible with the
-
-\subsubsection{Random Search}
-
-\subsubsection{Visualisation}
-
-
 \subsection{Code Availability}
 
 The code for \texttt{CCA-Zoo} is available at.
@@ -69,6 +53,7 @@ The code for \texttt{CCA-Zoo} is available at.
 \texttt{CCA-Zoo} has received 155 stars and 30 forks on GitHub, and has nearly 500 downloads per month on PyPI \footnote{https://pypistats.org/packages/cca-zoo}.
 
 I am particularly proud of the diversity of projects CCA-Zoo has found use in outside of medical imaging given that the goal was to create a general purpose multiview learning library.
+
 
 \section{Benchmarking}
 
@@ -91,10 +76,10 @@ The datasets consisted of random matrices with a varying number of dimensions: \
 Figure~\ref{fig:cca_benchmark} presents the comparison between \texttt{CCA-Zoo} and \texttt{scikit-learn} for Canonical Correlation Analysis. We observe that \texttt{CCA-Zoo} exhibits a competitive runtime profile when compared to \texttt{scikit-learn} across all dimensions.
 
 \begin{figure}[h]
-\centering
-\includegraphics[width=0.8\textwidth]{figures/CCA_Speed_Benchmark}
-\caption{Performance comparison for CCA methods}
-\label{fig:cca_benchmark}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/CCA_Speed_Benchmark}
+    \caption{Performance comparison for CCA methods}
+    \label{fig:cca_benchmark}
 \end{figure}
 
 \paragraph{Partial Least Squares:}
@@ -102,10 +87,10 @@ The comparison for Partial Least Squares is shown in Figure \ref{fig:pls_benchma
 Like the CCA experiment, \texttt{CCA-Zoo} maintains a robust performance profile that is competitive with \texttt{scikit-learn}.
 
 \begin{figure}[h]
-\centering
-\includegraphics[width=0.8\textwidth]{figures/CCA_Speed_Benchmark}
-\caption{Performance comparison for PLS methods}
-\label{fig:pls_benchmark}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/CCA_Speed_Benchmark}
+    \caption{Performance comparison for PLS methods}
+    \label{fig:pls_benchmark}
 \end{figure}
 
 \subsubsection{Discussion}

@@ -1,7 +1,11 @@
 \graphicspath{{chapters/background/}}
+
+
 \chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}\label{chap:background}
 \epigraph{Principal Component Analysis is a dimensionally invalid method that gives people a delusion that they are doing something useful with their data. If you change the units that one of the variables is measured in, it will change all the “principal components”! It’s for that reason that I made no mention of PCA in my book. I am not a slavish conformist, regurgitating whatever other people think should be taught. I think before I teach.}{Professor David MacKay}
 \minitoc
+
+
 \section{Introduction to Machine Learning and Multiview Learning}
 
 In this chapter, we gather the necessary background knowledge needed to motivate and understand the contributions of this thesis.
@@ -45,7 +49,7 @@ The graphical represents the assumption that the brain and behaviour are conditi
 \begin{figure}
     \centering
     \tikz{
-        % nodes
+    % nodes
         \node[latent, align=center, minimum size=2cm] (Z) {Severity\\z};
         %
         \node[obs, below left=of Z, minimum size=2cm, align=center] (x1) {Brain\\$x^{(1)}$};
@@ -82,11 +86,13 @@ This process exploits the overlap in information to correct or reduce noise and 
 In this thesis we will work with Canonical Correlation Analysis, a multiview learning method which assumes that the \gls{views} contain complementary information about latent variables.
 The next section builds a formal understanding of the principles behind Canonical Correlation Analysis and its variants.
 
+
 \section{Learning Representations: Definitions and Notation}
 
 Suppose we have a sequence of vector-valued random variables $X\sps{i} \in \R^{D_i}$ for $i \in \{1, \dots, I \}$
 We want to learn meaningful $K$-dimensional representations
-\begin{equation}\label{eq:general-form-of-representations}
+\begin{equation}
+    \label{eq:general-form-of-representations}
     Z\sps{i} = f\sps{i}( X\sps{i}; \theta\sps{i}).
 \end{equation}
 For convenience, define $D = \sum_{i=1}^I D_i$ and $\theta = \left(\theta\sps{i}\right)_{i=1}^I$.
@@ -101,6 +107,21 @@ matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of \gls{weights}, 
 matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations.
 We will refer to the Pearson correlation between features and their respective latent variable $\Corr(X\sps{i}_j, Z_k)$ as the \textit{\gls{loadings}} of $X\sps{i}_j$ on $Z_k$ \citep{rosipal2005overview}, noting that the same concept has also been referred to as \textit{structure correlations} \citep{meredith1964canonical}.
 
+\subsection{Background: GEPs in linear algebra}
+A Generalized Eigenvalue Problem (GEP) is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}. They are usually characterized by the set of solutions to the equation:
+\begin{align}
+    \label{eq:igep}
+    Au=\lambda Bu
+\end{align}
+with $\lambda \in \R, u \in \R^D$, called (generalized) eigenvalue and (generalized) eigenvector respectively. We shall only consider the case where $B$ is positive definite to avoid degeneracy.
+Then the GEP becomes equivalent to an eigen-decomposition of the symmetric matrix $B^\mhalf A B^\mhalf$. This is key to the proof of our new characterization.
+In addition, one can find a basis of eigenvectors spanning $\R^D$.
+We define a \textit{top-$K$ subspace} to be one spanned by some set of eigenvectors {$u_1,\dots,u_K$} with the top-$K$ associated eigenvalues $\lambda_1 \geq \dots \geq \lambda_K$.
+We say a matrix $U \in \R^{D \times K}$ \textit{defines} a top-$K$ subspace if its columns span one.
+
+\paragraph{Uniqueness}
+In GEPs, the eigenvectors $u$ are not in general unique, but the canonical correlations $1 \geq \rho_1 \geq \rho_2 \geq \dots \geq 0$ are unique \citep{mills1988calculation}.
+
 \subsection{Principal Components Analysis}
 
 Principal Components Analysis \citep{hotelling1933analysis} (\acrshort{pca}) is a classical method in unsupervised machine learning for representation learning.
@@ -108,11 +129,13 @@ It is widely used for dimensionality reduction and feature extraction.
 The primary goal of \acrshort{pca} is to transform the original high-dimensional data into a new coordinate system defined by orthogonal axes, capturing the most relevant aspects of the data.
 
 In \acrshort{pca}, the representations are constrained to be linear transformations of the form:
-\begin{equation}\label{eq:pca-linear-function-def}
+\begin{equation}
+    \label{eq:pca-linear-function-def}
     Z_k = X u_k,
 \end{equation}
 where $u_k$ are the orthonormal basis vectors such that:
-\begin{equation}\label{eq:pca-orthonormality-constraint}
+\begin{equation}
+    \label{eq:pca-orthonormality-constraint}
     u_k^\top u_k = 1, \quad
     u_k^\top u_l = \delta_{kl} \text{ for } k \neq l.
 \end{equation}
@@ -208,7 +231,7 @@ We can also represent the system of equations in matrix form as follows:
     \end{pmatrix}
     =
     \lambda
-        I
+    I
     \begin{pmatrix}
         u\sps{1} \\
         u\sps{2}
@@ -216,6 +239,12 @@ We can also represent the system of equations in matrix form as follows:
 \end{align}
 
 Which is of the form $A v = \lambda B v$. \acrshort{pls} is therefore also defined by the solution to a single generalized eigenvalue problem.
+
+Given the notions of uniqueness in GEPs, the weights $u$ are not in general unique but we can write the vector of generalized eigenvalues, here representing covariances, as
+\begin{align}
+    \label{eq:cca-vector-of-correlations-def}
+    \PLS_K(X^{(1)},X^{(2)}) \defeq (\rho_k)_{k=1}^K
+\end{align}
 
 \subsubsection{Limitations} The problem with applying \acrshort{pls} to neuroimaging and behavioural modalities is that \acrshort{pls} is not scale invariant and
 is therefore biased towards the largest principal components in the data \citep{helmer2020stability}.
@@ -238,21 +267,22 @@ This nuance renders \acrshort{cca} invariant to feature scale.
 The optimization problem for \acrshort{cca} can be expressed as:
 
 \begin{align}
-     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spsT{1}X\spsT{1}X\sps{2}u\sps{2} \} \\
-     & \text{subject to:} \notag                                                                \\
-     & u\spsT{1}\Sigma_{11}u\sps{1}=1 \notag                                                  \\
-     & u\spsT{2}\Sigma_{22}u\sps{2}=1 \notag
+    & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spsT{1}X\spsT{1}X\sps{2}u\sps{2} \} \\
+    & \text{subject to:} \notag                                                                \\
+    & u\spsT{1}\Sigma_{11}u\sps{1}=1 \notag                                                  \\
+    & u\spsT{2}\Sigma_{22}u\sps{2}=1 \notag
 \end{align}
 
 Although non-convex, numerous methods exist for solving the \acrshort{cca} problem, including eigendecomposition and generalized eigendecomposition solvers\citep{uurtio2017tutorial} and block coordinate descent via alternating least squares regressions \citep{golub1995canonical,sun2008least}.
 
 The first-order conditions derived in the same manner as the \acrshort{pls} case are:
 
-\begin{align}\label{CCA:FOCs}
-     & \Sigma_{21}u\sps{1}=\lambda\sps{2} \Sigma_{22}u\sps{2} \\
-     & \Sigma_{12}u\sps{2}=\lambda\sps{1} \Sigma_{11}u\sps{1} \\
-     & u\spsT{1}\Sigma_{11}u\sps{1}=1                       \\
-     & u\spsT{2}\Sigma_{22}u\sps{2}=1
+\begin{align}
+    \label{CCA:FOCs}
+    & \Sigma_{21}u\sps{1}=\lambda\sps{2} \Sigma_{22}u\sps{2} \\
+    & \Sigma_{12}u\sps{2}=\lambda\sps{1} \Sigma_{11}u\sps{1} \\
+    & u\spsT{1}\Sigma_{11}u\sps{1}=1                       \\
+    & u\spsT{2}\Sigma_{22}u\sps{2}=1
 \end{align}
 
 \paragraph{Eigenvalue Problems}
@@ -260,17 +290,17 @@ The first-order conditions derived in the same manner as the \acrshort{pls} case
 Substituting the second two conditions into the first two, we get \(\lambda\sps{1}=\lambda\sps{2}=\lambda\). Then, recognizing \(X_i^{\top}X_i\) as the covariance matrix \(\Sigma_{ii}\) and \(X_i^{\top}X_j\) as the cross-covariance matrix \(\Sigma_{ij}\), we obtain another pair of eigenvalue problems:
 
 \begin{align}
-     & \Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}u\sps{1}=\lambda^2u\sps{1} \notag \\
-     & \Sigma_{22}^{-1}\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}u\sps{2}=\lambda^2u\sps{2} \notag
+    & \Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}u\sps{1}=\lambda^2u\sps{1} \notag \\
+    & \Sigma_{22}^{-1}\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}u\sps{2}=\lambda^2u\sps{2} \notag
 \end{align}
 
 An alternative form of the \acrshort{cca} problem can be developed by reparameterizing \(u\sps{i*}=\Sigma_{ii}^{-\frac{1}{2}}u\sps{i}\). The optimization problem then becomes:
 
 \begin{align}
-     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spsT{1}\Sigma_{11}^{-\frac{1}{2}}\Sigma_{12}\Sigma_{22}^{-\frac{1}{2}}u\sps{2} \} \\
-     & \text{subject to:} \notag                                                                                                            \\
-     & u\spsT{1}u\sps{1}=1 \notag                                                                                                         \\
-     & u\spsT{2}u\sps{2}=1 \notag
+    & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spsT{1}\Sigma_{11}^{-\frac{1}{2}}\Sigma_{12}\Sigma_{22}^{-\frac{1}{2}}u\sps{2} \} \\
+    & \text{subject to:} \notag                                                                                                            \\
+    & u\spsT{1}u\sps{1}=1 \notag                                                                                                         \\
+    & u\spsT{2}u\sps{2}=1 \notag
 \end{align}
 
 This reparameterized form will later underpin Deep Canonical Correlation Analysis (\acrshort{dcca}).
@@ -304,6 +334,12 @@ We can also represent the system of equations in equation~\ref{CCA:FOCs} as a ma
 
 Which is once again of the form $A v = \lambda B v$. \acrshort{cca}, like \acrshort{pls}, is therefore also defined by the solution to a single generalized eigenvalue problem.
 
+Given the notions of uniqueness in GEPs, the weights $u$ are not in general unique but we can write the vector of generalized eigenvalues, here representing covariances, as
+\begin{align}
+    \label{eq:cca-vector-of-correlations-def}\small
+    \CCA_K(X^{(1)},X^{(2)}) \defeq (\rho_k)_{k=1}^K
+\end{align}
+
 \subsection{Multiview \acrshort{cca}}
 
 Multiview \acrshort{cca} or \acrshort{mcca} is a straightforward extension of \acrshort{cca} to the case of 3-or more datasets.
@@ -313,9 +349,9 @@ The goal is to find a set of directions \(u\sps{i}\) such that the pairwise corr
 
 The optimization problem for \acrshort{mcca} can be stated as:
 \begin{align}
-     & u_{\text{opt}} = \underset{u}{\mathrm{argmax}} \sum_{i=1}^{m} \sum_{j=1, j \neq i}^{m} u\spsT{i} \Sigma_{ij} u\sps{j} \\
-     & \text{subject to:} \notag                                                                                               \\
-     & \sum_{i=1}^{m} u\spsT{i} \Sigma_{ii} u\sps{i} = 1 \notag
+    & u_{\text{opt}} = \underset{u}{\mathrm{argmax}} \sum_{i=1}^{m} \sum_{j=1, j \neq i}^{m} u\spsT{i} \Sigma_{ij} u\sps{j} \\
+    & \text{subject to:} \notag                                                                                               \\
+    & \sum_{i=1}^{m} u\spsT{i} \Sigma_{ii} u\sps{i} = 1 \notag
 \end{align}
 
 \paragraph{Generalized Eigenvalue Problem}
@@ -325,32 +361,41 @@ The generalized eigenvalue problem (GEP) for MCCA can be written in matrix form 
 \begin{align}
     \small
     \begin{pmatrix}
-      0           & \Sigma_{12} & \cdots & \Sigma_{1m} \\
-      \Sigma_{21} & 0           & \cdots & \Sigma_{2m} \\
-      \vdots      & \vdots      & \ddots & \vdots      \\
-      \Sigma_{m1} & \Sigma_{m2} & \cdots & 0
+        0           & \Sigma_{12} & \cdots & \Sigma_{1m} \\
+        \Sigma_{21} & 0           & \cdots & \Sigma_{2m} \\
+        \vdots      & \vdots      & \ddots & \vdots      \\
+        \Sigma_{m1} & \Sigma_{m2} & \cdots & 0
     \end{pmatrix}
     \begin{pmatrix}
-          u\sps{1} \\
-          u\sps{2} \\
-          \vdots   \\
-          u\sps{m}
+        u\sps{1} \\
+        u\sps{2} \\
+        \vdots   \\
+        u\sps{m}
     \end{pmatrix}.
     =
     \lambda
     \begin{pmatrix}
-      \Sigma_{11} & 0           & \cdots & 0           \\
-      0           & \Sigma_{22} & \cdots & 0           \\
-      \vdots      & \vdots      & \ddots & \vdots      \\
-      0           & 0           & \cdots & \Sigma_{mm}
+        \Sigma_{11} & 0           & \cdots & 0           \\
+        0           & \Sigma_{22} & \cdots & 0           \\
+        \vdots      & \vdots      & \ddots & \vdots      \\
+        0           & 0           & \cdots & \Sigma_{mm}
     \end{pmatrix}
     \begin{pmatrix}
-          u\sps{1} \\
-          u\sps{2} \\
-          \vdots   \\
-          u\sps{m}
+        u\sps{1} \\
+        u\sps{2} \\
+        \vdots   \\
+        u\sps{m}
     \end{pmatrix}.
 \end{align}
+
+This GEP formulation of MCCA can be presented in a unified framework generalizing CCA and ridge-regularized extensions. Indeed, we now take $A,B_\alpha \in \R^{D \times D}$ to be block matrices $A = (A\sps{ij})_{i,j=1}^I, B_\alpha = (B_\alpha\sps{ij})_{i,j=1}^I$ where the diagonal blocks of $A$ are zero, the off-diagonal blocks of $B_\alpha$ are zero, and the remaining blocks are defined by:
+\begin{align}
+    \label{eq:gep-most-general-formulation}%\small
+    A^{(ij)} &= \Cov(X\sps{i}, X\sps{j}) \text{ for } i \neq j, \quad % \text{ for } i,j \in [I], ; \:\:
+    B_\alpha^{(ii)} = \alpha_i I_{D\sps{i}} + (1-\alpha_i) \Var(X\sps{i})  %\text{ for } i \in [I]
+\end{align}
+Where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters: taking $\alpha_i = 0 \: \forall i$ recovers CCA and $\alpha = 1 \: \forall i$ recovers PLS.
+We may omit the subscript $\alpha$ when $\alpha=0$ and we recover the `pure CCA' setting; in this case, following \cref{eq:cca-vector-of-correlations-def} we can define $\MCCA_K(X\sps{1},\dots,X\sps{I})$ to be the vector of the top-$K$ generalized eigenvalues.
 
 \subsection{Linear Discriminant Analysis LDA}
 
@@ -395,11 +440,11 @@ Here, \(b\) denotes the size of the minibatch, and \(\mathbf{X}\sps{1} \in \math
 This dual perspective—considering both population and sample covariance matrices—enables a more robust and flexible approach to the methods discussed, bridging the gap between theoretical analysis and practical application.
 It will be particularly useful in the context of chapter \ref{chap:loadings} where we will use population variables as ground truth while estimating the models using sample data.
 
+
 \section{Practical Frameworks for Multiview Learning}
 
 At this point, we have introduced the theoretical foundations of multiview learning, including \acrshort{cca} and its variants.
 However, it is not yet clear how we should apply these methods to real-world datasets.
-
 
 \subsection{Machine Learning and Statistical Inference}
 
@@ -433,9 +478,9 @@ Permutation testing is a non-parametric method that evaluates the significance o
 In machine learning, data is typically partitioned into training, validation, and test sets, each serving a specific purpose in the model development process:
 
 \begin{itemize}
-\item Training Set: Used for fitting the model.
-\item Validation Set: Assists in model parameter tuning.
-\item Test Set: Evaluates the model's generalization capability.
+    \item Training Set: Used for fitting the model.
+    \item Validation Set: Assists in model parameter tuning.
+    \item Test Set: Evaluates the model's generalization capability.
 \end{itemize}
 
 \paragraph{Cross-Validation}
@@ -462,21 +507,23 @@ While our focus so far has primarily been on the top-1 eigenvector-eigenvalue pa
 
 \subsubsection{Addressing the Top-k Problem}
 
-Transitioning from a focus on the top-1 component to exploring the top-k subspace introduces additional complexities. One common method to solve the top-k problem is to identify the top-1 component and then apply a deflation process to find subsequent orthogonal components. However, this is not the only approach, and other methods may also be employed.
-
-\subsubsection{Deflation Methods in Subspace Identification}
-
-While Hotelling's Deflation and Projection Deflation are crucial for ensuring orthogonality in the deflation process, it's important to recognize that they represent just one approach to identifying multiple components in CCA. These methods, although effective, can be sensitive to the initial conditions of the data and can influence the outcome of the top-k subspace identification.
+Transitioning from a focus on the top-1 component to exploring the top-k subspace introduces additional complexities. One common method to solve the top-k problem is to identify the top-1 component and then apply a deflation process to find subsequent orthogonal components.
+Deflation involves removing the top-1 component from the data and then repeating the process to find the next top-1 component. This process is repeated until the desired number of components is found.
+For instance, Hotelling's Deflation \citep{hotelling1933analysis} involves removing the top-1 component from the data, while Projection Deflation \citep{mackey2008deflation} involves projecting the data onto the orthogonal complement of the top-1 component.
+Different deflation methods enforce different forms of orthogonality, which can impact the resulting components and their interpretation, particularly when the first component is not a true eigenvector.
 
 \subsubsection{Non-Uniqueness of Components}
 
-Furthermore, non-uniqueness is a significant challenge in CCA, particularly when eigenvectors have repeated eigenvalues. Imagine a scenario where the top-1 eigenvalue is repeated \(k\) times. In this case, there are \(k\) possible eigenvectors that can be associated with the top-1 eigenvalue. While this is unlikely to occur in practice, the eigenvalues can be very close to each other, leading to numerical instability and non-uniqueness in the components. Particularly true in cross-validation settings, this non-uniqueness can lead to instability in the components, complicating their interpretation and comparison across different data analyses.
+Furthermore, non-uniqueness is a significant challenge in CCA, particularly when eigenvectors have repeated eigenvalues. Imagine a scenario where the top-1 eigenvalue is repeated \(k\) times. In this case, there are \(k\) possible eigenvectors that can be associated with the top-1 eigenvalue. While this is unlikely to occur in practice, the eigenvalues can in practice be very close to each other, leading to numerical instability and non-uniqueness in the components. Particularly true in cross-validation settings, this non-uniqueness can lead to instability in the components, complicating their interpretation and comparison.
+For example, the top-1 component in one analysis might be the second component in another analysis, making it difficult to compare the results.
 
-This non-uniqueness aligns with the probabilistic perspectives on PCA and CCA, where the latent variables are considered unique only up to a rotation. This perspective further reinforces the subspace approach, emphasizing the identification of a subspace rather than specific directions within it.
+This non-uniqueness also has a grounding in the probabilistic perspectives on PCA and CCA, where the latent variables are considered unique only up to a rotation.
+This perspective further reinforces the subspace approach, emphasizing the identification of a subspace rather than specific directions within it.
 
 \paragraph{Thesis Approach: Concentrating on the Top-1 Component}
 
 In this thesis, we focus on the top-1 component in CCA to align with and facilitate comparison with typical componentwise studies in brain-behavior research. This choice is driven by the complexity associated with the top-k problem and the variety of methods available to address it. Under the assumption of a significant eigengap\footnote{An 'eigengap' refers to the difference in magnitude between consecutive eigenvalues in an eigenvalue problem. A significant eigengap between the first and second eigenvalues suggests that the first eigenvalue (and its corresponding eigenvector) is distinctly more significant than the next, lending credence to its uniqueness and importance.}, the first component can be considered equivalent to the top-1 subspace. This equivalence allows for a clear and interpretable analysis, making the top-1 subspace a straightforward and reliable choice for studying multivariate data. It's important to note that while we focus on the top-1 component, the later sections of the thesis introduce a method for simultaneously solving the complete subspace, addressing broader subspace analyses.
+
 
 \section{Multiview Learning in Neuroimaging}
 
@@ -490,11 +537,17 @@ In particular, \acrshort{cca} and clustering have been used to identify depressi
 CCA has also been used in the manner we described to denoise two \gls{views} of a dataset such as separate measures of neuroimaging data \citep{zhuang2020technical} to remove artefacts.
 Deep \acrshort{cca} has recently been used to extract features for the diagnosis of schizophrenia\citep{qi2016deep}.
 
+
 \section{Open challenges in Multiview Learning and CCA}
+
+This thesis has been motivated by a number of open challenges in multiview learning and canonical correlation analysis.
+Chapter \ref{chap:als} and \ref{chap:loadings} will address the first challenge, which is the regularisation of \acrshort{cca} in high dimensional settings and the interpretation of the resulting components.
+Chapter \ref{chap:deep} and \ref{chap:software} will address the second challenge, the efficient application of \acrshort{cca} to big data.
+Finally \ref{chap:deep} will also address the third challenge, extending \acrshort{cca} to Deep Self-Supervised Learning.
 
 \subsection{Interpretability and Regularization}
 
-
+\textcolor{red}{TODO: Add a paragraph on interpretability and regularization}
 
 \subsection{Efficient Algorithms for High-Dimensional Data}
 
@@ -512,15 +565,25 @@ The GEP is often represented as \( Ax = \lambda Bx \), where \( A \) and \( B \)
     \centering
     \begin{tabular}{|c|c|c|c|c|}
         \hline
-        Method         & \( A \)                                                                                    & \( B \)                                                                & \( x \)                                                  & Dimensions               \\
+        Method         & \( A \)           & \( B \)   & \( x \)        & Dimensions       \\
         \hline
-       \acrshort{pca} & \( \Sigma_{11} \)                                                                          & \( I \)                                                                & \( u\sps{1} \)                                           & \( p \times p \)         \\
+        \acrshort{pca} & \( \Sigma_{11} \) & \( I \)   & \( u\sps{1} \) & \( p \times p \) \\
         \hline
-        LDA            & \( S_B \)                                                                                  & \( S_W \)                                                              & \( u\sps{1} \)                                           & \( p \times p \)         \\
+        LDA            & \( S_B \)         & \( S_W \) & \( u\sps{1} \) & \( p \times p \) \\
         \hline
-       \acrshort{cca} & \( \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} \Sigma_{11} & 0 \\ 0 & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p+q) \times (p+q) \) \\
+        \acrshort{cca} & \( \begin{pmatrix}
+                                \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22}
+        \end{pmatrix} \) & \( \begin{pmatrix}
+                                  \Sigma_{11} & 0 \\ 0 & \Sigma_{22}
+        \end{pmatrix} \) & \( \begin{pmatrix}
+                                  u\sps{1} \\ u\sps{2}
+        \end{pmatrix} \) & \( (p+q) \times (p+q) \) \\
         \hline
-       \acrshort{pls} & \( \begin{pmatrix} 0 & \Sigma_{12} \\ \Sigma_{21} & 0 \end{pmatrix} \)                     & \( I \)                                                                & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p+q) \times (p+q) \) \\
+        \acrshort{pls} & \( \begin{pmatrix}
+                                0 & \Sigma_{12} \\ \Sigma_{21} & 0
+        \end{pmatrix} \) & \( I \) & \( \begin{pmatrix}
+                                            u\sps{1} \\ u\sps{2}
+        \end{pmatrix} \) & \( (p+q) \times (p+q) \) \\
         \hline
     \end{tabular}
     \caption{Definitions and dimensions of \( A \)and \( B \)for different subspace learning methods.}
@@ -543,23 +606,23 @@ In this case the maximum number of principal components is \( K=n \), and the co
 This approach has been employed to great effect in neuroimaging but suprisingly is not used even in the scikit-learn implementation of \acrshort{cca} \citep{pedregosa2011scikit}.
 Nonetheless, for the large sample sizes (desirable for machine learning frameworks as well as statistical power), the complexity of even \acrshort{pca}-CCA can render the problems nearly intractable.
 
-Kernel \acrshort{cca} (\acrshort{kcca}) also offers computational efficiency for high-dimensional data (\(p>n\)) as its complexity scales with the number of samples \(n\), not the number of features \(p\). 
+Kernel \acrshort{cca} (\acrshort{kcca}) also offers computational efficiency for high-dimensional data (\(p>n\)) as its complexity scales with the number of samples \(n\), not the number of features \(p\).
 It casts the CCA optimisation as a dual problem:
 
 \begin{align}
-     & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha\sps{1}K\spsT{1}K\sps{2}\alpha\sps{2}  \} \\
-     & \text{subject to:} \notag                                                                                            \\
-     & \alpha\sps{1}K\spsT{1}K\sps{1}\alpha\sps{1}=1 \notag                                                                  \\
-     & \alpha\sps{2}K\spsT{2}K\sps{2}\alpha\sps{2}=1 \notag
+    & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha\sps{1}K\spsT{1}K\sps{2}\alpha\sps{2}  \} \\
+    & \text{subject to:} \notag                                                                                            \\
+    & \alpha\sps{1}K\spsT{1}K\sps{1}\alpha\sps{1}=1 \notag                                                                  \\
+    & \alpha\sps{2}K\spsT{2}K\sps{2}\alpha\sps{2}=1 \notag
 \end{align}
 
 Where \(\alpha\sps{1}=\)
 
-The kernel function in KCCA can be computed iteratively on pairwise comparisons of samples, allowing for memory efficiency by not requiring the entire dataset to be loaded into RAM. 
-This iterative approach uses slow hard drive memory access instead of RAM, making KCCA RAM memory-efficient but slower. 
+The kernel function in KCCA can be computed iteratively on pairwise comparisons of samples, allowing for memory efficiency by not requiring the entire dataset to be loaded into RAM.
+This iterative approach uses slow hard drive memory access instead of RAM, making KCCA RAM memory-efficient but slower.
 However, a significant drawback of KCCA is the need for access to all training data at test time, which raises concerns about efficiency and scalability.
 
-\subsection{Non-linear \acrshort{cca}}
+\subsection{Non-linear \acrshort{cca} and Joint Embedding Self-Supervised Learning}
 
 As is standard in Kernel methods, \acrshort{kcca} can be extended to non-linear \acrshort{cca} by using a non-linear kernel function \(k\).
 This allows for the discovery of non-linear relationships between the data modalities.
@@ -568,6 +631,29 @@ However, the non-linear kernel function \(k\) is typically fixed a priori, which
 \subsubsection{Deep \acrshort{cca}}
 
 Deep \acrshort{cca} (\acrshort{dcca}) is a non-linear extension of \acrshort{cca} that uses deep neural networks to find non-linear relationships between variables.
+
+\subsubsection{Joint Embedding Self-Supervised Learning}
+
+Joint Embedding Self-Supervised Learning is a method for learning representations of data that are useful for downstream tasks.
+
+\begin{figure}
+    \centering
+    \tikz{
+    % nodes
+        \node[latent, align=center, minimum size=2cm] (x) {Original Image\\x};
+        %
+        \node[obs, below left=of Z, minimum size=2cm, align=center] (x1) {Augmentated Image \\$x^{(1')}$};
+        \node[obs, below right=of Z, minimum size=2cm, align=center] (x2) {Augmentated Image \\$x^{(2')}$};
+        % edges
+        \edge{x} {x1}
+        \edge{x} {x2}}
+    \caption[Joint Embedding Data Generation Process]{\textit{\textbf{Joint Embedding Data Generation Process:}} The original image \(x\) is augmented twice to produce two augmentated images \(x^{(1')}\) and \(x^{(2')}\).}
+\end{figure}
+
+In many self-supervised learning methods, the data is augmented to produce multiple views of the same data.
+For example, in the case of images, the image can be cropped, rotated, or flipped to produce multiple views of the same image.
+The goal is to learn representations of the data that are invariant to these augmentations and thus capture the underlying structure of the data (e.g. features which are generally useful).
+From the background we have given on \acrshort{cca}, it is clear that \acrshort{cca} is a natural fit for this problem, precisely because all of the information is redundant rather than complementary; the augmentations are all views of the same data and they are chosen randomly.
 
 
 
