@@ -6,7 +6,9 @@
 % \epigraph{And that's really the essence of programming. By the time you've sorted out a complicated idea into little steps that even a stupid machine can deal with, you've learned something about it yourself.}{\textit{Douglas Adams}}
 \section*{Preface}
 
-This work was published in the Journal of Open Source Software \cite{chapman2021cca}.
+This work was published in the Journal of Open Source Software \citep{chapman2021cca}.
+I have been the lead developer of the \texttt{CCA-Zoo} package since its inception in 2020.
+Almost all of the methods we have described in this thesis are implemented in \texttt{CCA-Zoo}.
 
 \section{Introduction}
 
@@ -20,9 +22,9 @@ The discrepancy between the availability of multiview learning tools in R and Py
 
 \section{Background}
 
-In recent years, the research community has shown a heightened interest in multiview learning, as evident from the proliferation of scholarly articles and the diversification of use-cases ranging from bioinformatics to natural language processing.
+The research community continues to show a heightened interest in multiview learning.
 Traditionally, this field has been dominated by contributions from statistical learning researchers who predominantly utilized R and MATLAB for their work.
-These platforms have been the birthplace of many state-of-the-art algorithms and methodologies, including but not limited to Sparse PLS.
+These platforms have been the birthplace of many state-of-the-art algorithms and methodologies, including Sparse PLS.
 
 However, this posed a challenge for Python-oriented researchers and practitioners, leaving them with two less-than-ideal options: either port existing R or MATLAB code into Python, often a non-trivial task requiring domain expertise, or resort to using the limited set of methods available in native Python libraries like \texttt{scikit-learn}.
 This fragmentation has, in effect, created barriers to entry and possibly slowed down the progress in applying multiview learning techniques in Python-based projects.
@@ -31,27 +33,49 @@ The \texttt{CCA-Zoo} package aims to bridge this divide by offering a broad rang
 
 \section{Methods}
 
-In this section, we describe the implementation of \texttt{CCA-Zoo} and the design decisions that were made during its development.
-We will also demonstrate how the package is optimised for use with high-dimensional biomedical data.
+In this section, we describe the implementation of \texttt{CCA-Zoo} as depicted in Figure \ref{fig:cca-zoo-api} and the design decisions that were made during its development.
+We highlight the package's optimization for use with high-dimensional biomedical data and elaborate on its compatibility with standard machine learning packages.
 
 \subsection{API}
 
-\begin{figure}
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/CCA_Zoo_map}
-    \caption{The \texttt{CCA-Zoo} API}
+    \caption[The \texttt{CCA-Zoo} compatibility map]{The \texttt{CCA-Zoo} compatibility map showcases integration with various machine learning packages. The deep learning module is built upon \texttt{PyTorch} and \texttt{Lightning}, reflecting their status as industry standards for neural network implementations. The probabilistic module employs \texttt{NumPyro} for its Bayesian inference capabilities, enhancing the application of probabilistic approaches in CCA.}
     \label{fig:cca-zoo-api}
 \end{figure}
 
-The \texttt{scikit-learn} API is familiar to many machine learning practitioners and researchers, and is the de facto standard for machine learning in Python.
-Users of machine learning libraries in Python expect a consistent API, and so we have designed \texttt{CCA-Zoo} to be compatible with the \texttt{scikit-learn} API.
-Moreover, by using the \texttt{scikit-learn} API, \texttt{CCA-Zoo} is compatible with the \texttt{scikit-learn} ecosystem.
+The \texttt{scikit-learn} API is familiar to many machine learning practitioners and researchers, and is the de facto standard for machine learning in Python. \texttt{CCA-Zoo} has been designed to be consistent with the \texttt{scikit-learn} API, inheriting its user-friendly characteristics and ensuring compatibility with the \texttt{scikit-learn} ecosystem. Furthermore, the deep module within \texttt{CCA-Zoo} integrates \texttt{PyTorch} and \texttt{Lightning}, harnessing their powerful features for deep learning research and applications. The probabilistic module takes advantage of \texttt{NumPyro}, which offers advanced features for probabilistic programming and Bayesian methods, further extending the versatility and functionality of \texttt{CCA-Zoo}.
 
-The major barrier to using the \texttt{scikit-learn} API for multiview learning is that the \texttt{scikit-learn} API is designed for single-view data.
-In particular, the \texttt{scikit-learn} API for fitting a model is \texttt{model.fit(X, y)}, where \texttt{model} is an instance of a model, \texttt{X} is a matrix of features, and \texttt{y} is a vector of labels.
 
-In multiview learning, we have multiple views of data \texttt{X}, and so we need to be able to fit a model with multiple views of data.
-For this reason, models in \texttt{CCA-Zoo} have a \texttt{fit} method that takes a list of views as input, i.e. \texttt{model.fit([X1, X2, X3], y)}.
+\subsection{Usage}
+
+Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonstrated in the following example, which implements a regularized CCA model with a ridge penalty.
+
+\begin{minted}{python}
+    # Import required libraries
+    import numpy as np
+    from cca_zoo.datasets import LatentVariableData
+    from cca_zoo.linear import rCCA
+    from cca_zoo.model_selection import GridSearchCV
+    
+    # Generate synthetic multiview data
+    data = LatentVariableData(view_features=[10,10],latent_dims: int = 2)
+    (X,Y) = data.sample(n_samples=100)
+
+    # Define grid of potential regularization parameters
+    c1 = [0.1, 0.3, 0.7, 0.9]
+    c2 = [0.1, 0.3, 0.7, 0.9]
+    param_grid = {'c': [c1, c2]}
+
+    cv = 5  # Number of folds in cross-validation
+
+    # Conduct grid search
+    ridge = GridSearchCV(rCCA(latent_dimensions=2), param_grid=param_grid,
+                        cv=cv, verbose=True, scoring=scorer).fit((train_view_1, train_view_2)).best_estimator_
+    \end{minted}
+\subsection{Deep}
+
 
 \subsection{Code Availability}
 
@@ -59,27 +83,26 @@ The code for \texttt{CCA-Zoo} is available at.
 
 \texttt{CCA-Zoo} has received 155 stars and 30 forks on GitHub, and has nearly 500 downloads per month on PyPI \footnote{https://pypistats.org/packages/cca-zoo}.
 
-I am particularly proud of the diversity of projects CCA-Zoo has found use in outside of medical imaging given that the goal was to create a general purpose multiview learning library.
+Documentation for \texttt{CCA-Zoo} is available at \footnote{https://cca-zoo.readthedocs.io/en/latest/}.
+The documentation includes a user guide, API reference, and examples.
+
+The package can be installed using \texttt{pip install cca-zoo} or \texttt{poetry add cca-zoo}.
+
 
 
 \section{Benchmarking}
 
-\subsubsection{Objective}
-The objective of the benchmarking experiments is to compare the performance of \texttt{CCA-Zoo} against \texttt{scikit-learn}, focusing on the efficiency of CCA and PLS methods.
+In this section, we compare the performance of \texttt{CCA-Zoo} against \texttt{scikit-learn}, focusing on the efficiency of the basic CCA and PLS methods.
 We conducted experiments on synthetic datasets with varying dimensions to evaluate their average execution time.
-
-\subsubsection{Experimental Setup}
 The datasets consisted of random matrices with a varying number of dimensions: \(50\), \(100\), \(200\), \(400\), and \(800\). Each matrix had \(100\) samples. We set the latent dimensions for both CCA and PLS to \(10\). For each dimension, the experiment was repeated \(10\) times to obtain reliable performance metrics.
 
 \paragraph{Libraries Used:}
 \begin{itemize}
-    \item \texttt{CCA-Zoo} (version: X.X.X)
-    \item \texttt{Scikit-learn} (version: X.X.X)
+    \item \texttt{CCA-Zoo} (version: 2.4.0)
+    \item \texttt{Scikit-learn} (version: 1.3.0)
 \end{itemize}
 
-\subsubsection{Results}
-
-\paragraph{Canonical Correlation Analysis:}
+\subsection{Canonical Correlation Analysis:}
 Figure~\ref{fig:cca_benchmark} presents the comparison between \texttt{CCA-Zoo} and \texttt{scikit-learn} for Canonical Correlation Analysis. We observe that \texttt{CCA-Zoo} exhibits a competitive runtime profile when compared to \texttt{scikit-learn} across all dimensions.
 
 \begin{figure}[h]
@@ -89,7 +112,7 @@ Figure~\ref{fig:cca_benchmark} presents the comparison between \texttt{CCA-Zoo} 
     \label{fig:cca_benchmark}
 \end{figure}
 
-\paragraph{Partial Least Squares:}
+\subsection{Partial Least Squares:}
 The comparison for Partial Least Squares is shown in Figure \ref{fig:pls_benchmark}.
 Like the CCA experiment, \texttt{CCA-Zoo} maintains a robust performance profile that is competitive with \texttt{scikit-learn}.
 
@@ -99,8 +122,6 @@ Like the CCA experiment, \texttt{CCA-Zoo} maintains a robust performance profile
     \caption{Performance comparison for PLS methods}
     \label{fig:pls_benchmark}
 \end{figure}
-
-\subsubsection{Discussion}
 
 The results indicate that \texttt{CCA-Zoo} is an efficient Python package for both CCA and PLS methods, holding its own against the widely-used \texttt{scikit-learn} library.
 These experiments underscore the capability of \texttt{CCA-Zoo} to handle high-dimensional data efficiently, making it a suitable choice for applications in bioinformatics, natural language processing, and other high-dimensional data domains.

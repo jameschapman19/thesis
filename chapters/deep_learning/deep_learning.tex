@@ -7,7 +7,16 @@
 % chktex-file 3
 \section*{Preface}
 
+This chapter is based on work presented in \citet{chapman2023cca} and \citet{chapman2023efficient}.
+
 \section{Introduction}
+
+Deep CCA \citep{andrew2013deep} secured a runner-up position for the test-of-time award at ICML 2023 \citep{ICML2023TOT}. However, its direct application has been limited in large datasets due to biased gradients in the stochastic minibatch setting.
+There have since been proposals to scale-up Deep CCA in the stochastic case with adaptive whitening \cite{wang2015stochastic} and regularization \cite{chang2018scalable}, but these techniques are highly sensitive to hyperparameter tuning.
+
+Self-Supervised Learning (SSL) methods have reached the state of the art in tasks such as image classification \citep{balestriero2023cookbook}. These methods can learn robust data representations without the need for explicit labels or supervision. Recently, a family of SSL methods that are closely aligned with Canonical Correlation Analysis (CCA) has garnered interest. This family notably includes Barlow Twins \citep{zbontar2021barlow}, VICReg \citep{bardes2021vicreg}, and W-MSE \citep{ermolov2021whitening} and they aim to transform a pair of data views into similar representations, similar to the objective of CCA. Similarly, some generative approaches to SSL\cite{sansone2022gedi} bear a striking resemblance to Probabilistic CCA\cite{bach2005probabilistic}. These connections have started to be explored in \cite{balestriero2022contrastive}.
+
+In this chapter, we propose a novel formulation of Deep CCA that is unbiased in the stochastic setting and scales to large datasets. We also propose a novel SSL method, SSL-EY, that is competitive with existing methods on CIFAR-10 and CIFAR-100. We highlight the connections between our work and existing SSL methods, and show that our method is more robust to hyperparameter tuning.
 
 \section{Background}
 
@@ -283,3 +292,9 @@ For this reason, in another set of experiments, we explored varying the projecto
     \caption{(a) Performance of SSL-EY with reduced projector size compared to Barlow Twins and VICReg. (b) SSL-EY's learned embeddings indicate untapped representation capacity.}
     \label{fig: ssl projector cifar 100}
 \end{figure}
+
+\section{Conclusion}
+
+In this chapter, we extended our work on CCA to the deep learning setting.
+We illustrated state-of-the-art performance on the DCCA and DMCCA tasks.
+By highlighting links between modern Self-Supervised Learning methods and CCA, we were able to propose a novel self-supervised learning method, SSL-EY, which is competitive with existing methods on CIFAR-10 and CIFAR-100.

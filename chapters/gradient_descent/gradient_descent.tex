@@ -2,7 +2,7 @@
 
 
 \chapter{Efficient Algorithms for the CCA Family: Unconstrained Losses with Unbiased Gradients}\label{chap:gradient_descent}
-\epigraph{It seems easier to train a bi-directional LSTM with attention than to compute the SVD of a large matrix.\cite{gemp}}{Chris Ré}
+\epigraph{It seems easier to train a bi-directional LSTM with attention than to compute the SVD of a large matrix}{Chris Ré}\cite{gemp2021}
 \minitoc
 % chktex-file 44
 % chktex-file 3
@@ -14,7 +14,14 @@ In this thesis I include much of the work from these papers, but I exclude many 
 
 \section{Introduction}
 
-T
+There are significant computational challenges when applying these CCA methods to large scale data.
+
+
+
+Classical algorithms for linear CCA methods require computing full covariance matrices and so scale quadratically with dimension, becoming intractable for many large-scale datasets of practical interest.
+There is therefore great interest in approximating solutions for CCA in stochastic or data-streaming settings \citep{arora2012stochastic}.
+
+
 
 
 \section{Background: Efficient CCA}\label{sec:background-unified}
@@ -302,8 +309,5 @@ The GEP-EY PLS analysis was trained for 100 epochs using a learning rate of 0.00
 
 \section{Conclusion}
 
-In this paper, we introduced a class of efficient, scalable algorithms for Canonical Correlation Analysis and Self-Supervised Learning, rooted in a novel unconstrained loss function. These algorithms are computationally lightweight, making them uniquely suited for large-scale problems where traditional methods struggle.
-
-We have two distinct avenues for future research. Firstly, we aim to incorporate regularization techniques to improve both generalizability and interpretability, building upon existing sparse methods in CCA \citep{witten2009extensions}. We also intend to investigate the utility of correlation as a metric for measuring the quality of learnt representations. This holds the potential to replace traditional validation methods like classification accuracy, especially in situations where validation labels are not available.
-
-In summary, this paper sets a new benchmark for addressing large-scale CCA problems and opens new avenues in self-supervised learning, paving the way for more accessible and efficient solutions in various applications.
+In this chapter, we introduced a class of efficient, scalable algorithms for Canonical Correlation Analysis, and Generalized Eigenvalue Problems more broadly, rooted in a novel unconstrained loss function.
+These algorithms are computationally lightweight, making them uniquely suited for large-scale problems where traditional methods struggle.
