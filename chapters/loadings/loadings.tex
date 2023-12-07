@@ -762,14 +762,6 @@ In this section, we discuss the implications of our findings.
 This is because the \gls{weights} and \gls{loadings} are only equivalent when the covariance matrices are identity.
 We have gone a step further than \cite{haufe2014interpretation} by showing that the identitiness of the covariance matrices is crucial for understanding how imposing sparsity on the \gls{weights} imposes a prior belief in sparsity on the more biologically interesting loadings.
 
-\paragraph{Sparsity on the \gls{weights} does not imply sparsity on the loadings:}
-
-On the other hand, our results raise whether sparsity on the \gls{weights} makes sense in the first place.
-For latent variable models of brain-behaviour associations, we have argued that the \gls{loadings} are the more biologically relevant quantity.
-Since in practice, identity covariance is rarely a good assumption, the \gls{weights} and \gls{loadings} are not equivalent.
-This means that sparsity on the \gls{weights} does not imply sparsity on the loadings, and so we should not expect sparsity on the \gls{weights} to lead to more interpretable loadings.
-A practical step this implies is \textit{to ensure that the data covariances are at least close to identity before applying sparse \acrshort{cca} methods}.
-
 \paragraph{Identitiness of real covariance matrices:} Between the \acrshort{hcp} and \acrshort{adni} datasets, only the \acrshort{adni} data had eigenvalue spectra that were reasonably close to those of an identity matrix.
 This suggests that the only dataset and view where we can expect sparsity on the \gls{weights} to imply sparsity on the \gls{loadings} is the \acrshort{adni} data.
 This is consistent with the results we have seen in the previous section, that sparsity improves performance in the \acrshort{adni} data but not in the \acrshort{hcp} data.
