@@ -240,9 +240,6 @@ We predict labels via a linear probe on the learnt representations and evaluate 
     \label{tab:selfsup}
 \end{table}
 
-
-\section{Further Experiments with CIFAR-10 and CIFAR-100}\label{sec:experiments}
-
 \textbf{Model Convergence:} The Learning curves in Figure~\ref{fig:ssl learning curve cifar100 top5} indicate that the performance variation at 1,000 epochs in table \ref{tab:selfsup} mainly results from optimization noise and speed of convergence is similar.
 
 \textbf{Smaller Projector or None at All:}
@@ -272,7 +269,7 @@ For this reason, in another set of experiments, we explored varying the projecto
     \centering
 % \includegraphics[width=\textwidth]{figures/SSL/cifar100_top5_learning_curve.svg}
     \includegraphics[width=0.57\textwidth]{figures/SSL/cifar100_learning_curve_log_error}
-    \caption{Learning curves for SSL-EY, Barlow Twins, and VICReg on CIFAR-100, showing performance across 1,000 epochs.}
+    \caption{\textbf{CIFAR 100: } Learning curves for SSL-EY, Barlow Twins, and VICReg, showing performance across 1,000 epochs.}
     \label{fig:ssl learning curve cifar100 top5}
 \end{figure}
 
@@ -289,8 +286,34 @@ For this reason, in another set of experiments, we explored varying the projecto
         \caption{}
         \label{fig:ssl learning curve cifar100 vs corr}
     \end{subfigure}
-    \caption{(a) Performance of SSL-EY with reduced projector size compared to Barlow Twins and VICReg. (b) SSL-EY's learned embeddings indicate untapped representation capacity.}
+    \caption{\textbf{CIFAR 100: }(a) Performance of SSL-EY with reduced projector size compared to Barlow Twins and VICReg. (b) SSL-EY's learned embeddings indicate untapped representation capacity.}
     \label{fig: ssl projector cifar 100}
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+% \includegraphics[width=\textwidth]{figures/SSL/cifar100_top5_learning_curve.svg}
+    \includegraphics[width=0.57\textwidth]{figures/SSL/cifar10_learning_curve_log_error}
+    \caption{\textbf{CIFAR 100: }Learning curves for SSL-EY, Barlow Twins, and VICReg, showing performance across 1,000 epochs.}
+    \label{fig:ssl learning curve cifar10 top5}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/SSL/cifar10_proj_dim_log_error}
+        \caption{}
+        \label{fig: ssl projector dimensions 10}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/SSL/cifar10_corr_vs_acc_log_error}
+        \caption{}
+        \label{fig:ssl learning curve cifar10 vs corr}
+    \end{subfigure}
+    \caption{\textbf{CIFAR 10: }(a) Performance of SSL-EY with reduced projector size compared to Barlow Twins and VICReg. (b) SSL-EY's learned embeddings indicate untapped representation capacity.}
+    \label{fig: ssl projector cifar 10}
 \end{figure}
 
 \section{Conclusion}

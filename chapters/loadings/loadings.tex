@@ -131,7 +131,7 @@ While these generative models are provide a clear interpretation of the data gen
 This is primarily due to their computational intensity and the need for a careful selection of priors.
 Moreover, while these models can generate data with sparse loadings, generating data with sparse weights is challenging due to the dependence of \acrshort{cca} weights on the covariance matrices of the views.
 
-\subsection{A Joint Covariance Matrix Perspective (Implicit Latent Variable Model)}\label{subsubsec:a-joint-covariance-matrix-perspective}
+\subsection{Joint Covariance Matrix Perspective (Implicit Latent Variable Model)}\label{subsubsec:a-joint-covariance-matrix-perspective}
 
 In contrast to the explicit latent variable models discussed earlier, the joint covariance matrix perspective offers an implicit approach to understanding the data generation process.
 This method focuses on the covariance matrices of the views, rather than directly modeling latent variables.
@@ -269,7 +269,7 @@ By convention, and without loss of generality, we standardize the latent variabl
 
 Intuitively, \gls{loadings} measure how much each original feature contributes to the latent variables, providing insight into the structure of the data.
 
-\subsubsection{Invariance to Scale}\label{subsubsec:invariance-to-scale}
+\subsection{Invariance to Scale}\label{subsubsec:invariance-to-scale}
 
 First, we show that the \gls{loadings} are invariant to column-wise scaling of the data matrix whereas the weights are not.
 
@@ -339,7 +339,7 @@ This follows from the definition of correlation and the unchanged latent variabl
 \paragraph{Intuition}
 The \gls{loadings} remain the same because scaling the data does not change the relative contributions of each feature to the latent variables.
 
-\subsubsection{Invariance to Repeated Linear Combinations of Columns}\label{subsubsec:invariance-to-linear-combinations}
+\subsection{Invariance to Repeated Linear Combinations of Columns}\label{subsubsec:invariance-to-linear-combinations}
 
 We can also prove a more general result that the \gls{loadings} are invariant to repeated linear combinations of columns of the data matrix.
 This is not as contrived as it sounds, since we often need to decide which features to include or exclude in a model, and when we work with highly correlated variables like survey questions, we may choose to use summary scores instead of individual questions.
@@ -754,11 +754,9 @@ From Figure \ref{fig:covariance-matrices-real}, we can see the block structure o
 \newpage
 
 
-\section{Discussion and Limitations}
+\section{Discussion}
 
-In this section, we discuss the implications of our findings as well as the limitations of our study.
-
-\subsection{Discussion}
+In this section, we discuss the implications of our findings.
 
 \paragraph{Interpreting the Forward and Backward Models of \acrshort{cca}:} Consistent with \cite{haufe2014interpretation}, we have shown that assumptions imposed on the \gls{weights} of a model do not in general transfer to the loadings.
 This is because the \gls{weights} and \gls{loadings} are only equivalent when the covariance matrices are identity.
