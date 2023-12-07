@@ -528,7 +528,7 @@ Suprisingly, PCA performed almost as well as PLS.
 This suggests that there is value in both tunable shrinkage and sparsity in this dataset.
 It also reveals that the correlated signal between the brain structure and behavioural data is relatively much stronger than in the \acrshort{hcp} data.
 
-\begin{figure}[h]
+\begin{figure}
     \centering
     \includegraphics[width=0.5\linewidth]{figures/adni/holdout_correlations}
     \caption{\textbf{ADNI:} Out-of-sample canonical correlations for each model.}\label{fig:performance}
@@ -622,14 +622,11 @@ We can see clearly that the Elastic Net is much slower than the other models whe
 Despite also being an iterative algorithm, the SPLS model is much faster than the Elastic Net and only slightly slower than the PLS and RCCA models which call optimised solvers in C.
 Since PLS and RCCA both use PCA preprocessing for efficiency, it is unsuprising that PCA is the fastest model.
 
-\begin{figure}[h]
+\begin{figure}
     \centering
     \includegraphics[width=0.45\linewidth]{figures/model_fit_timings}
     \caption{Time taken to fit each model.}\label{fig:timings}
 \end{figure}
-
-\newpage
-
 
 \section{Discussion and Limitations}
 
@@ -640,8 +637,6 @@ In this section, we discuss the implications of our findings as well as the limi
 \paragraph{Ridge CCA is typically much better than PLS across datasets:} Our results show that Ridge CCA is typically much better than PLS across datasets.
 Much like regularised regression, it is unusual to need to use maximal ridge regularization even in high dimensions.
 This means that while PLS might be more stable for a given dataset, it is not necessarily more stable across random samples from the same population.
-
-\paragraph{FRALS is a useful tool for implementing Elastic Net CCA:} Our results show that FRALS is a useful tool for implementing Elastic Net CCA.
 
 \subsection{FRALS Limitations}
 While FRALS offers promising performance in terms of out-of-sample correlation, it does come with significant drawbacks, the most noteworthy being its computational inefficiency.
@@ -658,12 +653,11 @@ The primary bottleneck in FRALS is the computation of the least squares solution
 For each iteration of the algorithm, we need to compute the least squares solution for each view.
 This is a computationally expensive operation.
 It is the primary factor contributing to the slow speed of FRALS (depending on the experiment around 10 times slower than Ridge CCA).
-In the next chapter, we address this bottleneck by introducing a novel algorithm based on gradient descent.
-\newpage
-
 
 \section{Conclusion}\label{sec:conclusion}
 
-We have also shown that FRALS can be a useful tool for brain-behaviour studies, but that it is computationally expensive.
-
-In the next chapter,
+In this chapter, we introduced the Flexible Regularized Alternating Least Squares (FRALS) framework for CCA\@.
+We used the FRALS framework to implement Elastic Net CCA\@.
+We then compared the performance of Elastic Net CCA with other CCA variants on two datasets: the \acrshort{hcp} and \acrshort{adni}.
+We found that Elastic Net CCA outperformed other CCA variants on both datasets but that the performance of Elastic Net CCA was similar to Ridge CCA on the \acrshort{hcp} dataset.
+However we found that Elastic Net CCA was much slower than other CCA variants.

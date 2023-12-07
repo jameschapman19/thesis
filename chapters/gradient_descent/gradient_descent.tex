@@ -17,15 +17,79 @@ In this thesis I include much of the work from these papers, but I exclude many 
 T
 
 
-\section{Background: A unified approach to the CCA family}\label{sec:background-unified}
-So far in this thesis, we have considered only linear functions.
+\section{Background: Efficient CCA}\label{sec:background-unified}
 
-\begin{equation}
-    \label{eq:cca-linear-function-def}
-    Z\sps{i}_k = \langle u_k\sps{i} , X\sps{i} \rangle.
-\end{equation}
+\subsubsection{Challenges in Solving Generalized Eigenvalue Problems}
 
-\textbf{Stochastic PLS and CCA:}
+The GEP is often represented as \( Ax = \lambda Bx \), where \( A \) and \( B \) are matrices. To generalize the dimensions of these matrices, let's denote them as \( m \times m \). This dimension \( m \) can vary based on the specific method in use. For instance, in Principal Component Analysis (PCA), represented as \acrshort{pca}, \( m \) would be equal to \( p \) since \( A \) and \( B \) are \( p \times p \) matrices. In methods like Partial Least Squares (PLS) and Canonical Correlation Analysis (CCA), represented as \acrshort{pls} and \acrshort{cca} respectively, \( m \) would be \( p+q \), as \( A \) and \( B \) in these cases are \( (p+q) \times (p+q) \).
+
+
+% Table summarizing the definitions of A and B for various methods
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        Method         & \( A \)           & \( B \)   & \( x \)        & Dimensions       \\
+        \hline
+        \acrshort{pca} & \( \Sigma_{11} \) & \( I \)   & \( u\sps{1} \) & \( p \times p \) \\
+        \hline
+        LDA            & \( S_B \)         & \( S_W \) & \( u\sps{1} \) & \( p \times p \) \\
+        \hline
+        \acrshort{cca} & \( \begin{pmatrix}
+                                \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22}
+        \end{pmatrix} \) & \( \begin{pmatrix}
+                                  \Sigma_{11} & 0 \\ 0 & \Sigma_{22}
+        \end{pmatrix} \) & \( \begin{pmatrix}
+                                  u\sps{1} \\ u\sps{2}
+        \end{pmatrix} \) & \( (p+q) \times (p+q) \) \\
+        \hline
+        \acrshort{pls} & \( \begin{pmatrix}
+                                0 & \Sigma_{12} \\ \Sigma_{21} & 0
+        \end{pmatrix} \) & \( I \) & \( \begin{pmatrix}
+                                            u\sps{1} \\ u\sps{2}
+        \end{pmatrix} \) & \( (p+q) \times (p+q) \) \\
+        \hline
+    \end{tabular}
+    \caption{Definitions and dimensions of \( A \)and \( B \)for different subspace learning methods.}
+    \label{tab:subspace}
+\end{table}
+
+To solve the GEP, one common technique is to transform it into a standard eigenvalue problem \( B^{-\frac{1}{2}} A B^{-\frac{1}{2}} y = \lambda y \), followed by eigendecomposition. However, this approach has computational complexity \( O(m^3) \) and may suffer from numerical instability.
+
+\subsubsection{\acrshort{pca}-CCA}
+
+One way to reduce the complexity of solving GEPs is to use the \acrshort{pca}-CCA method, which first applies \acrshort{pca} to the data and then solves the GEP in the reduced space.
+An important advantage of using \acrshort{pca}-CCA is computational efficiency, especially for high-dimensional data.
+The overall complexity of \acrshort{pca}-CCA involves two main steps.
+First, applying PCA has a complexity of \( O(\max(p^3, q^3)) \), dominated by the larger of the two matrices.
+Second, solving the generalized eigenvalue problem in the reduced space with \( K \) components in each view leads to a complexity of \( O((2K)^3) \).
+Thus, the overall complexity of \acrshort{pca}-CCA is \( O(\max(p^3, q^3) + (2K)^3) \), which is significantly lower than the complexity of solving the GEP directly.
+Since CCA, ridge CCA, and PLS can all be solved in the principal component space, \acrshort{pca}-CCA can be used to compute solutions efficiently \textit{even if we keep all the principal components}.
+Most obviously, this is the case when the number of samples \( n \) is smaller than either of the number of features \( p \) or \( q \), i.e. \( n < p \) or \( n < q \).
+In this case the maximum number of principal components is \( K=n \), and the complexity of \acrshort{pca}-CCA is thus \( O(n^3) \), which is significantly lower than the complexity of solving the GEP directly.
+This approach has been employed to great effect in neuroimaging but suprisingly is not used even in the scikit-learn implementation of \acrshort{cca} \citep{pedregosa2011scikit}.
+Nonetheless, for the large sample sizes (desirable for machine learning frameworks as well as statistical power), the complexity of even \acrshort{pca}-CCA can render the problems nearly intractable.
+
+Kernel \acrshort{cca} (\acrshort{kcca}) also offers computational efficiency for high-dimensional data (\(p>n\)) as its complexity scales with the number of samples \(n\), not the number of features \(p\).
+It casts the CCA optimisation as a dual problem:
+
+\begin{align}
+    & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha\sps{1}K\spsT{1}K\sps{2}\alpha\sps{2}  \} \\
+    & \text{subject to:} \notag                                                                                            \\
+    & \alpha\sps{1}K\spsT{1}K\sps{1}\alpha\sps{1}=1 \notag                                                                  \\
+    & \alpha\sps{2}K\spsT{2}K\sps{2}\alpha\sps{2}=1 \notag
+\end{align}
+
+Where \(\alpha\sps{1}=\)
+
+The kernel function in KCCA can be computed iteratively on pairwise comparisons of samples, allowing for memory efficiency by not requiring the entire dataset to be loaded into RAM.
+This iterative approach uses slow hard drive memory access instead of RAM, making KCCA RAM memory-efficient but slower.
+However, a significant drawback of KCCA is the need for access to all training data at test time, which raises concerns about efficiency and scalability.
+
+
+\subsection{Stochastic PLS and CCA}
+
+
 To the best of our knowledge, the state-of-the-art in Stochastic PLS and CCA are the subspace Generalized Hebbian Algorithm (\textbf{SGHA}) of \cite{chen2019constrained} and \textbf{$\gamma$-EigenGame} from \cite{gemp20,gemp2021}. Specifically, SGHA utilizes a Lagrange multiplier heuristic along with saddle-point analysis, albeit with limited convergence guarantees. EigenGame focuses on top-k subspace learning but introduces an adaptive whitening matrix in the stochastic setting with an additional hyperparameter. Both methods set the benchmarks we aim to compare against in the subsequent experimental section. Like our method, both can tackle other symmetric Generalized Eigenvalue Problems in principle.
 
 
@@ -98,7 +162,7 @@ This loss is a differentiable function of $\Z, \Z'$ and so also of $\theta$.
 
 \textbf{Simple algorithms:}
 We first define a very general algorithm using these estimates in Algorithm \ref{alg:general}.
-In the next section we apply this algorithm to multi-view stochastic CCA and PLS, and Deep CCA.
+In the next section we apply this algorithm to multi-view stochastic CCA and PLS.
 
 \begin{algorithm}
     \caption{GEP-EY: General algorithm for learning correlated representations}
@@ -116,7 +180,7 @@ In the next section we apply this algorithm to multi-view stochastic CCA and PLS
     \end{algorithmic}
 \end{algorithm}
 
-\subsection{Applications to (multi-view) stochastic CCA and PLS, and Deep CCA}
+\subsection{Applications to (multi-view) stochastic CCA and PLS}
 \begin{lemma}[Objective recovers GEP formulation of linear (multi-view) CCA]
     When the $f\sps{i}$ are linear, as in \cref{eq:cca-linear-function-def}, the population loss from \cref{eq:EY-loss-def-C-V} recovers MCCA as defined in \cref{sec:CCA-family}. %Moreover, the minimal loss value is precisely $-\norm{\MCCA_K(X)}$
 \end{lemma}
@@ -129,45 +193,7 @@ In the next section we apply this algorithm to multi-view stochastic CCA and PLS
 Moreover, by following through the chain of back-propagation, we obtain gradient estimates in $\mathcal{O}(MKD)$ time.
 Indeed, we can obtain gradients for the transformed variables in $\mathcal{O}(M K^2)$ time so the dominant cost is then updating $U$; we flesh this out with full details in \cref{supp:fast-updates}.
 
-\begin{restatable}{lemma}{recoverDeepCCA}[Objective recovers Deep Multi-view CCA]\label{lem:recover-DeepCCA}
-Assume that there is a final linear layer in each neural network $f\sps{i}$.
-Then at any local optimum, $\hat{\theta}$, of the population problem, we have
-\begin{align*}
-    \LEY(\hat{\theta}) = - \norm{\MCCA_K(\hat{Z})}_2^2
-\end{align*}
-where $\hat{Z} = f_{\hat{\theta}}(X)$.
-Therefore, $\hat{\theta}$ is also a local optimum of objectives from \cite{andrew2013deep, somandepalli2019multimodal} as defined in \cref{eq:DMCCA-def}.
-\end{restatable}
-\begin{proof}[Proof sketch: see \cref{supp:EY-recover-Deep-CCA} for full details.]
-    Consider treating the penultimate-layer representations as fixed, and optimising over the weights in the final layer. This is precisely equivalent to optimising the Eckhart-Young loss for linear CCA where the input variables are the penultimate-layer representations. So by \cref{prop:no-spurious}, a local optimum is also a global optimum, and by \cref{prop:EY-charac} the optimal value is the negative sum of squared generalised eigenvalues.
-\end{proof}
-
-\subsection{Application to SSL}
-We can directly apply Algorithm \ref{alg:general} to SSL.
-If we wish to have the same neural network transforming each view, we can simply tie the weights $\theta\sps{1} = \theta\sps{2}$.
-When the paired data are generated from applying independent, identically distributed (i.i.d.) augmentations to the same original datum, it is intuitive that tying the weights is a sensible procedure, and perhaps acts as a regulariser.
-We make certain notions of this intuition precise for CCA and Deep CCA in \cref{supp:further-cca}.
-
-To provide context for this proposal, we also explored in detail how VICReg and Barlow twins are related to CCA.
-For now we focus on VICReg, whose loss can be written as
-\begin{small}\begin{align*}
-                 \mathcal{L}_\text{VR}(Z\sps{1}, Z\sps{2})
-                 &= \gamma \mathbb{E} \norm{Z^{(1)} - Z^{(2)}}^2 + \sum_{i \in \{1,2\}} \bigg[\alpha \sum_{k=1}^K \left(1 \shortminus \sqrt{\Var(Z\sps{i}_i)}\right)_+ + \beta \sum_{\substack{k,l=1 \\ k \neq l}}^K \Cov(Z\sps{i}_k,Z\sps{i}_l)^2 \bigg]
-\end{align*}\end{small}%
-where $\alpha, \beta, \gamma > 0$ are tuning parameters and, as in the framework of \cref{sec:background-unified}, the $Z\sps{1}, Z\sps{2}$ are $K$-dimensional representations, parameterised by neural networks in \cref{eq:general-form-of-representations}.
-Our main conclusions regarding optima of the population loss are:
-\begin{itemize}
-    \item Consider the linear setting with untied weights. Then global optimisers of the VICReg loss define CCA subspaces, but may not be of full rank.
-    \item Consider the linear setting with tied weights and additionally assume that the data are generated by i.i.d. augmentations. Then the same conclusion holds.
-    \item In either of these settings, the optimal VICReg loss is a component-wise decreasing function of $\CCA_K(X\sps{1}, X\sps{2})$ the vector of population canonical correlations.
-    \item VICReg can therefore be interpreted as a formulation of Deep CCA, but one that will not in general recover full rank representations.
-\end{itemize}
-
-% We believe versions of each of these conclusions also hold for Barlow twins, but can only prove a subset of the results at present.%, see \cref{supp:ssl-theory} for further discussion.
-We give full mathematical details and further discussion in \cref{supp:ssl-theory}.
-The analysis for Barlow twins is more difficult, but we present a combination of mathematical and empirical arguments which suggest all the same conclusions hold, again see \cref{supp:ssl-theory}.
-
-\section{Experiments}\label{Experiments}
+\section{Experiments}
 
 % Stochastic CCA Section
 
@@ -192,8 +218,6 @@ All models are trained for a single epoch with varying mini-batch sizes ranging 
     \end{tabular}
     \footnotetext{gamma is only used for $\gamma$-EigenGame}
 \end{table}
-
-% In this section, we assess the performance of our proposed method, CCA-EY, against baseline techniques $\gamma$-EigenGame and SGHA. We draw upon the experimental setups detailed in \cite{meng2021online, gemp2022generalized}, zeroing in on the MediaMill dataset to evaluate top-5 canonical correlations. Our models are trained for a single epoch with varying mini-batch sizes ranging from 5 to 100. We utilize the Proportion of Correlation Captured (PCC), defined as \( \text{PCC} = \frac{\sum_{i=1}^k \rho_i}{\sum_{i=1}^k \rho_i^*} \), as our evaluation metric.
 
 \textbf{Observations:}
 Figure \ref{fig:scca_mediamill} compares the algorithms on the MediaMill dataset. \cref{fig:corr_mediamill} shows that CCA-EY consistently outperforms both $\gamma$-EigenGame and SGHA in terms of PCC across all evaluated mini-batch sizes.

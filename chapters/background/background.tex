@@ -551,105 +551,42 @@ Finally \ref{chap:deep} will also address the third challenge, extending \acrsho
 
 \subsection{Efficient Algorithms for High-Dimensional Data}
 
-\subsubsection{Challenges in Solving Generalized Eigenvalue Problems}
-
-The GEP is often represented as \( Ax = \lambda Bx \), where \( A \) and \( B \) are matrices. To generalize the dimensions of these matrices, let's denote them as \( m \times m \). This dimension \( m \) can vary based on the specific method in use. For instance, in Principal Component Analysis (PCA), represented as \acrshort{pca}, \( m \) would be equal to \( p \) since \( A \) and \( B \) are \( p \times p \) matrices. In methods like Partial Least Squares (PLS) and Canonical Correlation Analysis (CCA), represented as \acrshort{pls} and \acrshort{cca} respectively, \( m \) would be \( p+q \), as \( A \) and \( B \) in these cases are \( (p+q) \times (p+q) \).
-
-
-% Table summarizing the definitions of A and B for various methods
-\begin{table}[h]
-    \centering
-    \begin{tabular}{|c|c|c|c|c|}
-        \hline
-        Method         & \( A \)           & \( B \)   & \( x \)        & Dimensions       \\
-        \hline
-        \acrshort{pca} & \( \Sigma_{11} \) & \( I \)   & \( u\sps{1} \) & \( p \times p \) \\
-        \hline
-        LDA            & \( S_B \)         & \( S_W \) & \( u\sps{1} \) & \( p \times p \) \\
-        \hline
-        \acrshort{cca} & \( \begin{pmatrix}
-                                \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22}
-        \end{pmatrix} \) & \( \begin{pmatrix}
-                                  \Sigma_{11} & 0 \\ 0 & \Sigma_{22}
-        \end{pmatrix} \) & \( \begin{pmatrix}
-                                  u\sps{1} \\ u\sps{2}
-        \end{pmatrix} \) & \( (p+q) \times (p+q) \) \\
-        \hline
-        \acrshort{pls} & \( \begin{pmatrix}
-                                0 & \Sigma_{12} \\ \Sigma_{21} & 0
-        \end{pmatrix} \) & \( I \) & \( \begin{pmatrix}
-                                            u\sps{1} \\ u\sps{2}
-        \end{pmatrix} \) & \( (p+q) \times (p+q) \) \\
-        \hline
-    \end{tabular}
-    \caption{Definitions and dimensions of \( A \)and \( B \)for different subspace learning methods.}
-    \label{tab:subspace}
-\end{table}
-
-To solve the GEP, one common technique is to transform it into a standard eigenvalue problem \( B^{-\frac{1}{2}} A B^{-\frac{1}{2}} y = \lambda y \), followed by eigendecomposition. However, this approach has computational complexity \( O(m^3) \) and may suffer from numerical instability.
-
-\subsubsection{\acrshort{pca}-CCA}
-
-One way to reduce the complexity of solving GEPs is to use the \acrshort{pca}-CCA method, which first applies \acrshort{pca} to the data and then solves the GEP in the reduced space.
-An important advantage of using \acrshort{pca}-CCA is computational efficiency, especially for high-dimensional data.
-The overall complexity of \acrshort{pca}-CCA involves two main steps.
-First, applying PCA has a complexity of \( O(\max(p^3, q^3)) \), dominated by the larger of the two matrices.
-Second, solving the generalized eigenvalue problem in the reduced space with \( K \) components in each view leads to a complexity of \( O((2K)^3) \).
-Thus, the overall complexity of \acrshort{pca}-CCA is \( O(\max(p^3, q^3) + (2K)^3) \), which is significantly lower than the complexity of solving the GEP directly.
-Since CCA, ridge CCA, and PLS can all be solved in the principal component space, \acrshort{pca}-CCA can be used to compute solutions efficiently \textit{even if we keep all the principal components}.
-Most obviously, this is the case when the number of samples \( n \) is smaller than either of the number of features \( p \) or \( q \), i.e. \( n < p \) or \( n < q \).
-In this case the maximum number of principal components is \( K=n \), and the complexity of \acrshort{pca}-CCA is thus \( O(n^3) \), which is significantly lower than the complexity of solving the GEP directly.
-This approach has been employed to great effect in neuroimaging but suprisingly is not used even in the scikit-learn implementation of \acrshort{cca} \citep{pedregosa2011scikit}.
-Nonetheless, for the large sample sizes (desirable for machine learning frameworks as well as statistical power), the complexity of even \acrshort{pca}-CCA can render the problems nearly intractable.
-
-Kernel \acrshort{cca} (\acrshort{kcca}) also offers computational efficiency for high-dimensional data (\(p>n\)) as its complexity scales with the number of samples \(n\), not the number of features \(p\).
-It casts the CCA optimisation as a dual problem:
-
-\begin{align}
-    & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha\sps{1}K\spsT{1}K\sps{2}\alpha\sps{2}  \} \\
-    & \text{subject to:} \notag                                                                                            \\
-    & \alpha\sps{1}K\spsT{1}K\sps{1}\alpha\sps{1}=1 \notag                                                                  \\
-    & \alpha\sps{2}K\spsT{2}K\sps{2}\alpha\sps{2}=1 \notag
-\end{align}
-
-Where \(\alpha\sps{1}=\)
-
-The kernel function in KCCA can be computed iteratively on pairwise comparisons of samples, allowing for memory efficiency by not requiring the entire dataset to be loaded into RAM.
-This iterative approach uses slow hard drive memory access instead of RAM, making KCCA RAM memory-efficient but slower.
-However, a significant drawback of KCCA is the need for access to all training data at test time, which raises concerns about efficiency and scalability.
+\textcolor{red}{TODO: Add a paragraph on efficient algorithms for high-dimensional data}
 
 \subsection{Non-linear \acrshort{cca} and Joint Embedding Self-Supervised Learning}
 
-As is standard in Kernel methods, \acrshort{kcca} can be extended to non-linear \acrshort{cca} by using a non-linear kernel function \(k\).
-This allows for the discovery of non-linear relationships between the data modalities.
-However, the non-linear kernel function \(k\) is typically fixed a priori, which can be problematic since the optimal kernel function may be unknown.
+\textcolor{red}{TODO: Add a paragraph on non-linear \acrshort{cca} and Joint Embedding Self-Supervised Learning}
 
-\subsubsection{Deep \acrshort{cca}}
-
-Deep \acrshort{cca} (\acrshort{dcca}) is a non-linear extension of \acrshort{cca} that uses deep neural networks to find non-linear relationships between variables.
-
-\subsubsection{Joint Embedding Self-Supervised Learning}
-
-Joint Embedding Self-Supervised Learning is a method for learning representations of data that are useful for downstream tasks.
-
-\begin{figure}
-    \centering
-    \tikz{
-    % nodes
-        \node[latent, align=center, minimum size=2cm] (x) {Original Image\\x};
-        %
-        \node[obs, below left=of Z, minimum size=2cm, align=center] (x1) {Augmentated Image \\$x^{(1')}$};
-        \node[obs, below right=of Z, minimum size=2cm, align=center] (x2) {Augmentated Image \\$x^{(2')}$};
-        % edges
-        \edge{x} {x1}
-        \edge{x} {x2}}
-    \caption[Joint Embedding Data Generation Process]{\textit{\textbf{Joint Embedding Data Generation Process:}} The original image \(x\) is augmented twice to produce two augmentated images \(x^{(1')}\) and \(x^{(2')}\).}
-\end{figure}
-
-In many self-supervised learning methods, the data is augmented to produce multiple views of the same data.
-For example, in the case of images, the image can be cropped, rotated, or flipped to produce multiple views of the same image.
-The goal is to learn representations of the data that are invariant to these augmentations and thus capture the underlying structure of the data (e.g. features which are generally useful).
-From the background we have given on \acrshort{cca}, it is clear that \acrshort{cca} is a natural fit for this problem, precisely because all of the information is redundant rather than complementary; the augmentations are all views of the same data and they are chosen randomly.
+%As is standard in Kernel methods, \acrshort{kcca} can be extended to non-linear \acrshort{cca} by using a non-linear kernel function \(k\).
+%This allows for the discovery of non-linear relationships between the data modalities.
+%However, the non-linear kernel function \(k\) is typically fixed a priori, which can be problematic since the optimal kernel function may be unknown.
+%
+%\subsubsection{Deep \acrshort{cca}}
+%
+%Deep \acrshort{cca} (\acrshort{dcca}) is a non-linear extension of \acrshort{cca} that uses deep neural networks to find non-linear relationships between variables.
+%
+%\subsubsection{Joint Embedding Self-Supervised Learning}
+%
+%Joint Embedding Self-Supervised Learning is a method for learning representations of data that are useful for downstream tasks.
+%
+%\begin{figure}
+%    \centering
+%    \tikz{
+%    % nodes
+%        \node[latent, align=center, minimum size=2cm] (x) {Original Image\\x};
+%        %
+%        \node[obs, below left=of Z, minimum size=2cm, align=center] (x1) {Augmentated Image \\$x^{(1')}$};
+%        \node[obs, below right=of Z, minimum size=2cm, align=center] (x2) {Augmentated Image \\$x^{(2')}$};
+%        % edges
+%        \edge{x} {x1}
+%        \edge{x} {x2}}
+%    \caption[Joint Embedding Data Generation Process]{\textit{\textbf{Joint Embedding Data Generation Process:}} The original image \(x\) is augmented twice to produce two augmentated images \(x^{(1')}\) and \(x^{(2')}\).}
+%\end{figure}
+%
+%In many self-supervised learning methods, the data is augmented to produce multiple views of the same data.
+%For example, in the case of images, the image can be cropped, rotated, or flipped to produce multiple views of the same image.
+%The goal is to learn representations of the data that are invariant to these augmentations and thus capture the underlying structure of the data (e.g. features which are generally useful).
+%From the background we have given on \acrshort{cca}, it is clear that \acrshort{cca} is a natural fit for this problem, precisely because all of the information is redundant rather than complementary; the augmentations are all views of the same data and they are chosen randomly.
 
 
 

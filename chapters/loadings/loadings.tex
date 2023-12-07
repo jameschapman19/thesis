@@ -55,7 +55,9 @@ With this context, we reconsider the role of regularization in \acrshort{cca} mo
 \newpage
 
 
-\section{Background: Unifying Generative Perspectives on \acrshort{cca}}
+\section{Unifying Generative Perspectives on \acrshort{cca}}\label{sec:generative-perspectives}
+
+In this section, we review the generative perspectives on \acrshort{cca} and show that they can be categorized into two groups: explicit latent variable models and implicit latent variable models.
 
 \subsection{Probabilistic \acrshort{cca} and \acrshort{gfa} (Explicit Latent Variable Models)}\label{subsubsec:a-probabilistic-latent-variable-perspective}
 
@@ -150,7 +152,7 @@ This is achieved by constructing the joint covariance matrix of the two views as
 Where $\Sigma_{11}$ and $\Sigma_{22}$ are the within-view covariance matrices and $\Sigma_{12}$ and $\Sigma_{21}$ are the between-view covariance matrices.
 
 This has the advantage of allowing us to control the within-view covariance and therefore test the methods under specific conditions.
-The process was first described by Chen~\citep{chen2013sparse} and further explained by~\citep{suo2017sparse} and has been the basis behind findings in \citet{helmer2020stability,Matkovi}.
+The process was first described by Chen~\citep{chen2013sparse} and further explained by~\citep{suo2017sparse} and has been the basis behind findings in \citet{helmer2020stability,matkovivc2023static}.
 
 We can control the true signal by setting the active variables and correlations in the between-view covariance matrices $\Sigma_{12}$ and $\Sigma_{21}$.
 Specifically we construct the between-view covariance matrices as follows:
@@ -220,7 +222,7 @@ This distinction is crucial, especially in scenarios where the population covari
 \newpage
 
 
-\section{A Mathematical Argument for the use of Loadings not Weights for Interpretability}\label{sec:an-argument-for-the-use-of-loadings}
+\section{A Mathematical Argument for Using Loadings not Weights for Interpretation of CCA Models}\label{sec:an-argument-for-the-use-of-loadings}
 
 In this section, we make a mathematical argument for the use of \gls{loadings} over weights for the interpretation of \acrshort{cca} models.
 In particular, we show that the \gls{loadings} are invariant to columnwise transformations of the data matrix, while the weights are not.
@@ -395,58 +397,77 @@ We might even be inclined to state this even more strongly: \textbf{the loadings
 
 Having given a mathematical argument for the use of \gls{loadings} over weights for the interpretation of \acrshort{cca} models, we now present a number of experiments demonstrating the relationship between loadings and weights in \acrshort{cca} models.
 
-In this chapter, we use simulated data to illustrate properties of CCA models and then revisit the results of chapter~\ref{chap:frals} to demonstrate the relationship between \gls{weights} and \gls{loadings} in real-world datasets.
+In this chapter, we use simulated data to illustrate properties of CCA models and then revisit the results of chapter~\ref{chap:als} to demonstrate the relationship between \gls{weights} and \gls{loadings} in real-world datasets.
 
 \subsection{Simulated Data}
 
-We used 6 simulated datasets, generated using the methods described in section~\ref{subsec:generative-perspectives}.
+We used a number of simulated datasets, generated using the methods described in section~\ref{sec:generative-perspectives}.
 Simulated data was characterized by distinct properties, including sparse weights and/or loadings.
-In our experiments, both low-dimensional (10 features per view) and high-dimensional (100 features per view) scenarios were considered.
-We utilized 50 training and 50 test samples for each of 10 independent random draws from the data generation process, as detailed in table~\ref{tab:simulated-data-parameters}.
+In each dataset, both views have 10 features where 5 features are active and 5 features are inactive (in either a loadings or weights sense).
+We used 50 training and 50 test samples for each of 10 independent random draws from the data generation process, as detailed in table~\ref{tab:simulated-data-parameters}.
 
 \paragraph{Implicit Latent Variable Models and Sparse Weights:}
+The implicit latent variable approach allows us to choose the true weights.
+The true \gls{loadings} are defined as the product of the true weights and the true population within-view covariance matrices.
 In line with the Joint Covariance method described in section~\ref{subsubsec:a-joint-covariance-matrix-perspective}, we generated data under two scenarios:
 \begin{itemize}
-    \item Using identity covariance matrices, aligning with the 'Implicit' latent variable model (Joint Covariance (Identity)) where true weights are equivalent to true loadings.
-    \item Employing non-identity covariance matrices, consistent with the `Implicit` latent variable model (Joint Covariance (Non-Identity)) where true weights differ from true loadings, usually resulting in non-sparse weights.
+    \item Using identity within-view covariance matrices, such that the true weights are equivalent to true loadings.
+    \item Using random covariance matrices, where true weights differ from true loadings, usually resulting in non-sparse loadings.
 \end{itemize}
-The true \gls{loadings} are defined as the product of the true weights and the true population within-view covariance matrix.
-For each model, we estimated model \gls{loadings} using the pseudo-inverse\footnote{Defined as $A^+ = (A^\top A)^{-1} A^\top$, it inverts the closest matrix to $A$ in a least squares sense} of the sample covariance matrix.
 
 \paragraph{Explicit Latent Variable Models and Sparse Loadings:}
+The explicit latent variable approach allows us to choose the true \gls{loadings}.
+The true weights were defined as the product of the true \gls{loadings} and the inverse of the true population within-view covariance matrices.
 We generated data with sparse \gls{loadings} using the Probabilistic \acrshort{cca} and \acrshort{gfa} models, as outlined in section~\ref{subsubsec:a-probabilistic-latent-variable-perspective}.
-The signal-to-noise ratio was calibrated to mirror the correlations observed in the Joint Covariance method, with the sum of the signal's eigenvalues being twice that of the noise.
-The true weights were defined as the product of the true \gls{loadings} and the inverse of the true population within-view covariance matrix.
-For each model, we once again estimated model \gls{loadings} using the pseudo-inverse of the sample covariance matrix.
+The signal-to-noise ratio was set so that the sum of the signal's eigenvalues was twice that of the noise.
+
+For each model, we estimated model \gls{loadings} using the product of the model weights and the sample within-view covariance matrix.
 Note that because we multiply model weights by the sample covariance matrix to estimate the loadings, the estimated \gls{loadings} are sometimes not sparse even when both the model weights are sparse and the true covariance matrix is identity.
 
 \begin{table}
     \centering
-    \caption{Simulated Data Parameters}
+    \caption{Simulated Data Parameters for Weight and Loadings Recovery Experiments}
     \begin{tabular}{| l | l |}
         \hline
         \textbf{Parameter}                        & \textbf{Value}                               \\
         \hline
         Number of samples (\textit{n})            & 50 train, 50 test                            \\
-        Number of features in View 1 (\textit{p}) & 10 (low-dimensional), 100 (high-dimensional) \\
-        Number of features in View 2 (\textit{q}) & 10 (low-dimensional), 100 (high-dimensional) \\
+        Number of features in View 1 (\textit{p}) & 10 \\
+        Number of features in View 2 (\textit{q}) & 10 \\
         True Latent dimensions                    & 1                                            \\
-        True Feature Density in View 1            & 0.5                                          \\
-        True Feature Density in View 2            & 0.5                                          \\
+        Fraction of active features View 1            & 0.5                                          \\
+        Fraction of active features View 2            & 0.5                                          \\
         \hline
     \end{tabular}\label{tab:simulated-data-parameters}
+\end{table}
+\newpage
+
+Finally, we consider simulating data with the same scale as typical neuroimaging datasets.
+We simulated data with 1000 samples and between 100 and 10,000 features.
+We use an explicit latent variable model with non-sparse \gls{loadings} and vary the signal-to-noise ratio, defined by the ratio of the sum of the eigenvalues of the signal covariance matrix to the sum of the eigenvalues of the noise covariance matrix.
+
+\begin{table}
+    \centering
+    \caption{Simulated Data Parameters for Brain-Behaviour Simulations}
+    \begin{tabular}{| l | l |}
+        \hline
+        \textbf{Parameter}                        & \textbf{Value}                               \\
+        \hline
+        Number of features in View 1 (\textit{p}) & 100-10000 \\
+        Number of features in View 2 (\textit{q}) & 100-10000 \\
+        True Latent dimensions                    & 1                                            \\
+        Fraction of active features View 1            & 1.0                                          \\
+        Fraction of active features View 2            & 1.0                                          \\
+        Signal-to-noise ratio                    & 0.001-1 \\
+        \hline
+    \end{tabular}\label{tab:simulated-data-parameters-bb}
 \end{table}
 \newpage
 
 
 \section{Simulated Data Results}
 
-In this section, we present the results of our experiments.
-We begin with the results of the low and high-dimensional simulated data experiments, followed by the results of the \acrshort{hcp} and \acrshort{adni} data.
-
-\subsection{Low-Dimensional Data}
-
-\subsubsection{Implicit Latent Variables (Sparse Weights):}
+\subsection{Implicit Latent Variables (Sparse Weights)}
 
 \paragraph{Recovery of Weights and Loadings} Elastic regularization sets true zero weights close to zero and accurately retrieves true weights in both the identity (Figure~\ref{fig:joint-identity-weights-loadings}a) and non-identity (Figure~\ref{fig:joint-identity-weights-loadings}b) scenarios.
 Unregularized \acrshort{cca} and Ridge \acrshort{cca} are comparable to Elastic Net regularization but slightly worse in both scenarios (Figure \ref{fig:joint-scores})
@@ -491,7 +512,7 @@ This suggests that the random covariance scenario results in a higher signal-to-
     \caption{Test Scores for Implicit Latent Variable Data Generation.}\label{fig:joint-scores}
 \end{figure}
 
-\subsubsection{Explicit Latent Variables (Sparse Weights):}
+\subsection{Explicit Latent Variables (Sparse Weights)}
 
 \paragraph{Recovery of Weights and Loadings} A striking observation, though theoretically consistent, from Figure~\ref{fig:latent-variable-weights-loadings}a is that PCA almost perfectly recovers the true \gls{weights} and loadings for the \acrshort{gfa} model with identity noise covariance.
 Admittedly, we have chosen a reasonably high signal-to-noise ratio for this experiment, but this nonetheless demonstrates that PCA can be a useful baseline for multiview data under an isotropic latent variable noise model.
@@ -534,7 +555,7 @@ However, this does illustrate that priors on \gls{weights} do not translate well
     \caption{Test Scores for Explicit Latent Variable Data Generation Models.}\label{fig:latent-variable-scores}
 \end{figure}
 
-\subsubsection{Measuring the Identitiness of the Covariance Matrices}
+\subsection{Measuring the Identitiness of the Covariance Matrices}
 The theory we developed in section~\ref{subsec:generative-perspectives} suggests that the identitiness of the covariance matrices is crucial for understanding how imposing sparsity on the \gls{weights} imposes a prior belief in sparsity on the more biologically interesting loadings.
 We can measure the identitiness of the covariance matrices by looking at the eigenvalues of the covariance matrices.
 If the eigenvalues of the sample covariance matrix are all close to 1, then the sample covariance matrix is close to identity.
@@ -567,7 +588,7 @@ Our theoretical analysis suggests that while \gls{weights} may vary and are arbi
         \includegraphics[width=\linewidth]{figures/simulated/repeated/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_implicit}
         \caption{Random Covariance Matrices}
     \end{subfigure}
-    \caption{Weights and Loadings for Implicit Latent Variable Data Generation.}
+    \caption{\textbf{Repeated Columns}: Weights and Loadings.}
 \end{figure}
 
 \begin{figure}
@@ -586,6 +607,9 @@ For Elastic and Ridge \acrshort{cca}, the \gls{weights} applied to repeated feat
 In contrast, \gls{loadings} for repeated features remained consistent across all tested models, reinforcing our theoretical stance on their preferential use for model interpretation in scenarios with repeated columns or near-repeated columns.
 
 \subsection{Brain-Behaviour Simulations}
+
+We plot results for Ridge \acrshort{cca} and vary the regularization parameter from 0 (CCA) to 1 (PLS).
+
 
 \begin{figure}
     \centering
@@ -761,10 +785,6 @@ Furthermore, in limited sample sizes, our estimations of the covariance matrices
 This generally resulted in poor estimation of \gls{loadings} from model \gls{weights} \textit{even when the \gls{weights} themselves were estimated almost perfectly}.
 Therefore, it's crucial for researchers to recognize these nuances and adopt appropriate measures when extrapolating results, especially in brain-behaviour studies where typically only one sample is available and often limited in size.
 
-\paragraph{Ridge \acrshort{cca} is typically much better than \acrshort{pls} across datasets:} Our results show that Ridge \acrshort{cca} is typically much better than \acrshort{pls} across datasets.
-Much like regularised regression, it is unusual to need to use maximal ridge regularization even in high dimensions.
-Our results in simulated data even cast doubt on the touted stability of \acrshort{pls} over \acrshort{cca} with respect to population \acrshort{cca} problem.
-This means that while \acrshort{pls} might be more stable for a given dataset, it is not necessarily more stable across random samples from the same population.
 
 \paragraph{Can We Construct a Regularization Functional that Imposes Sparsity on the Loadings?}
 Finally, given our observations, a natural question to ask is whether we can construct a regularization functional that imposes sparsity on the \gls{loadings} (instead of the weights).
@@ -780,13 +800,12 @@ Which imposes an L1 penalty on the \gls{loadings} via an L1 penalty on the \gls{
 We could in principle apply the soft-thresholding operator to the estimated loadings.
 However we would need to be careful to ensure that the sample covariance matrix is invertible in order to get back to the weights.
 This is of course not guaranteed in the small sample setting.
-\newpage
-
 
 \section{Conclusion}
 
-In this chapter, we have explored the performance of several \acrshort{cca} variants on simulated and real data.
-We have shown that the choice of \acrshort{cca} variant can have a significant impact on the results.
-We have also shown that the identitiness of the covariance matrices is crucial for understanding how imposing sparsity on the \gls{weights} imposes a prior belief in sparsity on the more biologically interesting loadings.
-We described a way to check the identitiness of the covariance matrices by looking at the eigenvalues of the covariance matrices and comparing to the ideal case.
-In the next chapter, we address the scalability of \acrshort{cca} and its variants by introducing a novel algorithm based on gradient descent.
+In this chapter, we have shown that the \gls{loadings} are of critical importance for the interpretation of \acrshort{cca} models.
+We have shown that the \gls{loadings} are invariant to columnwise transformations of the data matrix, while the \gls{weights} are not.
+Through a series of experiments, we have demonstrated that the \gls{loadings} are more stable than the \gls{weights} across datasets and samples.
+We have also shown that regularisation of the \gls{weights} does not imply regularisation of the \gls{loadings}.
+Finally, we have shown that the identitiness of the covariance matrices is crucial for understanding whether imposing sparsity on the \gls{weights} imposes a prior belief in sparsity on loadings.
+We revisited the results of chapter~\ref{chap:frals} and showed that our interpretations would be different if we used \gls{loadings} instead of \gls{weights}.

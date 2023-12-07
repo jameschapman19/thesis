@@ -1,8 +1,7 @@
-\graphicspath{{chapters/gradient_descent/}}
+\graphicspath{{chapters/deep_learning/}}
 
 
-\chapter{Efficient Algorithms for the CCA Family: Unconstrained Losses with Unbiased Gradients}\label{chap:gradient_descent}
-\epigraph{It seems easier to train a bi-directional LSTM with attention than to compute the SVD of a large matrix.\cite{gemp}}{Chris Ré}
+\chapter{Deep CCA and CCA for Self-Supervised Learning}\label{chap:deep_learning}
 \minitoc
 % chktex-file 44
 % chktex-file 3
@@ -12,20 +11,31 @@
 
 \section{Background}
 
-\textbf{DCCA and Deep Multiview CCA:}
-The deep canonical correlation analysis (DCCA) landscape comprises three principal approaches with inherent limitations. The first, known as the full-batch approach, uses analytic gradient derivations based on the full sample covariance matrix \citep{andrew2013deep}.
-% Lennie: could work in $\norm{\Var(Z\sps{1})^\mhalf \Cov(Z\sps{1}, Z\sps{2}) \Var(Z\sps{2})^\mhalf}_F$ here - what do you think James?
-The second involves applying the full batch objective to large mini-batches, an approach referred to as \textbf{DCCA-STOL} \citep{wang2015unsupervised}. However, this approach gives biased gradients and therefore requires batch sizes much larger than the representation size in practice. This is the approach taken by both \textbf{DMCCA} \citep{somandepalli2019multimodal} and \textbf{DGCCA} \citep{benton2017deep} . The final set of approaches use an adaptive whitening matrix \citep{wang2015stochastic, chang2018scalable} to mitigate the bias of the Deep CCA objective. However, the authors of \textbf{DCCA-NOI} highlight that the associated time constant complicates analysis and requires extensive tuning. These limitations make existing DCCA methods less practical and resource-efficient.
+\subsection{DCCA and Deep Multiview CCA}
 
-\textbf{Self-Supervised Learning:}
-\textbf{Barlow Twins} and \textbf{VICReg} have come to be known as part of the canonical correlation family of algorithms \citep{balestriero2023cookbook}. Barlow Twins employs a redundancy reduction objective to make the representations of two augmented views both similar and decorrelated \citep{zbontar2021barlow}. Similarly, VICReg uses variance-invariance-covariance regularization, which draws upon canonical correlation principles, to achieve robust performance in diverse tasks \citep{bardes2021vicreg}. These methods serve as vital baselines for our experiments, owing to their foundational use of canonical correlation ideas.
-
-\textbf{Deep CCA:} was originally introduced in \cite{andrew2013deep}; this was extended to an GEP-based formulation of \textbf{Deep Multi-view CCA} (DMCCA) in \cite{somandepalli2019multimodal}. This can be defined using our $\MCCA$ notation as maximizing
+The goal of DCCA and DMCCA can be defined using our $\MCCA$ notation as maximizing
 \begin{align}
     \label{eq:DMCCA-def}
     \norm{\MCCA_K\left(Z\sps{1}, ... Z\sps{I}\right)}_2
 \end{align}
 over parameters $\theta$ of neural networks defining the representations $Z\sps{i}=f\sps{i}(X\sps{i};\theta\sps{i})$ for $i\in[I]$.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\textwidth]{figures/dcca_schematic}
+\end{figure}
+
+The deep canonical correlation analysis (DCCA) landscape comprises three principal approaches with inherent limitations. The first, known as the full-batch approach, uses analytic gradient derivations based on the full sample covariance matrix \citep{andrew2013deep}.
+The second involves applying the full batch objective to large mini-batches, an approach referred to as \textbf{DCCA-STOL} \citep{wang2015unsupervised}. However, this approach gives biased gradients and therefore requires batch sizes much larger than the representation size in practice. This is the approach taken by both \textbf{DMCCA} \citep{somandepalli2019multimodal} and \textbf{DGCCA} \citep{benton2017deep} . The final set of approaches use an adaptive whitening matrix \citep{wang2015stochastic, chang2018scalable} to mitigate the bias of the Deep CCA objective. However, the authors of \textbf{DCCA-NOI} highlight that the associated time constant complicates analysis and requires extensive tuning. These limitations make existing DCCA methods less practical and resource-efficient.
+
+\subsection{Self-Supervised Learning}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/ssl_schematic}
+\end{figure}
+
+\textbf{Barlow Twins} and \textbf{VICReg} have come to be known as part of the canonical correlation family of algorithms \citep{balestriero2023cookbook}. Barlow Twins employs a redundancy reduction objective to make the representations of two augmented views both similar and decorrelated \citep{zbontar2021barlow}. Similarly, VICReg uses variance-invariance-covariance regularization, which draws upon canonical correlation principles, to achieve robust performance in diverse tasks \citep{bardes2021vicreg}. These methods serve as vital baselines for our experiments, owing to their foundational use of canonical correlation ideas.
 
 \section{Methods: Novel Objectives and Algorithms}\label{sec:contributions}
 
