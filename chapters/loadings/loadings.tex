@@ -1,27 +1,39 @@
 \graphicspath{{chapters/loadings/}}
 
 
-\chapter{Insights From Generating Simulated Data for CCA}\label{chap:loadings}
-%\epigraph{Correlation does not imply causation.}{\textit{Anon.}}
+\chapter{Insights From Generating Simulated Data for CCA: Loadings not Weights}\label{chap:loadings}
+\epigraph{Correlation does not imply causation.}{\textit{Anon.}}
 \minitoc
 % chktex-file 44
 % chktex-file 3
 \section*{Preface}
 
-This chapter is based on observations made across a number of projects.
-While the work itself is unpublished, it has influenced , most notably by the use of loadings rather than weights for model interpretation in \citet{} where I contributed parts of the appendix and encouraged the use of loadings for model interpretation. The simulated data generation methods were also used to generate simulated data in \citet{mihalik2022canonical}.
-This chapter makes the theoretical case for using loadings rather than weights for model interpretation in \acrshort{cca} and \acrshort{pls} models.
-It also presents a number of experiments demonstrating the relationship between loadings and weights in \acrshort{cca} models.
-
+This chapter, deriving insights from various projects, primarily unpublished, delves into the application of loadings over weights for model interpretation in CCA models. The simulated data generation methods were used to generate simulated data in \citet{mihalik2022canonical}. The arguments for the use of loadings influenced our choice of loadings for the interpretation of the results in \citet{}.
 
 \section{Introduction}
 
-In practical applications, (\acrshort{cca}) has two aspects: estimating latent variables associated with different views, and exploring the expression of these latent variables in each view, ideally providing insight into biomedical mechanisms.
-This dual focus is similar to the distinction in machine learning between discriminative and generative approaches.
+There remains a substantial debate in the \acrshort{cca} literature about the relative merits of interpreting models in terms of weights or loadings \citep{gu2018simultaneous}.
+Simulated data has also been used extensively to understand the properties of \acrshort{cca} models for high-dimensional data \citep{chen2013sparse, suo2017sparse, helmer2020stability} including the recovery of sparse weights.
 
-Discriminative approaches in Canonical Correlation Analysis (CCA) prioritize estimating latent variables from observed data, typically employing `weights' as parameters.
-Conversely, generative approaches in CCA seek to understand the data generation process.
-This perspective is illustrated by the `loadings' in our model, which represent the parameters transforming the latent variable into observed data.
+In this chapter, we first review the generative perspectives on \acrshort{cca} and show that they can be categorized into two groups: explicit latent variable models and implicit latent variable models, in particular by reformulating the joint covariance matrix perspective used by \citet{suo2017sparse, chen2013sparse, helmer2020stability} as an implicit latent variable model.
+
+This rigorous categorization of generative approaches to \acrshort{cca} is novel and gives both a unique perspective on both the merits of weights and loadings, and understanding the properties of \acrshort{cca} models in high-dimensional simulations.
+We also make a mathematical argument for the use of loadings over weights for the interpretation of \acrshort{cca} models, showing that the \gls{loadings} are invariant to columnwise transformations of the data matrix, while the weights are not.
+
+We illustrate these arguments with simulated data and revisit the results from chapter \ref{chap:als} through the lens of loadings.
+
+\section{Background}
+
+In practical applications, (\acrshort{cca}) has two aspects: estimating latent variables associated with different views, and exploring the expression of these latent variables in each view, ideally providing insight into biomedical mechanisms.
+These aspects correspond to the motivation behind discriminative and generative approaches in machine learning.
+
+\paragraph{Generative} approaches in CCA seek to understand the data generation process.
+They are concerned with the joint distribution $P(X\sps{1},X\sps{2})$ and the conditional distribution $P(X\sps{1},X\sps{2}|Z)$.
+We will refer to this conditional distribution as the `forward model', since it describes how the observed data are generated from the latent variables.
+This model is parameterized by `loadings' which describe the relationship between the latent variables and the observed data.
+\paragraph{Discriminative} approaches in \acrshort{cca} prioritize estimating latent variables from observed data, typically employing `weights' as parameters.
+In the context of the graphical model of \acrshort{cca} in Figure~\ref{fig:forward-backward-models}, discriminative approaches estimate the distribution $P(Z|X\sps{1},X\sps{2})$.
+We will refer to this conditional distribution as the `backward model', since it describes how we can infer the latent variables from the observed data.
 
 \begin{figure}
     \centering
@@ -40,26 +52,21 @@ This perspective is illustrated by the `loadings' in our model, which represent 
     \caption[Forward and Backward Multiview Models]{\textit{\textbf{Forward and Backward Multiview Models:}} The \textcolor{blue}{generative approach to \acrshort{cca} focuses on the forward model from latent variables to observed data}, while the \textcolor{red}{machine learning approach focuses on the backward model from observed data to latent variables}.}\label{fig:forward-backward-models}
 \end{figure}
 
-In this context, the generative or probabilistic CCA is parameterized by the \gls{loadings}, which play a crucial role in understanding how the latent variable (severity) influences the observed data (brain and behaviour).
-On the other hand, the discriminative or machine learning approach to CCA is characterized by \gls{weights}, focusing on how observations can be used to estimate the latent variables.
+\citet{gu2018simultaneous} noted that there appear to be two schools of thought in the \acrshort{cca} literature: one that focuses on the weights and one that focuses on the loadings.
+The former group argues both that the weights provide a measure of the contribution of each feature holding other features constant, and that weights are multivariate.
+The latter group argues that the loadings are more interpretable because they measure how much each feature is represented by the latent variable.
+\citet{haufe2014interpretation} argued for the use of loadings for interpretability in the context of linear models like SVM and Lasso in neuroimaging.
+\citet{alpert1972interpretation} also highlighted the problem with interpreting weights in the backward model, noting that they inherit all of the problems of interpreting regression coefficients.
+They conclude that weights appear more suitable for prediction, while correlations may better explain underlying (although interrelated) constructs.
 
-The ideal CCA model aims to accurately estimate latent variables while maintaining the interpretability of the model, particularly through the loadings.
-This allows for a deeper understanding of the relationship between different views (brain and behaviour) through the data generation process.
-The significance of loadings for interpretability, particularly in the forward model, as opposed to weights in the backward model, was highlighted in the context of linear models like SVM and Lasso \citep{haufe2014interpretation}.
-Our work in this chapter contributes to this discourse by demonstrating a similar interpretative advantage of loadings over weights in CCA models.
-
-In this chapter, we reexamine the relationship between these discriminative and generative approaches to \acrshort{cca} approaches using simulated data.
-We categorize the main simulated data generation methods for CCA into two groups: explicit latent variable models and implicit latent variable models; in particular by reformulating the joint covariance matrix perspective from \citet{suo2017sparse, chen2013sparse} as an implicit latent variable model.
-With this context, we reconsider the role of regularization in \acrshort{cca} models and give recommendations for the use of loadings over weights for model interpretation.
-
-\newpage
-
+In this chapter, we are interested in generating insights to the interpretability of \acrshort{cca} models in the context of simulated data where we know precisely how the data were generated.
+The most important argument we will make is that all generative approaches to \acrshort{cca} are implicitly latent variable models, so that loadings are the natural parameters for interpretation.
 
 \section{Unifying Generative Perspectives on \acrshort{cca}}\label{sec:generative-perspectives}
 
 In this section, we review the generative perspectives on \acrshort{cca} and show that they can be categorized into two groups: explicit latent variable models and implicit latent variable models.
 
-\subsection{Probabilistic \acrshort{cca} and \acrshort{gfa} (Explicit Latent Variable Models)}\label{subsubsec:a-probabilistic-latent-variable-perspective}
+\subsection{Probabilistic \acrshort{cca} and \acrshort{gfa} (Explicit Latent Variable Models)}
 
 Let's reconsider the graphical model depicted in Figure~\ref{fig:forward-backward-models}.
 Now we further assume that the brain is generated via a linear model with added noise, while the behavioural modality similarly arises from a linear model with noise.
@@ -131,12 +138,12 @@ While these generative models are provide a clear interpretation of the data gen
 This is primarily due to their computational intensity and the need for a careful selection of priors.
 Moreover, while these models can generate data with sparse loadings, generating data with sparse weights is challenging due to the dependence of \acrshort{cca} weights on the covariance matrices of the views.
 
-\subsection{Joint Covariance Matrix Perspective (Implicit Latent Variable Model)}\label{subsubsec:a-joint-covariance-matrix-perspective}
+\subsection{Joint Covariance Matrix Perspective (Implicit Latent Variable Model)}
 
-In contrast to the explicit latent variable models discussed earlier, the joint covariance matrix perspective offers an implicit approach to understanding the data generation process.
+In contrast to the explicit latent variable models discussed earlier, the joint covariance matrix perspective \cite{suo2017sparse,chen2013sparse} offers an implicit approach to understanding the data generation process.
 This method focuses on the covariance matrices of the views, rather than directly modeling latent variables.
-A key advantage of this perspective, particularly noted in the sparse \acrshort{cca} literature, is its ability to generate data with sparse weights and or known canonical correlations.
-This is achieved by constructing the joint covariance matrix of the two views as follows:
+A key advantage of this perspective, particularly noted in the sparse \acrshort{cca} literature, is its ability to generate data with known sparse weights and or known canonical correlations.
+This is achieved by constructing the joint covariance matrix of the distribution $P(X\sps{1},X\sps{2})$:
 
 \begin{align}
     \label{eq:covariance}
@@ -219,8 +226,32 @@ This distinction is crucial, especially in scenarios where the population covari
     \label{tab:weights-loadings-population-sample}
 \end{table}
 
-\newpage
+\subsection{Efficient Sampling of Simulated CCA Data}
 
+Efficient sampling from high-dimensional multivariate normal distributions is a critical step in simulating data for Canonical Correlation Analysis (CCA). Traditional methods can be computationally intensive and storage-demanding, especially for large datasets. To address these challenges, we leverage low-rank and sparse covariance matrices, along with Singular Value Decomposition (SVD), to facilitate efficient and feasible sampling procedures.
+
+\subsubsection{Challenges with High-Dimensional Data}
+In the context of high-dimensional data, direct sampling from a multivariate normal distribution and storing the full covariance matrix (\(p \times p\) for \(p\) dimensions) become impractical.
+High computational cost and substantial storage requirements necessitate more efficient approaches.
+
+\subsubsection{Utilizing Low-Rank Covariance Matrices}
+A practical solution is to use low-rank approximations of covariance matrices. Instead of storing the entire covariance matrix, we store only the significant components, specifically the matrices \(U\) and \(S\) from the SVD of the covariance matrix (\(\Sigma = U S U^T\)). Sampling then involves generating samples from a standard univariate normal distribution and transforming them using these SVD components.
+
+\subsubsection{Sparse Covariance Matrices}
+For certain applications, sparse covariance matrices offer an additional avenue for efficiency.
+These matrices, with many zero entries, reduce both computational complexity and storage requirements, allowing for faster processing and less memory usage.
+
+\subsubsection{Explicit Latent Variable Models}
+In explicit latent variable models, we generate orthogonal latent variables from a low-dimensional multivariate normal distribution.
+These are then transformed using the loading matrices to create the signal component of the data. Noise is added by sampling from a univariate normal distribution and multiplying by a factorized (low-rank or sparse) covariance matrix.
+This method allows for precise control over the signal-to-noise ratio in the simulated data.
+
+\subsubsection{Implicit Latent Variable Models}
+Implicit latent variable models pose a greater challenge as they typically require storing the full covariance matrix.
+However, we can improve the efficiency by employing the SVD of the covariance matrix.
+This approach involves decomposing the covariance matrix and then using the resulting components to transform samples from a standard multivariate normal distribution, thereby generating samples that conform to the desired high-dimensional distribution with reduced computational overhead.
+
+These methods collectively enhance the feasibility and efficiency of simulating CCA data, especially in high-dimensional scenarios, providing a robust framework for research and analysis in various fields.
 
 \section{A Mathematical Argument for Using Loadings not Weights for Interpretation of CCA Models}\label{sec:an-argument-for-the-use-of-loadings}
 
@@ -392,16 +423,69 @@ We have shown that the \gls{loadings} are invariant to columnwise transformation
 This is a key advantage of \gls{loadings} over weights for the interpretation of \acrshort{cca} models.
 We might even be inclined to state this even more strongly: \textbf{the loadings are the true parameters of the model, while the weights are not}.
 
-
 \section{Experiments}
 
-Having given a mathematical argument for the use of \gls{loadings} over weights for the interpretation of \acrshort{cca} models, we now present a number of experiments demonstrating the relationship between loadings and weights in \acrshort{cca} models.
-In this chapter, we use simulated data to illustrate properties of CCA models and then revisit the results of chapter~\ref{chap:als} to demonstrate the relationship between \gls{weights} and \gls{loadings} in real-world datasets.
+Having given a mathematical argument for the use of \gls{loadings} over weights for the interpretation of \acrshort{cca} models, we now motivate a number of experiments demonstrating the relationship between loadings and weights in \acrshort{cca} models.
+
+The first set of experiments illustrates the relationship between weights and \gls{loadings} in simulated data from explicit and implicit latent variable models with identity and non-identity covariance matrices.
+
+The second set of experiments illustrates the power of the less popular explicit latent variable models for studying the properties of CCA and PLS models in high dimensional settings.
+
+\subsection{The Relationship Between Weights and Loadings}
+
+This experiment uses simulated data to illustrate the relationship between weights and \gls{loadings} in \acrshort{cca} models.
+Given the thrust of this chapter, we are particularly interested in scenarios where the model weights are uninformative, but the \gls{loadings} are informative.
+
+We generate data with 100 samples and 10 features in each view.
+We then generate data under two implicit latent variable models and two explicit latent variable models.
+
+\paragraph{Implicit Latent Variable Models}
+The implicit latent variable approach allows us to choose the true weights.
+We ensure that the true weights are sparse with 5 non-zero entries in each view.
+We use a true correlation of 1.0 between the views at the population level.
+
+We generated data under two scenarios:
+\begin{itemize}
+    \item Using identity within-view covariance matrices, such that the true weights are equivalent to true loadings.
+    \item Using random covariance matrices, where true weights differ from true loadings, usually resulting in non-sparse loadings.
+\end{itemize}
+
+\paragraph{Explicit Latent Variable Models and Sparse Loadings:}
+The explicit latent variable approach allows us to choose the true \gls{loadings}.
+We ensure that the true \gls{loadings} are sparse with 5 non-zero entries in each view.
+The signal-to-noise ratio was set so that the sum of the signal's eigenvalues was half that of the noise.
+We generate data under two scenarios:
+\begin{itemize}
+    \item GFA (identity noise covariance matrices)
+    \item Probabilistic CCA (random covariance matrices)
+\end{itemize}
+
+For the two models with random covariance matrices, we also duplicate each column of the data matrix and add a small amount of noise to illustrate the effect of repeated linear combinations of columns on the weights and \gls{loadings}.
+
+\begin{table}
+    \centering
+    \caption{Simulated Data Parameters for Weight and Loadings Recovery Experiments}
+    \begin{tabular}{| l | l |}
+        \hline
+        \textbf{Parameter}                        & \textbf{Value}                               \\
+        \hline
+        Number of samples (\textit{n})            & 100 train, 500 test                            \\
+        Number of features in View 1 (\textit{p}) & 10-20 (10 repeated) \\
+        Number of features in View 2 (\textit{q}) & 10-20 (10 repeated) \\
+        True Latent dimensions                    & 1                                            \\
+        Fraction of active features View 1            & 0.5                                          \\
+        Fraction of active features View 2            & 0.5                                          \\
+        \hline
+    \end{tabular}\label{tab:simulated-data-parameters}
+\end{table}
 
 \subsection{Varying the Signal-to-Noise Ratio}
-Our first experiment is designed to better understand how we can interpret low but non-zero out of sample correlations in \acrshort{pls} models of high dimensional brain-behaviour datasets.
-We simulated data with 1000 samples and between 100 and 10,000 features.
-We used an explicit latent variable model and varied the signal-to-noise ratio, defined by the ratio of the sum of the eigenvalues of the signal covariance matrix to the sum of the eigenvalues of the noise covariance matrix.
+
+Our next experiment was motivated by the observation that \acrshort{pls} models (including sparse PLS) often exhibit low but non-zero out of sample correlations in real high-dimensional data.
+We want to understand how much of this is due to the fact that PLS models optimize covariance rather than correlation, and how much is due to the fact that the signal-to-noise ratio is too low.
+In order to understand this, we simulated data with varying signal-to-noise ratios and compared the out of sample correlations of \acrshort{pls} models with the out of sample correlations of Ridge \acrshort{cca} models with varying regularization.
+We simulated data with 1000 samples and between 100 and 10,000 features in one view and 100 features in the other.
+These are of the same order of magnitude as typical brain-behaviour datasets.
 We summarise these data properties in table \ref{tab:simulated-data-parameters-bb}.
 
 \begin{table}
@@ -421,74 +505,9 @@ We summarise these data properties in table \ref{tab:simulated-data-parameters-b
     \end{tabular}\label{tab:simulated-data-parameters-bb}
 \end{table}
 
-\subsection{Recovery of Weights and Loadings}
-
-Our second set of experiments is designed to understand how well we can recover the true weights and \gls{loadings} in simulated data.
-Given the thrust of this chapter, we are particularly interested in scenarios where the model weights are uninformative, but the \gls{loadings} are informative.
-With this in mind, we generated data using both the implicit and explicit latent variable models described in section~\ref{sec:generative-models}.
-We used 50 training and 50 test samples for each of 10 independent random draws from the data generation process.
-
-\paragraph{Implicit Latent Variable Models and Sparse Weights:}
-The implicit latent variable approach allows us to choose the true weights.
-The true \gls{loadings} are defined as the product of the true weights and the true population within-view covariance matrices.
-We generated data under two scenarios:
-\begin{itemize}
-    \item Using identity within-view covariance matrices, such that the true weights are equivalent to true loadings.
-    \item Using random covariance matrices, where true weights differ from true loadings, usually resulting in non-sparse loadings.
-\end{itemize}
-For this data, we estimated model \gls{loadings} using the product of the model weights and the sample within-view covariance matrix.
-Note that because we multiply model weights by the sample covariance matrix to estimate the loadings, the estimated \gls{loadings} are sometimes not sparse even when both the model weights are sparse and the true covariance matrix is identity.
-
-\paragraph{Explicit Latent Variable Models and Sparse Loadings:}
-The explicit latent variable approach allows us to choose the true \gls{loadings}.
-The true weights were defined as the product of the true \gls{loadings} and the inverse of the true population within-view covariance matrices.
-We generated data with sparse \gls{loadings} using the Probabilistic \acrshort{cca} and \acrshort{gfa} models, as outlined in section~\ref{subsubsec:a-probabilistic-latent-variable-perspective}.
-The signal-to-noise ratio was set so that the sum of the signal's eigenvalues was twice that of the noise.
-For this data, we estimated model \gls{weights} using the product of the model weights and the sample within-view covariance matrix.
-Note that because we multiply model weights by the sample covariance matrix to estimate the loadings, the estimated \gls{loadings} are sometimes not sparse even when both the model weights are sparse and the true covariance matrix is identity.
-
-\begin{table}
-    \centering
-    \caption{Simulated Data Parameters for Weight and Loadings Recovery Experiments}
-    \begin{tabular}{| l | l |}
-        \hline
-        \textbf{Parameter}                        & \textbf{Value}                               \\
-        \hline
-        Number of samples (\textit{n})            & 50 train, 50 test                            \\
-        Number of features in View 1 (\textit{p}) & 10 \\
-        Number of features in View 2 (\textit{q}) & 10 \\
-        True Latent dimensions                    & 1                                            \\
-        Fraction of active features View 1            & 0.5                                          \\
-        Fraction of active features View 2            & 0.5                                          \\
-        \hline
-    \end{tabular}\label{tab:simulated-data-parameters}
-\end{table}
-
-\subsection{Revisiting the Results from the Previous Chapter}
-
-Finally, we revisit the results of chapter~\ref{chap:als} with a view to understanding the relationship between \gls{weights} and \gls{loadings} in real-world datasets.
-
-
 \section{Results}
 
-\subsection{Varying the Signal-to-Noise Ratio}
-
-In Figures \ref{fig:snr-scores-identity} and \ref{fig:snr-scores-random} we plot the test correlation (score) varying the signal-to-noise ratio and the number of features.
-Figure 
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{figures/simulated/snr/snr_vs_scores_facet_identity}
-    \caption{Identity Covariance Matrices}\label{fig:snr-scores-identity}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{figures/simulated/snr/snr_vs_scores_facet_random}
-    \caption{Random Covariance Matrices}\label{fig:snr-scores-random}
-\end{figure}
-
-\subsection{Recovering Weights and Loadings}
+\subsection{The Relationship Between Weights and Loadings}
 
 \subsubsection{Implicit Latent Variables (Sparse Weights)}
 
@@ -601,92 +620,27 @@ On the other hand, these plots (shown for 10 random samples) show that all of th
     \caption{Eigenvalues of the covariance matrices for the simulated datasets.}\label{fig:covariance-eigenvalues-simulated-low}
 \end{figure}
 
-%\subsection{Repeated Columns}\label{subsec:repeated-columns}
-%
-%In this section, we explore the stability of \gls{weights} and \gls{loadings} in \acrshort{cca} models when faced with repeated columns in the data.
-%Our theoretical analysis suggests that while \gls{weights} may vary and are arbitrary with repeated columns, \gls{loadings}  remain consistent.
-%
-%\begin{figure}
-%    \centering
-%    \begin{subfigure}{0.49\linewidth}
-%        \centering
-%        \includegraphics[width=\linewidth]{figures/simulated/repeated/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_implicit}
-%        \caption{Identity Covariance Matrices}
-%    \end{subfigure}
-%%
-%    \begin{subfigure}{0.49\linewidth}
-%        \centering
-%        \includegraphics[width=\linewidth]{figures/simulated/repeated/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_implicit}
-%        \caption{Random Covariance Matrices}
-%    \end{subfigure}
-%    \caption{\textbf{Repeated Columns}: Weights and Loadings.}
-%\end{figure}
-%
-%\begin{figure}
-%        \centering
-%        \includegraphics[0.49\linewidth]{figures/simulated/repeated/Train_Test_Scores_Identity_Covariance_implicit}
-%        \caption{Identity Covariance Matrices}
-%\end{figure}
-%
-%Empirical results from our experiments validate this theoretical proposition.
-%We observed that in \acrshort{pls} and \acrshort{spls} models, which are significantly regularized (L2 regularization), the \gls{weights} for repeated features tend to be uniform.
-%However, in the case of \acrshort{cca} the \gls{weights} applied to repeated features are almost completely arbitrary (see the scale).
-%For Elastic and Ridge \acrshort{cca}, the \gls{weights} applied to repeated features, though not identical, display greater stability due to shrinkage effects.
-%In contrast, \gls{loadings} for repeated features remained consistent across all tested models, reinforcing our theoretical stance on their preferential use for model interpretation in scenarios with repeated columns or near-repeated columns.
 
-%
+\subsection{Varying the Signal-to-Noise Ratio}
 
-%\subsection{High-Dimensional Simulated Data}
-%In this section we consider only the latent variable models in order to ensure we have a sufficient signal-to-noise ratio to compare the models as we are deliberately undersampled.
-%Figure~\ref{fig:latent-variable-weights-loadings-high}a once again shows that PCA is a useful baseline for multiview data under an isotropic noise model, even in the high-dimensional setting.
-%On the other hand, \acrshort{cca} cannot recover any signal when it is overparameterized.
-%Ridge \acrshort{cca} and \acrshort{pls} perform similarly, perhaps because the only identifiable signal is the \acrshort{pls} signal (since the \acrshort{cca} signal is not identifiable).
-%Figure~\ref{fig:latent-variable-weights-loadings-high}b illustrates clearly that both \acrshort{rcca} and ElasticNet with their tunable L2 regularization both outperform \acrshort{pls} and \acrshort{spls} with fixed and maximal L2 regularization.
-%It appears that in high dimensions correlated noise is a significant problem for \acrshort{pls} (and therefore \acrshort{spls}) when used as regularized \acrshort{cca} models, even though the models are identifiable.
-%
-%\begin{figure}
-%\centering
-%\begin{subfigure}{0.49\linewidth}
-%\centering
-%\includegraphics[width=\linewidth]{figures/simulated/high/Combined_Weights_Loadings_with_Error_Bars_Identity_Covariance_explicit}
-%\caption{Identity Covariance Latent Variable}
-%\end{subfigure}
-%%
-%\begin{subfigure}{0.49\linewidth}
-%\centering
-%\includegraphics[width=\linewidth]{figures/simulated/high/Combined_Weights_Loadings_with_Error_Bars_Random_Covariance_explicit}
-%\caption{Random Covariance Latent Variable}
-%\end{subfigure}
-%\caption{Weights and Loadings for High-Dimensional Explicit Latent Variable Data Generation.}\label{fig:latent-variable-weights-loadings-high}
-%\end{figure}
-%
-%\begin{figure}
-%\centering
-%\begin{subfigure}{0.49\linewidth}
-%\centering
-%\includegraphics[width=\linewidth]{figures/simulated/high/Train_Test_Scores_Identity_Covariance_explicit}
-%\caption{}
-%\end{subfigure}
-%%
-%\begin{subfigure}{0.49\linewidth}
-%\centering
-%\includegraphics[width=\linewidth]{figures/simulated/high/Train_Test_Scores_Random_Covariance_explicit}
-%\caption{}
-%\end{subfigure}
-%\caption{Test Scores for High-Dimensional Explicit Latent Variable Data Generation Models.}\label{fig:latent-variable-scores-high}
-%\end{figure}
+In Figures \ref{fig:snr-scores-identity} and \ref{fig:snr-scores-random} we plot the test correlation (score) varying the signal-to-noise ratio and the number of features.
+Figure 
 
-%\paragraph{Identitiness of the Covariance Matrices}
-%
-%As in the low-dimensional case, we can measure the identitiness of the covariance matrices by looking at the eigenvalues of the covariance matrices.
-%
-%\begin{figure}
-%\centering
-%\includegraphics[width=0.8\linewidth]{figures/covariance/simulated_covariance_eigenvalues_high}
-%\caption{Eigenvalues of the covariance matrices for the simulated datasets.}\label{fig:covariance-eigenvalues-simulated-high}
-%\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/simulated/snr/snr_vs_scores_facet_identity}
+    \caption{Identity Covariance Matrices}\label{fig:snr-scores-identity}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/simulated/snr/snr_vs_scores_facet_random}
+    \caption{Random Covariance Matrices}\label{fig:snr-scores-random}
+\end{figure}
 
 \section{Revisiting Brain-Behaviour Results}
+
+In this section, we revisit the results from the brain-behaviour experiments in Chapter \ref{chap:als} by comparing the weights and \gls{loadings} of the \acrshort{hcp} and \acrshort{adni} datasets.
 
 \subsection{Identitiness of Covariance Matrices}
 In this section, we consider the identitiness of the covariance matrices for the \acrshort{hcp} and \acrshort{adni} datasets.
@@ -750,9 +704,6 @@ From Figure \ref{fig:covariance-matrices-real}, we can see the block structure o
     \includegraphics[width=0.8\linewidth]{figures/adni/SPLS behaviour weights and loadings}
     \caption{Bar plots of the behaviour \gls{weights} and \gls{loadings} for each model.}
 \end{figure}
-
-\newpage
-
 
 \section{Discussion}
 
