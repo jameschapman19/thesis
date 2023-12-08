@@ -85,7 +85,7 @@ Notice that if it were not for the view-specific noise, the two views would be p
 \citet{bach2005probabilistic} showed that the maximum likelihood solution for this model is equivalent to the solution of the \acrshort{cca} problem in the sense that the \gls{loadings} are the same as the \acrshort{cca} weights multiplied by the covariance:
 
 \begin{align}
-    \label{eq:probabilistic-cca}
+    \label{eq:weights-to-loadings}
     \hat{W}\sps{i} = \Sigma_{ii} \hat{U}\sps{i} R
 \end{align}
 
@@ -433,14 +433,18 @@ The second set of experiments illustrates the power of the less popular explicit
 
 \subsection{The Relationship Between Weights and Loadings}
 
-This experiment uses simulated data to illustrate the relationship between weights and \gls{loadings} in \acrshort{cca} models.
-Given the thrust of this chapter, we are particularly interested in scenarios where the model weights are uninformative, but the \gls{loadings} are informative.
+Given the thrust of this chapter, we are particularly interested in scenarios where model weights are interpretable, but the \gls{loadings} are interpretable.
+One scenario in which weights and loadings could be interpretable is when they are sparse.
+In the former, truly sparse weights indicate that only a subset of the features are predictive of the latent variables.
+In the latter, truly sparse \gls{loadings} indicate that only a subset of the features are driven by variation in the latent variables.
+Implicit latent variable models can generate data with sparse weights, but not sparse \gls{loadings}.
+Explicit latent variable models can generate data with sparse \gls{loadings}, but not sparse weights.
 
 We generate data with 100 samples and 10 features in each view.
 We then generate data under two implicit latent variable models and two explicit latent variable models.
 
 \paragraph{Implicit Latent Variable Models}
-The implicit latent variable approach allows us to choose the true weights.
+The implicit latent variable approach allows us to choose truly sparse weights.
 We ensure that the true weights are sparse with 5 non-zero entries in each view.
 We use a true correlation of 1.0 between the views at the population level.
 
@@ -451,7 +455,7 @@ We generated data under two scenarios:
 \end{itemize}
 
 \paragraph{Explicit Latent Variable Models and Sparse Loadings:}
-The explicit latent variable approach allows us to choose the true \gls{loadings}.
+The explicit latent variable approach allows us to choose truly sparse \gls{loadings}.
 We ensure that the true \gls{loadings} are sparse with 5 non-zero entries in each view.
 The signal-to-noise ratio was set so that the sum of the signal's eigenvalues was half that of the noise.
 We generate data under two scenarios:
@@ -509,23 +513,17 @@ We summarise these data properties in table \ref{tab:simulated-data-parameters-b
 
 \subsection{The Relationship Between Weights and Loadings}
 
+We first present the results of the experiments demonstrating the relationship between weights and \gls{loadings} in simulated data from explicit and implicit latent variable models with identity and non-identity covariance matrices.
+
+For both cases, we plot the true weights and loadings along with the estimated weights and loadings for each model.
+We estimate model loadings by multiplying the model weights by the sample within-view covariance matrix following equation \ref{eq:weights-to-loadings}.
+This means that the estimated model loadings may not be sparse even when the estimated model weights are sparse and the \textit{population} covariance matrix is identity.
+
 \subsubsection{Implicit Latent Variables (Sparse Weights)}
 
-For this data, we estimated model \gls{loadings} using the product of the model weights and the sample within-view covariance matrix.
-Note that because we multiply model weights by the sample covariance matrix to estimate the loadings, the estimated \gls{loadings} are sometimes not sparse even when both the model weights are sparse and the true covariance matrix is identity.
+Figure~\ref{fig:implicit-latent-variable-weights-loadings} shows the true and estimated \gls{weights} and \gls{loadings} for the implicit latent variable models.
+Figure~\ref{fig:implicit-latent-variable-weights-loadings}a) shows the results for the identity covariance scenario, while Figure~\ref{fig:implicit-latent-variable-weights-loadings}b) shows the results for the random covariance scenario.
 
-Figure~\ref{fig:implicit-latent-variable-weights-loadings} shows the true and estimated \gls{weights} and \gls{loadings} for the implicit latent variable models. Figure~\ref{fig:implicit-latent-variable-weights-loadings}a) shows the results for the identity covariance scenario, while Figure~\ref{fig:implicit-latent-variable-weights-loadings}b) shows the results for the random covariance scenario.
-
-Elastic regularization sets true zero weights close to zero and accurately retrieves true weights in both the identity (Figure~\ref{fig:implicit-latent-variable-weights-loadings}a) and non-identity (Figure~\ref{fig:implicit-latent-variable-weights-loadings}b) scenarios.
-
-PCA performs badly across both scenarios. This is unsurprising because the implicit latent variable model does not assume that the latent variables are the principal components of the data.
-
-Tt is clear that the \acrshort{pls} and \acrshort{spls} models have been skewed by the principal components.
-Furthermore, the \acrshort{spls} does not result in appropriate shrinkage and identifies a number of false negatives.
-This is perhaps surprising because all three problems are equivalent in the population setting (due to identical view covariances).
-
-Interestingly, all the models seem to give more accurate estimates of the true loadings in the random covariance scenario (Figure~\ref{fig:implicit-latent-variable-weights-loadings}b) than in the identity covariance scenario (Figure~\ref{fig:implicit-latent-variable-weights-loadings}a).
-In particular, even when the true covariance is identity, the estimated loadings are not sparse even when the model weights are sparse because the estimated loadings are the product of the model weights and the sample covariance matrix rather than the population covariance matrix.
 
 \begin{figure}
     \centering
@@ -542,33 +540,9 @@ In particular, even when the true covariance is identity, the estimated loadings
     \caption{\textbf{Implicit Latent Variable:} Weights and Loadings. Blue signifies true zero weights and loadings, while Orange indicates estimated true non-zero weights and loadings.}\label{fig:implicit-latent-variable-weights-loadings}
 \end{figure}
 
-\paragraph{Recovery of Latent Variables}
-
-Unregularized \acrshort{cca} and Ridge \acrshort{cca} are comparable to Elastic Net regularization but slightly worse in both scenarios (Figure \ref{fig:implicit-latent-variable-scores})
-
-\begin{figure}
-    \centering
-    \begin{subfigure}{0.49\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Identity_Covariance_implicit}
-        \caption{Identity Covariance Matrices}
-    \end{subfigure}
-    \begin{subfigure}{0.49\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Random_Covariance_implicit}
-        \caption{Random Covariance Matrices}
-    \end{subfigure}
-    \caption{\textbf{Implicit Latent Variable:} Test Scores.}\label{fig:implicit-latent-variable-scores}
-\end{figure}
 
 \subsubsection{Explicit Latent Variables (Sparse Weights)}
 
-\paragraph{Recovery of Weights and Loadings} A striking observation, though theoretically consistent, from Figure~\ref{fig:explicit-latent-variable-weights-loadings}a is that PCA almost perfectly recovers the true \gls{weights} and loadings for the \acrshort{gfa} model with identity noise covariance.
-Admittedly, we have chosen a reasonably high signal-to-noise ratio for this experiment, but this nonetheless demonstrates that PCA can be a useful baseline for multiview data under an isotropic latent variable noise model.
-Figure~\ref{fig:explicit-latent-variable-weights-loadings}b indicates that with anisotropic noise covariance, PCA no longer captures the true loadings.
-There is no strong evidence that \acrshort{spls} or Elastic Net regularization outperform \acrshort{pls} or \acrshort{rcca}, respectively, in this setting.
-This is unsurprising because the true \gls{weights} are not sparse, and so the additional sparsity constraints do not help.
-However, this does illustrate that priors on \gls{weights} do not translate well to priors on loadings.
 
 \begin{figure}
     \centering
@@ -585,34 +559,18 @@ However, this does illustrate that priors on \gls{weights} do not translate well
     \caption{\textbf{Explicit Latent Variable:} Weights and Loadings. Blue signifies true zero weights and loadings, while Orange indicates estimated true non-zero weights and loadings.}\label{fig:explicit-latent-variable-weights-loadings}
 \end{figure}
 
-\paragraph{Recovery of Latent Variables}
 
-Indeed, in the identity noise covariance scenario, all the models perform similarly (Figure~\ref{fig:explicit-latent-variable-scores}a) with the exception of \acrshort{cca} which appears to be unstable in this setting (Figure~\ref{fig:explicit-latent-variable-weights-loadings}a).
-In the random noise covariance scenario, PCA performs poorly, and \acrshort{cca} now performs well (Figure~\ref{fig:explicit-latent-variable-scores}b).
 
-\begin{figure}
-    \centering
-    \begin{subfigure}{0.49\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Identity_Covariance_explicit}
-        \caption{\acrshort{gfa}}
-    \end{subfigure}
-    \begin{subfigure}{0.49\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/simulated/low/Train_Test_Scores_Random_Covariance_explicit}
-        \caption{Probabilistic \acrshort{cca}}
-    \end{subfigure}
-    \caption{\textbf{Explicit Latent Variable:} Test Scores.}\label{fig:explicit-latent-variable-scores}
-\end{figure}
 
 \subsubsection{Measuring the Identitiness of the Covariance Matrices}
-The theory we developed in section~\ref{sec:generative-perspectives} suggests that the identitiness of the covariance matrices is crucial for understanding how imposing sparsity on the \gls{weights} imposes a prior belief in sparsity on the more biologically interesting loadings.
-We can measure the identitiness of the covariance matrices by looking at the eigenvalues of the covariance matrices.
+The theory we developed in section~\ref{sec:generative-perspectives} suggests that the closer to identity the covariance matrices are, the closer the weights and \gls{loadings} will be.
+This is particularly important if we want to use structure inducing regularisation of the backward model (such as FRALS framework from chapter \ref{chap:als}) as the structural priors (e.g. sparsity) will only translate to equivalent structural priors the forward model if the covariance matrices are close to identity.
+We develop a simple graphical way to compare the identitiness of the covariance matrices by plotting the eigenvalues of the covariance matrices.
 If the eigenvalues of the sample covariance matrix are all close to 1, then the sample covariance matrix is close to identity.
 Departures from 1 indicate that the sample covariance matrix is not close to identity and imply multicollinearity in the data.
 
 In the simulated data, we can see that the data generation models with identity noise covariance matrices, have eigenvalues closer to one than (Figure~\ref{fig:covariance-eigenvalues-simulated-low}).
-On the other hand, these plots (shown for 10 random samples) show that all of the sample covariance matrices depart from the ideal case, \textit{even when the true covariance matrices are identity}.
+On the other hand, these plots show that all the \textit{sample} covariance matrices depart from the ideal case, even when the \textit{population} covariance matrices are precisely identity.
 
 \begin{figure}
     \centering
@@ -676,7 +634,13 @@ From Figure \ref{fig:covariance-matrices-real}, we can see the block structure o
 `\begin{figure}
      \centering
      \includegraphics[width=0.8\linewidth]{figures/hcp/brain and behaviour loadings correlation}
-     \caption{\textbf{HCP:} Correlation between the brain and behaviour \gls{representations} for each model.}\label{fig:brain-behaviour-scores-sim}
+     \caption{\textbf{HCP:} Correlation between the brain and behaviour \gls{representations} for each model.}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/adni/brain and behaviour loadings correlation}
+    \caption{\textbf{ADNI:} Correlation between the brain and behaviour \gls{representations} for each model.}
 \end{figure}
 
 \subsection{Comparing Behaviour Weights and Loadings}

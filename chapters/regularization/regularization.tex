@@ -1,7 +1,7 @@
-\graphicspath{{chapters/regularization}}
+\graphicspath{{chapters/regularisation}}
 
 
-\chapter{Regularization of CCA Models}\label{chap:als}
+\chapter{Regularisation of CCA Models}\label{chap:als}
 %\epigraph{All models are wrong, some are useful.}{\textit{G. Box}}
 \minitoc
 % chktex-file 44 
@@ -10,34 +10,34 @@
 
 This chapter expands on my work previously showcased at the OHBM conference and draws connections to a tutorial paper I co-authored, where I contributed a number of simulations \citep{mihalik2022canonical}.
 
-This chapter explores the role of regularization in improving the performance and interpretation of \acrshort{cca} using simulated and brain-behaviour data.
-We develop a framework for regularized CCA which allows us to incorporate any regularized least squares solver to efficiently implement a wide range of regularization functions using any scikit-learn compatible solver, but in particular allows us to efficiently implement the elastic net penalty with controllable L2 and L1 penalties so that we can control the bias towards the largest principal components while still encouraging sparsity in the weights in contrast to most previous work on sparse Brain-Behavior analysis which has used a PLS objective with lasso constraints (SPLS), which inherits a bias towards the largest principal components from PLS.
+This chapter explores the role of regularisation in improving the performance and interpretation of \acrshort{cca} using simulated and brain-behaviour data.
+We develop a framework for regularised CCA which allows us to incorporate any regularised least squares solver to efficiently implement a wide range of regularisation functions using any scikit-learn compatible solver, but in particular allows us to efficiently implement the elastic net penalty with controllable L2 and L1 penalties so that we can control the bias towards the largest principal components while still encouraging sparsity in the weights in contrast to most previous work on sparse Brain-Behavior analysis which has used a PLS objective with lasso constraints (SPLS), which inherits a bias towards the largest principal components from PLS.
 
 
 \section{Introduction}\label{sec:introduction}
 
 Large datasets neuroimaging datasets including the Human Connectome Project (\acrshort{hcp}) and Alzheimer's Disease Neuroimaging Initiative (\acrshort{adni}) datasets as well as the UK Biobank and Adolescent Brain Cognitive Development (ABCD) datasets \footnote{Not covered in this chapter} appear to offer unprecedented opportunities for understanding the relationship between brain structure and function and behavior \citep{SMITH2018263,BZDOK2017549,wang2020finding}.
 Despite the impressive scale of these modern neuroimaging studies, the number of subjects is still often orders of magnitude smaller than the number of features in the data; the \acrshort{adni} dataset we use in this chapter, for example, has 592 subjects and 168,130 structural MRI voxels.
-In this context, CCA models are prone to overfitting, leading to spurious correlations and poor generalization \citep{helmer2020stability,mihalik2020multiple}.
+In this context, CCA models are prone to overfitting, leading to spurious correlations and poor generalisation \citep{helmer2020stability,mihalik2020multiple}.
 But given the reproducibility crisis in neuroscience \citep{button2013power}, it is important to ensure that our models generalize well to new data.
 
-Regularization, having been extensively studied and well-understood in the contexts of Linear Regression and Inverse Problems \citep{engl1996regularization}, introduces a deliberate bias to guide models towards more generalizable solutions, can be a powerful tool for addressing these problems.
-Furthermore, regularization can help us improve the interpretability of the results by imposing structure on the solutions, perhaps most obviously by encouraging sparsity\citep{bzdok2019towards}.
-However, due to the complexity of the CCA problem, regularization is not as straightforward as in Linear Regression.
-The most popular approaches to `sparse CCA' have, in practice, been based on Partial Least Squares (PLS), which simplifies the optimization problem but, as we shall see, causes the model to inherit a bias towards the largest principal components from PLS.
+Regularisation, having been extensively studied and well-understood in the contexts of Linear Regression and Inverse Problems \citep{engl1996regularisation}, introduces a deliberate bias to guide models towards more generalizable solutions, can be a powerful tool for addressing these problems.
+Furthermore, regularisation can help us improve the interpretability of the results by imposing structure on the solutions, perhaps most obviously by encouraging sparsity\citep{bzdok2019towards}.
+However, due to the complexity of the CCA problem, regularisation is not as straightforward as in Linear Regression.
+The most popular approaches to `sparse CCA' have, in practice, been based on Partial Least Squares (PLS), which simplifies the optimisation problem but, as we shall see, causes the model to inherit a bias towards the largest principal components from PLS.
 
-With this perspective in mind, we propose a flexible regularized alternating least squares (FRALS) framework for CCA which allows us to incorporate any regularized least squares solver to efficiently implement a wide range of regularization functions, but in particular allows us to efficiently implement the elastic net penalty with controllable L2 and L1 penalties so that we can control the bias towards the largest principal components while still encouraging sparsity in the weights.
+With this perspective in mind, we propose a flexible regularised alternating least squares (FRALS) framework for CCA which allows us to incorporate any regularised least squares solver to efficiently implement a wide range of regularisation functions, but in particular allows us to efficiently implement the elastic net penalty with controllable L2 and L1 penalties so that we can control the bias towards the largest principal components while still encouraging sparsity in the weights.
 This is in contrast to much of the previous work on sparse Brain-Behavior analysis which has used a PLS objective with lasso constraints (SPLS), which inherits a bias towards the largest principal components from PLS.
 
-We apply FRALS with Elastic Net regularization to the \acrshort{hcp} and \acrshort{adni} datasets.
+We apply FRALS with Elastic Net regularisation to the \acrshort{hcp} and \acrshort{adni} datasets.
 We show that it outperforms other CCA models in terms of out-of-sample canonical correlation.
 We also show that the identified mode of variation is distinct from previous work which identified latent variables with \gls{weights} related to cognitive tests and negatively related to cigarette, tobacco or alcohol\citep{smith2015positive}.
 FRALS has stronger correlations with the Line Orientation test, which measures visuospatial abilities, and the parietal lobe, which is known to be involved in visuospatial processing.
 
 
-\section{Background: Regularization for High-Dimensional and Structured Data}\label{sec:background}
+\section{Background: Regularisation for High-Dimensional and Structured Data}\label{sec:background}
 
-In this section, we review a number of regularization techniques that have been applied to CCA and related methods.
+In this section, we review a number of regularisation techniques that have been applied to CCA and related methods.
 
 \subsection{The Bias-Variance Tradeoff}
 
@@ -47,20 +47,20 @@ High-bias models are generally simpler and more stable, but they might oversimpl
 Conversely, low-bias, complex models are sensitive to data changes and prone to overfitting.
 As the number of features increases, there are more parameters to estimate, and models tend to become more complex, leading to higher variance and lower bias.
 This relationship highlights the importance of balancing model complexity to avoid overfitting, particularly in high-dimensional scenarios with a low signal-to-noise ratio \citep{mcintosh2021comparison}\footnote{It's worth noting that the number of model parameters, often used as a proxy for complexity, does not always directly correlate with model behavior, as illustrated by the `double descent' phenomenon.}.
-Regularization can be understood as a method for reducing the variance of a model by introducing a bias towards simpler models.
-This means regularization can improve the generalizability of models in high-dimensional settings.
+Regularisation can be understood as a method for reducing the variance of a model by introducing a bias towards simpler models.
+This means regularisation can improve the generalizability of models in high-dimensional settings.
 
-\paragraph{Implicit and Explicit Regularization}
+\paragraph{Implicit and Explicit Regularisation}
 
-We can implement regularization in two different ways.
-\textit{Explicit} regularization is achieved by adding a penalty term to the objective function. Weights the objective function against a term that penalizes complexity.
+We can implement regularisation in two different ways.
+\textit{Explicit} regularisation is achieved by adding a penalty term to the objective function. Weights the objective function against a term that penalizes complexity.
 
-\textit{Implicit} regularization is achieved by changing the optimization algorithm.
+\textit{Implicit} regularisation is achieved by changing the optimisation algorithm.
 
-\subsection{Shrinkage Regularization}
+\subsection{Shrinkage Regularisation}
 
-Shrinkage regularization is a form of regularization that penalizes the magnitude of the model parameters.
-This technique is particularly effective in enhancing the performance of linear models in situations characterized by high dimensionality, multicollinearity, or low signal-to-noise ratios.
+Shrinkage regularisation is a form of regularisation that penalizes the magnitude of the model parameters.
+This technique is particularly effective in enhancing the performance of linear models in situations characterised by high dimensionality, multicollinearity, or low signal-to-noise ratios.
 
 In high-dimensional situations where the number of features exceeds the number of observations in either view, Like Linear Regression, Canonical Correlation Analysis is non-identifiable, meaning there is no unique solution.
 This is because we can find perfectly correlated latent variables using a linear combination of the features, but there are many different linear combinations that will achieve this.
@@ -73,18 +73,18 @@ In practice, features are rarely perfectly correlated, but even when features ar
 Once again, some of these linear combinations will generalize better than others, but we might expect a model to generalize better if it spreads the \gls{weights} across the correlated features rather than concentrating them on a single feature.
 
 Finally, even in low-dimensional settings with little multicollinearity, the model parameters can sensitive to noise in the data, and once again small changes in the data can lead to large changes in the model parameters.
-For example, parameters associated with noisy features might `cancel out' in the training set, but not in the test set, leading to poor generalization.
+For example, parameters associated with noisy features might `cancel out' in the training set, but not in the test set, leading to poor generalisation.
 
-The premise of shrinkage regularization in all these cases is that the latent variables or predictions are too sensitive to small changes in the data because the model parameters are too large.
-Shrinkage regularization works by shrinking the model parameters towards zero, so that small changes in the data do not lead to large changes in the model estimates.
+The premise of shrinkage regularisation in all these cases is that the latent variables or predictions are too sensitive to small changes in the data because the model parameters are too large.
+Shrinkage regularisation works by shrinking the model parameters towards zero, so that small changes in the data do not lead to large changes in the model estimates.
 
-\paragraph{PLS as Shrinkage Regularization} PLS can be interpreted as a form of shrinkage regularization applied to CCA. We can explain this by considering an analogy between CCA and \textit{Linear Regression}\footnote{indeed Linear Regression is a special case of CCA where \(X^{(2)}\) has one feature}.
+\paragraph{PLS as Shrinkage Regularisation} PLS can be interpreted as a form of shrinkage regularisation applied to CCA. We can explain this by considering an analogy between CCA and \textit{Linear Regression}\footnote{indeed Linear Regression is a special case of CCA where \(X^{(2)}\) has one feature}.
 
 In Linear Regression, the ridge regression solution is given by:
 \begin{align}
     \hat{\beta}_{\text{ridge}} = ((1-c)\Sigma_{X,X} + c I)^{-1} \Sigma_{X,y}
 \end{align}
-Where \(c\) is the regularization parameter between 0 and 1\footnote{It is more common to see $(\Sigma_{X,X} + c I)^{-1} \Sigma_{X,y}$ but these are equivalent up to a scalar factor and this form helps us later on}.
+Where \(c\) is the regularisation parameter between 0 and 1\footnote{It is more common to see $(\Sigma_{X,X} + c I)^{-1} \Sigma_{X,y}$ but these are equivalent up to a scalar factor and this form helps us later on}.
 The ridge penalty acts in three important ways:
 \begin{itemize}
     \item It shrinks the \gls{weights} towards zero.
@@ -117,15 +117,15 @@ As we increase $c$, $\lim_{c \to \infty} (\Sigma_{ii}+ c I)^{-\frac{1}{2}}= (c I
 \end{align}
 
 Which is precisely the PLS objective and constraints with an arbitrary scaling of the covariance matrix $\Sigma_{12}$ by $\frac{1}{c^2}$.
-For this reason, we can consider PLS as an explicit shrinkage method for CCA, equivalent to adding a maximal ridge regularization term.
+For this reason, we can consider PLS as an explicit shrinkage method for CCA, equivalent to adding a maximal ridge regularisation term.
 The downside of using PLS as a regularised CCA is precisely its very high bias.
 By strongly guiding the model towards high covariance solutions, it strongly biases the solution towards only the largest principal components.
 But what if the correlation between the views is not concentrated in the largest principal components?
-Although one would rarely resort to maximally regularized ridge regression except in extremely low sample sizes or high-dimensional data, it has become almost standard practice to use PLS in neuroimaging and genetics \citep{cruciani2022pls, krishnan2011partial}.
-One of the core contributions of this chapter will be to demonstrate that PLS is usually a poor choice for regularization even in these very high-dimensional settings and that more nuanced regularization methods can offer significant improvements in performance and interpretability.
-PLS is evidently not a nuanced tool for regularization because it offers no control over the degree of regularization applied.
+Although one would rarely resort to maximally regularised ridge regression except in extremely low sample sizes or high-dimensional data, it has become almost standard practice to use PLS in neuroimaging and genetics \citep{cruciani2022pls, krishnan2011partial}.
+One of the core contributions of this chapter will be to demonstrate that PLS is usually a poor choice for regularisation even in these very high-dimensional settings and that more nuanced regularisation methods can offer significant improvements in performance and interpretability.
+PLS is evidently not a nuanced tool for regularisation because it offers no control over the degree of regularisation applied.
 
-\paragraph{Ridge Regularization} For this reason, \citet{vinod1976canonical} proposed the \textit{Canonical Ridge} or \textit{Ridge CCA}, which combined the PLS and CCA constraints in a single constrained optimization:
+\paragraph{Ridge Regularisation} For this reason, \citet{vinod1976canonical} proposed the \textit{Canonical Ridge} or \textit{Ridge CCA}, which combined the PLS and CCA constraints in a single constrained optimisation:
 
 \begin{align}
     & u\sps{1}_{\text{opt}} = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spsT{1} \hat{\Sigma_{12}} u\sps{2} \} \\
@@ -134,35 +134,35 @@ PLS is evidently not a nuanced tool for regularization because it offers no cont
     & (1 - c_2) u\spsT{2} \hat{\Sigma_{22}} u\sps{2} + c_2 u\spsT{2} u\sps{2} = 1 \notag
 \end{align}
 
-Where $c_1$ and $\tau_2$ are the ridge regularization parameters for the first and second views respectively.
-By tuning these parameters, we can control the degree of regularization applied to each view independently.
+Where $c_1$ and $\tau_2$ are the ridge regularisation parameters for the first and second views respectively.
+By tuning these parameters, we can control the degree of regularisation applied to each view independently.
 If we set $c_1$ and $c_2$ to zero, we recover the standard CCA objective while if we set $c_1$ and $c_2$ to one, we recover the PLS objective.
 This allows us to interpolate between the two extremes, allowing us to control the level of shrinkage and therefore the level of bias towards the largest principal components
 
-\paragraph{PCA-CCA} PCA be can be used as an implicit regularization method for CCA.
+\paragraph{PCA-CCA} PCA be can be used as an implicit regularisation method for CCA.
 
 Most obviously, by using only the first \( k \) principal components of each view as the input to CCA, we can reduce the dimensionality of the data and therefore reduce the number of parameters in the model.
 Moreover, by working with the principal components, we remove the correlation between the features, which can improve the conditioning of the problem.
 
 \paragraph{A Visual Comparison of Shrinkage Techniques}
 
-The distinct effects of Ridge and PCA on the eigenvalues of the effective covariance matrices can be clearly visualized with a simple visualisation.
-We plot the eigenvalues of covariance matrices as perceived by models with different regularization techniques \footnote{e.g. the eigenvalues of $(1 - c_i) \hat{\Sigma_{ii}} + c_i I$ for ridge and $\hat{\Sigma_{ii}}$ truncated to include only the largest $k$ principal components for PCA}.
-As shown in Figure~\ref{fig:shrinkage}, Ridge regularization reduces the magnitude of the largest eigenvalues in the effective covariance matrix towards 1, and increases the magnitude of the smallest eigenvalues towards 1.
+The distinct effects of Ridge and PCA on the eigenvalues of the effective covariance matrices can be clearly visualised with a simple visualisation.
+We plot the eigenvalues of covariance matrices as perceived by models with different regularisation techniques \footnote{e.g. the eigenvalues of $(1 - c_i) \hat{\Sigma_{ii}} + c_i I$ for ridge and $\hat{\Sigma_{ii}}$ truncated to include only the largest $k$ principal components for PCA}.
+As shown in Figure~\ref{fig:shrinkage}, Ridge regularisation reduces the magnitude of the largest eigenvalues in the effective covariance matrix towards 1, and increases the magnitude of the smallest eigenvalues towards 1.
 On the other hand, PCA-CCA, leaves the largest eigenvalues unchanged, and ignores the smallest eigenvalues (we could have represented this by setting them to infinity).
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/shrinkage/shrinkage}
-    \caption{Comparison of the effect of OLS, Ridge, and PCA regularization on the eigenvalues of the covariance matrix.}\label{fig:shrinkage}
+    \caption{Comparison of the effect of OLS, Ridge, and PCA regularisation on the eigenvalues of the covariance matrix.}\label{fig:shrinkage}
 \end{figure}
 
 When these effective covariance matrices are inverted to form the CCA objective, these effects are reversed.
-Ridge regularization increases the magnitude of the weights associated with the largest eigenvalues and decreases the magnitude of the smallest eigenvalues.
+Ridge regularisation increases the magnitude of the weights associated with the largest eigenvalues and decreases the magnitude of the smallest eigenvalues.
 PCA maintains the weights associated with the largest eigenvalues and sets the weights associated with the smallest eigenvalues to zero.
-The visualization underscores the intrinsic nature of each regularization method:
+The visualisation underscores the intrinsic nature of each regularisation method:
 \begin{itemize}
-    \item \textbf{Unregularized}: Presents the unaltered spectrum, making it susceptible to noise but preserving potential subtle patterns.
+    \item \textbf{Unregularised}: Presents the unaltered spectrum, making it susceptible to noise but preserving potential subtle patterns.
     \item \textbf{Ridge}: Warps the spectrum, shrinking the largest eigenvalues and expanding the smallest eigenvalues, potentially missing subtle patterns but offering a cleaner representation of stronger associations.
     \item \textbf{PCA}: Truncates the spectrum, ignoring the smallest eigenvalues and preserving the largest eigenvalues, potentially missing subtle patterns but offering a cleaner representation of stronger associations.
 \end{itemize}
@@ -171,11 +171,11 @@ However, while these shrinkage techniques can improve the performance of CCA, th
 Weights are shrunk towards zero, but they are not set to zero.
 This means that the model still uses all the features, and the results are not sparse.
 
-\subsection{Sparse Regularization}
+\subsection{Sparse Regularisation}
 
-Sparse regularization is a powerful tool for improving the performance and interpretability of linear models.
-Sparse regularization encourages the model to use only a subset of the features, which can both help to avoid overfitting and improve the interpretability of the model.
-Sparse regularization works on the premise that only a subset of the features are relevant to the model.
+Sparse regularisation is a powerful tool for improving the performance and interpretability of linear models.
+Sparse regularisation encourages the model to use only a subset of the features, which can both help to avoid overfitting and improve the interpretability of the model.
+Sparse regularisation works on the premise that only a subset of the features are relevant to the model.
 Sparsity is typically achieved by adding either an L1 penalty or constraint\footnote{The L0 norm of the weight vector is the number of non-zero elements in the vector and is arguably a closer match to the goal, but the L0 norm is (a) not a proper norm in the mathematical sense and (b) not convex and so is difficult to optimize.}.
 The L1 penalty is defined as:
 
@@ -184,12 +184,12 @@ The L1 penalty is defined as:
 \end{align}
 
 Intuitively, this is the sum of the absolute values of the elements of the vector.
-Now, with a foundational understanding of sparse regularization, we review a number of approaches to adding sparsity to the CCA problem.
+Now, with a foundational understanding of sparse regularisation, we review a number of approaches to adding sparsity to the CCA problem.
 
-\paragraph{Sparse PLS: Penalized Matrix Decomposition}
-Penalized Matrix Decomposition (PMD)~\citep{witten2009penalized} provides an approximate solution to the sparse CCA problem by altering the constraints of the classical CCA formulation.
+\paragraph{Sparse PLS: Penalised Matrix Decomposition}
+Penalised Matrix Decomposition (PMD)~\citep{witten2009penalised} provides an approximate solution to the sparse CCA problem by altering the constraints of the classical CCA formulation.
 Specifically, PMD replaces the constraints \(u\spsT{i} \hat{\Sigma_{ii}} u\sps{i} = 1\) with the PLS constraints \(u\spsT{i} u\sps{i}= 1\) and additionally imposes \(\|u\spsT{i}\|_1 \leq \tau\).
-The optimization problem for PMD is then given by:
+The optimisation problem for PMD is then given by:
 
 \begin{align}
     & u^{opt}=\underset{u}{\mathrm{argmax}}\{ u\spsT{1} \hat{\Sigma_{12}} u\sps{2} \} \\
@@ -202,17 +202,17 @@ This Sparse PLS (SPLS) approximation has been highly influential as a form of Sp
 There are a number of other sparse CCA methods that employ the PLS approximation\citep{parkhomenko2009sparse, waaijenborg2008quantifying, lindenbaum2021l0}.
 However, while the PLS approximation is efficient, it means these methods inherit a bias towards the largest principal components from PLS.
 
-To address these problems and truly tackle the sparse CCA optimization, another class of approaches have adopted a penalized least squares approach.
+To address these problems and truly tackle the sparse CCA optimisation, another class of approaches have adopted a penalised least squares approach.
 
 \paragraph{Sparse CCA: Least Squares Approaches}
 
 It is well known that the CCA problem can be formulated as a constrained least squares problem with the intuition that
-for \(X\sps{1} u\sps{1}=1\) and \(X\sps{2} u\sps{2}=1\), correlation is maximized when the squared distance
-between \(X\sps{1} u\sps{1}\) and \(X\sps{2} u\sps{2}\) is minimized. \citep{golub1995canonical} proved the
+for \(X\sps{1} u\sps{1}=1\) and \(X\sps{2} u\sps{2}=1\), correlation is maximised when the squared distance
+between \(X\sps{1} u\sps{1}\) and \(X\sps{2} u\sps{2}\) is minimised. \citep{golub1995canonical} proved the
 convergence of a simple algorithm which alternates between solving the least squares problem for \(u\sps{1}\) and
 \(u\sps{2}\) while keeping the other fixed.
 
-With this intuition, \cite{wilms2015sparse} and \cite{mai2019iterative} separately proposed iterative penalized least
+With this intuition, \cite{wilms2015sparse} and \cite{mai2019iterative} separately proposed iterative penalised least
 squares methods for sparse CCA\@.
 
 \begin{align}
@@ -231,11 +231,11 @@ This means a sparse CCA based
 on alternating lasso regressions can be solved relatively efficiently using existing solvers.
 However, the one homogenous penalty in practice limits the flexibility of the method.
 For example, the elastic net penalty is not one-homogenous and therefore cannot be used with this method.
-\citet{6556581} and \cite{Mullins2021} added ridge penalties to the subproblems to improve the conditioning of the problem in a way that could be considered a form of elastic net regularization but the subproblems no longer correctly optimize the global objective\footnote{when rescaling the penalized solutions back to unit variance}.
+\citet{6556581} and \cite{Mullins2021} added ridge penalties to the subproblems to improve the conditioning of the problem in a way that could be considered a form of elastic net regularisation but the subproblems no longer correctly optimize the global objective\footnote{when rescaling the penalised solutions back to unit variance}.
 
 \paragraph{Sparse CCA: Proximal Gradient Descent and ADMM}
 \citet{kanatsoulis2018structured} proposed solving equation~\ref{eq:mai} for more general classes of $P$ using the alternating direction method of multipliers (ADMM)~\citep{boyd2011distributed}.
-\cite{fu2017scalable} propose a regularized CCA based on an alternative classical CCA formulation, sometimes called the MAXVAR formulation, which views the problem as a constrained least squares with an auxiliary representation $T$\citep{carroll1968generalization,kettenring1971canonical}.
+\cite{fu2017scalable} propose a regularised CCA based on an alternative classical CCA formulation, sometimes called the MAXVAR formulation, which views the problem as a constrained least squares with an auxiliary representation $T$\citep{carroll1968generalisation,kettenring1971canonical}.
 
 \begin{align}
     \label{eq:fu}
@@ -246,35 +246,35 @@ For example, the elastic net penalty is not one-homogenous and therefore cannot 
 In this formulation, \(U\sps{i}\) represents the \gls{weights} for the $i^{\text{th}}$ view, and \(T\) denotes the latent variable matrix.
 The premise is that when \(T\) closely mirrors \(X\sps{i} U\sps{i}\) across all \(i\), the scores correlate.
 Notably, this method is adaptable to multiple views.
-The authors employed proximal gradient descent for regularization, specifically suited for penalties like the lasso.
-While these methods are flexible, they don't have the plug-and-play nature of the penalized least squares methods.
-Not just a matter of convenience, this means that these methods are not compatible with existing solvers for regularized least squares problems like for example total variation regularisation solvers in nilearn, which are often highly optimized for specific problems and modalities.
+The authors employed proximal gradient descent for regularisation, specifically suited for penalties like the lasso.
+While these methods are flexible, they don't have the plug-and-play nature of the penalised least squares methods.
+Not just a matter of convenience, this means that these methods are not compatible with existing solvers for regularised least squares problems like for example total variation regularisation solvers in nilearn, which are often highly optimised for specific problems and modalities.
 
-\paragraph{Structured Regularization}
+\paragraph{Structured Regularisation}
 
-As highly structured data, linear models using both Structural and Functional \acrshort{mri} data have been shown to benefit from structured regularization methods but notably these methods have not been applied to CCA.
-Total variation regularization, which biases spatially neighboring weights to be similar, has been shown to improve the performance of PCA \citep{de2017structured} and regression \citep{michel2011total,dohmatob2014benchmarking, baldassarre2012structured}.
-Similarly, Laplacian (or \textit{GraphNet}) regularization, which induces a similar spatial bias with additional smoothness, has been shown to improve the performance of CCA on functional MRI data \citep{grosenick2013interpretable}.
+As highly structured data, linear models using both Structural and Functional \acrshort{mri} data have been shown to benefit from structured regularisation methods but notably these methods have not been applied to CCA.
+Total variation regularisation, which biases spatially neighboring weights to be similar, has been shown to improve the performance of PCA \citep{de2017structured} and regression \citep{michel2011total,dohmatob2014benchmarking, baldassarre2012structured}.
+Similarly, Laplacian (or \textit{GraphNet}) regularisation, which induces a similar spatial bias with additional smoothness, has been shown to improve the performance of CCA on functional MRI data \citep{grosenick2013interpretable}.
 
 Having discussed the benefits of both shrinkage (e.g., PCA-CCA, Ridge CCA, PLS), sparsity (SPLS, Sparse CCA), and structure (Total Variation, Laplacian) in handling high-dimensional, noisy, and structured data, a natural progression is to integrate these advantages.
-Specifically, the challenge lies in creating a framework that allows for users to match the regularization method to their data and research question, enhancing the interpretability and performance of Brain-Behaviour association models.
+Specifically, the challenge lies in creating a framework that allows for users to match the regularisation method to their data and research question, enhancing the interpretability and performance of Brain-Behaviour association models.
 The solution?
-A method that employs readily available regularized regression solvers, allowing for flexible and tunable regularization in CCA.
-This leads us to propose the Flexible Regularized Alternating Least Squares (FRALS).
+A method that employs readily available regularised regression solvers, allowing for flexible and tunable regularisation in CCA.
+This leads us to propose the Flexible Regularised Alternating Least Squares (FRALS).
 
-\section{Methods - Flexible Regularized Alternating Least Squares (FRALS)}\label{subsec:flexible-regularized-alternating-least-squares-(frals)}
+\section{Methods - Flexible Regularised Alternating Least Squares (FRALS)}\label{subsec:flexible-regularised-alternating-least-squares-(frals)}
 
-The primary goal of our Flexible Regularized Alternating Least Squares framework is to provide a versatile and user-friendly interface for Canonical Correlation Analysis (CCA). This is achieved by designing the framework to be compatible with any scikit-learn compatible regularized least squares solver. This compatibility is pivotal as it allows researchers and practitioners to leverage the extensive range of solvers available in scikit-learn, a popular machine learning library in Python.
+The primary goal of our Flexible Regularised Alternating Least Squares framework is to provide a versatile and user-friendly interface for Canonical Correlation Analysis (CCA). This is achieved by designing the framework to be compatible with any scikit-learn compatible regularised least squares solver. This compatibility is pivotal as it allows researchers and practitioners to leverage the extensive range of solvers available in scikit-learn, a popular machine learning library in Python.
 
 This approach marks a significant departure from traditional methodologies in CCA, which often focused on developing or utilizing specific solvers tailored for particular types of data or computational constraints.
 By contrast, \acrshort{frals} democratizes access to advanced CCA techniques, allowing users to select solvers that best fit their specific data characteristics, computational needs, or familiarity.
 Such flexibility is particularly advantageous in interdisciplinary fields like neuroimaging, where diverse datasets and varying levels of technical expertise are common.
 
-For example, users dealing with high-dimensional, sparse neuroimaging data could opt for solvers optimized for such datasets, while those needing parallel computation for large data sets might choose solvers with GPU acceleration capabilities.
+For example, users dealing with high-dimensional, sparse neuroimaging data could opt for solvers optimised for such datasets, while those needing parallel computation for large data sets might choose solvers with GPU acceleration capabilities.
 In principle, \acrshort{frals} can even be used with Neural Network-based solvers, which are becoming increasingly popular in machine learning\footnote{Though for reasons that will later become clear, we do not reccommend this!}.
 This adaptability enhances \acrshort{frals}' accessibility and future-proofs the framework against evolving computational technologies and data analysis needs.
 
-In the \acrshort{frals} framework, we consider the formulation for a single latent variable \(t\) with regularization \(\lambda_i P_i\) on the weights \(u^{(i)}\):
+In the \acrshort{frals} framework, we consider the formulation for a single latent variable \(t\) with regularisation \(\lambda_i P_i\) on the weights \(u^{(i)}\):
 
 \begin{align}
     \underset{u}{\mathrm{argmin}}\left\{\sum_i \|X^{(i)} u^{(i)} - t\|_2^2 + \textcolor{red}{\lambda_i P_i(u^{(i)})} \right\}\\
@@ -298,16 +298,68 @@ The subproblems for the weights \(u^{(i)}\):
     \underset{u^{(i)}}{\mathrm{argmin}}\left\{\|X^{(i)} u^{(i)} - t\|_2^2 + \textcolor{red}{\lambda_i P_i(u^{(i)})} \right\}
 \end{align}
 
-are regularized least squares problems that can be solved using any suitable regularized least squares solver\footnote{We could also in principle replace $X^{(i)} u^{(i)}$ with $f(X^{(i)})$ for any function $f$ including kernels, neural networks, or random forests}.
+are regularised least squares problems that can be solved using any suitable regularised least squares solver\footnote{We could also in principle replace $X^{(i)} u^{(i)}$ with $f(X^{(i)})$ for any function $f$ including kernels, neural networks, or random forests}.
 
 In this chapter, we illustrate the power of the \acrshort{frals} framework by implementing the well-tested Elastic Net solver from the \texttt{scikit-learn} package~\citep{pedregosa2011scikit}, where \(P_i = \alpha_i \times \text{l1\_ratio} \|u^{(i)}\|_1 + \alpha_i \times (1-\text{l1\_ratio}) \|u^{(i)}\|_2^2\), allowing for independent tuning of shrinkage and sparsity of the weights in both views.
 
-In summary, the \acrshort{frals} framework is a flexible and user-friendly interface for CCA that allows users to combine scikit-learn compatible regularized least squares solvers to solve regularized CCA problems.
+In summary, the \acrshort{frals} framework is a flexible and user-friendly interface for CCA that allows users to combine scikit-learn compatible regularised least squares solvers to solve regularised CCA problems.
 
 
 \section{Experiments}
 
 In this section, we outline the methodologies employed in our study of \acrshort{frals} and related techniques.
+
+\subsection{Datasets}\label{subsec:datasets}
+
+For this chapter, we chose the \acrshort{hcp} and the \acrshort{adni} datasets to facilitate comparison with two influential brain-behaviour studies \citep{smith2015positive, monteiro2016multiple} as well as the tutorial paper that this chapter is loosely related to \citep{mihalik2022canonical}.
+We are particularly interested in the performance of an Elastic Net \acrshort{frals}  on these datasets as Ridge CCA has been shown to outperform PLS \citep{mihalik2022canonical}, implying that shrinkage regularisation is beneficial, and Sparse PLS has been shown to outperform PLS\cite{monteiro2016multiple}, implying that sparsity is beneficial.
+We therefore expect that Elastic Net \acrshort{frals} will outperform PLS, Ridge CCA, and Sparse PLS on these datasets.
+
+\subsubsection{The Human Connectome Project (\acrshort{hcp})}
+
+The \acrshort{hcp} offers publicly available resting-state functional MRI (rs-fMRI) and non-imaging measures like demographics, psychometrics, and other behavioral measures.
+Specifically, we sourced data from 1003 subjects out of the 1200-subject data release of the \acrshort{hcp}.
+The rs-fMRI data provided brain connectivity matrices. These were derived from pairwise partial correlations between subject components obtained through group independent component analysis (ICA), utilizing 25 components. This resulted in 300 brain variables, corresponding to the lower triangle of the connectivity matrix. In our analysis, 145 non-imaging subject measures were incorporated, similar to prior studies, with the exception of 13 measures (ASR_Aggr_Pct, ASR_Attn_Pct, ASR_Intr_Pct, ASR_Rule_Pct, ASR_Soma_Pct, ASR_Thot_Pct, ASR_Witd_Pct, DSM_Adh_Pct, DSM_Antis_Pct, DSM_Anxi_Pct, DSM_Avoid_Pct, DSM_Depr_Pct, DSM_Somp_Pct) that were unavailable in the 1200-subject data release. Furthermore, nine confounding variables, including the acquisition reconstruction software version, a summary statistic of head motion during rs-fMRI acquisition, weight, height, systolic and diastolic blood pressure, hemoglobin A1C level, and cube-root of total brain and intracranial volumes as estimated by FreeSurfer, were regressed out from both data types.
+More details can be found in \cite{smith2015positive, mihalik2022canonical}.
+We summarize the parameters of the \acrshort{hcp} data in table~\ref{tab:hcp-parameters}.
+
+\begin{table}
+    \centering
+    \caption{HCP Data Parameters}
+    \begin{tabular}{| l | l |}
+        \hline
+        \textbf{Parameter}                        & \textbf{Value} \\
+        \hline
+        Number of samples (\textit{n})            & 1003           \\
+        Number of features in View 1 (\textit{p}) & 19900          \\
+        Number of features in View 2 (\textit{q}) & 145            \\
+        \hline
+    \end{tabular}\label{tab:hcp-parameters}
+\end{table}
+
+\subsubsection{The Alzheimer's Disease Neuroimaging Initiative (ADNI)}
+
+Accessible at \url{adni.loni.usc.edu}, the \acrshort{adni} database was initiated in 2003. 
+Its primary aim is the examination of how well serial MRI, PET (Positron Emission Tomography), biological markers, along with clinical and neuropsychological assessments, track the progression of Mild Cognitive Impairment (MCI) and the early stages of Alzheimer’s disease. 
+In our study, we utilised data from a subset of 592 unique individuals, comprising 309 males (average age 74.68 ± 7.36 SEM) and 283 females (average age 72.18 ± 7.50 SEM). This subset included 147 healthy controls, 335 individuals with Mild Cognitive Impairment (MCI), and 110 diagnosed with dementia. 
+T1 weighted structural MRI (sMRI) scans were the source of whole-brain voxel-based grey matter volumes. The sMRI data underwent preprocessing with SPM12\citep{ashburner2014spm12}, which involved segmentation, normalisation using DARTEL, reslicing to a resolution of 2 x 2 x 2 mm^3, and spatial smoothing using a Gaussian kernel with 2 mm full width at half maximum (FWHM). A grey matter voxel selection mask, with a threshold of ≥10\%, was applied to all participants' scans, resulting in 168,130 brain variables. 
+The Mini-Mental State Examination (MMSE) is a widely recognised neurocognitive test comprising 30 questions across five cognitive domains: orientation (questions 1-10), registration (questions 11-13), attention and calculation (questions 14-18), recall (questions 19-21), and language (questions 22-30)\citep{folstein1975mini}. 
+An additional item was included in our study to account for the number of attempts a subject needed to correctly respond to the registration domain questions, leading to a total of 31 variables. As in \citet{monteiro2016multiple}, no confounds were removed from these data.
+We summarize the parameters of the \acrshort{adni} data in table~\ref{tab:adni-parameters}.
+
+\begin{table}
+    \centering
+    \caption{ADNI Data Parameters}
+    \begin{tabular}{| l | l |}
+        \hline
+        \textbf{Parameter}                        & \textbf{Value} \\
+        \hline
+        Number of samples (\textit{n})            & 592            \\
+        Number of features in View 1 (\textit{p}) & 168130         \\
+        Number of features in View 2 (\textit{q}) & 31             \\
+        \hline
+    \end{tabular}\label{tab:adni-parameters}
+\end{table}
 
 \subsection{The predictive framework for CCA}\label{subsec:the-predictive-framework-for-cca}
 
@@ -330,7 +382,7 @@ To this end, we compare the performance of Elastic Net \acrshort{frals} with oth
         \hline
         Principal Component Analysis & PCA                   & -                                                & -                                                                                                                         \\
         \hline
-        Regularized CCA              & RCCA                  & \(c_1, c_2\)                                     & 0-1 (log scaled)                                                                                                          \\
+        Regularised CCA              & RCCA                  & \(c_1, c_2\)                                     & 0-1 (log scaled)                                                                                                          \\
         \hline
         FRALS - Elastic              & Elastic               & \(\alpha_1, \alpha_2, \text{l1}_1, \text{l1}_2\) & (1e-5,1e-1), (0-1)                                                                                                        \\
         \hline
@@ -347,61 +399,6 @@ For the models that require hyperparameter tuning, we use a grid search to find 
 Specifically, we use 5-fold cross-validation to evaluate the performance of a model with a given set of hyperparameters on 5 different splits of the training data with non-overlapping validation sets.
 We optimise for the hyperparameters that give the best average out of sample correlation.
 
-\subsection{Datasets}\label{subsec:datasets}
-
-For this chapter, we chose the \acrshort{hcp} and the \acrshort{adni} datasets to facilitate comparison with two influential brain-behaviour studies \citep{smith2015positive, monteiro2016multiple} as well as the tutorial paper that this chapter is loosely related to \citep{mihalik2022canonical}.
-
-\subsubsection{The Human Connectome Project (\acrshort{hcp})}
-
-The \acrshort{hcp} offers publicly available resting-state functional MRI (rs-fMRI) and non-imaging measures like demographics, psychometrics, and other behavioral measures.
-Specifically, we sourced data from 1003 subjects out of the 1200-subject data release of the \acrshort{hcp}.
-This dataset is constructed using brain connectivity features of the thoroughly processed rs-fMRI data.
-This processing results in 19,900 brain connectivity variables for every subject.
-Additionally, there are 145 non-imaging measures employed.
-Notably, nine confounding variables were regressed out from both data modalities.
-Each variable was standardized for zero mean and unit variance.
-More details can be found in \cite{smith2015positive, mihalik2022canonical}.
-We summarize the parameters of the \acrshort{hcp} data in table~\ref{tab:hcp-parameters}.
-
-\begin{table}
-    \centering
-    \caption{HCP Data Parameters}
-    \begin{tabular}{| l | l |}
-        \hline
-        \textbf{Parameter}                        & \textbf{Value} \\
-        \hline
-        Number of samples (\textit{n})            & 1003           \\
-        Number of features in View 1 (\textit{p}) & 19900          \\
-        Number of features in View 2 (\textit{q}) & 145            \\
-        \hline
-    \end{tabular}\label{tab:hcp-parameters}
-\end{table}
-
-\subsubsection{The Alzheimer's Disease Neuroimaging Initiative (ADNI)}
-
-The \acrshort{adni} database is found at \url{adni.loni.usc.edu}.
-Launched in 2003, \acrshort{adni}'s main objective is to assess the combination of serial MRI, PET (Positron emission tomography), biological markers, and clinical and neuropsychological assessment in tracking the progression of Mild Cognitive Impairment (MCI) and early Alzheimer’s disease.
-For our experiments, we used a subset of 592 unique subjects from the \acrshort{adni}. The MRI scans underwent a series of processing stages, yielding a grey matter probability map
-The Mini-Mental State Examination (MMSE) scores were employed to investigate the association with the grey matter maps.
-Composed of a series of brief tasks, the MMSE evaluates various cognitive domains including memory, attention, language, and visuospatial skills.
-The MMSE is a widely used test for assessing cognitive impairment.
-The MMSE scores range from 0 to 30, with lower scores indicating more severe cognitive impairment.
-We summarize the parameters of the \acrshort{adni} data in table~\ref{tab:adni-parameters}.
-
-\begin{table}
-    \centering
-    \caption{ADNI Data Parameters}
-    \begin{tabular}{| l | l |}
-        \hline
-        \textbf{Parameter}                        & \textbf{Value} \\
-        \hline
-        Number of samples (\textit{n})            & 592            \\
-        Number of features in View 1 (\textit{p}) & 168130         \\
-        Number of features in View 2 (\textit{q}) & 31             \\
-        \hline
-    \end{tabular}\label{tab:adni-parameters}
-\end{table}
-
 
 \section{Results}
 
@@ -413,7 +410,7 @@ Since the \acrshort{hcp} data is high-dimensional, we drop CCA from the analysis
 \subsubsection{Out of Sample Correlation}
 
 Both Ridge CCA and Elastic Net outperformed PLS and SPLS in terms of holdout correlation captured (Figure~\ref{fig:performance}).
-This suggests that tunable L2 regularization is important, even for very high-dimensional data, and that resorting to PLS is suboptimal.
+This suggests that tunable L2 regularisation is important, even for very high-dimensional data, and that resorting to PLS is suboptimal.
 On the other hand, while the additional sparsity improved SPLS over PLS (consistent with previous work \cite{monteiro2016multiple}), it did not improve the performance of the Elastic Net model over Ridge CCA\@.
 
 \begin{figure}[h]
@@ -471,10 +468,28 @@ The second method is to use surface maps to visualize the brain connectivity wei
 This approach has been used by both \cite{ferreira2022hierarchical} and \cite{smith2015positive}.
 
 \paragraph{Chord Diagrams}
-We grouped the nodes of the connectivity matrix of our data into 7 parcels according to the Yeo 7 network parcellation \cite{yeo2011organization}.
+We grouped the nodes of the connectivity matrix of our data into 7 parcels according to the Yeo 7 network parcellation \cite{yeo2011organisation}.
+This was achieved by assigning each node to the network with the highest voxelwise overlap.
 These are then arranged around the circumference of the chord diagram using the Nichord package\citep{bogdan2023connsearch}.
 The plots then show the 8 strongest positive and negative \gls{weights} for each model as `chords'.
 The chord diagrams in Figure~\ref{fig:chord_weights} show the top 8 positive and negative brain \gls{weights} for each model.
+
+\begin{itemize}
+    \item The \textbf{RCCA} model displays a diverse set of connections across all networks, with especially prominent weights in the \textcolor{red}{somatomotor} and \textcolor{blue}{default mode} networks.
+
+    \item The \textbf{ElasticNet} model presents similar connections between the \textcolor{red}{somatomotor} and \textcolor{blue}{default mode} networks.
+
+    \item The \textbf{PLS} model exhibits strong connections between the \textcolor{green}{frontoparietal} and \textcolor{pink}{visual} networks.
+
+    \item The \textbf{SPLS} model exhibits similar connections between the \textcolor{green}{frontoparietal} and \textcolor{pink}{visual} networks.
+\end{itemize}
+
+This is perhaps consistent with the behaviour data as the somatomotor network is associated with motor function and sensory processing which is related to the Line Orientation test, requiring spatial reasoning and motor coordination.
+
+The correlations made by the PLS and SPLS models between substance abuse and cognitive tests could be due to the significant role the frontoparietal network plays in executive function, which can be impaired by substance abuse.
+Likewise, the visual network is likely involved in a number of the cognitive tests and could be disrupted by substance abuse.
+
+The RCCA and ElasticNet models might be detecting more integrative and possibly more developed cognitive functions, while the PLS and SPLS models might be highlighting the more immediate cognitive processes that can be disrupted by substance abuse.
 
 \begin{figure}[h]
     \centering
@@ -492,11 +507,14 @@ In this section, we compare the models in terms of their similarity.
 We can measure the pairwise similarity between two models by comparing their \gls{weights} and their \gls{representations}.
 We can compare the \gls{weights} by computing the correlation between the \gls{weights} of the two models and we can compare the \gls{representations} by computing the correlation between the \gls{representations} of the two models.
 
-In Figure~\ref{fig:brain-behaviour-scores-sim}, we plot the correlation between the brain and behaviour \gls{representations} for each model. We can see clearly that both PCA, PLS, and SPLS are all highly correlated in terms of their brain representations, revealing the bias of PLS towards the largest principal components.
-On the other hand, in the behaviour space, the models are less correlated, with the exception of PLS and SPLS which are highly correlated with one another. There is however still substantial correlation between the PCA and PLS models.
+In Figure~\ref{fig:brain-behaviour-scores-sim}, we plot the correlation between the brain and behaviour \gls{representations} for each model. 
+We can see clearly that both PCA, PLS, and SPLS are all highly correlated in terms of their brain representations, revealing the bias of PLS towards the largest principal components.
+On the other hand, in the behaviour space, the models are less correlated, with the exception of PLS and SPLS which are highly correlated with one another. 
+There is however still substantial correlation between the PCA and PLS models.
 The very low correlation between the Ridge CCA and Elastic Net models with the PCA model is evidence that there are stronger correlations outside of the first principal components.
 
-In Figure~\ref{fig:brain-behaviour-weights-sim}, we similarly plot the correlation between the brain and behaviour \gls{weights} for each model. The story is similar, albeit with marginally lower correlations between the PLS and PCA-based models. Finally, in the weights space, the Ridge CCA and ElasticNet models are even less correlated with the PCA model.
+In Figure~\ref{fig:brain-behaviour-weights-sim}, we similarly plot the correlation between the brain and behaviour \gls{weights} for each model. 
+The story is similar, albeit with marginally lower correlations between the PLS and PCA-based models. Finally, in the weights space, the Ridge CCA and ElasticNet models are even less correlated with the PCA model.
 
 \begin{figure}
     \centering
@@ -630,7 +648,7 @@ In this section, we discuss the implications of our findings as well as the limi
 \subsection{Discussion}
 
 \paragraph{Ridge CCA is typically much better than PLS across datasets:} Our results show that Ridge CCA is typically much better than PLS across datasets.
-Much like regularised regression, it is unusual to need to use maximal ridge regularization even in high dimensions.
+Much like regularised regression, it is unusual to need to use maximal ridge regularisation even in high dimensions.
 This means that while PLS might be more stable for a given dataset, it is not necessarily more stable across random samples from the same population.
 
 \subsection{FRALS Limitations}
@@ -651,8 +669,8 @@ It is the primary factor contributing to the slow speed of FRALS (depending on t
 
 \section{Conclusion}\label{sec:conclusion}
 
-In this chapter, we introduced the Flexible Regularized Alternating Least Squares (FRALS) framework for CCA\@.
+In this chapter, we introduced the Flexible Regularised Alternating Least Squares (FRALS) framework for CCA\@.
 We used the FRALS framework to implement Elastic Net CCA\@.
 We then compared the performance of Elastic Net CCA with other CCA variants on two datasets: the \acrshort{hcp} and \acrshort{adni}.
 We found that Elastic Net CCA outperformed other CCA variants on both datasets but that the performance of Elastic Net CCA was similar to Ridge CCA on the \acrshort{hcp} dataset.
-However we found that Elastic Net CCA was much slower than other CCA variants.
+However, we found that Elastic Net CCA was much slower than other CCA variants.
