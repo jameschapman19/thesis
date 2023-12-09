@@ -1,2 +1,357 @@
 \graphicspath{{chapters/gradient_descent/}}
-\section{Tractable Optimization - no spurious local minima}
+\section{Tractable Optimization - no spurious local minima}\label{supp:tractable-optimization}
+First in \cref{sec:no-spurious-local-minima-qualitative} we prove that for general $A, B$ our loss $\LEY(U)$ has no spurious local minima.
+Then in \cref{sec:no-spurious-local-minima-quantitative} we apply a result from \citet{ge_no_2017}.
+This application is somewhat crude, and we expect that a quantitative result with tighter constants could be obtained by adapting the argument of \cref{sec:no-spurious-local-minima-qualitative}; we leave such analysis to future work.
+
+\subsection{Qualitative results}\label{sec:no-spurious-local-minima-qualitative}
+First we prove an auxillary result.
+\begin{lemma}\label{lem:least-squares-projected-signal}
+Let $M \in \R^{D \times D}$ be a symmetric matrix and let $U \in \R^{D \times K}$.
+Let
+\begin{align*}
+    \hat{\Gamma} \defeq \argmin_{\Gamma \in \R^{K \times K}} \norm{M - U \Gamma U^T}_F^2
+\end{align*}
+Then $U \hat{\Gamma} U^T = \mathcal{P}_U M \mathcal{P}_U$ and the minimum value is precisely
+\begin{align}\label{eq:minimum-attained-low-rank-approximation}
+\norm{M}_F^2 - \norm{\mathcal{P}_U M \mathcal{P}_U}_F^2
+\end{align}
+
+Moreover, if $U$ has orthonormal columns then $\hat{\Gamma} = U^T M U$, and $\norm{\mathcal{P}_U M \mathcal{P}_U}_F^2 = \norm{\hat{\Gamma}}_F^2$
+\end{lemma}
+\begin{proof}
+    Simply complete the square to give
+    \begin{align*}
+        \norm{M - U \Gamma U^T}_F^2
+        &= \tr (U^T U) \Gamma^T (U^T U) \Gamma - 2 \tr D (U^T M U) + \norm{M}_F^2 \\
+        &= \norm{(U^T U)^\half \Gamma (U^T U)^\half - (U^T U)^\mhalf (U^T M U) (U^T U)^\mhalf}_F^2 + \norm{M}_F^2 - \norm{\mathcal{P}_U M \mathcal{P}_U}_F^2
+    \end{align*}
+    from which we can read off that the minimum is attained precisely when
+    \begin{align*}
+        \Gamma = (U^T U)^{-1} (U^T M U) (U^T U)^{-1}
+    \end{align*}
+    and that the optimal value is precisely the value of \cref{eq:minimum-attained-low-rank-approximation} as claimed.
+    Finally, if $U$ has orthonormal columns, $U^T U = I_K$ so $\Gamma^*$ is of the form claimed, and the final equality comes from expanding out the trace form of the Frobenius norm.
+\end{proof}
+
+\begin{lemma}\label{lem:clever-basis-choice-for-orthogonality}
+Let $M \in \R^{D \times D}$ be a symmetric matrix and $\mathcal{U}$ a subspace of $\R^D$ of dimension $L$.
+Then there exists an orthonormal basis $u_1, \dots, u_L$ for $\mathcal{U}$ such that
+\begin{align*}
+    u_L \perp M u_l \: \text{ for } l \in \{1, \dots, L-1 \}
+\end{align*}
+\end{lemma}
+\begin{proof}
+    Consider the action of $\tilde{M} \defeq \mathcal{P}_\mathcal{U} M \mathcal{P}_\mathcal{U}$ on $\mathcal{U}$.
+    Then $\tilde{M}$ is symmetric matrix whose range is a subspace of $\mathcal{U}$  and so there exists an orthonormal set of eigenvectors $u_1, \dots, u_L$ that give a basis for $\mathcal{U}$ with corresponding eigenvalues $\tilde{\lambda}_1 \geq \dots \geq \tilde{\lambda}_L$.
+    Then we can read off
+    \begin{align*}
+        \langle u_L, M u_l \rangle = \langle u_L, \tilde{M} u_l \rangle = \tilde{\lambda}_l \langle u_L, u_l \rangle = 0
+    \end{align*}
+    as required.
+\end{proof}
+
+% Note, this is no longer very consistent with the main text.
+\begin{proposition}[No spurious local minima]
+    The (population) objective $\mathcal{L}^{EY}$ has no spurious local minima.
+    That is, any matrix $\bar{W}$ that is a local minimum of $\mathcal{L}^{EY}$ must in fact be a global minimum of the form described in \cref{prop:EY-charac}.
+\end{proposition}
+\begin{proof}
+    We shall show that for any matrix $W$ that is not a global optimum, there is a (continuous) path of solutions $W_t$ with:
+    \begin{equation*}
+        W_0 = W, \quad W_1 = \hat{W}, \quad W_t \to W \text{ as } t \to 0, \quad \text{and} \quad \mathcal{L}^{EY}(W_t) < \mathcal{L}^{EY}(W) \: \forall t > 0
+    \end{equation*}
+
+    As in the proof of \cref{prop:EY-charac} we first reduce to the $B=I$ setting by defining $Z \defeq B^{\mhalf} W$ and $M = B^\mhalf A B^\mhalf$.
+    Let the eigendecomposition of $M$ be $M = V^* D^* {V^*}^\top$.
+    Define the loss
+    \begin{align*}
+        l(Z) \defeq \norm{M - Z Z^\top}_F^2
+    \end{align*}
+
+    It is now sufficient to show that: for any matrix $Z \in \R^{D \times K}$ that is not of the form $V^*_K D^*_K O_K$ where $V^*_K$ is a matrix whose columns are a set of top-$K$ eigenvectors for $M$, and $O_K \in \R^{K \times K}$ is some arbitrary orthogonal matrix cannot be a local minimum.
+
+    For notational simplicity we will assume that the $\lambda_K(M) > \lambda_{K+1}(M)$ from now on, such that $V_K^*$ can be made well-defined\footnote{with symmetry breaking for earlier repeated eigenvalues if required.}.
+
+    Now, take such a $Z$ and suppose, for contradiction that it is a local minimum.
+    We will construct a continuous path of matrices $Z(t): t \in [0,1]$ with $Z(0) = Z$ and $l\left(Z(t)\right) < l(Z) \: \forall t > 0$.
+
+    % Let $Z Z^T$ have eigen-decomposition $V_K D_K V_K^T = \sum_{k=1}^K d_k v_k v_k^T$.
+    % Then $Z = V_K D_K^\half O_K$ for some orthogonal matrix $O_K$.
+    % We will construct the path $Z(t)$ from certain paths for $V_K(t), D_K(t)$ while keeping $O_K$ fixed.
+
+    % Firstly, we consider changing $Z$ through the diagonal matrix $D_K$. Extend $V_K$ to an orthogonal matrix $V$. Then rearrange
+    % \begin{align*}
+    %     \norm{M - Z Z^T}_F^2 = \norm{V^T ( M - Z Z^\top) V}_F^2 = \norm{V^T M V - \begin{pmatrix} D_K & 0 \\ 0 & 0 \end{pmatrix}}
+    % \end{align*}
+    % Since $Z$ is a local optimum, $D$ must be a local optimum of this objective and therefore we must have $d_k = v_k^T M v_k$.
+
+    Then by our assumption on the form of $Z$, we have
+    \begin{align*}
+        \mathcal{V}_K \defeq \cspan{Z} \neq \cspan{V_K^*} \eqdef \mathcal{V}^*_K
+    \end{align*}
+
+    Now comes the clever part of the proof.
+    Define $\kappa_\cap = \operatorname{dim}\cspan{\mathcal{V}_K \cap \mathcal{V}_K^*}$. Then pick orthonormal bases
+    \begin{itemize}
+        \item $u_1, \dots, u_{\kappa_\cap}$ for $\mathcal{V}_K \cap \mathcal{V}_K^*$
+        \item $u_{\kappa_\cap + 1}, \dots, u_K$ for $\mathcal{V}_K \cap \mathcal{V}_K^*$ such that $u_K \perp M u_k$ for all $k = \kappa_\cap + 1, \dots, K-1$ by \cref{lem:clever-basis-choice-for-orthogonality}
+        \item $u^*_{\kappa_\cap + 1}, \dots, u^*_K$ for $\mathcal{V}_K^* \cap \mathcal{V}_K$
+    \end{itemize}
+
+    Let $U_K = \begin{pmatrix}u_1 & \dots & u_K\end{pmatrix}$.
+    Then by \cref{lem:least-squares-projected-signal}, for $Z$ to be a local minimum we must have
+    \begin{align*}
+        Z Z^T = U_K (U_K^T M U_K) U_K^T
+    \end{align*}
+    Moreover the objective value must therefore be
+    \begin{align}\label{eq:objective-decreases-as-signal-increases}
+    l(Z) = \norm{M}_F^2 - \norm{U_K^T M U_K}_F^2
+    \end{align}
+
+    We now make the observation that the second term is the `signal of $M$ captured by the subspace of $U_K$'.
+    So aligning $U_K$ with higher-eigenvalue subspaces of $M$ should increase this amount of signal captured and decrease this loss.
+
+    We now construct a path $U_K(t)$ which captures this intuition.
+
+    Let $u_K(t) = \cos(t) u_K + \sin(t) u^*_K$.
+    Then let $U_K(t)$ have columns $u_1, \dots, u_{K-1}, u_K(t)$.
+    By construction this is still an orthonormal set of basis vectors, so $U_K(t)^T U_K = I_K$.
+    Let $\Gamma(t) = U_K(t)^T M U_K(t)$.
+
+    We are finally ready to construct the path $Z(t)$.
+    Because $U_K$ is a basis for the column space of $Z$, and $Z$ is assumed to be a local optimum, we must have
+    \begin{align*}
+        Z Z^T = U_K \Gamma(0) U_K^T
+    \end{align*}
+    by \cref{lem:least-squares-projected-signal}.
+    So $Z = U_K \Gamma^\half O_K$ for some orthogonal matrix $O_K \in \R^{K \times K}$ where $\Gamma^\half$ is the unique positive semi-definite square root of $\Gamma$.
+    So define
+    \begin{align*}
+        Z(t) = U_K(t) \Gamma(t)^\half O_K
+    \end{align*}
+    where again $\Gamma(t)^\half$ is the unique positive semi-definite square root and therefore both $U_k(t)$ and  $\Gamma(t)^\half$ are continuous functions of $t$ and therefore so is $Z$.
+
+    Then
+    \begin{align}\label{eq:objective-decreases-as-signal-increases}
+    l(Z(t)) = \norm{M}_F^2 - \norm{U_K(t)^T M U_K(t)}_F^2
+    \end{align}
+    So it is sufficient to show that $\norm{U_K(t)^T M U_K(t)}_F^2 > \norm{U_K^T M U_K}_F^2$ for $t \in [0, \pi/2]$.
+    Indeed, we can compute
+    \begin{align*}
+        \norm{U_K(t)^T M U_K(t)}_F^2 - \norm{U_K^T M U_K}_F^2
+        &= \left(u_K(t)^T M u_K(t)\right)^2 - \left(u_K^T M u_K\right)^2 \\
+        & \quad + 2 \sum_{k=1}^{K-1} \left\{ \left(u_K(t)^T M u_k\right)^2 - \left(u_K^T M u_k\right)^2 \right\} \\
+        &\geq \left(u_K(t)^T M u_K(t)\right)^2 - \left(u_K^T M u_K\right)^2
+    \end{align*}
+    because $u_K^T M u_k = 0$ for $k = 1, \dots, K-1$ by construction.
+    Finally we have
+    \begin{align*}
+        u_K(t)^T M u_K(t)
+        &= \sin^2(t) \langle u_K^*, M u_K^* \rangle + 2 \sin(t)\cos(t) \langle u_K, M u_K^* \rangle + \cos^2(t) \langle u_K, M u_K \rangle \\
+        &= \sin^2(t) \langle u_K^*, M u_K^* \rangle + \cos^2(t) \langle u_K, M u_K \rangle \\
+        &> u_K^T M u_K
+    \end{align*}
+    Here we used that $\langle u_K^*, M u_K^* \rangle \geq \lambda_K > \langle u_K, M u_K \rangle$ and that the middle term vanishes because $M u_K^* \in \mathcal{U}^*_K$ and is therefore orthogonal to $u_K$.
+
+\end{proof}
+
+
+\subsection{Quantitative results}\label{sec:no-spurious-local-minima-quantitative}
+To use the results from \citet{ge_no_2017} we need to introduce their definition of a $(\theta, \gamma, \zeta)$-strict saddle.
+
+\begin{definition}
+    We say function $l(\cdot)$ is a $(\theta, \gamma, \zeta)$-\textbf{strict saddle} if for any $x$, at least one of the following holds:
+    \begin{enumerate}
+        \item $\norm{\nabla l (x)} \geq \theta$
+        \item $\lambda_{\text{min}}(\nabla^2 l(x)) \leq - \gamma$
+        \item $x$ is $\zeta$-close to $\mathcal{X}^*$ - the set of local minima.
+    \end{enumerate}.
+\end{definition}
+
+We can now state restate Lemma 13 from \citet{ge_no_2017} in our notation; this was used in their analysis of robust PCA, and directly applies to our PCA-type formulation.
+\begin{lemma}[Strict saddle for PCA]\label{lem:strict-saddle-pca}
+Let $M \in \R^{D \times D}$ be a symmetric PSD matrix, and define the matrix factorization objective over $Z \in \R^{D \times K}$
+\begin{align*}
+    l(Z) = \norm{M - Z Z^\top}^2
+\end{align*}
+Assume that $\lambda^*_K \defeq \lambda_K(M) \geq 15 \lambda_{K+1}(M)$.
+Then
+\begin{enumerate}
+    \item all local minima satisfy $Z Z^T = \mathcal{P}_K(M)$ - the best rank-$K$ approximation to $M$
+    \item the objective l(Z) is $(\epsilon, \Omega(\lambda_K^*), \mathcal{O}(\epsilon / \lambda_K^*)$-strict saddle.
+\end{enumerate}
+\end{lemma}
+
+However, we do not want to show a strict saddle of $l$ but of $\LEY: U \mapsto l(B^\half U)$. Provided that $B$ has strictly positive minimum and bounded maximum eigenvalues this implies that $\LEY$ is also strict saddle, as we now make precise.
+
+% think I've got the conclusion the wrong way round because had wrong power of $B$.
+\begin{lemma}[Change of variables for strict saddle conditions]\label{lem:strict-saddle-change-of-variables}
+Suppose that $l$ is $(\theta, \gamma, \zeta)$-strict saddle and let $L: U \mapsto l(B^\half U)$ for $B$ with minimal and maximal eigenvalues $\sigma_\text{min}, \sigma_\text{max}$ respectively.
+
+Then $L$ is \(\left(\sigma_\text{max}^\half \theta,\, \sigma_\text{min} \gamma,\, \sigma_\text{max}^\half \zeta \right)\)-strict saddle.
+\end{lemma}
+\begin{proof}
+    Write $g(U) = B^\half U$. Then $L = l \circ g$, so by the chain rule:
+    \begin{align*}
+        D_U L = D_{B^\half U} l \circ D_U g \, : \: \delta U \mapsto \langle \nabla l(B^\half U), B^{\half} \delta U \rangle
+        = \langle B^\half \nabla l(B^\half U), \delta U \rangle
+    \end{align*}
+    Therefore
+    \begin{align*}
+        \norm{\nabla L(U)} = \norm{B^\half \nabla l(B^\half U)} \geq \sigma_\text{min}^\half \norm{l(B^\half U)}
+    \end{align*}
+
+    By a further application of the chain rule we have
+    \begin{align*}
+        D_U^2 L \, : \: \delta U, \delta U \mapsto D^2_{B^\half U} l(B^\half \delta U, B^\half \delta U)
+    \end{align*}
+
+    Suppose $\lambda_{\text{min}}(\nabla^2 l(Z)) \leq - \gamma$ then by the variational characterization of eigenvalues, there exists some $\delta Z$ such that $\langle \delta Z, \nabla^2 l(Z) \delta Z \rangle \leq - \gamma \norm{\delta Z}^2$.
+    Then taking $\delta U = B^\mhalf \delta Z$ gives
+    \begin{align*}
+        \langle \delta U, \nabla^2 L(U) \delta U \rangle
+        &= \langle B^\half \delta U, \nabla^2 l(B^\half U) B^\half \delta U \rangle \\
+        &= \langle \delta Z, \nabla^2 l(Z) \delta Z \rangle  \\
+        &\leq - \gamma \norm{\delta Z}^2 \\
+        & \leq - \gamma \sigma_{\text{min}} \norm{\delta U}^2
+    \end{align*}
+
+    Thirdly, suppose that $\norm{B^\half U - Z^*} \leq \zeta$ for some local optimum $Z^*$ of $l$. Then since $B$ is invertible, $U^* \defeq B^\mhalf Z^*$ is a local optimum of $L$. In addition:
+    \begin{align*}
+        \norm{U - U^*} = \norm{B^\half( U - U^*)} \leq \sigma_\text{max}^\half \norm{B^\half U - Z^*} \leq \zeta
+    \end{align*}
+
+    Finally, consider some arbitrary point $U_0$. Let $Z_0 = B^\half U_0$. Then by the strict saddle property for $l$ one of the following must hold:
+    \begin{enumerate}
+        \item $\norm{\nabla l (Z_0)} \geq \theta \quad \implies \quad \norm{\nabla L(U_0)} \geq \sigma_\text{min}^\half \theta$
+        \item $\lambda_{\text{min}}(\nabla^2 l(Z_0)) \leq - \gamma \quad \implies \quad \lambda_{\text{min}}(\nabla^2 L(U_0) \leq - \sigma_{\text{min}} \gamma$
+        \item $Z_0$ is $\zeta$-close to a local-minimum $Z^*$, which implies that $U_0$ is $(\sigma_\text{max}^\half \zeta)$-close to a local minimum $B^\mhalf Z^*$ of $L$.
+    \end{enumerate}
+\end{proof}
+
+By combining \cref{lem:strict-saddle-pca} with \cref{lem:strict-saddle-change-of-variables}, we can conclude that our objective does indeed satisfy a (quantitative) strict saddle property.
+This is sufficient to show that certain local search algorithms will converge in polynomial time \cite{ge_no_2017}.
+
+\newpage
+
+\section{Fast updates for (Multi-view) Stochastic CCA (and PLS)}\label{supp:fast-updates}
+% Lennie: I got the following from GPT4 with careful prompting, now cutting down to size...
+\subsection{Back-propagation for empirical covariances}
+To help us analyse the full details of back-propagation in the linear case, we first prove a lemma regarding the gradients of the empirical covariance operator.
+
+\begin{lemma}[Back-prop for empirical covariance]\label{lem:backprop-empirical-covariance}
+Let $e \in \R^{M}, f \in \R^{M}$.
+Then $\empCov(e, f)$ and
+\begin{align*}
+    \frac{\partial \empCov(e, f)} {\partial e}
+\end{align*}
+can both be computed in $\order{M}$ time.
+\end{lemma}
+\begin{proof}
+    Let $\ones{M} \in \R^M$ be a vector of ones and $\mathcal{P}_{\ones{M}}^\perp = I_M - \frac{1}{M} \ones{M}^T \ones{M}$ be the projection away from this vector, then we can write $\bar{e} = \mathcal{P}_{\ones{M}}^\perp e, \bar{f} = \mathcal{P}_{\ones{M}}^\perp f$.
+    Moreover, exploiting the identity-plus-low-rank structure of $\mathcal{P}_{\ones{M}}^\perp$ allows us to compute these quantities in $\order{M}$ time.
+
+    Then by definition
+    \begin{align*}
+        \empCov(e, f) = \frac{1}{M-1} \bar{e}^T \bar{f}
+    \end{align*}
+    which is again computable in $\order{M}$ time.
+
+    For the backward pass, first note that
+    \begin{align*}
+        \frac{\partial \bar{e}}{\partial e} \, : \, \delta e \mapsto \mathcal{P}_{\ones{M}}^\perp \delta e
+    \end{align*}
+    So the derivative with respect to $e$ is
+    \begin{align*}
+        \frac{\partial \empCov(e, f)} {\partial e} = \frac{1}{M-1} \frac{\partial \bar{e}^T \bar{f}}{\partial e}
+        = \frac{1}{M-1} \left( \frac{\partial \bar{e}}{\partial e} \bar{f}  \right)
+        = \frac{1}{M-1} \mathcal{P}_{\ones{M}}^\perp \bar{f}
+        = \frac{1}{M-1}\bar{f}
+    \end{align*}
+    because $\bar{f}$ is independent of $e$, and already mean-centred.
+    So all that remains is element-wise division, which again costs $\order{M}$ time.
+\end{proof}
+
+
+\subsection*{Forward Pass}
+\begin{enumerate}
+    \item \textbf{Compute the transformed variables \(\Z\):}
+    \begin{equation}
+        \Z\sps{i} = U\sps{i} \X\sps{i},
+    \end{equation}
+    with a complexity of \(\mathcal{O}(MKD)\).
+
+    \item \textbf{Compute \(\tr\hat{C}(\theta)[\Z]\):} the diagonal elements of $\hat{C}$ are simply
+    \begin{align*}
+        \hat{C}_{kk} = \sum_{i \neq j} \empCov(\Z_k\sps{i}, \Z_k\sps{j})
+    \end{align*}
+    which each summand can be computed in $\order{M}$ time, so summing over $i,j,k$ gives total complexity of \(\mathcal{O}(I^2 K M)\).
+
+    \item \textbf{Compute \(\hat{V}(\theta)[\Z]\):}
+    For \( \hat{V}_\alpha[\Z] \):
+    \begin{align*}
+        \hat{V}_\alpha(\theta)[\Z] = \sum_i \alpha_i {U\sps{i}}^T U\sps{i} + (1 - \alpha_i) \empVar(\Z\sps{i}),
+    \end{align*}
+    each ${U\sps{i}}^T U\sps{i}$ can be computed with a complexity of $\order{D_i K^2}$\ and the total cost of evaluating all of these is $\order{K^2 D}$.
+    Each summand in the second term costs $\order{M K^2}$ by \cref{lem:backprop-empirical-covariance} so evaluating the full second term costs $\order{I MK^2}$.
+
+    \item \textbf{Evaluate \(\empLEY[\Z, \Z']\):}
+    \begin{equation}
+        \empLEY[\Z, \Z'] = - 2 \tr \hat{C}[\Z] + \langle \hat{V}_\alpha[\Z], \hat{V}_\alpha[\Z'] \rangle_F.
+    \end{equation}
+    The dominant complexity here is the \(\mathcal{O}(K^2)\) cost of computing the Frobenius inner product.
+\end{enumerate}
+
+\subsection*{Backward Pass}
+
+\begin{enumerate}
+    \item \textbf{Gradient with respect to \( \Z\sps{i} \):}
+    Using the chain rule, the gradient will flow back from the final computed value, \( \empLEY[\Z, \Z'] \), through the operations that produced it.
+
+    \item \textbf{Gradient of \( \tr\hat{C}(\theta)[\Z] \) with respect to \( \Z\sps{i}_k \):}
+    Is precisely
+    \begin{align*}
+        \frac{\partial \hat{C}_{kk}}{\partial \Z_k\sps{i}} = \frac{2}{M-1} \sum_{j \neq i} \bar{\Z}_k\sps{j},
+    \end{align*}
+    where $\bar{\Z}_k\sps{j} = \mathcal{P}_{\ones{M}}^\perp \bar{\Z}_k\sps{j} $, from \cref{lem:backprop-empirical-covariance} and so can be computed in \( \mathcal{O}(I M) \) time.
+
+    \item \textbf{Gradients of $\langle \hat{V}_\alpha[\Z], \hat{V}_\alpha[\Z'] \rangle_F$ with respect to \( \Z\sps{i}_k \):}
+    By applying \cref{lem:backprop-empirical-covariance}, the gradient of the empirical variance term is
+    \begin{align*}
+        \frac{\partial \empVar(\Z\sps{i})_{l,l'}}{\partial \Z_k\sps{i}} =
+        \begin{cases}
+            \frac{2}{M-1} \Z\sps{i}_k & \text{ if $l=l'=k$}\\
+            \frac{1}{M-1} \Z\sps{i}_l & \text{ if $l \neq l'=k$}\\
+            0 & \text{ otherwise.}
+        \end{cases}
+    \end{align*}
+    and so
+    \begin{align*}
+        \frac{\partial \langle \hat{V}_\alpha[\Z], \hat{V}_\alpha[\Z'] \rangle_F}{\partial \Z_k\sps{i}}
+        &= \frac{(1 - \alpha_i)}{M-1}\left( 2 \hat{V}_\alpha[\Z']_{kk} \Z_k\sps{i} + \sum_l ( \hat{V}_\alpha[\Z']_{lk} \Z_l\sps{i} + \hat{V}_\alpha[\Z']_{kl} \Z_k\sps{i}) \right) \\
+        &= \frac{2(1 - \alpha_i)}{M-1}\sum_{l=1}^K \hat{V}_\alpha[\Z']_{lk} \Z_l\sps{i} \\
+    \end{align*}
+    this can be computed in \( \mathcal{O}(M K) \) time.
+
+    \item \textbf{Gradients of \( \empLEY[\Z, \Z'] \) with respect to $\Z\sps{i}_k$:} can therefore be computed for a given $\Z\sps{i}_k$ in $\order{M (K + I)}$ time and so, adding up over all $i,k$ gives total $\order{I M (K + I)}$ time.
+
+    \item \textbf{Gradients of $\langle \hat{V}_\alpha[\Z], \hat{V}_\alpha[\Z'] \rangle_F$ with respect to $U\sps{i}_k$:}
+    is similarly
+    \begin{align*}
+        \frac{2\alpha_i}{M-1}\sum_{l=1}^K (\hat{V}_\alpha[\Z]_{lk} + \hat{V}_\alpha[\Z']_{lk}) U_l\sps{i}
+    \end{align*}
+    so can be computed in $\order{D_i K}$ time.
+
+    \item \textbf{Finally compute gradients with respect to $U\sps{i}_k$:} simply have $Z\sps{i}_k = {U\sps{i}_k}^\top \X\sps{i}$ so the final gradients are
+    \begin{align}
+        \frac{\partial \empLEY}{\partial U\sps{i}_k} = \left( \frac{\partial \empLEY}{\partial \Z\sps{i}_k} \right)^\top {\X\sps{i}}
+        + \frac{\partial \langle \hat{V}_\alpha[\Z], \hat{V}_\alpha[\Z'] \rangle_F}{\partial U\sps{i}_k}
+    \end{align}
+    so the dominant cost is the $\order{M D_i}$ multiplication.
+\end{enumerate}
+
+Since $D \gg K, M$, the dominant cost each final gradient is $\order{M D_i}$.
+Summing up over $i,k$ gives total cost $\order{K M \sum D_i} = \order{K M D}$, as claimed.
+
+\newpage

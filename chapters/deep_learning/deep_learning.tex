@@ -22,6 +22,10 @@ In this chapter, we propose a novel formulation of Deep CCA that is unbiased in 
 
 \subsection{DCCA and Deep Multiview CCA}
 
+Thus far in this thesis, we have focused on the linear CCA problem.
+However, in many applications, the data are high-dimensional and nonlinear, and so it is natural to consider nonlinear extensions of CCA.
+In this section, we review two such extensions: Deep CCA and Deep Multiview CCA.
+
 The goal of DCCA and DMCCA can be defined using our $\MCCA$ notation as maximizing
 \begin{align}
     \label{eq:DMCCA-def}
@@ -34,8 +38,13 @@ over parameters $\theta$ of neural networks defining the representations $Z\sps{
     \includegraphics[width=0.4\textwidth]{figures/dcca_schematic}
 \end{figure}
 
-The deep canonical correlation analysis (DCCA) landscape comprises three principal approaches with inherent limitations. The first, known as the full-batch approach, uses analytic gradient derivations based on the full sample covariance matrix \citep{andrew2013deep}.
-The second involves applying the full batch objective to large mini-batches, an approach referred to as \textbf{DCCA-STOL} \citep{wang2015unsupervised}. However, this approach gives biased gradients and therefore requires batch sizes much larger than the representation size in practice. This is the approach taken by both \textbf{DMCCA} \citep{somandepalli2019multimodal} and \textbf{DGCCA} \citep{benton2017deep} . The final set of approaches use an adaptive whitening matrix \citep{wang2015stochastic, chang2018scalable} to mitigate the bias of the Deep CCA objective. However, the authors of \textbf{DCCA-NOI} highlight that the associated time constant complicates analysis and requires extensive tuning. These limitations make existing DCCA methods less practical and resource-efficient.
+We represent this in Figure \ref{fig:dcca_schematic}.
+The first, known as the full-batch approach, uses analytic gradient derivations based on the full sample covariance matrix \citep{andrew2013deep}.
+The second involves applying the full batch objective to large mini-batches, an approach referred to as \textbf{DCCA-STOL} \citep{wang2015unsupervised}.
+However, this approach gives biased gradients and therefore requires batch sizes much larger than the representation size in practice.
+This is the approach taken by both \textbf{DMCCA} \citep{somandepalli2019multimodal} and \textbf{DGCCA} \citep{benton2017deep} .
+The final set of approaches use an adaptive whitening matrix \citep{wang2015stochastic, chang2018scalable} to mitigate the bias of the Deep CCA objective. However, the authors of \textbf{DCCA-NOI} highlight that the associated time constant complicates analysis and requires extensive tuning.
+These limitations make existing DCCA methods less practical and resource-efficient.
 
 \subsection{Self-Supervised Learning}
 
@@ -49,17 +58,6 @@ The second involves applying the full batch objective to large mini-batches, an 
 \section{Methods: Novel Objectives and Algorithms}\label{sec:contributions}
 
 \subsection{Applications to (multi-view) stochastic CCA and PLS, and Deep CCA}
-\begin{lemma}[Objective recovers GEP formulation of linear (multi-view) CCA]
-    When the $f\sps{i}$ are linear, as in \cref{eq:cca-linear-function-def}, the population loss from \cref{eq:EY-loss-def-C-V} recovers MCCA as defined in \cref{sec:CCA-family}. %Moreover, the minimal loss value is precisely $-\norm{\MCCA_K(X)}$
-\end{lemma}
-\begin{proof}
-    By construction, for linear MCCA we have $C = U^T A U,\, V_\alpha=U^T B_\alpha U$, where $(A, B_\alpha)$ define the GEP for MCCA introduced in \cref{eq:gep-most-general-formulation}.
-    So $\LEY(U) = \LEYGEP(U)$ and by \cref{prop:EY-charac} the optimal set of weights define a top-$K$ subspace of the GEP, and so is a MCCA solution.
-        %; by definition, $\MCCA_K$ is the vector of top-$K$ generalised eigenvalues, so the optimal value is as claimed.
-\end{proof}
-
-Moreover, by following through the chain of back-propagation, we obtain gradient estimates in $\mathcal{O}(MKD)$ time.
-Indeed, we can obtain gradients for the transformed variables in $\mathcal{O}(M K^2)$ time so the dominant cost is then updating $U$; we flesh this out with full details in \cref{supp:fast-updates}.
 
 \begin{restatable}{lemma}{recoverDeepCCA}[Objective recovers Deep Multi-view CCA]\label{lem:recover-DeepCCA}
 Assume that there is a final linear layer in each neural network $f\sps{i}$.

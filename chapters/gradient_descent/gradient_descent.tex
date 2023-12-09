@@ -26,7 +26,7 @@ There is therefore great interest in approximating solutions for CCA in stochast
 
 \section{Background: Efficient CCA}\label{sec:background-unified}
 
-\subsubsection{Challenges in Solving Generalized Eigenvalue Problems}
+\subsection{Challenges in Solving Generalized Eigenvalue Problems}
 
 The GEP is often represented as \( Ax = \lambda Bx \), where \( A \) and \( B \) are matrices. To generalize the dimensions of these matrices, let's denote them as \( m \times m \). This dimension \( m \) can vary based on the specific method in use. For instance, in Principal Component Analysis (PCA), represented as \acrshort{pca}, \( m \) would be equal to \( p \) since \( A \) and \( B \) are \( p \times p \) matrices. In methods like Partial Least Squares (PLS) and Canonical Correlation Analysis (CCA), represented as \acrshort{pls} and \acrshort{cca} respectively, \( m \) would be \( p_1+p_2 \), as \( A \) and \( B \) in these cases are \( (p_1+p_2) \times (p_1+p_2) \).
 
@@ -64,7 +64,7 @@ The GEP is often represented as \( Ax = \lambda Bx \), where \( A \) and \( B \)
 To solve the GEP, one common technique is to transform it into a standard eigenvalue problem \( B^{-\frac{1}{2}} A B^{-\frac{1}{2}} y = \lambda y \), followed by eigendecomposition.
 However, this approach has computational complexity \( O((p_1+p_2)^3) \) and may suffer from numerical instability.
 
-\subsubsection{\acrshort{pca}-CCA}
+\subsection{\acrshort{pca}-CCA}
 
 One way to reduce the complexity of solving GEPs is to use the \acrshort{pca}-CCA method, which first applies \acrshort{pca} to the data and then solves the GEP in the reduced space.
 An important advantage of using \acrshort{pca}-CCA is computational efficiency, especially for high-dimensional data.
@@ -79,7 +79,7 @@ For fat data where \( p_1 \) and \( p_2 \) are larger than \( n \), we can reaso
 This approach has been employed to great effect in neuroimaging but suprisingly is not used even in the scikit-learn implementation of \acrshort{cca} \citep{pedregosa2011scikit}.
 Nonetheless, for the large sample sizes (desirable for machine learning frameworks as well as statistical power), the complexity of even \acrshort{pca}-CCA can render the problems nearly intractable.
 
-\subsubsection{Kernel CCA}
+\subsection{Kernel CCA}
 
 Kernel \acrshort{cca} (\acrshort{kcca}) also offers computational efficiency for high-dimensional data (\(p_i>n\)) as its complexity scales with the number of samples \(n\), not the number of features \(p_i\).
 It casts the CCA optimisation as a dual problem:
@@ -147,7 +147,13 @@ To help us extend this to the general case of nonlinear transformations, \cref{e
 C(\theta) = \sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j}), \quad
 V(\theta) = \sum_{i} \Var(Z\sps{i})
 \end{align}
-In the case of linear transformations, \cref{eq:cca-linear-function-def}, it makes sense to add a ridge penalty so we can define
+In the case of linear transformations:
+
+\begin{equation}\label{eq:cca-linear-function-def}
+Z\sps{i}_k = \langle u_k\sps{i} , X\sps{i} \rangle.
+\end{equation}
+
+it makes sense to add a ridge penalty so we can define
 \begin{align}\label{eq:v-alpha-ridge-definition}
 V_\alpha(\theta) = \sum_i \alpha_i {U\spsT{i}} U\sps{i} +  (1 - \alpha_i) \Var(Z\sps{i})
 \end{align}
@@ -194,7 +200,7 @@ In the next section we apply this algorithm to multi-view stochastic CCA and PLS
 
 \subsection{Applications to (multi-view) stochastic CCA and PLS}
 \begin{lemma}[Objective recovers GEP formulation of linear (multi-view) CCA]
-    When the $f\sps{i}$ are linear, as in \cref{eq:cca-linear-function-def}, the population loss from \cref{eq:EY-loss-def-C-V} recovers MCCA as defined in \cref{sec:CCA-family}.
+    When the $f\sps{i}$ are linear, as in \ref{eq:cca-linear-function-def}, the population loss from \cref{eq:EY-loss-def-C-V} recovers MCCA.
 \end{lemma}
 \begin{proof}
     By construction, for linear MCCA we have $C = U^T A U,\, V_\alpha=U^T B_\alpha U$, where $(A, B_\alpha)$ define the GEP for MCCA introduced in \cref{eq:gep-most-general-formulation}.

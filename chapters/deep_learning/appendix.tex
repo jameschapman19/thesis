@@ -1,0 +1,103 @@
+\section{Eckhart-Young loss recovers Deep CCA}\label{supp:EY-recover-Deep-CCA}
+\recoverDeepCCA* %restatable reference
+\begin{proof}
+    Write $f\sps{i}(X\sps{i}; \theta\sps{i}) = U\spsT{i} g\sps{i}(X\sps{i}; \phi\sps{i})$ where the $U\sps{i}$ are matrices parameterising the final layer and $g\sps{i}$ defines the representations in the penultimate layer.
+
+    Because $\hat{\theta}$ is a local minimum of $\LEY(\theta)$ we must have $\hat{U}$ a local minimum of the map $l: \, U \mapsto \LEY((U, \hat{\phi}))$. Writing $\hat{Y} = g(X; \hat{\phi})$ for the corresponding penultimate-layer representations we get
+    \begin{align*}
+        l(U) \defeq \LEY((U, \hat{\phi}))
+        &= - 2 \tr \big(\sum_{i \neq j} \Cov(U\spsT{i} \hat{Y}\sps{i}, U\spsT{j} \hat{Y}\sps{j}) \big) + \norm[\big]{\sum_i \Var(U\spsT{i} \hat{Y}\sps{i})}_F^2 \\
+        &= - 2 \tr \left( \,U^T A(\hat{Y}) U\right)  + \norm{U^T B(\hat{Y}) U}^2_F
+    \end{align*}
+    where $A(\hat{Y}), B(\hat{Y})$ are as in \cref{eq:gep-most-general-formulation} with $X$ replaced by $\hat{Y}$.
+    This is precisely our Eckhart-Young loss for linear CCA on the $\hat{Y}$.
+    So by \cref{prop:no-spurious}, $\hat{U}$ must also be a global minimum of $l(U)$ and then by \cref{prop:EY-charac} the optimal value is precisely $- \norm{\MCCA_K(\hat{Y})}_2^2$.
+
+    This in turn is equal to $- \norm{\MCCA_K(\hat{Z})}_2^2$ by a simple sandwiching argument.
+    Indeed, by \cref{prop:EY-charac} $\min_V \LEY((V\spsT{i} X\sps{i})_i) = - \norm{\MCCA_K(\hat{Z})}_2^2$.
+    Then we can chain inequalities
+    \begin{align*}
+        - \norm{\MCCA_K(\hat{Y})}_2^2 = \LEY(\hat{Z})
+        &\geq \min_V \LEY((V\spsT{i} X\sps{i})_i) \\
+        &\geq \min_U \LEY((U\spsT{i} \hat{Y}\sps{i})_i) = - \norm{\MCCA_K(\hat{Y})}_2^2
+    \end{align*}
+    to conclude.
+\end{proof}
+
+\subsection{Interlacing results}
+First we state a standard result from matrix analysis.
+This is simply Theorem 2.1 from \citet{haemers_interlacing_1995}, but with notation changed to match our context. We therefore omit the (straightforward) proof.
+
+\begin{lemma}\label{lem:haemers}
+Let $Z \in \R^{D\times K}$ such that $Z^T Z = I_K$ and let $M \in \R^{D\times D}$ be symmetric with an orthonormal set of eigenvectors $v_1,\dots, v_D$ with eigenvalues $\lambda_1 \geq \dots \geq \lambda_D$.
+Define $C = Z^T M Z$, and let $C$ have eigenvalues $\mu_1 \geq \dots \geq \mu_K$ with respective eigenvectors $y_1 \dots y_K$.
+
+Then
+\begin{itemize}
+    \item $\mu_k \leq \lambda_k$ for $k=1,\dots,K$.
+    \item if $\mu_k = \lambda_k$ for some $k$ then $C$ has a $\mu_k$-eigenvector $y$ such that $Zy$ is a $\mu_k$-eigenvector of $M$.
+    \item if $\mu_k = \lambda_k$ for $k=1,\dots,K$ then $Zy_k$ is a $\mu_k$-eigenvector of $M$ for $k=1,\dots,K$.
+\end{itemize}
+\end{lemma}
+
+This immediately gives us a related result for generalized eigenvalues.
+
+\begin{corollary}[Generalized Eigenvalue Interlacing]\label{cor:generalised-eigenvalue-interlacing}
+Consider the GEP $(A, B)$ where $A \in \R^{D \times D}$ is symmetric and $B \in \R^{D \times D}$ symmetric positive definite; let these have $B$-orthonormal generalized eigenvectors $u_1, \dots, u_D$ with eigenvalues $\lambda_1, \dots, \lambda_D$.
+
+Let $U \in \R^{D \times K}$ such that $U^T B U = I_K$, define $C = U^T A U$, and let $C$ have eigenvalues $\mu_1 \geq \dots \geq \mu_K$ with respective eigenvectors $y_1 \dots y_K$.
+
+Then
+\begin{itemize}
+    \item $\mu_k \leq \lambda_k$ for $k=1,\dots,K$.
+    \item if $\mu_k = \lambda_k$ for some $k$ then $(C,V)$ has a $\mu_k$-generalised-eigenvector $y$ such that $Uy$ is a $\mu_k$-generalised-eigenvector of $(A,B)$.
+    \item if $\mu_k = \lambda_k$ for $k=1,\dots,K$ then $Uy_k$ is a $\mu_k$-generalised-eigenvector of $(A,B)$ for $k=1,\dots,K$.
+\end{itemize}
+\end{corollary}
+\begin{proof}
+    As in previous appendices, we convert from the GEP $(A,B)$ to an eigenvalue problem for $M \defeq B^\mhalf A B^\mhalf$ by defining $Z = B^\mhalf U$, and $v_d = B^\half u_d$.
+
+    We now check that the conditions and conclusions of \cref{lem:haemers} biject with the conditions and conclusions of this present lemma.
+
+    Indeed $(u_d)_d$ are $B$-orthonormal gevectors of $(A,B)$ if and only if $(v_d)_d$ are orthonormal evectors of $M$; the matrices $C$ and then coincide and so so does its eigenvectors and eigenvalues.
+
+    This proves the result.
+\end{proof}
+
+We can now apply this to the Multi-view CCA problem, generalising the two-view case.
+\begin{lemma}[Interlacing for MCCA]\label{lem:interlacing-for-cca}
+Let $(X\sps{i})_{i=1}^I$ be random vectors taking values in $\R^{D_i}$ respectively, as in \cref{sec:background-unified}.
+Take arbitrary full-rank weight matrices $U\sps{i} \in \R^{D_i \times K}$ for $i \in \{1,\dots, I\}$ and define the corresponding transformed variables $Z\sps{i} = \langle U\sps{i}, X\sps{i}\rangle$.
+Then we have the element-wise inequalities
+\begin{equation}\label{eq:cca-interlacing}
+\MCCA_K(Z\sps{i}, \dots, Z\sps{I}) \leq \MCCA_K(X\sps{1},\dots, X\sps{I})
+\end{equation}
+%Previously had ... define a top-$K$ MCCA subspace; that is somewhat ambiguous / mis-leading
+Moreover simultaneous equality in each component holds if and only if there exist matrices $Y\sps{i} \in \R^{K\times K}$ for $i \in [I]$ such that the $(U\sps{i}Y\sps{i})_{i=1}^I$ are a set of top-$K$ weights for the MCCA problem.
+\end{lemma}
+\begin{proof}
+    Let the matrices $A,B$ be those from the MCCA GEP in \cref{eq:gep-most-general-formulation} defined by the input variables $X$. By definition, $\MCCA_K(X\sps{1},\dots, X\sps{I})$ is precisely the vector of the top-$K$ such generalised eigenvalues.
+
+    Then the corresponding matrices defining the GEP for $Z$ are block matrices $\bar{A}, \bar{B}$ defined by the blocks
+    \begin{equation}\label{eq:block-bar-A-B-def}
+    \begin{aligned}
+        \bar{A}^{(ij)} &= \Cov(Z\sps{i}, Z\sps{j}) = {U\sps{i}}^\top \Cov(X\sps{i}, X\sps{j}) \, U\sps{j} \\ % \text{ for } i,j \in [I], ; \:\:
+        \bar{B}^{(ii)} &= \Var(Z\sps{i}) = {U\sps{i}}^\top \Var(X\sps{i}) \, U\sps{i}
+    \end{aligned}
+    \end{equation}
+
+    Now define the $D \times (K I)$ block diagonal matrix $\tilde{U}$ to have diagonal blocks $U\sps{i}$.
+    Then the definition from \cref{eq:block-bar-A-B-def} is equivalent to the block-matrix equations $\bar{A} = \bar{U}^T A \bar{U}$, $\bar{B} = \bar{U}^T B \bar{U}$, both in $\R^{(KI)\times(KI)}$.
+    Finally, we define a normalised version $\hat{U} = \bar{U} \bar{B}^\mhalf $ (possible because $B$ positive definite and $\bar{U}$ of full rank).
+
+    We can now apply the eigenvalue interlacing result of \cref{cor:generalised-eigenvalue-interlacing} to the GEP $(A,B)$ and $B$-orthonormal matrix $\hat{U} \in \R^{D \times I K}$.
+    Let the matrix $\bar{B}^\mhalf \bar{A} \bar{B}^\mhalf = \hat{U}^T A \hat{U}$ have top-$K$ eigenvalues $\rho_1\geq \dots \geq \rho_K$ with respective eigenvectors $y_1, \dots, y_K$.
+    Then the $(\rho_k)_{k=1}^K$ are precisely the first $K$ successive multi-view correlations between the $Z\sps{i}$.
+    As before, the first $K$ successive multi-view correlations $\rho^*_k$ between the $X\sps{i}$ are precisely the first $K$ generalised eigenvalues of the GEP $(A,B)$.
+    We therefore we have the element-wise inequalities $\rho_k \leq \rho_k^*$ for each $k = 1, \dots, K$.
+
+    Moreover, equality for each of the top-$K$ multi-view correlations implies that $\hat{U} y_k$ is a generalised-eigenvector of the original GEP $(A,B)$ for $k=1,\dots K$ (still by \cref{cor:generalised-eigenvalue-interlacing}).
+    Letting $Y\sps{i} = \begin{pmatrix}y\sps{i}_1 & \dots & y\sps{i}_K\end{pmatrix}$ then gives the equality case statement.
+    % Still need another line of justification here really; to add after Sergio meeting!
+
+\end{proof}
