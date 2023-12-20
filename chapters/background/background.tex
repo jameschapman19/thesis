@@ -2,7 +2,7 @@
 
 
 \chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}\label{chap:background}
-\epigraph{Principal Component Analysis is a dimensionally invalid method that gives people a delusion that they are doing something useful with their data. If you change the units that one of the variables is measured in, it will change all the “principal components”! It’s for that reason that I made no mention of PCA in my book. I am not a slavish conformist, regurgitating whatever other people think should be taught. I think before I teach.}{Professor David MacKay}
+% \epigraph{Principal Component Analysis is a dimensionally invalid method that gives people a delusion that they are doing something useful with their data. If you change the units that one of the variables is measured in, it will change all the “principal components”! It’s for that reason that I made no mention of PCA in my book. I am not a slavish conformist, regurgitating whatever other people think should be taught. I think before I teach.}{Professor David MacKay}
 \minitoc
 
 
@@ -11,7 +11,7 @@
 In this chapter, we gather the necessary background knowledge needed to motivate and understand the contributions of this thesis.
 
 Machine learning enables models to automatically learn patterns and make decisions from data.
-Machine learning comprises three primary paradigms: supervised, self-supervised (in the past called unsupervised), and reinforcement learning, each distinct in its approach to learning from data.
+Machine learning comprises three primary paradigms: supervised, self-supervised (or unsupervised), and reinforcement learning, each distinct in its approach to learning from data.
 This thesis focuses on \textit{multiview self-supervised machine learning}, which aims to develop robust representations by uncovering associations between various data types within datasets.
 These data types, known as \gls{views} may include distinct sources of information such as MRI images, genomic data, and clinical records in the context of patient data analysis.
 
@@ -23,22 +23,27 @@ These techniques can be broadly classified into supervised and self-supervised (
 \subsubsection{Supervised Multiview Learning}
 
 In supervised multiview learning, one view serves as the input while the other view is treated as the target label.
-The algorithm learns to predict the target view based on the input view, leveraging the information from both to enhance the predictive performance \citep{zong2023self}.
+The algorithm learns to predict the target view based on the input view, leveraging the information from both to enhance the predictive performance \citep{zong2023self}. These can in principal encompass both regression and classification tasks depending on the nature of the target view (continuous or discrete). In a sense, we can think of this in exactly the same way as supervised learning, where the features are one view and the target is the other view. However, multiview learning is not restricted to a single view as input or target.
 
 \subsubsection{Self-Supervised Multiview Learning}
 
 Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels \citep{balestriero2023cookbook}.
 The cornerstone of SSL is the concept of a `pretext task,' a learning task created from the data that trains the model to capture useful features or representations.
-In the context of multiview machine learning, self-supervised learning often operates under the assumption that different \gls{views} are generated from a common source.
+In the context of multiview machine learning, self-supervised learning often operates under the assumption that different \gls{views} are generated from a common, but unobserved, \textit{latent} source.
 A natural pretext task, in this case, is to predict or estimate this source from the given \gls{views}.
-In the prediction setting, we might mask the source and train the model to predict it from the remaining \gls{views}, closer to supervised learning.
-In the estimation setting, we never directly observe the source, but we train the model to estimate it from the \gls{views}.
-In this case, the model is forced to learn the underlying structure of the data without any direct supervision.
+Dimensionality reduction is a common example of this, where the model learns to estimate a low-dimensional representation of the data from the \gls{views}.
+In this case, the model is forced to learn the underlying latent variable structure of the data without any direct supervision.
 This not only enables the model to learn associations between \gls{views} but also allows it to derive robust and informative representations for subsequent tasks like classification or regression.
-This is particularly true if the source is unavailable at test time when an application must rely on the \gls{views} alone to make predictions.
-In the case of latent variables, where the assumed source is unobserved, the model learns to estimate latent variables from the \gls{views} which are unavailable even at training time.
-These are usually much lower-dimensional than the original \gls{views}, and therefore provide a more compact and informative representation of the data.
-The models we deal with in this thesis are generally of this type.
+
+\subsection{Types of Multiview Data}
+
+In neuroscience and genetics, two specific types of multiview studies are particularly relevant to this thesis: brain-behavior studies and imaging-genetics. Both involve the integration of data from multiple sources, offering rich insights into complex phenomena.
+
+Brain-behavior studies typically involve pairing neuroimaging data, such as that obtained from Structural MRI (sMRI) or Functional MRI (fMRI), with non-imaging data like responses from questionnaires, cognitive test results, and other behavioral assessments. sMRI provides detailed anatomical brain images, essential for understanding brain structure and neurological disorders *citation*, while fMRI focuses on brain function by mapping activity during cognitive tasks *citation*. The integration of these imaging techniques with behavioral data offers a comprehensive view of how brain structures and functions correlate with behavioral and cognitive patterns *citation*.
+
+Imaging-Genetics, another critical multiview approach, combines neuroimaging data with genetic information. This interdisciplinary field seeks to understand the genetic influences on brain structure and function, thereby illuminating the genetic basis of neuropsychiatric disorders and cognitive traits *citation*. Studies in this area might explore how specific genetic variations correlate with differences in brain morphology or activity patterns observed in neuroimaging *citation*.
+
+Together, these multiview approaches are fundamental in advancing our understanding of the brain's structure, function, and its interactions with genetic and behavioral factors. They represent key applications of SSL in neuroscience and genetics, providing comprehensive insights that underpin developments in these fields *citation*.
 
 \subsection{Conditional Independence, Causality, and Multiview Learning}
 
@@ -86,7 +91,6 @@ This process exploits the overlap in information to correct or reduce noise and 
 In this thesis we will work with Canonical Correlation Analysis, a multiview learning method which assumes that the \gls{views} contain complementary information about latent variables.
 The next section builds a formal understanding of the principles behind Canonical Correlation Analysis and its variants.
 
-
 \section{Learning Representations: Definitions and Notation}
 
 Suppose we have a sequence of vector-valued random variables $X\sps{i} \in \R^{D_i}$ for $i \in \{1, \dots, I \}$
@@ -107,7 +111,7 @@ matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of \gls{weights}, 
 matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations.
 We will refer to the Pearson correlation between features and their respective latent variable $\Corr(X\sps{i}_j, Z_k)$ as the \textit{\gls{loadings}} of $X\sps{i}_j$ on $Z_k$ \citep{rosipal2005overview, alpert1972interpretation}, noting that the same concept has also been referred to as \textit{structure correlations} \citep{meredith1964canonical}.
 
-\subsection{Background: GEPs in linear algebra}
+\subsection{Background: Generalized Eigenvalue Problems in linear algebra}
 A Generalized Eigenvalue Problem (GEP) is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}. They are usually characterized by the set of solutions to the equation:
 \begin{align}
     \label{eq:igep}
@@ -165,13 +169,13 @@ where \(\lambda\) is the Lagrange multiplier. Differentiating the Lagrangian yie
 
 \paragraph{Eigenvalue Problem}
 
-This transforms the problem into an eigenvalue equation for the covariance matrix \(\Sigma\), which can be efficiently solved using standard libraries such as scikit-learn\citep{pedregosa2011scikit}.
+This transforms the problem into an eigenvalue equation for the covariance matrix \(\Sigma\), which can be efficiently solved using standard libraries such as scikit-learn \citep{pedregosa2011scikit}.
 
 The first principal component therefore corresponds to the eigenvector associated with the largest eigenvalue \(\lambda\). Subsequent components are the remaining eigenvectors ordered by their corresponding eigenvalues.
 
 \subsubsection{Limitations}
 However, when applying \acrshort{pca} to datasets such as high-dimensional neuroimaging and behavioral
-data, \acrshort{pca}'s main limitation arises: it only accounts for variance within a single dataset, so it cannot take advantage of the redundancy in multiview data.
+data, \acrshort{pca}'s main limitation arises: it only accounts for variance within a single dataset, so it cannot take advantage of either the redundancy or the complementary information in multiview data.
 
 \subsection{Partial Least Squares}
 
@@ -273,7 +277,7 @@ The optimization problem for \acrshort{cca} can be expressed as:
     & u\spsT{2}\Sigma_{22}u\sps{2}=1 \notag
 \end{align}
 
-Although non-convex, numerous methods exist for solving the \acrshort{cca} problem, including eigendecomposition and generalized eigendecomposition solvers\citep{uurtio2017tutorial} and block coordinate descent via alternating least squares regressions \citep{golub1995canonical,sun2008least}.
+Although non-convex, numerous methods exist for solving the \acrshort{cca} problem, including eigendecomposition and generalized eigendecomposition solvers \citep{uurtio2017tutorial} and block coordinate descent via alternating least squares regressions \citep{golub1995canonical,sun2008least}.
 
 The first-order conditions derived in the same manner as the \acrshort{pls} case are:
 
@@ -529,7 +533,7 @@ In this thesis, we focus on the top-1 component in CCA to align with and facilit
 
 There have been a number of applications of \acrshort{cca} and related methods to multiview problems in neuroimaging.
 Using resting state fMRI data, modes of correlation have been found that relate to differences in sex and age relating to drug and alcohol abuse, depression and self harm \citep{mihalik2019brain}.
-A similar mode relating to `positive-negative' wellbeing has been found across studies \citep{smith2015positive}suggesting that mental wellbeing has a relationship (though not necessarily causally) with functional connectivity between networks in the brain.
+A similar mode relating to `positive-negative' wellbeing has been found across studies \citep{smith2015positive} suggesting that mental wellbeing has a relationship (though not necessarily causally) with functional connectivity between networks in the brain.
 Later in this dissertation we will replicate and build on the findings from this paper by using regularised and non-linear \acrshort{cca} methods.
 
 CCA has also been used as a preprocessing step in order to identify groups of subjects in the latent variable space.

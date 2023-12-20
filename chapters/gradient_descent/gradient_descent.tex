@@ -2,7 +2,7 @@
 
 
 \chapter{Efficient Algorithms for the CCA Family: Unconstrained Losses with Unbiased Gradients}\label{chap:gradient_descent}
-\epigraph{It seems easier to train a bi-directional LSTM with attention than to compute the SVD of a large matrix}{Chris Ré}\cite{gemp2021}
+%\epigraph{It seems easier to train a bi-directional LSTM with attention than to compute the SVD of a large matrix}{Chris Ré}\cite{gemp2021}
 \minitoc
 % chktex-file 44
 % chktex-file 3
@@ -76,6 +76,16 @@ Since CCA, ridge CCA, and PLS can all be solved in the principal component space
 Most obviously, this is the case when the number of samples \( n \) is smaller than either of the number of features \( p_1 \) or \( p_2 \), i.e. \( n < p_1 \) or \( n < p_2 \).
 In this case the maximum number of principal components is \( K=n \), and the complexity of PCA is \( O(n^3+ n^3) \) so that the overall complexity of \acrshort{pca}-CCA is thus \( O(2n^3+(2n^3)^3) \) = \( O(10n^3) \).
 For fat data where \( p_1 \) and \( p_2 \) are larger than \( n \), we can reasonably expect $10n^3<p_1^3+ p_2^3$ and thus \acrshort{pca}-CCA is still more efficient than solving the original GEP.
+
+We illustrate this in a simple simulation study in Figure \ref{fig:pca-cca-complexity}\footnote{This simulation was used to justify our pull request to \texttt{scikit-learn}\citep{pedregosa2011scikit} implementing a PCA-PLS and PCA-CCA backend}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/benchmarks/bench_ridgecca_pls.pdf}
+    \caption{Comparison of the complexity of PCA-CCA and CCA for varying numbers of samples and features.}
+    \label{fig:pca-cca-complexity}
+\end{figure}
+
 This approach has been employed to great effect in neuroimaging but suprisingly is not used even in the scikit-learn implementation of \acrshort{cca} \citep{pedregosa2011scikit}.
 Nonetheless, for the large sample sizes (desirable for machine learning frameworks as well as statistical power), the complexity of even \acrshort{pca}-CCA can render the problems nearly intractable.
 
