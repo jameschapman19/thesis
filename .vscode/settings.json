@@ -1,6 +1,6 @@
 {
     "files.exclude": {
-        "**.aux": true,
+        "**/.aux": true,
         "**/.git": true,
         "**/.idea": true,
         "**.xml": true,

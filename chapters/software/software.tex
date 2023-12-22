@@ -1,14 +1,14 @@
 \graphicspath{{chapters/software/}}
 
 
-\chapter{CCA-Zoo: A collection of Regularized, Deep Learning-based, Kernel, and Probabilistic methods in a scikit-learn style framework}\label{ch:ccazoo}
+\chapter{CCA-Zoo: A collection of Regularized, Deep Learning-based, Kernel, and Probabilistic methods in a scikit-learn style framework}\label{chap:ccazoo}
 
 % \epigraph{And that's really the essence of programming. By the time you've sorted out a complicated idea into little steps that even a stupid machine can deal with, you've learned something about it yourself.}{\textit{Douglas Adams}}
 \section*{Preface}
 
 This work was published in the Journal of Open Source Software \citep{chapman2021cca}.
 I have been the lead developer of the \texttt{CCA-Zoo} package since its inception in 2020.
-Almost all of the methods we have described in this thesis are implemented in \texttt{CCA-Zoo}.
+All of the methods we have described in this thesis are implemented in \texttt{CCA-Zoo} and are immediately available for use by the research community.
 
 \section{Introduction}
 
@@ -74,7 +74,75 @@ Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonst
     ridge = GridSearchCV(rCCA(latent_dimensions=2), param_grid=param_grid,
                         cv=cv, verbose=True, scoring=scorer).fit((train_view_1, train_view_2)).best_estimator_
     \end{minted}
+
+\subsection{Linear}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Class Name & Method Name \\
+        \hline
+        "MCCA" & Multiview CCA \\
+        "CCA" & Canonical Correlation Analysis \\
+        "rCCA" & Ridge CCA \\
+        "PLS" & Partial Least Squares \\
+        "MPLS" & Multiview Partial Least Squares \\
+        "GCCA" & Generalized CCA \\
+        "GRCCA" & Group Ridge Regularized CCA \\
+        "PartialCCA" & Partial CCA \\
+        "PRCCA" &  \\
+        "TCCA" & Tensor CCA \\
+        "PCACCA" & PCA CCA \\
+        "SCCA_IPLS" & Sparse CCA using Iterative Lasso \\
+        "ElasticCCA" & Elastic CCA using FRALS \\
+        "PLS_ALS" & PLS using Alternating Least Squares \\
+        "SPLS" & Sparse PLS \\
+        "SCCA_Parkhomenko" & Penalized CCA \\
+        "SCCA_Span" & Sparse CCA using Span Bound \\
+        "CCA_EY" & CCA by Eckart-Young \\
+        "PLS_EY" & PLS by Eckart-Young \\
+        "CCA_GHA" & CCA using Generalized Hebbian Algorithm \\
+        "CCA_SVD" & CCA using SVD \\
+        "PLSStochasticPower" & PLS using Stochastic Power Method \\
+        \hline
+    \end{tabular}
+    \caption{Class Names and Method Names}
+    \label{tab:class_method}
+\end{table}
+
+
 \subsection{Deep}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Class Name & Method Name \\
+        \hline
+        "DCCA" & Deep CCA \\
+        "DCCA_GHA" & Deep CCA by Generalized Hebbian Algorithm \\
+        "DCCA_SVD" & Deep CCA by SVD \\
+        "DMCCA" & Deep Multiview CCA \\
+        "DGCCA" & Geep Generalised CCA \\
+        "DCCAE" & Deep Canonically Correlated Autoencoders \\
+        "DCCA_NOI" & Deep CCA by nonlinear orthogonal iterations \\
+        "DCCA_SDL" & Deep CCA by stochastic decorrelation loss \\
+        "DVCCA" & Deep Variaitional CCA \\
+        "BarlowTwins" & Barlow Twins \\
+        "VICReg" & VICReg \\
+        "DTCCA" & Deep Tensor CCA \\
+        "DCCA_EY" & Deep CCA by Eckart-Young \\
+        "architectures" & \\
+        "objectives" & \\
+        \hline
+    \end{tabular}
+    \caption{Class Names and Method Names}
+    \label{tab:class_method_2}
+\end{table}
+
+\subsection{Model Selection Utilities}
+
 
 
 \subsection{Code Availability}

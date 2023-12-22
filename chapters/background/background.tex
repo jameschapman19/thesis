@@ -13,7 +13,7 @@ In this chapter, we gather the necessary background knowledge needed to motivate
 Machine learning enables models to automatically learn patterns and make decisions from data.
 Machine learning comprises three primary paradigms: supervised, self-supervised (or unsupervised), and reinforcement learning, each distinct in its approach to learning from data.
 This thesis focuses on \textit{multiview self-supervised machine learning}, which aims to develop robust representations by uncovering associations between various data types within datasets.
-These data types, known as \gls{views} may include distinct sources of information such as MRI images, genomic data, and clinical records in the context of patient data analysis.
+These data types, known as \gls{views} may include distinct sources of information such as neuroimaging modalities, genomics, and clinical records in the context of patient data analysis.
 
 \subsection{Multiview Machine Learning}
 
@@ -28,7 +28,7 @@ The algorithm learns to predict the target view based on the input view, leverag
 \subsubsection{Self-Supervised Multiview Learning}
 
 Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels \citep{balestriero2023cookbook}.
-The cornerstone of SSL is the concept of a `pretext task,' a learning task created from the data that trains the model to capture useful features or representations.
+The cornerstone of SSL is the concept of a `pretext task', a learning task created from the data that trains the model to capture useful features or representations.
 In the context of multiview machine learning, self-supervised learning often operates under the assumption that different \gls{views} are generated from a common, but unobserved, \textit{latent} source.
 A natural pretext task, in this case, is to predict or estimate this source from the given \gls{views}.
 Dimensionality reduction is a common example of this, where the model learns to estimate a low-dimensional representation of the data from the \gls{views}.
@@ -179,7 +179,7 @@ data, \acrshort{pca}'s main limitation arises: it only accounts for variance wit
 
 \subsection{Partial Least Squares}
 
-Partial Least Squares (PLS)\citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as \gls{views}. \acrshort{pls} can be seen as a generalization of \acrshort{pca}, where \acrshort{pca} becomes a special case when the two \gls{views} are identical.
+Partial Least Squares (PLS) \citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as \gls{views}. \acrshort{pls} can be seen as a generalization of \acrshort{pca}, where \acrshort{pca} becomes a special case when the two \gls{views} are identical.
 
 \subsubsection{Optimization and Solution}
 
@@ -526,7 +526,7 @@ This perspective further reinforces the subspace approach, emphasizing the ident
 
 \paragraph{Thesis Approach: Concentrating on the Top-1 Component}
 
-In this thesis, we focus on the top-1 component in CCA to align with and facilitate comparison with typical componentwise studies in brain-behavior research. This choice is driven by the complexity associated with the top-k problem and the variety of methods available to address it. Under the assumption of a significant eigengap\footnote{An 'eigengap' refers to the difference in magnitude between consecutive eigenvalues in an eigenvalue problem. A significant eigengap between the first and second eigenvalues suggests that the first eigenvalue (and its corresponding eigenvector) is distinctly more significant than the next, lending credence to its uniqueness and importance.}, the first component can be considered equivalent to the top-1 subspace. This equivalence allows for a clear and interpretable analysis, making the top-1 subspace a straightforward and reliable choice for studying multivariate data. It's important to note that while we focus on the top-1 component, the later sections of the thesis introduce a method for simultaneously solving the complete subspace, addressing broader subspace analyses.
+In this thesis, we focus on the top-1 component in CCA to align with and facilitate comparison with typical componentwise studies in brain-behavior research. This choice is driven by the complexity associated with the top-k problem and the variety of methods available to address it. Under the assumption of a significant eigengap\footnote{An `eigengap' refers to the difference in magnitude between consecutive eigenvalues in an eigenvalue problem. A significant eigengap between the first and second eigenvalues suggests that the first eigenvalue (and its corresponding eigenvector) is distinctly more significant than the next, lending credence to its uniqueness and importance.}, the first component can be considered equivalent to the top-1 subspace. This equivalence allows for a clear and interpretable analysis, making the top-1 subspace a straightforward and reliable choice for studying multivariate data. It's important to note that while we focus on the top-1 component, the later sections of the thesis introduce a method for simultaneously solving the complete subspace, addressing broader subspace analyses.
 
 
 \section{Multiview Learning in Neuroimaging}
@@ -535,8 +535,11 @@ There have been a number of applications of \acrshort{cca} and related methods t
 Using resting state fMRI data, modes of correlation have been found that relate to differences in sex and age relating to drug and alcohol abuse, depression and self harm \citep{mihalik2019brain}.
 A similar mode relating to `positive-negative' wellbeing has been found across studies \citep{smith2015positive} suggesting that mental wellbeing has a relationship (though not necessarily causally) with functional connectivity between networks in the brain.
 Later in this dissertation we will replicate and build on the findings from this paper by using regularised and non-linear \acrshort{cca} methods.
-
+Owing to the high dimensionality of neuroimaging data, regularisation has been a particular focus of multiview learning in neuroimaging. \citet{mihalik2022canonical} reviews the application of \acrshort{cca} to neuroimaging data and highlights the importance of regularisation in this context. \citet{bilenko2016pyrcca} 
 CCA has also been used as a preprocessing step in order to identify groups of subjects in the latent variable space.
+
+CCA has also been used to identify relationships between neuroimaging data and other modalities such as genetics \citep{chen2016imaging}, and behavioural data \citep{chen2015imaging}.
+
 In particular, \acrshort{cca} and clustering have been used to identify depression using fMRI data \citep{dinga2019evaluating,drysdale2017resting}.
 CCA has also been used in the manner we described to denoise two \gls{views} of a dataset such as separate measures of neuroimaging data \citep{zhuang2020technical} to remove artefacts.
 Deep \acrshort{cca} has recently been used to extract features for the diagnosis of schizophrenia\citep{qi2016deep}.
@@ -546,7 +549,7 @@ Deep \acrshort{cca} has recently been used to extract features for the diagnosis
 
 This thesis has been motivated by a number of open challenges in multiview learning and canonical correlation analysis.
 Chapter \ref{chap:als} and \ref{chap:loadings} will address the first challenge, which is the regularisation of \acrshort{cca} in high dimensional settings and the interpretation of the resulting components.
-Chapter \ref{chap:deep} and \ref{chap:software} will address the second challenge, the efficient application of \acrshort{cca} to big data.
+Chapters \ref{chap:gradient_descent}, \ref{chap:deep_learning}, and \ref{chap:software} will address the second challenge, the efficient application of \acrshort{cca} to big data.
 Finally \ref{chap:deep} will also address the third challenge, extending \acrshort{cca} to Deep Self-Supervised Learning.
 
 \subsection{Interpretability and Regularization}
