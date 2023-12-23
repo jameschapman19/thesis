@@ -2,9 +2,8 @@
 
 
 \chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}\label{chap:background}
-% \epigraph{Principal Component Analysis is a dimensionally invalid method that gives people a delusion that they are doing something useful with their data. If you change the units that one of the variables is measured in, it will change all the “principal components”! It’s for that reason that I made no mention of PCA in my book. I am not a slavish conformist, regurgitating whatever other people think should be taught. I think before I teach.}{Professor David MacKay}
+ \epigraph{Principal Component Analysis is a dimensionally invalid method that gives people a delusion that they are doing something useful with their data. If you change the units that one of the variables is measured in, it will change all the “principal components”! It’s for that reason that I made no mention of PCA in my book.}{Professor David MacKay}
 \minitoc
-
 
 \section{Introduction to Machine Learning and Multiview Learning}
 
@@ -112,19 +111,22 @@ matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations
 We will refer to the Pearson correlation between features and their respective latent variable $\Corr(X\sps{i}_j, Z_k)$ as the \textit{\gls{loadings}} of $X\sps{i}_j$ on $Z_k$ \citep{rosipal2005overview, alpert1972interpretation}, noting that the same concept has also been referred to as \textit{structure correlations} \citep{meredith1964canonical}.
 
 \subsection{Background: Generalized Eigenvalue Problems in linear algebra}
-A Generalized Eigenvalue Problem (GEP) is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}. They are usually characterized by the set of solutions to the equation:
+A Generalized Eigenvalue Problem (GEP) is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}.
+They are usually characterized by the set of solutions to the equation:
 \begin{align}
     \label{eq:igep}
     Au=\lambda Bu
 \end{align}
-with $\lambda \in \R, u \in \R^D$, called (generalized) eigenvalue and (generalized) eigenvector respectively. We shall only consider the case where $B$ is positive definite to avoid degeneracy.
-Then the GEP becomes equivalent to an eigen-decomposition of the symmetric matrix $B^\mhalf A B^\mhalf$. This is key to the proof of our new characterization.
+with $\lambda \in \R, u \in \R^D$, called (generalized) eigenvalue and (generalized) eigenvector respectively.
+We shall only consider the case where $B$ is positive definite to avoid degeneracy.
+Then the GEP becomes equivalent to an eigen-decomposition of the symmetric matrix $B^\mhalf A B^\mhalf$.
+This is key to the proof of our new characterization.
 In addition, one can find a basis of eigenvectors spanning $\R^D$.
 We define a \textit{top-$K$ subspace} to be one spanned by some set of eigenvectors {$u_1,\dots,u_K$} with the top-$K$ associated eigenvalues $\lambda_1 \geq \dots \geq \lambda_K$.
 We say a matrix $U \in \R^{D \times K}$ \textit{defines} a top-$K$ subspace if its columns span one.
 
 \paragraph{Uniqueness}
-In GEPs, the eigenvectors $u$ are not in general unique, but the canonical correlations $1 \geq \rho_1 \geq \rho_2 \geq \dots \geq 0$ are unique \citep{mills1988calculation}.
+In GEPs, the eigenvectors $u$ are not in general unique, but the generalized eigenvalues $1 \geq \lambda_1 \geq \lambda_2 \geq \dots \geq 0$ are unique \citep{mills1988calculation}.
 
 \subsection{Principal Components Analysis}
 
@@ -336,9 +338,11 @@ We can also represent the system of equations in equation~\ref{CCA:FOCs} as a ma
     \end{pmatrix}
 \end{align}
 
-Which is once again of the form $A v = \lambda B v$. \acrshort{cca}, like \acrshort{pls}, is therefore also defined by the solution to a single generalized eigenvalue problem.
+Which is once again of the form $A u = \lambda B u$. \acrshort{cca}, like \acrshort{pls}, is therefore also defined by the solution to a single generalized eigenvalue problem.
 
-Given the notions of uniqueness in GEPs, the weights $u$ are not in general unique but we can write the vector of generalized eigenvalues, here representing covariances, as
+\paragraph{Canonical Correlations}
+In the case of \acrshort{cca}, the generalized eigenvalues $\lambda$ are generally called \textit{canonical correlations} \citep{hotelling1936relations}.
+Given the notions of uniqueness in GEPs, the weights $u$ are not in general unique but we can write the vector of generalized eigenvalues or canonical correlations as:
 \begin{align}
     \label{eq:cca-vector-of-correlations-def}\small
     \CCA_K(X^{(1)},X^{(2)}) \defeq (\rho_k)_{k=1}^K

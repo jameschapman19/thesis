@@ -50,14 +50,24 @@ The \texttt{scikit-learn} API is familiar to many machine learning practitioners
 
 \subsection{Usage}
 
+Pipeline:
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/pipeline}
+    \caption[The \texttt{CCA-Zoo} pipeline]{The \texttt{CCA-Zoo} pipeline. The package is designed to be compatible with the \texttt{scikit-learn} API, allowing for easy integration with existing machine learning pipelines.}\label{fig:cca-zoo-pipeline}
+\end{figure}
+
 Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonstrated in the following example, which implements a regularized CCA model with a ridge penalty.
 
 \begin{minted}{python}
     # Import required libraries
     import numpy as np
     from cca_zoo.datasets import LatentVariableData
+    from cca_zoo.preprocessing import
     from cca_zoo.linear import rCCA
     from cca_zoo.model_selection import GridSearchCV
+    from cca_zoo.visualisation import Di
     
     # Generate synthetic multiview data
     data = LatentVariableData(view_features=[10,10],latent_dims: int = 2)
@@ -72,7 +82,13 @@ Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonst
 
     # Conduct grid search
     ridge = GridSearchCV(rCCA(latent_dimensions=2), param_grid=param_grid,
-                        cv=cv, verbose=True, scoring=scorer).fit((train_view_1, train_view_2)).best_estimator_
+                        cv=cv, verbose=True, scoring=scorer).fit((train_view_1, train_view_2))
+    # Get best model
+    best_model = ridge.best_estimator_
+
+    # Visualize
+
+
     \end{minted}
 
 \subsection{Linear}
@@ -83,28 +99,28 @@ Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonst
         \hline
         Class Name & Method Name \\
         \hline
-        "MCCA" & Multiview CCA \\
-        "CCA" & Canonical Correlation Analysis \\
-        "rCCA" & Ridge CCA \\
-        "PLS" & Partial Least Squares \\
-        "MPLS" & Multiview Partial Least Squares \\
-        "GCCA" & Generalized CCA \\
-        "GRCCA" & Group Ridge Regularized CCA \\
-        "PartialCCA" & Partial CCA \\
-        "PRCCA" &  \\
-        "TCCA" & Tensor CCA \\
-        "PCACCA" & PCA CCA \\
-        "SCCA_IPLS" & Sparse CCA using Iterative Lasso \\
-        "ElasticCCA" & Elastic CCA using FRALS \\
-        "PLS_ALS" & PLS using Alternating Least Squares \\
-        "SPLS" & Sparse PLS \\
-        "SCCA_Parkhomenko" & Penalized CCA \\
-        "SCCA_Span" & Sparse CCA using Span Bound \\
-        "CCA_EY" & CCA by Eckart-Young \\
-        "PLS_EY" & PLS by Eckart-Young \\
-        "CCA_GHA" & CCA using Generalized Hebbian Algorithm \\
-        "CCA_SVD" & CCA using SVD \\
-        "PLSStochasticPower" & PLS using Stochastic Power Method \\
+        MCCA & Multiview CCA \\
+        CCA & Canonical Correlation Analysis \\
+        rCCA & Ridge CCA \\
+        PLS & Partial Least Squares \\
+        MPLS & Multiview Partial Least Squares \\
+        GCCA & Generalized CCA \\
+        GRCCA & Group Ridge Regularized CCA \\
+        PartialCCA & Partial CCA \\
+        PRCCA &  \\
+        TCCA & Tensor CCA \\
+        PCACCA & PCA CCA \\
+        SCCA\_IPLS & Sparse CCA using Iterative Lasso \\
+        ElasticCCA & Elastic CCA using FRALS \\
+        PLS\_ALS & PLS using Alternating Least Squares \\
+        SPLS & Sparse PLS \\
+        SCCA\_Parkhomenko & Penalized CCA \\
+        SCCA\_Span & Sparse CCA using Span Bound \\
+        CCA\_EY & CCA by Eckart-Young \\
+        PLS\_EY & PLS by Eckart-Young \\
+        CCA\_GHA & CCA using Generalized Hebbian Algorithm \\
+        CCA\_SVD & CCA using SVD \\
+        PLSStochasticPower & PLS using Stochastic Power Method \\
         \hline
     \end{tabular}
     \caption{Class Names and Method Names}
@@ -120,30 +136,91 @@ Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonst
         \hline
         Class Name & Method Name \\
         \hline
-        "DCCA" & Deep CCA \\
-        "DCCA_GHA" & Deep CCA by Generalized Hebbian Algorithm \\
-        "DCCA_SVD" & Deep CCA by SVD \\
-        "DMCCA" & Deep Multiview CCA \\
-        "DGCCA" & Geep Generalised CCA \\
-        "DCCAE" & Deep Canonically Correlated Autoencoders \\
-        "DCCA_NOI" & Deep CCA by nonlinear orthogonal iterations \\
-        "DCCA_SDL" & Deep CCA by stochastic decorrelation loss \\
-        "DVCCA" & Deep Variaitional CCA \\
-        "BarlowTwins" & Barlow Twins \\
-        "VICReg" & VICReg \\
-        "DTCCA" & Deep Tensor CCA \\
-        "DCCA_EY" & Deep CCA by Eckart-Young \\
-        "architectures" & \\
-        "objectives" & \\
+        DCCA & Deep CCA \\
+        DCCA\_GHA & Deep CCA by Generalized Hebbian Algorithm \\
+        DCCA\_SVD & Deep CCA by SVD \\
+        DMCCA & Deep Multiview CCA \\
+        DGCCA & Geep Generalised CCA \\
+        DCCAE & Deep Canonically Correlated Autoencoders \\
+        DCCA\_NOI & Deep CCA by nonlinear orthogonal iterations \\
+        DCCA\_SDL & Deep CCA by stochastic decorrelation loss \\
+        DVCCA & Deep Variaitional CCA \\
+        BarlowTwins & Barlow Twins \\
+        VICReg & VICReg \\
+        DTCCA & Deep Tensor CCA \\
+        DCCA\_EY & Deep CCA by Eckart-Young \\
+        architectures & \\
         \hline
     \end{tabular}
-    \caption{Class Names and Method Names}
-    \label{tab:class_method_2}
+    \caption{Class Names and Method Names}\label{tab:class_method_2}
+\end{table}
+
+\subsection{Probabilistic}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Class Name & Method Name \\
+        \hline
+        PCCA & Probabilistic CCA \\
+        PPLS & Probabilistic PLS \\
+        \hline
+    \end{tabular}
+    \caption{Class Names and Method Names}\label{tab:class_method_3}
+\end{table}
+
+\subsection{Nonparametric}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Class Name & Method Name \\
+        \hline
+        KCCA & Kernel CCA \\
+        KPLS & Kernel PLS \\
+        \hline
+    \end{tabular}
+    \caption{Class Names and Method Names}\label{tab:class_method_4}
 \end{table}
 
 \subsection{Model Selection Utilities}
 
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Class Name & Method Name \\
+        \hline
+        GridSearchCV & Grid Search Cross Validation \\
+        RandomizedSearchCV & Randomized Search Cross Validation \\
+        cross\_validate & Cross Validation \\
+        learning\_curve & Learning Curve \\
+        permutation\_test\_score & Permutation Test Score \\
+        \hline
+    \end{tabular}
+    \caption{Class Names and Method Names}\label{tab:class_method_5}
+\end{table}
 
+\subsection{Datasets}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Class Name & Method Name \\
+        \hline
+        LatentVariableData & Latent Variable Data \\
+        JointData & Joint Data \\
+        load\_breast\_data & Breast Cancer Data \\
+        load\_split\_cifar10\_data & CIFAR10 Data \\
+        load\_split\_mnist\_data & MNIST Data \\
+        load\_mfeat\_data & Mfeat Data \\
+        \hline
+    \end{tabular}
+    \caption{Class Names and Method Names}\label{tab:class_method_6}
+\end{table}
 
 \subsection{Code Availability}
 
@@ -162,7 +239,8 @@ The package can be installed using \texttt{pip install cca-zoo} or \texttt{poetr
 
 In this section, we compare the performance of \texttt{CCA-Zoo} against \texttt{scikit-learn}, focusing on the efficiency of the basic CCA and PLS methods.
 We conducted experiments on synthetic datasets with varying dimensions to evaluate their average execution time.
-The datasets consisted of random matrices with a varying number of dimensions: \(50\), \(100\), \(200\), \(400\), and \(800\). Each matrix had \(100\) samples. We set the latent dimensions for both CCA and PLS to \(10\). For each dimension, the experiment was repeated \(10\) times to obtain reliable performance metrics.
+The datasets consisted of random matrices with a varying number of dimensions: \(50\), \(100\), \(200\), \(400\), and \(800\). Each matrix had \(100\) samples. We set the latent dimensions for both CCA and PLS to \(10\).
+    For each dimension, the experiment was repeated \(10\) times to obtain reliable performance metrics.
 
 \paragraph{Libraries Used:}
 \begin{itemize}

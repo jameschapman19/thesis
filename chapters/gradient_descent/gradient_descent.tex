@@ -14,29 +14,21 @@ In this thesis I include much of the work from these papers, but I exclude many 
 
 \section{Introduction}
 
-There are significant computational challenges when applying these CCA methods to large scale data.
-
-
-
 Classical algorithms for linear CCA methods require computing full covariance matrices and so scale quadratically with dimension, becoming intractable for many large-scale datasets of practical interest.
 There is therefore great interest in approximating solutions for CCA in stochastic or data-streaming settings \citep{arora2012stochastic}.
-
-
-
 
 \section{Background: Efficient CCA}\label{sec:background-unified}
 
 \subsection{Challenges in Solving Generalized Eigenvalue Problems}
 
-The GEP is often represented as \( Ax = \lambda Bx \), where \( A \) and \( B \) are matrices. To generalize the dimensions of these matrices, let's denote them as \( m \times m \). This dimension \( m \) can vary based on the specific method in use. For instance, in Principal Component Analysis (PCA), represented as \acrshort{pca}, \( m \) would be equal to \( p \) since \( A \) and \( B \) are \( p \times p \) matrices. In methods like Partial Least Squares (PLS) and Canonical Correlation Analysis (CCA), represented as \acrshort{pls} and \acrshort{cca} respectively, \( m \) would be \( p_1+p_2 \), as \( A \) and \( B \) in these cases are \( (p_1+p_2) \times (p_1+p_2) \).
-
+The GEP is often represented as \( Au = \lambda Bu \), where \( A \) and \( B \) are matrices. To generalize the dimensions of these matrices, let's denote them as \( m \times m \). This dimension \( m \) can vary based on the specific method in use. For instance, in Principal Component Analysis (PCA), represented as \acrshort{pca}, \( m \) would be equal to \( p \) since \( A \) and \( B \) are \( p \times p \) matrices. In methods like Partial Least Squares (PLS) and Canonical Correlation Analysis (CCA), represented as \acrshort{pls} and \acrshort{cca} respectively, \( m \) would be \( p_1+p_2 \), as \( A \) and \( B \) in these cases are \( (p_1+p_2) \times (p_1+p_2) \).
 
 % Table summarizing the definitions of A and B for various methods
 \begin{table}[h]
     \centering
     \begin{tabular}{|c|c|c|c|c|}
         \hline
-        Method         & \( A \)           & \( B \)   & \( x \)        & Dimensions       \\
+        Method         & \( A \)           & \( B \)   & \( u \)        & Dimensions       \\
         \hline
         \acrshort{pca} & \( \Sigma_{11} \) & \( I \)   & \( u\sps{1} \) & \( p \times p \) \\
         \hline
@@ -57,7 +49,7 @@ The GEP is often represented as \( Ax = \lambda Bx \), where \( A \) and \( B \)
         \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
         \hline
     \end{tabular}
-    \caption{Definitions and dimensions of \( A \)and \( B \)for different subspace learning methods.}
+    \caption{Definitions and dimensions of \( A \)and \( B \) for different subspace learning methods.}
     \label{tab:subspace}
 \end{table}
 
@@ -91,36 +83,73 @@ Nonetheless, for the large sample sizes (desirable for machine learning framewor
 
 \subsection{Kernel CCA}
 
-Kernel \acrshort{cca} (\acrshort{kcca}) also offers computational efficiency for high-dimensional data (\(p_i>n\)) as its complexity scales with the number of samples \(n\), not the number of features \(p_i\).
+Kernel \acrshort{cca} (\acrshort{kcca}) also offers computational efficiency for high-dimensional data (\(p_i>n\)) as its complexity scales with the number of samples \(n\), not the number of features \(p_i\)\citep{akaho2006kernel}.
 It casts the CCA optimisation as a dual problem:
 
 \begin{align}
-    & \alpha_{\text{opt}}=\underset{\alpha_{\text{opt}}}{\mathrm{argmax}}\{ \alpha\sps{1}K\spsT{1}K\sps{2}\alpha\sps{2}  \} \\
+    & \alpha_{\text{opt}}=\underset{\alpha}{\mathrm{argmax}}\{ \alpha\sps{1}K\spsT{1}K\sps{2}\alpha\sps{2}  \} \\
     & \text{subject to:} \notag                                                                                            \\
     & \alpha\sps{1}K\spsT{1}K\sps{1}\alpha\sps{1}=1 \notag                                                                  \\
     & \alpha\sps{2}K\spsT{2}K\sps{2}\alpha\sps{2}=1 \notag
 \end{align}
 
-Where \(\alpha\sps{1}=\)
-
-The kernel function in KCCA can be computed iteratively on pairwise comparisons of samples, allowing for memory efficiency by not requiring the entire dataset to be loaded into RAM.
-This iterative approach uses slow hard drive memory access instead of RAM, making KCCA RAM memory-efficient but slower.
+Where \(\alpha\sps{i}=\) are dual variables, \(K\sps{i}\) are kernel matrices, and \(K\spsT{i}\) are their transposes.
+The kernel matrices are defined as \(K\sps{i}=\phi(X\sps{i})\phi(X\sps{i})^T\), where \(\phi(\cdot)\) is a nonlinear mapping function.
+The kernel trick is used to avoid the explicit computation of the nonlinear mapping function \(\phi(\cdot)\).
+The complexity of \acrshort{kcca} is \(O(n^3)\), which can be much lower than the complexity of solving the original GEP directly when \(p_i>n\).
 However, a significant drawback of KCCA is the need for access to all training data at test time, which raises concerns about efficiency and scalability.
+Furthermore, when the number of samples is large, the kernel matrix can itself be too large to fit in memory.
 
 \subsection{Stochastic PLS and CCA}
 Recently, a number of algorithms have been proposed to approximate GEPs including PCA and PLS \citep{arora2012stochastic}, and CCA specifically \citep{bhatia2018gen}, in the `stochastic' or `data-streaming' setting; these can have big computational savings.
 Typically, the computational complexity of classical GEP algorithms is $\mathcal{O}\left((n + k)p^2\right)$; by exploiting parallelism (both between eigenvectors and between samples in a mini-batch), we can reduce this down to $\mathcal{O}\left(d k \right)$ \citep{arora2016stochastic}.
-Stochastic algorithms also introduce a form of regularisation which can be very helpful in these high-dimensional settings.
+Stochastic algorithms also introduce a form of implicit regularisation \citep{smith2021origin} which can be very helpful in these high-dimensional settings.
 To the best of our knowledge, the state-of-the-art in Stochastic PLS and CCA are the subspace Generalized Hebbian Algorithm (SGHA) \citep{chen2019constrained} and $\gamma$-EigenGame \citep{gemp20,gemp2021}.
-Specifically, SGHA utilizes a Lagrange multiplier heuristic along with saddle-point analysis, albeit with limited convergence guarantees.
-EigenGame focuses on top-k subspace learning but introduces an adaptive whitening matrix in the stochastic setting with an additional hyperparameter.
+\paragraph{SGHA} uses a Lagrange multiplier heuristic along with saddle-point analysis, albeit with limited convergence guarantees.
+Specifically, they form the constrained optimization problem for the top-k subspace as
+
+\begin{align}
+    \min_{U} -\Tr U^T A U \quad \text{subject to} \quad U^T B U = I
+\end{align}
+
+Transforming this into an unconstrained problem using Lagrange multipliers:
+
+\begin{align}
+    \min_{U} -\Tr\left(U^T A U \right) + \lambda \left(U^T B U - I\right)
+\end{align}
+
+Finally, they combine the primal and dual updates into a single update rule:
+
+\begin{align}
+    U_{t+1} = \left(1 - \eta_t\right) U_t + \eta_t \left(A U_t + \lambda_t B U_t\right)
+\end{align}
+
+This algorithm is very simple to implement but because it is based on a heuristic primal-dual update rule rather than gradient descent, it is hard to use with more sophisticated optimizers such as Adam \citep{kingma2014adam}.
+
+\paragraph{$\gamma$-EigenGame} is a stochastic algorithm for CCA which is based on the $\gamma$-Eigengame for PCA \citep{gemp20}.
+The EigenGame series of algorithms are based on the idea of eigenvectors competing to explain the data.
+They each maximize a utility function with reward and penalty terms:
+
+\begin{align}
+    \max_{u_i} \overbrace{\frac{u_i^TAu_i}{u_i^TBu_i}}^{rewards} - \overbrace{\sum_{j < i} \frac{(u_j^TAu_j)(u_i^TBu_j)^2}{(u_j^TBu_j)^2(u_i^TBu_i)}}^{penalties}
+\end{align}
+
+Where player $i$ only needs to maintain orthogonalization with respect to players $j < i$.
+By a few heuristic arguments, this can be moulded to an update rule in the full batch case:
+
+\begin{align}
+    u_i \leftarrow (u_i^T B u_i)A u_i - (u_i^T A u_i)B u_i - \sum_{j < i} (u_i^T A y_j)[(u_i^T B u_i)B y_j - (u_i^T B y_j)B u_i]
+\end{align}
+
+Where $y_i = \frac{u_i}{\sqrt{u_i^TBu_i}}$. Finally, the stochastic version of this algorithm is obtained by replacing $B y_j$ with a rolling average of $B u_j$, necessitating an additional hyperparameter $\gamma$ which must be tuned. As with SGHA, this algorithm is also hard to combine with more sophisticated optimizers.
 
 \section{Methods: Novel Objectives and Algorithms}\label{sec:contributions}
 
-In this section, we introduce a novel class of objectives for GEPs, which we call the Eckhart--Young (EY) objectives. They can be applied to any GEP, including CCA, PLS, and PCA but we will focus on CCA.
+In this section, we introduce a novel class of objectives for GEPs, which we call the Eckhart--Young (EY) objectives.
+They can be applied to any GEP, including CCA, PLS, and PCA but we will focus on CCA.
 
 \subsection{Unconstrained objective for GEPs}\label{sec:gep-ey-formulation}
-First, we present proposition \ref{prop:EY-charac}, a formulation of the top-$K$ subspace of GEP problems, which follows by applying the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. However, making this rigorous requires some technical care which we defer to the proof in supplement \ref{supp:proofs}.
+First, we present proposition \ref{prop:EY-charac}, a formulation of the top-$K$ subspace of GEP problems, which follows by applying the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. However, making this rigorous requires some technical care which we defer to the proof in supplement \ref{app:proofs}.
 
 \begin{restatable}[Eckhart--Young inspired objective for GEPs]{proposition}{EYcharac}
     \label{prop:EY-charac}
@@ -175,7 +204,7 @@ This immediately leads to following unconstrained objective for the CCA-family o
     \end{align}
 \end{definition}
 
-\textbf{Unbiased estimates:}
+\paragraph{Unbiased estimates}
 since empirical covariance matrices are unbiased, we can construct unbiased estimates to $C, V$ from a batch of transformed variables $\Z$.
 \begin{align}\label{eq:def-C-V-matrices-empirical}
 \hat{C}(\theta)[\Z] = \sum_{i \neq j} \empCov(\Z\sps{i}, \Z\sps{j}), \quad
@@ -189,7 +218,7 @@ Then if $\Z, \Z'$ are two independent batches of transformed variables, the batc
 gives an unbiased estimate of $\LEY(\theta)$.
 This loss is a differentiable function of $\Z, \Z'$ and so also of $\theta$.
 
-\textbf{Simple algorithms:}
+\paragraph{Simple algorithms:}
 We first define a very general algorithm using these estimates in Algorithm \ref{alg:general}.
 In the next section we apply this algorithm to multi-view stochastic CCA and PLS.
 
@@ -210,7 +239,7 @@ In the next section we apply this algorithm to multi-view stochastic CCA and PLS
 
 \subsection{Applications to (multi-view) stochastic CCA and PLS}
 \begin{lemma}[Objective recovers GEP formulation of linear (multi-view) CCA]
-    When the $f\sps{i}$ are linear, as in \ref{eq:cca-linear-function-def}, the population loss from \cref{eq:EY-loss-def-C-V} recovers MCCA.
+    When $f\sps{i}$ are linear, as in \ref{eq:cca-linear-function-def}, the population loss from \cref{eq:EY-loss-def-C-V} recovers MCCA.
 \end{lemma}
 \begin{proof}
     By construction, for linear MCCA we have $C = U^T A U,\, V_\alpha=U^T B_\alpha U$, where $(A, B_\alpha)$ define the GEP for MCCA introduced in \cref{eq:gep-most-general-formulation}.
@@ -223,11 +252,18 @@ Indeed, we can obtain gradients for the transformed variables in $\mathcal{O}(M 
 \section{Experiments}
 
 \subsection{Stochastic CCA}
-First, we compare our proposed method, CCA-EY, to the baselines of $\gamma$-EigenGame and SGHA.
-Our experimental setup is almost identical to that of \cite{meng2021online, gemp2022generalized}; unlike \cite{gemp2022generalized} we do not simplify the problem by first performing PCA on the data before applying the CCA methods, which explains the decrease in performance of $\gamma$-EigenGame compared to their original work.
-All models are trained for a single epoch with varying mini-batch sizes ranging from 5 to 100. We use Proportion of Correlation Captured (PCC) as our evaluation metric, defined as \( \text{PCC} = (\sum_{i=k}^K \rho_k)/ ({\sum_{k=1}^K \rho_k^*}) \) where $\rho_k$ are the full batch correlations of the learnt representations, and $\rho_k^*$ are the canonical correlations computed numerically from the full batch covariance matrices.
+In this study, we aim to demonstrate that our proposed CCA-EY method not only matches but potentially surpasses the performance of established baselines $\gamma$-EigenGame and SGHA in terms of convergence speed and robustness to hyperparameter settings. Our experimental setup largely follows the framework established by \citet{meng2021online, gemp2022generalized}. A key distinction in our approach, however, is the decision to not perform PCA on the data prior to applying CCA methods. This choice retains the full complexity of the datasets, providing a more rigorous evaluation of each algorithm's ability to handle high-dimensional data efficiently and accurately.
 
-\textbf{Parameters:} For each method, we searched over a hyperparameter grid using \citet{wandb}.
+One of the central goals of this comparison is to illustrate that CCA-EY can achieve faster convergence with less hyperparameter tuning, an essential attribute for practical applications. To facilitate a fair and direct comparison with the baseline methods, we employ Stochastic Gradient Descent (SGD) as the optimization technique for all algorithms. It is worth noting that while SGD provides a baseline for performance assessment, the potential of our CCA-EY method could be further unleashed by utilizing more advanced optimization techniques such as momentum-based optimizers like Adam or Nesterov acceleration. These advanced methods are known for their ability to accelerate convergence and navigate the optimization landscape more effectively, suggesting that our method might yield even better performance under such enhanced optimization schemes.
+
+We train models to optimize CCA on the MediaMill and Split-CIFAR-10 datasets for a single epoch, using mini-batch sizes ranging from 5 to 100. These sizes were selected to test the scalability and efficiency of our method under varied computational loads. The Proportion of Correlation Captured (PCC) metric, defined as \( \text{PCC} = (\sum_{i=k}^K \rho_k)/ ({\sum_{k=1}^K \rho_k^*}) \), serves as our evaluation criterion. Here, $\rho_k$ represents the correlations of the estimated representations $Z\sps{i}=X^{(i)}\hat{U}^{(i)}$ with one another on the test set, while $\rho_k^*$ denotes the canonical correlations computed from the full batch covariance matrices. Despite $\rho_k^*$ not being the `true` correlations, their computation from a large sample size renders them a reliable benchmark. PCC is an efficient metric for tracking algorithmic performance over time, minimizing computational overhead\citep{meng2021online, gemp2022generalized, ma2015finding, ge2016efficient}.
+
+\paragraph{Data}
+The MediaMill dataset \citep{gemert2008visual} comprises paired features of videos and corresponding commentary, with the objective of learning joint representations that capture their correlation. This representation could potentially enable prediction of commentary from video, or vice versa. The dataset includes 25,800 test images, with 120 and 101 features respectively.
+
+The Split-CIFAR dataset \citep{meng2021online} consists of 50,000 training and 10,000 test RGB images, each split in half with 32x16x3 features. The aim is to learn joint representations of the two halves that reveal correlations, expected to be high within the same class and low across different classes. These datasets are chosen for their diverse nature and complexity, providing a comprehensive test bed for our method.
+
+\paragraph{Parameters} For each method, we searched over the hyperparameter grid in table \ref{tab:hyperparameters} using \citet{wandb}.
 
 \begin{table}[h!]
     \centering
@@ -241,89 +277,75 @@ All models are trained for a single epoch with varying mini-batch sizes ranging 
         \hline $\gamma$\footnotemark & 0.01,0.1,1,10       \\
         \hline
     \end{tabular}
-    \footnotetext{gamma is only used for $\gamma$-EigenGame}
+    \footnotetext{gamma is only used for $\gamma$-EigenGame}\label{tab:hyperparameters}
 \end{table}
 
-\textbf{Observations:}
-Figure \ref{fig:scca_mediamill} compares the algorithms on the MediaMill dataset. \cref{fig:corr_mediamill} shows that CCA-EY consistently outperforms both $\gamma$-EigenGame and SGHA in terms of PCC across all evaluated mini-batch sizes.
-\cref{fig:lr_mediamill} examines the learning curves for batch sizes 5 and 100 in more detail; CCA-EY appears to learn more slowly than SGHA at the start of the epoch, but clearly outperforms SGHA as the number of samples seen increases. $\gamma$-EigenGame significantly underperforms SGHA and CCA-EY, particularly for small batch sizes.
+\paragraph{Observations}
+For the MediaMill dataset, Figure \ref{fig:corr_mediamill} compares the algorithms' performance across various mini-batch sizes, showing CCA-EY's consistent outperformance. Figure \ref{fig:learningcurve_mediamill} further examines the learning curves for batch sizes 5 and 100, illustrating CCA-EY's superior performance over time.
 
 \begin{figure}
     \centering
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/CCA/mediamill_models_different_batch_sizes}
-        \caption{}
-        \label{fig:corr_mediamill}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/CCA/mediamill_allbatchsizes_pcc}
-        \caption{}
-        \label{fig:lr_mediamill}
-    \end{subfigure}
-    \caption{Stochastic CCA on MediaMill using the Proportion of Correlation Captured (PCC) metric: (a) Across varying mini-batch sizes, trained for a single epoch, and (b) Training progress over a single epoch for mini-batch sizes 5, 100.
-    Shaded regions signify \(\pm\) one standard deviation around the mean of 5 runs.}\label{fig:scca_mediamill}
+    \includegraphics[width=0.6\textwidth]{figures/CCA/mediamill_models_different_batch_sizes}
+    \caption{Stochastic CCA on MediaMill using PCC: Performance across varying mini-batch sizes. Shaded regions signify \(\pm\) one standard deviation around the mean of 5 runs.}
+    \label{fig:corr_mediamill}
 \end{figure}
 
 \begin{figure}
     \centering
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/CCA/cifar_models_different_batch_sizes}
-        \caption{}
-        \label{fig:corr_cifar}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/CCA/cifar_allbatchsizes_pcc}
-        \caption{}
-        \label{fig:lr_cifar}
-    \end{subfigure}
-    \caption{Stochastic CCA on CIFAR using the Proportion of Correlation Captured (PCC) metric: (a) Across varying mini-batch sizes, trained for a single epoch, and (b) Training progress over a single epoch for mini-batch sizes 5, 100.
-    Shaded regions signify \(\pm\) one standard deviation around the mean of 5 runs.}\label{fig:scca_cifar}
+    \includegraphics[width=0.6\textwidth]{figures/CCA/mediamill_allbatchsizes_pcc}
+    \caption{Stochastic CCA on MediaMill: Training progress over a single epoch for mini-batch sizes 5, 100.}
+    \label{fig:learningcurve_mediamill}
+\end{figure}
+
+For the CIFAR dataset, Figure \ref{fig:corr_cifar} shows the performance comparison across batch sizes, while Figure \ref{fig:learningcurve_cifar} details the learning curves, highlighting the underperformance of $\gamma$-EigenGame, especially for smaller batch sizes.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/CCA/cifar_models_different_batch_sizes}
+    \caption{Stochastic CCA on CIFAR using PCC: Performance across varying mini-batch sizes. Shaded regions signify \(\pm\) one standard deviation around the mean of 5 runs.}
+    \label{fig:corr_cifar}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/CCA/cifar_allbatchsizes_pcc}
+    \caption{Stochastic CCA on CIFAR: Training progress over a single epoch for mini-batch sizes 5, 100.}
+    \label{fig:learningcurve_cifar}
 \end{figure}
 
 \subsection{Stochastic PLS UK Biobank}
-Next, we demonstrate the scalability of our methods to extremely high-dimensional data by applying stochastic PLS to imaging genetics data from the UK Biobank \citep{sudlow2015uk}.
-PLS is typically used for imaging-genetics studies owing to the extremely high dimensionality of genetics data requiring lots of regularisation.
-PLS can reveal novel phenotypes of interest and uncover genetic mechanisms of disease and brain morphometry.
-Previous imaging genetics analyses using full-batch PLS were limited to much smaller datasets \citep{Lorenzi2018,Taquet2021,Lefloch2012}.
-The only other analysis on the UK Biobank at comparable scale partitions the data into clusters and bootstrapping local PLS solutions on these clusters \citep{lorenzi2017secure, altmann2023tackling}.
-We ran PLS-EY with mini-batch size 500 on brain imaging (82 regional volumes) and genetics (582,565 variants) data for 33,333 subjects. See supplement (Section \ref{sec:ukbb_preprocessing}) for data pre-processing details.
-To our knowledge, this is the largest-scale PLS analysis of biomedical data to-date.
+In this section, we aim to demonstrate the exceptional scalability and efficiency of our Stochastic PLS method, PLS-EY, in handling extremely high-dimensional imaging genetics data. We employ imaging genetics data from the UK Biobank \citep{sudlow2015uk} as our test bed, given its comprehensive and complex nature. The UK Biobank dataset presents a unique challenge due to the sheer scale of its genetic data, requiring sophisticated regularization strategies.
 
-\textbf{Further details:} The UK BioBank data consisted of real-valued continuous brain volumes and ordinal, integer genetic variants.
+PLS is particularly suited for imaging-genetics studies due to its capability to handle high dimensionality and reveal novel phenotypes as well as genetic mechanisms underlying diseases and brain morphometry. Historically, imaging genetics analyses have been constrained to smaller datasets due to computational limitations \citep{Lorenzi2018,Taquet2021,Lefloch2012}. Moreover, the few studies that have attempted to analyze data of comparable scale to the UK Biobank have typically resorted to partitioning the data into smaller clusters, thereby limiting the scope of their analysis \citep{lorenzi2017secure, altmann2023tackling}.
+
+Our experiment with PLS-EY, conducted on a subset of the UK Biobank dataset consisting of brain imaging data (82 regional volumes) and genetic data (582,565 variants) for 33,333 subjects, is designed to overcome these limitations. A particular computational challenge we address is maintaining orthogonality between the weight vectors \( u_k \) in the PLS model, which is crucial for the method's effectiveness. We run PLS-EY with a mini-batch size of 500 and train the GEP-EY PLS analysis for 100 epochs using a learning rate of 0.0001. This approach allows us to not only manage the high-dimensional nature of the data but also to preserve the integrity and interpretability of the analysis. To our knowledge, this represents the largest-scale PLS analysis of biomedical data to-date, showcasing the potential of our method to facilitate discoveries in extremely large datasets.
+
+\paragraph{Data} The UK BioBank data consisted of real-valued continuous brain volumes and ordinal, integer genetic variants.
 We used pre-processed (using FreeSurfer \citep{Fischl2012}) grey-matter volumes for 66 cortical (Desikan-Killiany atlas) and 16 subcortical brain regions and 582,565 autosomal genetic variants.
 The affects of age, age squared, intracranial volume, sex, and the first 20 genetic principal components for population structure were removed from the brain features using linear regression to account for any confounding effects.
 Each brain ROI was normalized by removing the mean and dividing the standard deviation.
 We processed the genetics data using PLINK \citep{Purcell2007} keeping genetic variants with a minor allele frequency of at least 1\%  and a maximum missingness rate of 2\%.
 We used mean imputation to fill in missing values and centered each variant.
+To generate measures of genetic disease risk, we calculated polygenic risk scores using PRSice \citep{PRSice2014}.
+We calculated scores, with a p-value threshold of 0.05, using GWAS summary statistics for the following diseases; Alzheimer's \citep{Lambert2013}, Schizophrenia \citep{Trubetskoy2022}, Bipolar \citep{Mullins2021}, ADHD \citep{Demontis2023}, ALS \citep{Van_Rheenen2021}, Parkinson's \citep{Nalls2019}, and Epilepsy \citep{International_League_Against_Epilepsy_Consortium_on_Complex_Epilepsies2018}, using the referenced GWAS studies.
 
-To generate measures of genetic disease risk, we calculated polygenic risk scores using PRSice \citep{PRSice2014}. We calculated scores, with a p-value threshold of 0.05, using GWAS summary statistics for the following diseases; Alzheimer's \citep{Lambert2013}, Schizophrenia \citep{Trubetskoy2022}, Bipolar \citep{Mullins2021}, ADHD \citep{Demontis2023}, ALS \citep{Van_Rheenen2021}, Parkinson's \citep{Nalls2019}, and Epilepsy \citep{International_League_Against_Epilepsy_Consortium_on_Complex_Epilepsies2018}, using the referenced GWAS studies.
-
-The GEP-EY PLS analysis was trained for 100 epochs using a learning rate of 0.0001 with a minibatch size of 500.
-
-\textbf{Observations:} We see strong validation correlation between all 10 corresponding pairs of vectors in the PLS subspace and weak cross correlation, indicating that our model learnt a coherent and orthogonal subspace of covariation (Figure \ref{fig:UKBB_corr}), a remarkable feat for such high-dimensional data. We found that the PLS brain subspace was associated with genetic risk measures for several disorders (Figure \ref{fig:genetic_risk}), suggesting that the PLS subspace encodes relevant information for genetic disease risk, a significant finding for biomedical research.
+\paragraph{Observations}
+We observed strong validation correlations between all 10 corresponding pairs of representations \( Z^{(1)}_k \) and \( Z^{(2)}_k \) in the PLS model, with weak cross-correlations between \( Z^{(1)}_k \) and \( Z^{(2)}_i \) for \( i \neq k \). This indicates that our model learned a coherent and orthogonal subspace, as shown in Figure \ref{fig:UKBB_corr}. Furthermore, the PLS representations \( Z \) were significantly associated with genetic risk measures for several disorders, suggesting that the learned PLS subspace encodes relevant information for genetic disease risk, a critical insight for biomedical research (Figure \ref{fig:genetic_risk}). These results demonstrate the scalability of our method to extremely high-dimensional data, and its ability to learn interpretable representations.
 
 \begin{figure}
     \centering
-    \begin{subfigure}[b]{0.27\textwidth}
-        \centering
-        \includegraphics[width=\textwidth,trim={0.8cm 0cm 0.3cm 0cm}]{figures/UKBB/cross_corr.png}
-        \caption{}
-        \label{fig:UKBB_corr}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.72\textwidth}
-        \centering
-        \includegraphics[width=\textwidth,trim={0.5cm 0cm 0.7cm 0cm}]{figures/UKBB/prs_correlations.png}
-        \caption{}
-        \label{fig:genetic_risk}
-    \end{subfigure}
-    \caption{(a) Correlations between PLS components for UK Biobank. (b) Correlations between PLS brain components and genetic risk scores. AD=Alzheimer's disease, SCZ=Schizophrenia, BP=Bipolar, ADHD=Attention deficit hyperactivity disorder, ALS=Amyotrophic lateral sclerosis, PD=Parkinson's disease, EPI=Epilepsy. $\text{ns}: 0.05< p <= 1, \ast: 0.01< p <=0.05, \ast\ast: 0.001< p <= 0.01, \ast\ast\ast: 0.0001< p <= 0.001$.}
+    \includegraphics[width=0.6\textwidth,trim={0.8cm 0cm 0.3cm 0cm}]{figures/UKBB/cross_corr.png}
+    \caption{Pearson correlations among PLS latent variables \( Z_k \) derived from UK Biobank data.}
+    \label{fig:UKBB_corr}
 \end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth,trim={0.5cm 0cm 0.7cm 0cm}]{figures/UKBB/prs_correlations.png}
+    \caption{Correlation between PLS brain representations \( Z \) and genetic risk scores for various disorders. AD=Alzheimer's disease, SCZ=Schizophrenia, BP=Bipolar, ADHD=Attention deficit hyperactivity disorder, ALS=Amyotrophic lateral sclerosis, PD=Parkinson's disease, EPI=Epilepsy. $\text{ns}: 0.05< p \leq 1, \ast: 0.01< p \leq 0.05, \ast\ast: 0.001< p \leq 0.01, \ast\ast\ast: 0.0001< p \leq 0.001$.}
+    \label{fig:genetic_risk}
+\end{figure}
+
 
 \section{Conclusion}
 

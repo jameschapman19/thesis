@@ -1,5 +1,162 @@
 \graphicspath{{chapters/gradient_descent/}}
-\section{Tractable Optimization - no spurious local minima}\label{supp:tractable-optimization}
+\section{Eckhart-Young characterization of GEP subspace}\label{app:proofs}
+% can later restructure, but this is most appropriate title for current version
+\subsection{Formal definitions}
+There are various different notations and conventions for GEPs and SVDs.
+We largely follow the standard texts on Matrix Analysis \citep{stewart_matrix_1990,bhatiamatrix1997} but seek a more careful handling of the equality cases of certain results.
+To help, we use the following non-standard definitions, largely inspired by \citet{carlssonvon2021}.
+
+\begin{definition}[Top-$K$ subspace]
+    Let the GEP $(A,B)$ on $\R^d$ have eigenvalues $\lambda_1 \geq \dots \geq \lambda_d$. Then \textbf{a} top-$K$ subspace is that spanned by some $w_1,\dots,w_K$, where $w_k$ is a $\lambda_i$-eigenvector of $(A,B)$ for $k=1,\dots,K$.
+\end{definition}
+
+\begin{definition}[$B$-orthonormality]
+    Let $B \in \R^{d \times d}$ be strictly positive definite. Then we say a collection $w_1,\dots,w_K \in \R^{d}$ of vectors is $B$-orthonormal if $w_k^T B w_l = \delta_{kl}$ for each $k,l \in \{1,\dots,K\}$.
+\end{definition}
+
+\begin{definition}[Top-$K$ matrix]
+    We say $W \in \R^{d \times K}$ is a top-$K$ matrix for a GEP $(A,B)$ if the $k^{\text{th}}$ column $w_i$ of $W$ is a $\lambda_k$-eigenvector for each $k$ and the columns are $B$-orthonormal.
+\end{definition}
+
+
+\subsection{Standard Eckhart--Young inequality}
+
+\begin{theorem}[Eckhart--Young]\label{thm:eckhart-young}
+Let $M \in \R^{p\times q}$. Then $\hat{M}$ minimises $\|M-\tilde{M}\|_F$ over matrices $\tilde{M}$ of rank at most $K$ if and only if $\hat{M} = A_K R_K B_K^\top$ where $(A_K,R_K,B_K)$ is some top-$K$ SVD of the target $M$.
+\end{theorem}
+\begin{proof}
+    Let $M,\tilde{M}$ have singular values $\sigma_k,\tilde{\sigma}_k$ respectively.
+    Since $\tilde{M}$ has rank at most $K$ we must have $\tilde \sigma_k = 0 \text{ for } k> K$.
+
+    Then by von Neumann's trace inequality \citep{carlssonvon2021},
+    \begin{equation*}
+        \langle M, \tilde{M} \rangle_F \leq \sum_{k=1}^K \sigma_k \tilde{\sigma}_k
+    \end{equation*}
+    with equality if and only if $M,\tilde{M}$ `share singular vectors'; the notion of sharing singular vectors is defined as in \citet{carlssonvon2021} and in this case means that $\tilde{M} = A_K \tilde{R}_K B_K$ where $(A_K,R_K,B_K)$ is some top-$K$ SVD of $M$ and $\tilde{R}_K$ is a diagonal matrix with decreasing diagonal elements $\tilde{\sigma}_1\geq \dots \geq \tilde{\sigma}_K$.
+
+    Expanding out the objective and applying this inequality gives
+    \begin{align*}
+        \norm{\tilde{M} - M}_F^2
+        &\geq \sum_{k=1}^d \sigma_k^2 - 2 \sum_{k=1}^K \sigma_k \tilde{\sigma}_k + \sum_{k=1}^K \tilde\sigma_k^2 \\
+        &= \sum_{k=K+1}^d \sigma_k^2 + \sum_{k=1}^K (\sigma_k - \tilde{\sigma}_k)^2 \\
+        &\geq \sum_{k=K+1}^d \sigma_k^2
+    \end{align*}
+    so indeed to have equality in both cases requires $\sigma_k = \tilde{\sigma}_k$ for each $k\leq K$ so indeed $\tilde{R}_K = R_K$ and so $\hat{M}$, as defined in the statement of the theorem, minimises $\|M-\tilde M\|_F$ over matrices $\tilde M$ of rank at most $K$.
+\end{proof}
+
+
+\subsection{Supporting Results}
+\begin{lemma}[Matrix square root lemma]\label{lem:square-root-lemma}
+Suppose we have two full rank matrices $E,F \in \R^{d \times K}$ where $K \leq d$ and such that $E E^T = F F^T$; then there exists an orthogonal matrix $O \in \R^{K \times K}$ with $E = FO$.
+\end{lemma}
+\begin{proof}
+    Post multiplying the defining condition gives $E E^T E = F F^T E$.
+    Then right multiplying by $(E^T E)^{-1}$ gives
+    \begin{align*}
+        E = F F^T E (E^T E)^{-1} \eqdef F O
+    \end{align*}
+    to check that $O$ as defined above is orthogonal we again use the defining condition to compute
+    \begin{align*}
+        O^T O = (E^T E)^{-1} E^T F F^T E (E^T E)^{-1} = (E^T E)^{-1} E^T E E^T E (E^T E)^{-1} = I_K
+    \end{align*}
+\end{proof}
+
+\begin{corollary}[PSD Eckhart--Young for square root matrix]\label{prop:psd-eckhart-young-factor}
+Let $M \in \R^{d\times d}$ be symmetric positive semidefinite.
+Then
+\begin{align*}
+    \argmin_{\tilde{Z} \in \R^{d \times K}} \| M - \tilde{Z} \tilde{Z}^T \|_F^2
+\end{align*}
+is precisely the set of $\tilde{Z}$ of the form $\tilde{Z} = Z_K \Lambda_K^\half O_K$ for some top-$K$ eigenvector-matrix $Z_K$ of the GEP $(M,I)$ and some orthogonal $O_K \in \mathcal{O}(K)$, and where $\Lambda_K$ is a diagonal matrix of the top-$K$ eigenvalues.
+\end{corollary}
+\begin{proof}
+    First note that when $M$ is positive semi-definite the SVD coincides with the eigendecomposition.
+
+    Second note that taking $\tilde{Z} = Z_K \Lambda_K^\half O_K$ attains the minimal value by the Eckhart--Young inequality, Theorem \ref{thm:eckhart-young}.
+
+    Next note that if $\tilde{Z}$ attains the minimal value then it must have $\tilde{Z} \tilde{Z}^T = Z_K \Lambda_K Z_K^T$ by the equality case of Eckhart--Young.
+    Then by matrix square root Lemma \ref{lem:square-root-lemma} we must indeed have $\tilde{Z} = Z_K \Lambda_K^\half O_K$ for some orthogonal $O_K$.
+\end{proof}
+
+\begin{corollary}[Symmetric Eckhart--Young for square root matrix]\label{cor:sym-eckhart-young-factor}
+Let $M \in \R^{d\times d}$ be symmetric with eigenvalues $\lambda_1\geq \dots \geq \lambda_d$ such that $\lambda_K > 0$.
+Then
+\begin{align*}
+    \argmin_{\tilde{Z} \in \R^{d \times K}} \| M - \tilde{Z} \tilde{Z}^T \|_F^2
+\end{align*}
+is precisely the set of $\tilde{Z}$ of the form $\tilde{Z} = Z_K \Lambda_K^\half O_K$ for some top-$K$ eigenvector-matrix $Z_K$ of the GEP $(M,I)$ and some orthogonal $O_K \in \mathcal{O}(K)$, and where $\Lambda_K$ is a diagonal matrix of the top-$K$ eigenvalues.
+\end{corollary}
+\begin{proof}
+    Let $\tilde{Z} \in \R^{d\times K}$.
+    Because $M$ is symmetric it has some eigen-decomposition; separate this into strictly positive and non-positive eigenvalues $M = M_+ + M_- = Z_+ \Lambda_+ Z_+^T + Z_- \Lambda_- Z_-^T$, with rank $d_+,d_-$ respectively.
+    % In the above we separate > 0 from \leq 0 so that have P_+ + P_- = Id, which makes notation cleaner
+    Let the corresponding projections be $P_+ = Z_+ Z_+^T, P_- = Z_- Z_-^T$.
+
+    Now define $\tilde{Z}_+ = P_+ \tilde{Z}, \tilde{Z}_- = P_- \tilde{Z}$. Then note by orthogonality of the projections we have for any matrix $A$ that
+    \begin{align*}
+        \norm{A}^2 = \norm{(P_+ + P_-) A (P_+ + P_-)}^2 = \norm{P_+ A P_+}^2 + \norm{P_+ A P_-}^2 + \norm{P_- A P_+}^2 + \norm{P_- A P_-}^2
+    \end{align*}
+
+    So we can expand out
+    \begin{align}
+        \norm{M - \tilde{Z}\tilde{Z}^T}^2
+        &= \norm{(P_+ + P_-) (M - \tilde{Z}\tilde{Z}^T) (P_+ + P_-)}^2 \nonumber \\
+        &= \underbrace{\norm{M_+ - \tilde{Z}_+ \tilde{Z}_+^T}^2}_{\geq \sum_{k=K+1}^{d_+} \lambda_k^2} + \underbrace{\norm{M_- - \tilde{Z}_- \tilde{Z}_-^T}^2}_{\geq \norm{M_-}^2}
+        + \underbrace{\norm{\tilde{Z}_+ \tilde{Z}_-^T}^2}_{\geq 0} + \underbrace{\norm{\tilde{Z}_- \tilde{Z}_+^T}^2}_{\geq 0}
+        \geq \sum_{k=K+1}^d \lambda_k^2
+        \label{eq:chasing-equality}
+    \end{align}
+    where the first inequality follows from the previous Corollary \ref{prop:psd-eckhart-young-factor} and the second inequality is just from
+    \begin{align*}
+        \norm{M_- - \tilde{Z}_- \tilde{Z}_-^T}^2 - \norm{M_-}^2 = - 2 \tr\left( \tilde{Z}_-^T M_- \tilde{Z}_- \right)  + \norm{\tilde{Z}_- \tilde{Z}_-^T}^2 \geq 0
+    \end{align*}
+    because $M_-$ has negative eigenvalues.
+
+    Moreover equality in (\ref{eq:chasing-equality}) requires the equality case of all the component inequalities; the first gives $\tilde{Z}_+ = Z_K \Lambda_K^\half O_K$ for some $Z_K,O_K$ as in the statement of Corollary \ref{prop:psd-eckhart-young-factor}, and the second that $\tilde{Z}_- = 0$; so indeed combining $\tilde{Z} = \tilde{Z}_+ + \tilde{Z}_-$ gives the result.
+\end{proof}
+
+\subsection{GEP-EY Objective}
+\begin{proposition}[GEP-EY-Objective]
+    Consider the GEP $(A,B)$ with $A$ symmetric and $B$ positive definite; suppose there are at least $K$ strictly positive (generalized) eigenvalues. Then:
+    \begin{align*}
+        \tilW \in \argmax_{\tilW \in \R^{d\times k}} \: \tr\left\{2 \left(\tilW^T A \tilW\right) - \left(\tilW^T B \tilW\right) \left(\tilW^T B \tilW\right) \right\}
+    \end{align*}
+    if and only if $\tilW = W_K \Lambda_K^\half O_K$ for some top-$K$ matrix $W_K$ of the GEP and some orthogonal $O_K \in \mathcal{O}(k)$, where $\Lambda_K$ is a diagonal matrix of the top-$K$ eigenvalues.
+
+    Moreover, the maximum value is precisely $\sum_{k=1}^K \lambda_k^2$.
+\end{proposition}
+\begin{proof}
+    First recall that there is a bijection between eigenvectors $w$ for the GEP $(A,B)$ and eigenvectors $z = B^\half w$ for the GEP $(M,I)$ where $M \defeq B^\mhalf A B^\mhalf$ (e.g. see \citet{chapman2022generalized}).
+
+    Now consider how the Eckhart--Young objective from Corollary \ref{cor:sym-eckhart-young-factor} transforms under the bijection $Z = B^\half W$.
+
+    We get
+    \begin{align*}
+        \| M - \tilde{Z} \tilde{Z} \|_F^2
+        &= \| B^\mhalf A B^\mhalf - B^\half \tilde{W} \tilde{W}^T B^\half \|_F^2 \\
+        &= \| B^\mhalf A B^\mhalf \|_F^2 - 2\tr\left( B^\mhalf A B^\mhalf B^\half \tilde{W} \tilde{W}^T B^\half \right) \\
+        &\quad + \tr\left(B^\half \tilde{W} \tilde{W}^T B^\half \: B^\half \tilde{W} \tilde{W}^T B^\half \right) \\
+        &= \| B^\mhalf A B^\mhalf \|_F^2 - \tr\left\{2 \left(\tilW^T A \tilW\right) - \left(\tilW^T B \tilW\right) \left(\tilW^T B \tilW\right) \right\},
+    \end{align*}
+
+    where the first term is independent of $\tilde{W}$, so we can conclude by Corollary \ref{cor:sym-eckhart-young-factor}.
+
+    The moreover conclusion can follow from computing the objective at any maximiser of the form above. We note that
+    \begin{align*}
+        \tilW^T A \tilW &= O_K^T \Lambda_K^\half W_K^T A W_K \Lambda_K O_K = O_K^T \Lambda_K^2 O_K \\
+        \tilW^T B \tilW &= O_K^T \Lambda_K^\half W_K^T B W_K \Lambda_K O_K = O_K^T \Lambda_K O_K
+    \end{align*}
+    plugging into the objective gives
+    \begin{align*}
+        \tr \left(2 \: (\tilW^T A \tilW) - (\tilW^T B \tilW)^2\right) = \tr \left(2 \,O_K^T \Lambda_K^2 O_K - O_K^T \Lambda_K^2 O_K\right)
+        %=\tr \left(O_K^T \Lambda_K^2 O_K\right)
+        = \sum_{k=1}^K \lambda_k^2
+    \end{align*}
+    because the trace of a symmetric matrix is equal to the sum of its eigenvalues.
+\end{proof}
+
+
+\section{Tractable Optimization - no spurious local minima}\label{supp:tractable-optimization}\label{app:tractable-optimization}
 First in \cref{sec:no-spurious-local-minima-qualitative} we prove that for general $A, B$ our loss $\LEY(U)$ has no spurious local minima.
 Then in \cref{sec:no-spurious-local-minima-quantitative} we apply a result from \citet{ge_no_2017}.
 This application is somewhat crude, and we expect that a quantitative result with tighter constants could be obtained by adapting the argument of \cref{sec:no-spurious-local-minima-qualitative}; we leave such analysis to future work.
@@ -236,7 +393,6 @@ This is sufficient to show that certain local search algorithms will converge in
 \newpage
 
 \section{Fast updates for (Multi-view) Stochastic CCA (and PLS)}\label{supp:fast-updates}
-% Lennie: I got the following from GPT4 with careful prompting, now cutting down to size...
 \subsection{Back-propagation for empirical covariances}
 To help us analyse the full details of back-propagation in the linear case, we first prove a lemma regarding the gradients of the empirical covariance operator.
 

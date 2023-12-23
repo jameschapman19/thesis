@@ -177,8 +177,8 @@ The L1 penalty is defined as:
 Intuitively, this is the sum of the absolute values of the elements of the vector.
 Now, with a foundational understanding of sparse regularisation, we review a number of approaches to adding sparsity to the CCA problem.
 
-\paragraph{Sparse PLS: Penalized Matrix Decomposition}
-Penalized Matrix Decomposition (PMD)~\citep{witten2009penalized} provides an approximate solution to the sparse CCA problem by altering the constraints of the classical CCA formulation.
+\paragraph{Sparse PLS: Penalised Matrix Decomposition}
+Penalised Matrix Decomposition (PMD)~\citep{witten2009penalized} provides an approximate solution to the sparse CCA problem by altering the constraints of the classical CCA formulation.
 Specifically, PMD replaces the constraints \(u\spsT{i} \hat{\Sigma_{ii}} u\sps{i} = 1\) with the PLS constraints \(u\spsT{i} u\sps{i}= 1\) and additionally imposes \(\|u\spsT{i}\|_1 \leq \tau\).
 The optimisation problem for PMD is then given by:
 
