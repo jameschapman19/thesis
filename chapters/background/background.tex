@@ -403,7 +403,13 @@ This GEP formulation of MCCA can be presented in a unified framework generalizin
     B_\alpha^{(ii)} = \alpha_i I_{D\sps{i}} + (1-\alpha_i) \Var(X\sps{i})  %\text{ for } i \in [I]
 \end{align}
 Where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters: taking $\alpha_i = 0 \: \forall i$ recovers CCA and $\alpha = 1 \: \forall i$ recovers PLS.
-We may omit the subscript $\alpha$ when $\alpha=0$ and we recover the `pure CCA' setting; in this case, following \cref{eq:cca-vector-of-correlations-def} we can define $\MCCA_K(X\sps{1},\dots,X\sps{I})$ to be the vector of the top-$K$ generalized eigenvalues.
+We may omit the subscript $\alpha$ when $\alpha=0$ and we recover the `pure CCA' setting; in this case, following \cref{eq:cca-vector-of-correlations-def} we can define
+
+\begin{align}
+    \MCCA_K(X\sps{1},\dots,X\sps{I})
+\end{align}
+
+to be the vector of the top-$K$ generalized eigenvalues which are the average of the top-$K$ correlations between each pair of views.
 
 \subsection{Linear Discriminant Analysis LDA}
 
