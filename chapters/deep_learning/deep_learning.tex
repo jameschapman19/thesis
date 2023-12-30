@@ -1,7 +1,6 @@
 \graphicspath{{chapters/deep_learning/}}
 
-
-\chapter{Deep CCA and CCA for Self-Supervised Learning}\label{chap:deep_learning}
+\chapter{Deep CCA and CCA for Self-Supervised Learning}\label{ch:deep_learning}
 \minitoc
 % chktex-file 44
 % chktex-file 3
@@ -13,10 +12,10 @@ This chapter is based on work presented in \citet{chapman2023cca} and \citet{cha
 
 Deep CCA \citep{andrew2013deep} secured a runner-up position for the test-of-time award at ICML 2023 \citep{ICML2023TOT}.
 However, its direct application has been limited in large datasets due to biased gradients in the stochastic minibatch setting.
-There have since been proposals to scale-up Deep CCA in the stochastic case with adaptive whitening \cite{wang2015stochastic} and regularization \cite{chang2018scalable}, but these techniques are highly sensitive to hyperparameter tuning.
+There have since been proposals to scale-up Deep CCA in the stochastic case with adaptive whitening \citep{wang2015stochastic} and regularization \cite{chang2018scalable}, but these techniques are highly sensitive to hyperparameter tuning.
 
 Self-Supervised Learning (SSL) methods have reached the state-of-the-art in tasks such as image classification \citep{balestriero2023cookbook}, learning representations without labels that can be used to classify images using a linear probe in the zero-shot setting.
-Recently, a family of SSL methods that are closely aligned with Canonical Correlation Analysis (CCA) has garnered interest.
+A family of SSL methods that are closely aligned with Canonical Correlation Analysis (CCA) has garnered particular interest.
 This family notably includes Barlow Twins \citep{zbontar2021barlow}, VICReg \citep{bardes2021vicreg}, and W-MSE \citep{ermolov2021whitening} and they aim to transform a pair of data views into similar representations, similar to the objective of CCA. Similarly, some generative approaches to SSL\cite{sansone2022gedi} bear a striking resemblance to Probabilistic CCA\cite{bach2005probabilistic}.
 These connections have started to be explored in \cite{balestriero2022contrastive}.
 
@@ -37,13 +36,13 @@ It has been shown that neural networks with ReLU activations can approximate any
 This flexibility, combined with increasingly large datasets, allows neural networks to learn complex functions from data.
 Owing to the size of the models and datasets, neural networks are usually trained using the backpropagation algorithm and stochastic gradient descent (SGD) \citep{amari1993backpropagation}.
 
-
-
 \subsection{DCCA and Deep Multiview CCA}
 
-Thus far, our focus has been on linear Canonical Correlation Analysis (CCA). However, in dealing with high-dimensional and complex data structures commonly found in modern applications, nonlinear extensions of CCA become essential. Deep CCA (DCCA) and Deep Multiview CCA (DMCCA) represent such nonlinear extensions, aiming to capture more intricate relationships between data views.
+Thus far, our focus has been on linear Canonical Correlation Analysis (CCA). However, in dealing with high-dimensional and complex data structures commonly found in modern applications, nonlinear extensions of CCA become essential.
+Deep CCA (DCCA) and Deep Multiview CCA (DMCCA) represent such nonlinear extensions, aiming to capture more intricate relationships between data views.
 
-In essence, the objective of DCCA and DMCCA is to learn nonlinear representations of data that are linearly correlated across different views. We define this goal using our $\MCCA$ notation:
+In essence, the objective of DCCA and DMCCA is to learn nonlinear representations of data that are linearly correlated across different views.
+We define this goal using our $\MCCA$ notation:
 \begin{align}
     \label{eq:DMCCA-def}
     \norm{\MCCA_K\left(Z^{(1)}, \ldots, Z^{(I)}\right)}_2
@@ -59,14 +58,18 @@ where $Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})$ are representations learned by 
 
 Figure \ref{fig:dcca_schematic} illustrates the conceptual framework of DCCA, where data from different views are transformed through neural networks to achieve correlated representations.
 
-The full-batch approach of DCCA, formulated by \citet{andrew2013deep}, seeks to maximize the correlation between these different views. The objective, operationalized as a loss function, is defined by the trace of matrix \( T \):
-The full-batch approach of DCCA, formulated by \citet{andrew2013deep}, seeks to maximize the correlation between these different views. The objective, operationalized as a loss function, is defined by the trace of matrix \( T \):
+The full-batch approach of DCCA, formulated by \citet{andrew2013deep}, seeks to maximize the correlation between these different views.
+The objective, operationalized as a loss function, is defined by the trace of matrix \( T \):
+The full-batch approach of DCCA, formulated by \citet{andrew2013deep}, seeks to maximize the correlation between these different views.
+The objective, operationalized as a loss function, is defined by the trace of matrix \( T \):
 \begin{align}
     T &= \left(\text{cov}(Z^{(1)})\right)^{-\frac{1}{2}} Z^{(1)\top} Z^{(2)} \left(\text{cov}(Z^{(2)})\right)^{-\frac{1}{2}} \label{eq:T_definition} \\
     \LRayleigh &= -\Tr(T) \label{eq:loss_function}
 \end{align}
 
-This approach, while theoretically sound, faces scalability issues with large datasets. DCCA-STOL, proposed by \citet{wang2015unsupervised}, adapts this objective to large mini-batches but suffers from biased gradients due to the matrix inversions in equation \eqref{eq:T_definition}. This necessitates batch sizes larger than the representation size, limiting its practical application.
+This approach, while theoretically sound, faces scalability issues with large datasets.
+DCCA-STOL, proposed by \citet{wang2015unsupervised}, adapts this objective to large mini-batches but suffers from biased gradients due to the matrix inversions in equation \eqref{eq:T_definition}.
+This necessitates batch sizes larger than the representation size, limiting its practical application.
 
 Extensions such as DMCCA \citep{somandepalli2019multimodal} and DGCCA \citep{benton2017deep} attempt to mitigate these limitations by forming matrices \( A \) and \( B \) from mini-batch representations for the generalized eigenvalue problem in CCA. However, their loss function, given by
 \begin{align}
@@ -74,7 +77,8 @@ Extensions such as DMCCA \citep{somandepalli2019multimodal} and DGCCA \citep{ben
 \end{align}
 still encounters similar challenges.
 
-Adaptive whitening methods \citep{wang2015stochastic, chang2018scalable} offer another solution by reducing the bias in the DCCA objective. However, as noted in DCCA-NOI \citep{wang2015unsupervised}, these methods introduce a time constant that complicates analysis and requires extensive tuning.
+Adaptive whitening methods \citep{wang2015stochastic, chang2018scalable} offer another solution by reducing the bias in the DCCA objective.
+However, as noted in DCCA-NOI \citep{wang2015unsupervised}, these methods introduce a time constant that complicates analysis and requires extensive tuning.
 
 \begin{align}
     \LNOI &= \|{\tilde{\Sigma}_11}^{-\frac{1}{2}} Z\sps{1}-{\tilde{\Sigma}_{22}}^{-\frac{1}{2}} Z\sps{2}\|^2_F
@@ -83,52 +87,60 @@ Adaptive whitening methods \citep{wang2015stochastic, chang2018scalable} offer a
 Where $\tilde{\Sigma}_{11}$ and $\tilde{\Sigma}_{22}$ are estimates of the covariance matrices of $Z\sps{1}$ and $Z\sps{2}$ respectively.
 However, the authors of \textbf{DCCA-NOI} highlight that the associated time constant complicates analysis and requires extensive tuning.
 These limitations highlight the need for more scalable and efficient nonlinear CCA methods that can handle large datasets without compromising on representation quality or requiring extensive hyperparameter tuning.
-\subsection{Self-Supervised Learning}
+\subsection{Self-Supervised Learning and Joint Embedding}
 
-Self-Supervised Learning (SSL) has become a pivotal approach in deep learning for tasks with scarce labeled data. Central to non-contrastive SSL is creating joint embeddings of augmented images. This method involves generating two different views, \( X_1 \) and \( X_2 \), of the same image \( X \) using augmentation techniques. The goal is to align their representations, \( Z^{(1)} \) and \( Z^{(2)} \), in a shared embedding space, leveraging inherent data patterns to develop rich feature representations without explicit labels. A primary challenge in this approach is preventing the collapse of representations, where models output constant features, ignoring input variability.
+Self-Supervised Learning (SSL) has emerged as a crucial approach in deep learning, especially for tasks with limited labeled data. A fundamental strategy in SSL, particularly in non-contrastive SSL, involves creating joint embeddings of augmented images. This process entails generating two distinct views of the same image, denoted as \( X_1 \) and \( X_2 \), using various augmentation techniques. The primary aim is to align their representations, \( Z^{(1)} \) and \( Z^{(2)} \), in a shared embedding space. This alignment leverages the inherent patterns within the data to develop feature representations absent explicit labels. A significant challenge in this methodology is averting the collapse of representations, where models produce constant features irrespective of input variability.
 
-\subsubsection{Joint Embedding for SSL and the Role of the Projector}
-SSL methods like Barlow Twins and VICReg utilize an encoder-projector model, illustrated in Figure \ref{fig:sslschematic}. Input data is transformed by an encoder \( g \) into representations, which are further processed by a projector \( h \) into higher-dimensional embeddings. These embeddings are key to training, but it's the representations that are critical for downstream tasks. The encoder is typically a neural network tailored to the domain, while the projector is often a simpler multi-layer perceptron.
+\begin{figure}[ht]
+    \centering
+    \tikz{ % nodes
+        \node[latent, align=center, minimum size=2cm] (x) {Original Image\\x};
+        \node[obs, below left=of x, minimum size=2cm, align=center] (x1) {Augmented Image \\$x^{(1')}$};
+        \node[obs, below right=of x, minimum size=2cm, align=center] (x2) {Augmented Image \\$x^{(2')}$};
+        % edges
+        \edge{x} {x1}
+        \edge{x} {x2}}
+    \caption[Joint Embedding Data Generation Process]{\textit{\textbf{Joint Embedding Data Generation Process:}} The original image \(x\) is augmented to produce two views \(x^{(1')}\) and \(x^{(2')}\).}
+    \label{fig:joint-embedding}
+\end{figure}
 
-The essence of joint embedding is that similar inputs, \( X \) and its augmented counterpart \( X' \), should lead to similar embeddings, \( Z \) and \( Z' \). The encoder and projector learn to optimize an objective that measures the closeness of \( Z \) and \( Z' \).
+In SSL, augmented data generation serves to create multiple perspectives of the same underlying content, such as cropping or rotating an image. The objective is to learn representations that are invariant to these augmentations, thereby capturing the fundamental structure of the data. Canonical Correlation Analysis (CCA) emerges as a fitting tool for this task, especially given that augmentations represent redundant rather than complementary information, offering different perspectives of the same underlying data.
 
-Despite their empirical success, the mechanics behind encoder-projector architectures remain partially elusive. Recent research \cite{ma2023deciphering, jing2021understanding} has started unraveling these complexities, but more understanding is needed. Our approach, grounded in canonical correlation principles, seeks to deepen this understanding and inspire future architectural advancements.
+\subsubsection{Encoder-Projector Model in SSL}
+SSL methods like Barlow Twins and VICReg employ an encoder-projector model, as shown in Figure~\ref{fig:sslschematic}. In this model, input data is transformed by an encoder \( g \) into representations, which are further processed by a projector \( h \) into higher-dimensional embeddings. These embeddings are integral to training, with the representations being critical for downstream tasks. The encoder is typically a neural network suited to the domain, while the projector is often a simpler multi-layer perceptron.
 
-\begin{figure}
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/ssl_schematic}
     \caption{Schematic of the encoder-projector setup in SSL.}
     \label{fig:sslschematic}
 \end{figure}
 
-\textbf{Barlow Twins} and \textbf{VICReg}, part of the canonical correlation algorithm family \citep{balestriero2023cookbook}, are pivotal to our study. We first introduce a general form of SSL based on canonical correlation, termed \textbf{CCA-SSL}. Unlike traditional CCA, CCA-SSL employs tied weights for the neural networks, so both views \( Z^{(1)} \) and \( Z^{(2)} \) are functions of the same network \( f_{\theta} \). The general form of CCA-SSL is expressed as:
+The essence of joint embedding in SSL is that similar inputs, \( X \) and its augmented version \( X' \), should yield similar embeddings, \( Z \) and \( Z' \).
+The encoder and projector are optimized to minimize the distance between \( Z \) and \( Z' \), reflecting the similarity of the inputs.
+
+\subsubsection{CCA-based SSL Methods: Barlow Twins and VICReg}
+Barlow Twins and VICReg are two pivotal methods in SSL that build upon canonical correlation principles to generate robust representations from augmented views.
+Both methods aim to align representations of two augmented views while ensuring distinct yet correlated representations.
+
+\textbf{Barlow Twins} employs a redundancy reduction objective to ensure similarity between representations of the same augmented views and to decorrelate representations within each view.
+Its loss function is expressed as:
 \begin{align}
-    \LCCASSL &= \norm{\MCCA_K\left(Z^{(1)}, Z^{(2)}\right)}_2^2 \label{eq:cca-ssl}
+    \LBT = \overbrace{\gamma \mathbb{E} \norm{Z^{(1)} - Z^{(2)}}^2}^{\text{Invariance}} + \overbrace{\beta \sum_{\substack{k,l=1 \\ k \neq l}}^K \Cov(\hat{Z}^{(i)}_k, \hat{Z}^{(i)}_l)^2}^{\text{Redundancy Reduction}},
 \end{align}
-where \( Z^{(i)} = f_{\theta}(X^{(i)}) \) for \( i \in \{1, 2\} \).
+where \( \hat{Z}^{(i)} \) denotes the batch-normalized versions of the representations, with \( \gamma \) and \( \beta \) as hyperparameters controlling the similarity and decorrelation terms, respectively.
 
-In the linear case, CCA-SSL corresponds to a Generalized Eigenvalue Problem (GEP), closely related to both CCA and PCA:
+\textbf{VICReg}, in contrast, introduces a variance term and omits batch normalization, focusing on variance-invariance-covariance regularization.
+The VICReg loss is defined as:
 \begin{align}
-    \Sigma_{12} + \Sigma_{21} u &= \lambda (\Sigma_{11} + \Sigma_{22}) u \label{eq:gep}
+    \LVR = \overbrace{\gamma \mathbb{E} \norm{Z^{(1)} - Z^{(2)}}^2}^{\text{Invariance}} + \left[\overbrace{\sum_{i \in \{1,2\}} \alpha \sum_{k=1}^K \left(1 - \sqrt{\Var(Z^{(i)}_k)}\right)_+}^{\text{Variance}} + \overbrace{\beta \sum_{\substack{k,l=1 \\ k \neq l}}^K \Cov(Z^{(i)}_k, Z^{(i)}_l)^2 }^{\text{Covariance}}\right],
 \end{align}
+with \( \alpha \), \( \beta \), and \( \gamma \) as tuning parameters balancing the influence of variance, invariance, and covariance regularization.
 
-Barlow Twins and VICReg are two influential methods in Self-Supervised Learning (SSL) that build upon canonical correlation principles to generate robust representations from augmented views. Both methods aim to align representations of two augmented views, \( Z^{(1)} \) and \( Z^{(2)} \), while ensuring they are distinct yet correlated.
+These approaches, grounded in canonical correlation principles, offer foundational baselines for our experiments in SSL.
 
-\textbf{Barlow Twins} employs a redundancy reduction objective, ensuring that representations are both similar for the same augmented views and decorrelated within each view \citep{zbontar2021barlow}. Its loss function is formulated as:
-\begin{align}
-    \LBT &= \gamma \mathbb{E} \norm{Z^{(1)} - Z^{(2)}}^2 + \beta \sum_{\substack{k,l=1 \\ k \neq l}}^K \Cov(\hat{Z}^{(i)}_k, \hat{Z}^{(i)}_l)^2 \label{eq:bt}
-\end{align}
-where \( \hat{Z}^{(i)} = \text{BN}(Z^{(i)}) \) represents the batch-normalized versions of the representations. The hyperparameters \( \gamma \) and \( \beta \) control the importance of the similarity and decorrelation terms, respectively.
 
-\textbf{VICReg}, on the other hand, introduces a variance term and forgoes batch normalization, focusing on variance-invariance-covariance regularization \citep{bardes2021vicreg}. The VICReg loss is defined as:
-\begin{align}
-    \LVR &= \gamma \mathbb{E} \norm{Z^{(1)} - Z^{(2)}}^2 + \sum_{i \in \{1,2\}} \left[\alpha \sum_{k=1}^K \left(1 - \sqrt{\Var(Z^{(i)}_k)}\right)_+ + \beta \sum_{\substack{k,l=1 \\ k \neq l}}^K \Cov(Z^{(i)}_k, Z^{(i)}_l)^2 \right] \label{eq:vicreg}
-\end{align}
-In VICReg, \( \alpha \), \( \beta \), and \( \gamma \) are tuning parameters that balance the influence of variance, invariance, and covariance regularization.
-
-These methods, by leveraging canonical correlation concepts, serve as foundational baselines in our experiments in SSL.
-
-\section{Methods: Novel Objectives and Algorithms}\label{sec:contributions}
+\section{Methods: Novel Objectives and Algorithms}
 
 \subsection{Applications to (multi-view) stochastic CCA and PLS, and Deep CCA}
 
@@ -142,27 +154,44 @@ where $\hat{Z} = f_{\hat{\theta}}(X)$.
 Therefore, $\hat{\theta}$ is also a local optimum of objectives from \cite{andrew2013deep, somandepalli2019multimodal} as defined in \cref{eq:DMCCA-def}.
 \end{restatable}
 \begin{proof}[Proof sketch: see \cref{supp:EY-recover-Deep-CCA} for full details.]
-    Consider treating the penultimate-layer representations as fixed, and optimising over the weights in the final layer. This is precisely equivalent to optimising the Eckhart-Young loss for linear CCA where the input variables are the penultimate-layer representations. So by \cref{prop:no-spurious}, a local optimum is also a global optimum, and by \cref{prop:EY-charac} the optimal value is the negative sum of squared generalised eigenvalues.
+    Consider treating the penultimate-layer representations as fixed, and optimising over the weights in the final layer.
+    This is precisely equivalent to optimising the Eckhart-Young loss for linear CCA where the input variables are the penultimate-layer representations.
+    So by \cref{prop:no-spurious}, a local optimum is also a global optimum, and by \cref{prop:EY-charac} the optimal value is the negative sum of squared generalised eigenvalues.
 \end{proof}
 
 \subsection{Application to SSL}
-We can directly apply Algorithm \ref{alg:general} to SSL.
+We can directly apply Algorithm~\ref{alg:general} to SSL\@.
 If we wish to have the same neural network transforming each view, we can simply tie the weights $\theta\sps{1} = \theta\sps{2}$.
 When the paired data are generated from applying independent, identically distributed (i.i.d.) augmentations to the same original datum, it is intuitive that tying the weights is a sensible procedure, and perhaps acts as a regulariser.
 
 
-\section{Experiments}
+\section{Experiments and Results}
 
 % Deep CCA Section
 
 \subsection{Deep CCA}\label{sec:experiments-DCCA}
-In this experiment, we aim to establish the superiority of our DCCA-EY method over existing Deep Canonical Correlation Analysis (DCCA) approaches as described in \cref{sec:related-work}. We specifically focus on showcasing how DCCA-EY outperforms these methods in terms of correlation capture, convergence speed, and ease of hyperparameter tuning. The experimental setup is aligned with that of \cite{wang2015stochastic}, providing a direct comparison under identical conditions.
+In this experiment, we aim to establish the superiority of our DCCA-EY method over existing Deep Canonical Correlation Analysis (DCCA) approaches.
+We specifically focus on showcasing how DCCA-EY outperforms these methods in terms of correlation capture, convergence speed, and ease of hyperparameter tuning.
+The experimental setup is aligned with that of \citet{wang2015stochastic}, providing a direct comparison under identical conditions.
 
-As per \citet{wang2015stochastic}, our architecture comprises multilayer perceptrons with two hidden layers of size 800 and an output layer of 50 with ReLU activations. We train these networks for 20 epochs. However, our primary goal is to learn $K=50$ dimensional representations over a range of mini-batch sizes (from 20 to 100) across 50 epochs, demonstrating the robustness and scalability of DCCA-EY even in varying batch conditions.
+As per \citet{wang2015stochastic}, our architecture comprises multilayer perceptrons with two hidden layers of size 800 and an output layer of 50 with ReLU activations.
+We train these networks for 20 epochs.
+However, our primary goal is to learn $K=50$ dimensional representations over a range of mini-batch sizes (from 20 to 100) across 50 epochs, demonstrating the robustness and scalability of DCCA-EY even in varying batch conditions.
 
-In this chapter, we employ the Total Correlation Captured (TCC) metric for evaluation. While similar to the PCC metric described in the previous chapter, TCC does not rely on a ground truth for its computation. Instead, it is defined as \( \text{TCC} = \sum_{k=1}^K \rho_k \), where $\rho_k$ are the empirical correlations between the neural network-based representations $Z^{(i)} = f^{(i)}(X^{(i)})$ on a validation set, rather than on the training set as was the case with PCC. This distinction is crucial as TCC evaluates the model's performance in capturing correlations in an unseen dataset, offering a more robust measure of its generalization capability.
+In this chapter, we employ the Total Correlation Captured (TCC) metric for evaluation.
+While similar to the PCC metric described in the previous chapter, TCC does not rely on a ground truth for its computation.
+Instead, it is defined as \( \text{TCC} = \sum_{k=1}^K \rho_k \), where $\rho_k$ are the empirical correlations between the neural network-based representations $Z^{(i)} = f^{(i)}(X^{(i)})$ on a validation set, rather than on the training set as was the case with PCC. This distinction is crucial as TCC evaluates the model's performance in capturing correlations in an unseen dataset, offering a more robust measure of its generalization capability.
+\paragraph{Data}
+The Split MNIST dataset is a modified version of the original MNIST dataset, where each 28x28 pixel grayscale image of handwritten digits (0-9) is divided into left and right halves, creating two distinct views.
+This split challenges models to learn from partial information, as each view contains only half of the digit, either the left or the right side.
+The dataset comprises 50,000 training and 10,000 test images.
+The X-Ray Microbeam Speech Production Database (XRMB) is a multi-view dataset used for studying articulatory speech data.
+It comprises around 40,000 spoken utterances from 47 American English speakers.
+The dataset provides two views: acoustic features and articulatory measurements.
+The acoustic features consist of 273-dimensional vectors representing spectral characteristics, while the articulatory measurements include 112-dimensional vectors capturing the position and movement of speech articulators (like the tongue and lips).
+The XRMB dataset is notable for its complexity and high dimensionality, making it a challenging testbed for multiview learning algorithms.
 
-\paragraph{Parameters:} For each method, we searched over a hyperparameter grid using \citet{wandb}.
+\paragraph{Parameters} For each method, we searched over a hyperparameter grid using \citet{wandb}.
 
 \begin{table}[h!]
     \centering
@@ -174,53 +203,60 @@ In this chapter, we employ the Total Correlation Captured (TCC) metric for evalu
         \hline epochs              & 50               \\
         \hline
     \end{tabular}
-    \footnotetext{$\rho$ is only used for DCCA-NOI}
+    \footnotetext{$\rho$ is only used for DCCA-NOI}\label{tab:hyperparams}
 \end{table}
 
 \paragraph{Observations on SplitMNIST}
-For the SplitMNIST dataset, Figure \ref{fig:corr_mnist} shows the comparison of methods across different batch sizes. We observe that DCCA-STOL captures significantly less correlation than the other methods and breaks down when the mini-batch size is smaller than the dimension $K=50$. Figure \ref{fig:lr_mnist} illustrates the learning progress over 50 epochs, where DCCA-NOI, despite performing similarly to DCCA-EY, requires more careful hyperparameter tuning and demonstrates a slower convergence speed.
+For the SplitMNIST dataset, Figure~\ref{fig:corr_mnist} shows the comparison of methods across different batch sizes.
+We observe that DCCA-STOL captures significantly less correlation than the other methods and breaks down when the mini-batch size is smaller than the dimension $K=50$.
+Figure~\ref{fig:lr_mnist} illustrates the learning progress over 50 epochs, where DCCA-NOI, despite performing similarly to DCCA-EY, requires more careful hyperparameter tuning and demonstrates a slower convergence speed.
 
 \paragraph{Observations on XRMB}
-On the XRMB dataset, as seen in Figure \ref{fig:corr_xrmb}, similar trends are evident. DCCA-STOL struggles with smaller mini-batch sizes, while DCCA-NOI, though comparable to DCCA-EY in performance, lags in convergence speed, as shown in Figure \ref{fig:lr_xrmb}.
+On the XRMB dataset, as seen in Figure~\ref{fig:corr_xrmb}, similar trends are evident.
+DCCA-STOL struggles with smaller mini-batch sizes, while DCCA-NOI, though comparable to DCCA-EY in performance, lags in convergence speed, as shown in Figure~\ref{fig:lr_xrmb}.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.7\textwidth]{figures/DCCA/SplitMNIST_models_different_batch_sizes}
+    \includegraphics[width=0.8\textwidth]{figures/DCCA/SplitMNIST_models_different_batch_sizes}
     \caption{Deep CCA on SplitMNIST: Comparison of methods across varying batch sizes.}
     \label{fig:corr_mnist}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.7\textwidth]{figures/DCCA/SplitMNIST_allbatchsizes_pcc}
+    \includegraphics[width=0.8\textwidth]{figures/DCCA/SplitMNIST_allbatchsizes_pcc}
     \caption{Deep CCA on SplitMNIST: Learning progress over 50 epochs.}
     \label{fig:lr_mnist}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.7\textwidth]{figures/DCCA/XRMB_models_different_batch_sizes}
+    \includegraphics[width=0.8\textwidth]{figures/DCCA/XRMB_models_different_batch_sizes}
     \caption{Deep CCA on XRMB: Comparison of methods across varying batch sizes.}
     \label{fig:corr_xrmb}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.7\textwidth]{figures/DCCA/XRMB_allbatchsizes_pcc}
+    \includegraphics[width=0.8\textwidth]{figures/DCCA/XRMB_allbatchsizes_pcc}
     \caption{Deep CCA on XRMB: Learning progress over 50 epochs.}
     \label{fig:lr_xrmb}
 \end{figure}
 
 \subsection{Deep Multiview CCA: Robustness Across Different Batch Sizes}
-In our second experiment, our objective is to showcase the adaptability and effectiveness of the DCCA-EY method in the multiview context, particularly in comparison to existing methods such as DMCCA and DGCCA. We choose the mfeat dataset for this purpose, which comprises 2,000 handwritten numeral patterns represented through six distinct feature sets, including Fourier coefficients, profile correlations, Karhunen-Love coefficients, pixel averages in \(2 \times 3\) windows, Zernike moments, and morphological features. These diverse features present an ideal testbed for evaluating the performance of multiview learning methods.
+In our second experiment, our objective is to showcase the adaptability and effectiveness of the DCCA-EY method in the multiview context, particularly in comparison to existing methods such as DMCCA and DGCCA.
 We again learn $K=50$ dimensional representations, but now train for 100 epochs.
 We employ a multiview extension of the Total Correlation Captured (TCC) metric, termed Total Multiview Correlation Captured (TMCC). TMCC averages the correlation across views and is defined using the consistent notation from \cref{sec:background-unified} as:
 \[
     \text{TMCC} = \sum_{k=1}^{K} \frac{1}{I(I-1)} \sum_{\substack{i,j \leq I \\ i \neq j}} \text{corr}(Z_k^{(i)}, Z_k^{(j)}),
 \]
-where \( Z_k^{(i)} \) represents the \( k \)-th dimension of the \( i \)-th view's representation. This metric effectively measures the extent to which our method captures correlations between different views in a multidimensional representation space.
+where \( Z_k^{(i)} \) represents the \( k \)-th dimension of the \( i \)-th view's representation.
+This metric effectively measures the extent to which our method captures correlations between different views in a multidimensional representation space.
 
-\paragraph{Parameters:} For each method, we searched over a hyperparameter grid using \citet{wandb}.
+\paragraph{Data} We choose the mfeat dataset for this purpose, which comprises 2,000 handwritten numeral patterns represented through six distinct feature sets, including Fourier coefficients, profile correlations, Karhunen-Love coefficients, pixel averages in \(2 \times 3\) windows, Zernike moments, and morphological features.
+These diverse features present an ideal testbed for evaluating the performance of multiview learning methods.
+
+\paragraph{Parameters} For each method, we searched over a hyperparameter grid using \citet{wandb}.
 
 \begin{table}[h!]
     \centering
@@ -235,52 +271,37 @@ where \( Z_k^{(i)} \) represents the \( k \)-th dimension of the \( i \)-th view
 \end{table}
 
 \paragraph{Observations}
-Figure~\ref{fig:dmcca_corr} illustrates the comparison of DCCA-EY with DGCCA and DMCCA across different mini-batch sizes, using the validation TMCC metric. DCCA-EY consistently outperforms both DGCCA and DMCCA, showcasing its superior ability to capture validation TMCC. Notably, DMCCA encounters issues when the batch size is smaller than $K=50$, likely due to singular empirical covariances. DGCCA, while not breaking down, significantly underperforms with smaller batch sizes, highlighting limitations in scalability and efficiency for large-scale data applications.
+Figure~\ref{fig:dmcca_corr} illustrates the comparison of DCCA-EY with DGCCA and DMCCA across different mini-batch sizes, using the validation TMCC metric.
+DCCA-EY consistently outperforms both DGCCA and DMCCA, showcasing its superior ability to capture validation TMCC. Notably, DMCCA encounters issues when the batch size is smaller than $K=50$, likely due to singular empirical covariances.
+DGCCA, while not breaking down, significantly underperforms with smaller batch sizes, highlighting limitations in scalability and efficiency for large-scale data applications.
 
 In Figure~\ref{fig:dmcca_lr}, we observe the learning curves for batch sizes 50 and 100. Both DMCCA and DGCCA demonstrate rapid initial learning of significant correlations but reach a plateau relatively quickly. In contrast, DCCA-EY exhibits a consistent improvement over time and notably outperforms the other methods by the end of the training period. This behavior underscores the enhanced learning capability and efficiency of DCCA-EY, especially in the context of large-scale, high-dimensional data.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.49\textwidth]{figures/DMCCA/mfeat_models_different_batch_sizes}
+    \includegraphics[width=0.8\textwidth]{figures/DMCCA/mfeat_models_different_batch_sizes}
     \caption{Deep Multi-view CCA on mfeat: Comparison across various mini-batch sizes using the Validation TMCC metric.}\label{fig:dmcca_corr}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.49\textwidth]{figures/DMCCA/mfeat_allbatchsizes_pcc}
+    \includegraphics[width=0.8\textwidth]{figures/DMCCA/mfeat_allbatchsizes_pcc}
     \caption{Deep Multi-view CCA on mfeat: Learning progress over 100 epochs for batch sizes 50 and 100.}\label{fig:dmcca_lr}
 \end{figure}
 
 \subsection{Self-Supervised Learning with SSL-EY}
-Finally, we benchmark our self-supervised learning algorithm, SSL-EY, with Barlow Twins and VICReg on CIFAR-10 and CIFAR-100. Each dataset contains 60,000 labelled images, but these are over 10 classes for CIFAR-10 and 100 classes for CIFAR-100.
+Finally, we benchmark our self-supervised learning algorithm, SSL-EY, with Barlow Twins and VICReg on standard SSL benchmarks.
+We follow a standard experimental design \citep{tong2023emp}.
+Indeed, we use the sololearn library \citep{da2022solo}, which offers optimized setups particularly tailored for VICReg and Barlow Twins.
+All methods use a ResNet-18 encoder coupled with a bi-layer projector network.
+Training spans 1,000 epochs with batches of 256 images.
+For SSL-EY, we use the hyperparameters optimized for Barlow Twins, aiming not to outperform but to showcase the robustness of our method.
+We predict labels via a linear probe on the learnt representations and evaluate performance with Top-1 and Top-5 accuracies on the validation set.
 
-We follow a standard experimental design \citep{tong2023emp}. Indeed, we use the sololearn library \citep{da2022solo}, which offers optimized setups particularly tailored for VICReg and Barlow Twins. All methods utilize a ResNet-18 encoder coupled with a bi-layer projector network. Training spans 1,000 epochs with batches of 256 images. For SSL-EY, we use the hyperparameters optimized for Barlow Twins, aiming not to outperform but to showcase the robustness of our method.
-We predict labels via a linear probe on the learnt representations and evaluate performance with Top-1 and Top-5 accuracies on the validation set. For more details, refer to the supplementary material \ref{supp:experimental details}.
+\paragraph{Data} We use the CIFAR-10 and CIFAR-100 datasets, which comprise 60,000 labelled images of size 32x32.
+CIFAR-10 contains 10 classes, while CIFAR-100 contains 100 classes.
 
-\paragraph{Observations:} Table \ref{tab:selfsup} shows that SSL-EY is competitive with Barlow Twins and VICReg. This is remarkable because we used out-of-the-box hyperparameters for SSL-EY but used hyperparameters for Barlow Twins and VICReg that had been heavily optimized in previous studies.
-
-\begin{table}
-    \centering
-    \begin{tabular}{lcccc}
-        \hline
-        Method          & CIFAR-10 Top-1 & CIFAR-10 Top-5 & CIFAR-100 Top-1 & CIFAR-100 Top-5 \\
-        \hline
-        Barlow Twins    & \textbf{92.1}  & 99.73          & \textbf{71.38}  & \textbf{92.32}  \\
-        VICReg          & 91.68          & 99.66          & 68.56           & 90.76           \\
-        \textbf{SSL-EY} & 91.43          & \textbf{99.75} & 67.52           & 90.17           \\
-        \hline
-    \end{tabular}
-    \caption{Performance comparison of SSL methods on CIFAR-10 and CIFAR-100.}
-    \label{tab:selfsup}
-\end{table}
-
-\paragraph{Model Convergence:} The Learning curves in Figure~\ref{fig:ssl learning curve cifar100 top5} indicate that the performance variation at 1,000 epochs in table \ref{tab:selfsup} mainly results from optimization noise and speed of convergence is similar.
-
-\paragraph{Smaller Projector or None at All:}
-One key motivation for projectors is to prevent excessive collapse of meaningful information. Because SSL-EY learns does not suffer from collapse, we had a prior that it may be more robust to projector size, and perhaps even to removing the projector altogether.
-For this reason, in another set of experiments, we explored varying the projector's output dimensions from 2048 to 64 and removing the projector completely while holding the encoder output size constant. Figure~\ref{fig: ssl projector dimensions 100} demonstrates that SSL-EY maintains good performance even with a smaller projector, making the representations more efficient than Barlow Twins and VICReg (they contain the same amount of useful information for the classification task in much fewer dimensions). While Figure~\ref{fig: ssl projector dimensions 100} shows the strong performance of Barlow Twins and VICReg at larger projector sizes for this task, we would argue that our objective is more robust to this design choice, potentially offering a more reliable choice for practitioners employing SSL to unfamiliar datasets. At the bottom of Table \ref{tab:selfsup}, we further highlight the efficiency of SSL-EY by showing that our model performs similarly when we have no projector (just using the a 2048 dimensional representation), suggesting that SSL-EY is less reliant on this architecture\footnote{We note that W-MSE, a close relative of our work, also didn't use a projector despite its use being seemingly ubiquitous}. In contrast, we show in appendix \ref{sec:noproj} that Barlow Twins and VICReg's performance drops substantially without the use of a projector.
-
-\paragraph{$\LEY$ is an informative metric:} Figure~\ref{fig:ssl learning curve cifar100 vs corr} offers two key insights. First, it shows that the EY loss, which provides an unbiased estimate of the canonical correlations of the embeddings, is closely related to classification accuracy. This suggests that maximizing canonical correlation is a promising pretext task for self-supervised learning. Second, the figure reveals that even a reduced-dimensionality projector output (64 dimensions) has not reached its full capacity by 1,000 epochs. Specifically, the sum of squared canonical correlations reaches 46, out of a maximum possible value of 64. This indicates that there is still room for further optimization, implying that SSL-EY's representations have not yet saturated their capacity for capturing meaningful information. Lastly, the evolution of the correlation, as measured by $\LEY$, offers a novel way of monitoring model training even without the need for a separate validation task like classification, and could potentially eliminate the requirement for a validation set altogether. This is a particularly interesting direction given recent work on the stepwise eigenvalue behavior of the representations in SSL models \cite{simon2023stepwise}.
+\paragraph{Observations} As Table \ref{tab:selfsup} demonstrates, SSL-EY rivals Barlow Twins and VICReg, despite employing general hyperparameters as opposed to the latter's specifically optimized ones.
 
 \begin{table}[H]
     \centering
@@ -292,66 +313,82 @@ For this reason, in another set of experiments, we explored varying the projecto
         VICReg          & 91.68          & 99.66          & 68.56           & 90.76           \\
         \textbf{SSL-EY} & 91.43          & \textbf{99.75} & 67.52           & 90.17           \\
         \hline
-        SSL-EY No Proj. & 90.98          & 99.69          & 65.21           & 88.09           \\
-        \hline
     \end{tabular}
-    \caption{Performance comparison of SSL methods on CIFAR-10 and CIFAR-100.}
+    \caption{Comparing the performance of SSL methods on CIFAR-10 and CIFAR-100.}
     \label{tab:selfsup}
 \end{table}
 
+\paragraph{Model Convergence} In deep learning, a learning curve usually represents a graph showing the model's learning progress against number of epochs.
+Figure \ref{fig:ssl_learning_curve_cifar100_top5} illustrates that the performance variations at 1,000 epochs, shown in Table \ref{tab:selfsup}, primarily stem from optimization noise, with convergence speeds being comparable among methods.
+
 \begin{figure}[H]
     \centering
-% \includegraphics[width=\textwidth]{figures/SSL/cifar100_top5_learning_curve.svg}
-    \includegraphics[width=0.57\textwidth]{figures/SSL/cifar100_learning_curve_log_error}
-    \caption{\textbf{CIFAR 100: } Learning curves for SSL-EY, Barlow Twins, and VICReg, showing performance across 1,000 epochs.}
-    \label{fig:ssl learning curve cifar100 top5}
+    \includegraphics[width=0.8\textwidth]{figures/SSL/cifar100_learning_curve_log_error}
+    \caption{Learning curves for SSL-EY, Barlow Twins, and VICReg on CIFAR-100, depicting 1,000-epoch performance.}
+    \label{fig:ssl_learning_curve_cifar100_top5}
 \end{figure}
+
+\paragraph{Projector Size Variation} We hypothesized that SSL-EY's robustness to projector size might allow for efficient performance even with smaller projectors or without one.
+This hypothesis led us to experiment with varying projector output dimensions and completely removing the projector while maintaining the encoder size.
+Figure \ref{fig:ssl_projector_dimensions_100} shows SSL-EY's sustained performance with reduced projector size, indicating more efficient representations compared to Barlow Twins and VICReg.
+Furthermore, as Table \ref{tab:selfsup} and Figure \ref{fig:ssl_learning_curve_cifar100_vs_corr} suggest, SSL-EY performs consistently well even without a projector, underlining its reduced reliance on this architectural component.
 
 \begin{figure}[H]
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/SSL/cifar100_proj_dim_log_error}
-        \caption{}
-        \label{fig: ssl projector dimensions 100}
+        \caption{Performance of SSL-EY with varying projector dimensions on CIFAR-100.}
+        \label{fig:ssl_projector_dimensions_100}
     \end{subfigure}
+    \hfill
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/SSL/cifar100_corr_vs_acc_log_error}
-        \caption{}
-        \label{fig:ssl learning curve cifar100 vs corr}
+        \caption{Correlation of EY loss with classification accuracy in SSL-EY on CIFAR-100.}
+        \label{fig:ssl_learning_curve_cifar100_vs_corr}
     \end{subfigure}
-    \caption{\textbf{CIFAR 100: }(a) Performance of SSL-EY with reduced projector size compared to Barlow Twins and VICReg. (b) SSL-EY's learned embeddings indicate untapped representation capacity.}
-    \label{fig: ssl projector cifar 100}
+    \caption{\textbf{CIFAR 100 Projector Analysis:} (a) Examining the impact of projector size on SSL-EY's performance. (b) Investigating the relationship between EY loss and classification accuracy.}
+    \label{fig:ssl_projector_cifar_100}
 \end{figure}
 
+\paragraph{$\LEY$ as an Informative Metric} Figure\ref{fig:ssl_learning_curve_cifar100_vs_corr} offers two insights.
+First, it evidences the close relationship between EY loss and classification accuracy, highlighting the potential of maximizing canonical correlation as a pretext task in SSL. Second, it reveals that even a reduced projector dimensionality does not reach full capacity within 1,000 epochs, implying untapped potential in SSL-EY's representation capacity.
+evolution of the correlation, measured by $\LEY$, suggests a new avenue for monitoring model training, potentially eliminating the need for a separate validation task.
 
 \begin{figure}[H]
     \centering
-% \includegraphics[width=\textwidth]{figures/SSL/cifar100_top5_learning_curve.svg}
     \includegraphics[width=0.57\textwidth]{figures/SSL/cifar10_learning_curve_log_error}
-    \caption{\textbf{CIFAR 100: }Learning curves for SSL-EY, Barlow Twins, and VICReg, showing performance across 1,000 epochs.}
-    \label{fig:ssl learning curve cifar10 top5}
+    \caption{Learning curves for SSL-EY, Barlow Twins, and VICReg on CIFAR-10, depicting 1,000-epoch performance.}
+    \label{fig:ssl_learning_curve_cifar10_top5}
 \end{figure}
 
 \begin{figure}[H]
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/SSL/cifar10_proj_dim_log_error}
-        \caption{}
-        \label{fig: ssl projector dimensions 10}
+        \caption{Performance of SSL-EY with varying projector dimensions on CIFAR-10.}
+        \label{fig:ssl_projector_dimensions_10}
     \end{subfigure}
+    \hfill
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/SSL/cifar10_corr_vs_acc_log_error}
-        \caption{}
-        \label{fig:ssl learning curve cifar10 vs corr}
+        \caption{Correlation of EY loss with classification accuracy in SSL-EY on CIFAR-10.}
+        \label{fig:ssl_learning_curve_cifar10_vs_corr}
     \end{subfigure}
-    \caption{\textbf{CIFAR 10: }(a) Performance of SSL-EY with reduced projector size compared to Barlow Twins and VICReg. (b) SSL-EY's learned embeddings indicate untapped representation capacity.}
-    \label{fig: ssl projector cifar 10}
+    \caption{\textbf{CIFAR 10 Projector Analysis:} (a) Examining the impact of projector size on SSL-EY's performance. (b) Investigating the relationship between EY loss and classification accuracy.}
+    \label{fig:ssl_projector_cifar_10}
 \end{figure}
 
-\section{Conclusion}
 
-In this chapter, we extended our work on CCA to the deep learning setting.
-We illustrated state-of-the-art performance on the DCCA and DMCCA tasks.
-By highlighting links between modern Self-Supervised Learning methods and CCA, we were able to propose a novel self-supervised learning method, SSL-EY, which is competitive with existing methods on CIFAR-10 and CIFAR-100.
+\section{Discussion}
+
+Our innovative formulation of DCCA-EY successfully addresses the limitations of traditional DCCA methods, particularly in stochastic settings. The experimental results on Split MNIST and XRMB datasets unequivocally demonstrate DCCA-EY's superior capability in capturing correlations efficiently across a range of mini-batch sizes, thereby validating its scalability and robustness. Furthermore, our method shows notable improvements in convergence speed and reduced sensitivity to hyperparameter tuning, aspects critically important for practical applications.
+
+In SSL, SSL-EY stands out as a competitive and robust approach. Our experiments on CIFAR-10 and CIFAR-100 highlight SSL-EY's ability to achieve comparable performance with state-of-the-art methods like Barlow Twins and VICReg, even while using general hyperparameters. This underscores SSL-EY's adaptability and robustness in different settings. Particularly noteworthy is its performance with reduced or absent projectors, indicating its efficiency and potential for broader applications in SSL.
+
+Moreover, the insights gleaned from the correlation of EY loss with classification accuracy in SSL-EY open new avenues for understanding and leveraging canonical correlations in SSL. The observed relationships provide a promising direction for future research in developing more effective and efficient SSL methods.
+
+Our work bridges significant gaps in the literature and establishes a strong foundation for future explorations in both DCCA and SSL. The proposed methods not only enhance our understanding of these domains but also pave the way for practical applications where scalability, efficiency, and robustness are paramount.
+
+In summary, this chapter contributes to the advancement of DCCA and SSL by introducing novel approaches that are not only theoretically sound but also practically viable, offering valuable tools for researchers and practitioners alike in the ever-evolving landscape of machine learning.

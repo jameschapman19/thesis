@@ -1,7 +1,7 @@
 \graphicspath{{chapters/background/}}
 
 
-\chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}\label{chap:background}
+\chapter{Background: Multiview Machine Learning: Concepts, Methods, and Limitations}\label{ch:background}
  \epigraph{Principal Component Analysis is a dimensionally invalid method that gives people a delusion that they are doing something useful with their data. If you change the units that one of the variables is measured in, it will change all the “principal components”! It’s for that reason that I made no mention of PCA in my book.}{Professor David MacKay}
 \minitoc
 
@@ -11,7 +11,7 @@ In this chapter, we gather the necessary background knowledge needed to motivate
 
 Machine learning enables models to automatically learn patterns and make decisions from data.
 Machine learning comprises three primary paradigms: supervised, self-supervised (or unsupervised), and reinforcement learning, each distinct in its approach to learning from data.
-This thesis focuses on \textit{multiview self-supervised machine learning}, which aims to develop robust representations by uncovering associations between various data types within datasets.
+This thesis focuses on multiview self-supervised machine learning, which aims to develop robust representations by uncovering associations between various data types within datasets.
 These data types, known as \gls{views} may include distinct sources of information such as neuroimaging modalities, genomics, and clinical records in the context of patient data analysis.
 
 \subsection{Multiview Machine Learning}
@@ -28,7 +28,7 @@ The algorithm learns to predict the target view based on the input view, leverag
 
 Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels \citep{balestriero2023cookbook}.
 The cornerstone of SSL is the concept of a `pretext task', a learning task created from the data that trains the model to capture useful features or representations.
-In the context of multiview machine learning, self-supervised learning often operates under the assumption that different \gls{views} are generated from a common, but unobserved, \textit{latent} source.
+In the context of multiview machine learning, self-supervised learning often operates under the assumption that different \gls{views} are generated from a common, but unobserved, latent source.
 A natural pretext task, in this case, is to predict or estimate this source from the given \gls{views}.
 Dimensionality reduction is a common example of this, where the model learns to estimate a low-dimensional representation of the data from the \gls{views}.
 In this case, the model is forced to learn the underlying latent variable structure of the data without any direct supervision.
@@ -36,13 +36,19 @@ This not only enables the model to learn associations between \gls{views} but al
 
 \subsection{Types of Multiview Data}
 
-In neuroscience and genetics, two specific types of multiview studies are particularly relevant to this thesis: brain-behavior studies and imaging-genetics. Both involve the integration of data from multiple sources, offering rich insights into complex phenomena.
+In neuroscience and genetics, two specific types of multiview studies are particularly relevant to this thesis: brain-behavior studies and imaging-genetics.
+Both involve the integration of data from multiple sources, offering rich insights into complex phenomena.
 
-Brain-behavior studies typically involve pairing neuroimaging data, such as that obtained from Structural MRI (sMRI) or Functional MRI (fMRI), with non-imaging data like responses from questionnaires, cognitive test results, and other behavioral assessments. sMRI provides detailed anatomical brain images, essential for understanding brain structure and neurological disorders *citation*, while fMRI focuses on brain function by mapping activity during cognitive tasks *citation*. The integration of these imaging techniques with behavioral data offers a comprehensive view of how brain structures and functions correlate with behavioral and cognitive patterns *citation*.
+Brain-behavior studies typically involve pairing neuroimaging data, such as that obtained from Structural MRI (sMRI) or Functional MRI (fMRI), with non-imaging data like responses from questionnaires, cognitive test results, and other behavioral assessments.
+sMRI provides detailed anatomical brain images, essential for understanding brain structure and neurological disorders \citep{kanai2011structural}, while fMRI focuses on brain function by mapping activity during cognitive tasks \citep{miranda2021systematic}.
+The integration of these imaging techniques with behavioral data offers a comprehensive view of how brain structures and functions correlate with behavioral and cognitive patterns \citep{rypma2001age,genon2022linking}.
 
-Imaging-Genetics, another critical multiview approach, combines neuroimaging data with genetic information. This interdisciplinary field seeks to understand the genetic influences on brain structure and function, thereby illuminating the genetic basis of neuropsychiatric disorders and cognitive traits *citation*. Studies in this area might explore how specific genetic variations correlate with differences in brain morphology or activity patterns observed in neuroimaging *citation*.
+Imaging-Genetics, another critical multiview approach, combines neuroimaging data with genetics and omics information \citep{le2008sparse}.
+This interdisciplinary field seeks to understand the genetic influences on brain structure and function, thereby illuminating the genetic basis of neuropsychiatric disorders and cognitive traits \citep{bogdan2017imaging}.
+Studies in this area might explore how specific genetic variations correlate with differences in brain morphology or activity patterns observed in neuroimaging \citep{liu2014review}.
 
-Together, these multiview approaches are fundamental in advancing our understanding of the brain's structure, function, and its interactions with genetic and behavioral factors. They represent key applications of SSL in neuroscience and genetics, providing comprehensive insights that underpin developments in these fields *citation*.
+Together, these multiview approaches are fundamental in advancing our understanding of the brain's structure, function, and its interactions with genetic and behavioral factors.
+They represent key applications of SSL in neuroscience and genetics, providing comprehensive insights that underpin developments in these fields.
 
 \subsection{Conditional Independence, Causality, and Multiview Learning}
 
@@ -64,7 +70,7 @@ The graphical represents the assumption that the brain and behaviour are conditi
     \caption[Latent Variable Model of Mental Health]{\textit{\textbf{Latent Variable Model of Mental Health:}} From this perspective the neuroimaging modality and behavioural data are both considered to have been generated with distributions conditioned on the severity of a mental health condition}\label{fig:mentalhealthselfsupervised}
 \end{figure}
 
-In multiview machine learning, the relationship between conditional independence and causality is nuanced but crucial.
+In multiview machine learning, the relationship between conditional independence and causality is nuanced but crucial \citep{pearl2009causality}.
 When examining dependencies between events, such as those observed between brain activity and behavior, several scenarios emerge:
 
 \begin{itemize}
@@ -73,17 +79,18 @@ When examining dependencies between events, such as those observed between brain
     \item no direct causal link between them
 \end{itemize}
 
-Importantly, if a common cause does exist, conditioning on it renders brain and behavior independent; this 'screens off' their dependence, revealing key insights for our models \citep{reichenbach1956direction}.
+Importantly, if a common cause does exist, conditioning on it renders brain and behavior independent; this `screens off' their dependence, revealing key insights for our models \citep{reichenbach1956direction}.
 However, it is essential to recognize that the presence of a common latent variable, inferred from these \gls{views}, does not automatically imply causality in the observed data.
 
 \subsubsection{Complementary and Redundant Information}
 The nature of the information provided by different \gls{views} (such as neuroimaging and behavioral data) is important for understanding multiview learning models.
-A particularly useful distinction is between \textit{complementary} and \textit{redundant} information \citep{nguyen2020multiview}.
+A particularly useful distinction is between complementary and redundant information \citep{nguyen2020multiview,lyu2021understanding}.
 When views contain complementary information, they provide different perspectives on the same subject or sample.
 For example, we can understand different aspects of a mental health condition by examining both neuroimaging and behavioral data.
 On the other hand, when \gls{views} contain redundant information about the latent variables, they provide the same information from different perspectives.
 For example, a disease diagnosis might be encoded in both neuroimaging and blood test results.
-This does not make the \gls{views} useless, however, because they can be used to denoise each other, enhancing the clarity and reliability of the data. We can be more confident that a diagnosis is correct if it is supported by both neuroimaging and blood test results.
+This does not make the \gls{views} useless, however, because they can be used to denoise each other, enhancing the clarity and reliability of the data.
+We can be more confident that a diagnosis is correct if it is supported by both neuroimaging and blood test results.
 A particularly famous example of this principle is the `Wisdom of Crowds' effect, where the average of multiple noisy estimates is more accurate than any individual estimate \citep{galton1907vox}.
 This process exploits the overlap in information to correct or reduce noise and errors, a principle fundamental to many denoising techniques in machine learning.
 
@@ -105,10 +112,9 @@ $d \in [D_i]$ for dimensions of input variables;
 and $l,k \in [K]$ for dimensions of representations - i.e. to subscript dimensions of $Z\sps{i}, f\sps{i}$.
 Later on we will introduce total number of samples $N$.
 
-In this report, when the functions $f$ are linear, we will typically refer to $u_k$ as \textit{\gls{weights}}, $Z_k = X_k u_k$ as \textit{\gls{representations}} or \textit{\gls{latent variables}}, depending on the context. We will sometimes consider a
-matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of \gls{weights}, and a
-matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations.
-We will refer to the Pearson correlation between features and their respective latent variable $\Corr(X\sps{i}_j, Z_k)$ as the \textit{\gls{loadings}} of $X\sps{i}_j$ on $Z_k$ \citep{rosipal2005overview, alpert1972interpretation}, noting that the same concept has also been referred to as \textit{structure correlations} \citep{meredith1964canonical}.
+In this report, when the functions $f$ are linear, we will typically refer to $u_k$ as \gls{weights}, $Z_k = X_k u_k$ as \gls{representations} or \gls{latent variables} (and in the CCA literature as canonical variables \citep{borga_learning_1998}), depending on the context.
+We will sometimes consider a matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of \gls{weights}, and a matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations.
+We will refer to the Pearson correlation between features and their respective latent variable $\Corr(X\sps{i}_j, Z_k)$ as the \gls{loadings} of $X\sps{i}_j$ on $Z_k$ \citep{rosipal2005overview, alpert1972interpretation, borga_learning_1998}, noting that the same concept has also been referred to as structure correlations \citep{meredith1964canonical}.
 
 \subsection{Background: Generalized Eigenvalue Problems in linear algebra}
 A Generalized Eigenvalue Problem (GEP) is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}.
@@ -122,8 +128,8 @@ We shall only consider the case where $B$ is positive definite to avoid degenera
 Then the GEP becomes equivalent to an eigen-decomposition of the symmetric matrix $B^\mhalf A B^\mhalf$.
 This is key to the proof of our new characterization.
 In addition, one can find a basis of eigenvectors spanning $\R^D$.
-We define a \textit{top-$K$ subspace} to be one spanned by some set of eigenvectors {$u_1,\dots,u_K$} with the top-$K$ associated eigenvalues $\lambda_1 \geq \dots \geq \lambda_K$.
-We say a matrix $U \in \R^{D \times K}$ \textit{defines} a top-$K$ subspace if its columns span one.
+We define a top-$K$ subspace to be one spanned by some set of eigenvectors {$u_1,\dots,u_K$} with the top-$K$ associated eigenvalues $\lambda_1 \geq \dots \geq \lambda_K$.
+We say a matrix $U \in \R^{D \times K}$ defines a top-$K$ subspace if its columns span one.
 
 \paragraph{Uniqueness}
 In GEPs, the eigenvectors $u$ are not in general unique, but the generalized eigenvalues $1 \geq \lambda_1 \geq \lambda_2 \geq \dots \geq 0$ are unique \citep{mills1988calculation}.
@@ -173,11 +179,12 @@ where \(\lambda\) is the Lagrange multiplier. Differentiating the Lagrangian yie
 
 This transforms the problem into an eigenvalue equation for the covariance matrix \(\Sigma\), which can be efficiently solved using standard libraries such as scikit-learn \citep{pedregosa2011scikit}.
 
-The first principal component therefore corresponds to the eigenvector associated with the largest eigenvalue \(\lambda\). Subsequent components are the remaining eigenvectors ordered by their corresponding eigenvalues.
+The first principal component therefore corresponds to the eigenvector associated with the largest eigenvalue \(\lambda\).
+Subsequent components are the remaining eigenvectors ordered by their corresponding eigenvalues.
 
 \subsubsection{Limitations}
 However, when applying \acrshort{pca} to datasets such as high-dimensional neuroimaging and behavioral
-data, \acrshort{pca}'s main limitation arises: it only accounts for variance within a single dataset, so it cannot take advantage of either the redundancy or the complementary information in multiview data.
+data, \acrshort{pca}\('\)s main limitation arises: it only accounts for variance within a single dataset, so it cannot take advantage of either the redundancy or the complementary information in multiview data.
 
 \subsection{Partial Least Squares}
 
@@ -248,7 +255,7 @@ Which is of the form $A v = \lambda B v$. \acrshort{pls} is therefore also defin
 
 Given the notions of uniqueness in GEPs, the weights $u$ are not in general unique but we can write the vector of generalized eigenvalues, here representing covariances, as
 \begin{align}
-    \label{eq:cca-vector-of-correlations-def}
+    \label{eq:pls-vector-of-correlations-def}
     \PLS_K(X^{(1)},X^{(2)}) \defeq (\rho_k)_{k=1}^K
 \end{align}
 
@@ -341,7 +348,7 @@ We can also represent the system of equations in equation~\ref{CCA:FOCs} as a ma
 Which is once again of the form $A u = \lambda B u$. \acrshort{cca}, like \acrshort{pls}, is therefore also defined by the solution to a single generalized eigenvalue problem.
 
 \paragraph{Canonical Correlations}
-In the case of \acrshort{cca}, the generalized eigenvalues $\lambda$ are generally called \textit{canonical correlations} \citep{hotelling1936relations}.
+In the case of \acrshort{cca}, the generalized eigenvalues $\lambda$ are generally called canonical correlations \citep{hotelling1935canonical, hotelling1992relations}.
 Given the notions of uniqueness in GEPs, the weights $u$ are not in general unique but we can write the vector of generalized eigenvalues or canonical correlations as:
 \begin{align}
     \label{eq:cca-vector-of-correlations-def}\small
@@ -403,7 +410,7 @@ This GEP formulation of MCCA can be presented in a unified framework generalizin
     B_\alpha^{(ii)} = \alpha_i I_{D\sps{i}} + (1-\alpha_i) \Var(X\sps{i})  %\text{ for } i \in [I]
 \end{align}
 Where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters: taking $\alpha_i = 0 \: \forall i$ recovers CCA and $\alpha = 1 \: \forall i$ recovers PLS.
-We may omit the subscript $\alpha$ when $\alpha=0$ and we recover the `pure CCA' setting; in this case, following \cref{eq:cca-vector-of-correlations-def} we can define
+We may omit the subscript $\alpha$ when $\alpha=0$ and we recover the `pure CCA' setting; in this case, following \ref{eq:cca-vector-of-correlations-def} we can define
 
 \begin{align}
     \MCCA_K(X\sps{1},\dots,X\sps{I})
@@ -414,7 +421,7 @@ to be the vector of the top-$K$ generalized eigenvalues which are the average of
 \subsection{Linear Discriminant Analysis LDA}
 
 Linear Discriminant Analysis (LDA) can be viewed as a special case of Canonical Correlation Analysis (CCA) where \(X^{(2)}\) is a one-hot encoded matrix representing the class labels.
-This allows us to draw a connection between the unsupervised learning framework of \acrshort{cca} and the supervised framework of LDA, thus expanding the understanding of both algorithms.
+This allows us to draw a connection between the unsupervised learning framework of \acrshort{cca} and the supervised framework of LDA\citep{balakrishnama1998linear,riffenburgh1957linear}, thus expanding the understanding of both algorithms.
 
 \textbf{Intuition:} In LDA, the aim is to find a lower-dimensional subspace where the classes are maximally separated. This objective can be viewed through the lens of \acrshort{cca}, where the optimal directions \(u^{(1)}\) and \(u^{(2)}\) in the original and one-hot encoded spaces aim to maximize correlation. In the LDA context, \(u^{(1)}\) would maximize the separation between classes.
 
@@ -439,7 +446,7 @@ This perspective unifies the two algorithms and shows that the core objective—
 \subsection{Sample Covariance and Population Covariance}
 In the previous sections, the methods were described in terms of population covariance matrices such as \(\Sigma_{11}=\mathbb{E}[X\spsT{1} X\sps{1}]\), \(\Sigma_{22}=\mathbb{E}[X\spsT{2} X\sps{2}]\), and \(\Sigma_{12}=\mathbb{E}[X\spsT{1} X\sps{2}]\). These population covariances assume an underlying probability distribution from which the data are drawn.
 
-\textbf{Sample Covariance:} In practical settings, we often do not have access to the entire population but only to a sample. Hence, we can utilize the Sample Average Approximation to estimate these covariances:
+\textbf{Sample Covariance:} In practical settings, we often do not have access to the entire population but only to a sample. Hence, we can use the Sample Average Approximation to estimate these covariances:
 
 \[
     \hat{\Sigma}\sps{12} = \frac{1}{b-1} \bar{\mathbf{X}\sps{1}} \bar{\mathbf{X}\sps{2}}\top
@@ -452,7 +459,7 @@ Here, \(b\) denotes the size of the minibatch, and \(\mathbf{X}\sps{1} \in \math
 \textbf{Connection to Previous Methods:} The use of sample covariance matrices is directly applicable to algorithms like \acrshort{cca} and LDA. When replacing the population covariances \(\Sigma\sps{ij}\) with sample estimates, the optimization problems remain structurally similar but are solved using the sample data.
 
 This dual perspective—considering both population and sample covariance matrices—enables a more robust and flexible approach to the methods discussed, bridging the gap between theoretical analysis and practical application.
-It will be particularly useful in the context of chapter \ref{chap:loadings} where we will use population variables as ground truth while estimating the models using sample data.
+It will be particularly useful in the context of chapter \ref{ch:loadings} where we will use population variables as ground truth while estimating the models using sample data.
 
 
 \section{Practical Frameworks for Multiview Learning}
@@ -463,7 +470,9 @@ However, it is not yet clear how we should apply these methods to real-world dat
 \subsection{Machine Learning and Statistical Inference}
 
 Canonical Correlation Analysis (\acrshort{cca}) has been studied from both machine learning and statistical inference perspectives.
-In this section, we will explore the differences between these two approaches and their implications for multiview learning.
+At its core, machine learning focuses on prediction, while statistical inference focuses on understanding the underlying data structure\citep{ij2018statistics}.
+However, these two approaches are not mutually exclusive, and statistical learning theory has emerged as a unifying framework for both perspectives \citep{vapnik1999nature, hastie2009elements}.
+In this section, we will review the differences between these two approaches and their implications for multiview learning.
 
 \subsubsection{Statistical Inference Evaluation Framework}
 
@@ -471,15 +480,18 @@ Statistical inference approaches provide a contrasting perspective to machine le
 
 \paragraph{Parameter Estimation}
 
-In statistical inference, parameter estimation involves estimating model parameters and their uncertainties. This process is fundamental to understanding the data and the model's fit.
+In statistical inference, parameter estimation involves estimating model parameters and their uncertainties.
+This process is fundamental to understanding the data and the model's fit.
 
 \paragraph{Hypothesis Testing}
 
-Hypothesis testing assesses the statistical significance of the relationships found by the model. It tests whether the observed data patterns are likely to have occurred under the null hypothesis.
+Hypothesis testing assesses the statistical significance of the relationships found by the model.
+It tests whether the observed data patterns are likely to have occurred under the null hypothesis.
 
 \paragraph{Confidence Intervals}
 
-Confidence intervals provide ranges within which the true parameter values are likely to fall, considering uncertainty. They are essential for understanding the reliability of parameter estimates.
+Confidence intervals provide ranges within which the true parameter values are likely to fall, considering uncertainty.
+They are essential for understanding the reliability of parameter estimates.
 
 \paragraph{Permutation Testing}
 
@@ -536,7 +548,11 @@ This perspective further reinforces the subspace approach, emphasizing the ident
 
 \paragraph{Thesis Approach: Concentrating on the Top-1 Component}
 
-In this thesis, we focus on the top-1 component in CCA to align with and facilitate comparison with typical componentwise studies in brain-behavior research. This choice is driven by the complexity associated with the top-k problem and the variety of methods available to address it. Under the assumption of a significant eigengap\footnote{An `eigengap' refers to the difference in magnitude between consecutive eigenvalues in an eigenvalue problem. A significant eigengap between the first and second eigenvalues suggests that the first eigenvalue (and its corresponding eigenvector) is distinctly more significant than the next, lending credence to its uniqueness and importance.}, the first component can be considered equivalent to the top-1 subspace. This equivalence allows for a clear and interpretable analysis, making the top-1 subspace a straightforward and reliable choice for studying multivariate data. It's important to note that while we focus on the top-1 component, the later sections of the thesis introduce a method for simultaneously solving the complete subspace, addressing broader subspace analyses.
+In this thesis, we focus on the top-1 component in CCA to align with and facilitate comparison with typical componentwise studies in brain-behavior research.
+This choice is driven by the complexity associated with the top-k problem and the variety of methods available to address it.
+Under the assumption of a significant eigengap\footnote{An `eigengap' refers to the difference in magnitude between consecutive eigenvalues in an eigenvalue problem. A significant eigengap between the first and second eigenvalues suggests that the first eigenvalue (and its corresponding eigenvector) is distinctly more significant than the next, lending credence to its uniqueness and importance.}, the first component can be considered equivalent to the top-1 subspace.
+This equivalence allows for a clear and interpretable analysis, making the top-1 subspace a straightforward and reliable choice for studying multivariate data.
+It is important to note that while we focus on the top-1 component, the later sections of the thesis introduce a method for simultaneously solving the complete subspace, addressing broader subspace analyses.
 
 
 \section{Multiview Learning in Neuroimaging}
@@ -548,62 +564,30 @@ Later in this dissertation we will replicate and build on the findings from this
 Owing to the high dimensionality of neuroimaging data, regularisation has been a particular focus of multiview learning in neuroimaging. \citet{mihalik2022canonical} reviews the application of \acrshort{cca} to neuroimaging data and highlights the importance of regularisation in this context. \citet{bilenko2016pyrcca} 
 CCA has also been used as a preprocessing step in order to identify groups of subjects in the latent variable space.
 
-CCA has also been used to identify relationships between neuroimaging data and other modalities such as genetics \citep{chen2016imaging}, and behavioural data \citep{chen2015imaging}.
-
 In particular, \acrshort{cca} and clustering have been used to identify depression using fMRI data \citep{dinga2019evaluating,drysdale2017resting}.
 CCA has also been used in the manner we described to denoise two \gls{views} of a dataset such as separate measures of neuroimaging data \citep{zhuang2020technical} to remove artefacts.
 Deep \acrshort{cca} has recently been used to extract features for the diagnosis of schizophrenia\citep{qi2016deep}.
 
-
-\section{Open challenges in Multiview Learning and CCA}
-
-This thesis has been motivated by a number of open challenges in multiview learning and canonical correlation analysis.
-Chapter \ref{chap:als} and \ref{chap:loadings} will address the first challenge, which is the regularisation of \acrshort{cca} in high dimensional settings and the interpretation of the resulting components.
-Chapters \ref{chap:gradient_descent}, \ref{chap:deep_learning}, and \ref{chap:software} will address the second challenge, the efficient application of \acrshort{cca} to big data.
-Finally \ref{chap:deep} will also address the third challenge, extending \acrshort{cca} to Deep Self-Supervised Learning.
-
-\subsection{Interpretability and Regularization}
-
-\textcolor{red}{TODO: Add a paragraph on interpretability and regularization}
-
-\subsection{Efficient Algorithms for High-Dimensional Data}
-
-\textcolor{red}{TODO: Add a paragraph on efficient algorithms for high-dimensional data}
-
-\subsection{Non-linear \acrshort{cca} and Joint Embedding Self-Supervised Learning}
-
-\textcolor{red}{TODO: Add a paragraph on non-linear \acrshort{cca} and Joint Embedding Self-Supervised Learning}
-
-%As is standard in Kernel methods, \acrshort{kcca} can be extended to non-linear \acrshort{cca} by using a non-linear kernel function \(k\).
-%This allows for the discovery of non-linear relationships between the data modalities.
-%However, the non-linear kernel function \(k\) is typically fixed a priori, which can be problematic since the optimal kernel function may be unknown.
+%\section{Open challenges in Multiview Learning and CCA}
 %
-%\subsubsection{Deep \acrshort{cca}}
+%This thesis has been motivated by a number of open challenges in multiview learning and canonical correlation analysis.
+%Chapter \ref{ch:als} and \ref{ch:loadings} will address the first challenge, which is the regularisation of \acrshort{cca} in high dimensional settings and the interpretation of the resulting components.
+%Chapters \ref{ch:gradient_descent}, \ref{ch:deep_learning}, and \ref{ch:software} will address the second challenge, the efficient application of \acrshort{cca} to big data.
+%Finally \ref{ch:deep_learning} will also address the third challenge, extending \acrshort{cca} to Deep Self-Supervised Learning.
 %
-%Deep \acrshort{cca} (\acrshort{dcca}) is a non-linear extension of \acrshort{cca} that uses deep neural networks to find non-linear relationships between variables.
+%\subsection{Interpretability and Regularization}
 %
-%\subsubsection{Joint Embedding Self-Supervised Learning}
+%\textcolor{red}{TODO: Add a paragraph on interpretability and regularization}
 %
-%Joint Embedding Self-Supervised Learning is a method for learning representations of data that are useful for downstream tasks.
+%\subsection{Efficient Algorithms for High-Dimensional Data}
 %
-%\begin{figure}
-%    \centering
-%    \tikz{
-%    % nodes
-%        \node[latent, align=center, minimum size=2cm] (x) {Original Image\\x};
-%        %
-%        \node[obs, below left=of Z, minimum size=2cm, align=center] (x1) {Augmentated Image \\$x^{(1')}$};
-%        \node[obs, below right=of Z, minimum size=2cm, align=center] (x2) {Augmentated Image \\$x^{(2')}$};
-%        % edges
-%        \edge{x} {x1}
-%        \edge{x} {x2}}
-%    \caption[Joint Embedding Data Generation Process]{\textit{\textbf{Joint Embedding Data Generation Process:}} The original image \(x\) is augmented twice to produce two augmentated images \(x^{(1')}\) and \(x^{(2')}\).}
-%\end{figure}
+%\textcolor{red}{TODO: Add a paragraph on efficient algorithms for high-dimensional data}
 %
-%In many self-supervised learning methods, the data is augmented to produce multiple views of the same data.
-%For example, in the case of images, the image can be cropped, rotated, or flipped to produce multiple views of the same image.
-%The goal is to learn representations of the data that are invariant to these augmentations and thus capture the underlying structure of the data (e.g. features which are generally useful).
-%From the background we have given on \acrshort{cca}, it is clear that \acrshort{cca} is a natural fit for this problem, precisely because all of the information is redundant rather than complementary; the augmentations are all views of the same data and they are chosen randomly.
+%\subsection{Non-linear \acrshort{cca} and Joint Embedding Self-Supervised Learning}
+%
+%\textcolor{red}{TODO: Add a paragraph on non-linear \acrshort{cca} and Joint Embedding Self-Supervised Learning}
+%
+%
 
 
 

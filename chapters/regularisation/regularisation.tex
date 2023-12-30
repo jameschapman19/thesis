@@ -1,8 +1,8 @@
 \graphicspath{{chapters/regularisation}}
 
 
-\chapter{Regularisation of CCA Models}\label{chap:als}
-%\epigraph{All models are wrong, some are useful.}{\textit{G. Box}}
+\chapter{Regularisation of CCA Models}\label{ch:als}
+
 \minitoc
 % chktex-file 44 
 % chktex-file 3
@@ -12,13 +12,19 @@ In this chapter, I build upon my earlier work presented at the OHBM conference a
 
 \section{Introduction}\label{sec:introduction}
 
-This chapter introduces a novel approach for analyzing large-scale neuroimaging datasets, such as the Human Connectome Project (\acrshort{hcp}) and Alzheimer's Disease Neuroimaging Initiative (\acrshort{adni}), to understand the relationship between brain structure, function, and behavior \citep{SMITH2018263,BZDOK2017549,wang2020finding}. These datasets are characterized by a disproportion between the number of subjects and the volume of features, posing a challenge for Canonical Correlation Analysis (CCA) models due to the risk of overfitting and spurious correlations \citep{citation}. For example, the \acrshort{hcp} dataset used in this chapter contains 1003 subjects and 19,900 features in the functional MRI (fMRI) view alone while the \acrshort{adni} dataset contains 592 subjects and  168,130 features in the structural MRI (sMRI) view alone.
+This chapter introduces a novel approach for analyzing large-scale neuroimaging datasets, such as the Human Connectome Project (\acrshort{hcp} \citep{van2013wu}) and Alzheimer's Disease Neuroimaging Initiative (\acrshort{adni}), to understand the relationship between brain structure, function, and behavior \citep{SMITH2018263,BZDOK2017549,wang2020finding}.
+These datasets are characterized by a disproportion between the number of subjects and the volume of features, posing a challenge for Canonical Correlation Analysis (CCA) models due to the risk of overfitting and spurious correlations \citep{wang2018finding}.
+For example, the \acrshort{hcp} dataset used in this chapter contains 1003 subjects and 19,900 features in the functional MRI (fMRI) view alone while the \acrshort{adni} dataset contains 592 subjects and  168,130 features in the structural MRI (sMRI) view alone.
 
-In response to the reproducibility crisis in neuroscience \citep{button2013power}, this chapter focuses on enhancing the generalizability of CCA models through regularization, a technique that introduces a bias towards more interpretable and generalizable models \citep{engl1996regularisation,bzdok2019towards}. Traditional regularization methods in CCA, such as 'sparse CCA' with Partial Least Squares (PLS) objectives, are limited by their inherent bias towards the largest principal components \citep{citation}.
+In response to the reproducibility crisis in neuroscience \citep{button2013power}, this chapter focuses on enhancing the generalizability of CCA models through regularization, a technique that introduces a bias towards more interpretable and generalizable models \citep{engl1996regularisation,bzdok2019towards}.
+Existing regularization methods in CCA, such as `sparse CCA' with Partial Least Squares (PLS) objectives \citep{le2008sparse,witten2009penalized,lindenbaum2021l0}, are limited by their inherent bias towards the largest principal components \citep{mihalik_canonical_2022}.
 
-To overcome these limitations, we propose the Flexible Regularised Alternating Least Squares (FRALS) framework for CCA. FRALS allows for the integration of various regularized least squares solvers, particularly emphasizing the elastic net penalty, which combines L2 and L1 penalties. This method controls bias and promotes sparsity in model weights, advancing beyond previous sparse Brain-Behavior analysis methods.
+To overcome these limitations, we propose the Flexible Regularised Alternating Least Squares (FRALS) framework for CCA based on the Alternating Least Squares form of CCA \citep{golub1995canonical}.
+FRALS allows for the integration of various regularized least squares solvers, particularly emphasizing the elastic net penalty, which combines L2 and L1 penalties.
+This method controls bias and promotes sparsity in model weights, advancing beyond previous sparse Brain-Behavior analysis methods.
 
-Our application of the FRALS framework with Elastic Net regularization to the \acrshort{hcp} and \acrshort{adni} datasets showcases its effectiveness in enhancing out-of-sample canonical correlation compared to traditional CCA models \citep{citation}. Additionally, FRALS uncovers new modes of variation in brain-behavior relationships.
+Our application of the FRALS framework with Elastic Net regularization to the \acrshort{hcp} and \acrshort{adni} datasets showcases its effectiveness in enhancing out-of-sample canonical correlation compared to traditional CCA models.
+Additionally, FRALS uncovers new modes of variation in brain-behavior relationships.
 
 In essence, this chapter presents FRALS as a robust, innovative solution for the analysis of high-dimensional neuroimaging datasets, significantly improving the reliability and interpretability of Brain-Behavior correlations.
 
@@ -28,7 +34,7 @@ In this section, we review a number of regularisation techniques that have been 
 
 \subsection{The Bias-Variance Tradeoff}
 
-A key principle in machine learning is the bias-variance tradeoff.
+A key principle in machine learning is the bias-variance tradeoff \citep{curth2023u, hastie2009elements}.
 This concept posits that a tradeoff exists between the bias and variance of a model: high-bias models typically exhibit low variance, and vice versa.
 High-bias models are generally simpler and more stable, but they might oversimplify the problem, leading to underfitting.
 Conversely, low-bias, complex models are sensitive to data changes and prone to overfitting.
@@ -40,9 +46,10 @@ This means regularisation can improve the generalizability of models in high-dim
 \paragraph{Implicit and Explicit Regularisation}
 
 We can implement regularisation in two different ways.
-\textit{Explicit} regularisation is achieved by adding a penalty term to the objective function. Weights the objective function against a term that penalises complexity.
+\textit{Explicit} regularisation is achieved by adding a penalty term to the objective function.
+This weights the objective function against a term that penalises complexity.
 
-\textit{Implicit} regularisation is achieved by changing the optimisation algorithm and can include dimensionality and feature engineering techniques.
+\textit{Implicit} regularisation is achieved by changing the optimisation algorithm and can include dimensionality reduction, as well as certain optimisation procedures like using stochastic gradient descent in place of gradient descent \citep{ali2020implicit}, and early stopping of optimization routines \citep{yao2007early}
 
 \subsection{Shrinkage Regularisation}
 
@@ -227,7 +234,7 @@ For example, the elastic net penalty is not one-homogenous and therefore cannot 
 
 \paragraph{Sparse CCA: Proximal Gradient Descent and ADMM}
 \citet{kanatsoulis2018structured} proposed solving equation~\ref{eq:mai} for more general classes of $P$ using the alternating direction method of multipliers (ADMM)~\citep{boyd2011distributed}.
-\cite{fu2017scalable} propose a regularised CCA based on an alternative classical CCA formulation, sometimes called the MAXVAR formulation, which views the problem as a constrained least squares with an auxiliary representation $T$\citep{carroll1968generalisation,kettenring1971canonical}.
+\cite{fu2017scalable} propose a regularised CCA based on an alternative classical CCA formulation, sometimes called the MAXVAR formulation, which views the problem as a constrained least squares with an auxiliary representation $T$\citep{carroll1968generalization,kettenring1971canonical}.
 
 \begin{align}
     \label{eq:fu}
@@ -250,13 +257,12 @@ Similarly, Laplacian (or \textit{GraphNet}) regularisation, which induces a simi
 
 Having discussed the benefits of both shrinkage (e.g., PCA-CCA, Ridge CCA, PLS), sparsity (SPLS, Sparse CCA), and structure (Total Variation, Laplacian) in handling high-dimensional, noisy, and structured data, a natural progression is to integrate these advantages.
 Specifically, the challenge lies in creating a framework that allows for users to match the regularisation method to their data and research question, enhancing the interpretability and performance of Brain-Behaviour association models.
-The solution?
-A method that employs readily available regularised regression solvers, allowing for flexible and tunable regularisation in CCA.
-This leads us to propose the Flexible Regularised Alternating Least Squares (FRALS).
+This led us to propose the Flexible Regularised Alternating Least Squares (FRALS).
 
-\section{Methods - Flexible Regularised Alternating Least Squares (FRALS)}\label{subsec:flexible-regularised-alternating-least-squares-(frals)}
+\section{Methods: Flexible Regularised Alternating Least Squares (FRALS)}\label{subsec:flexible-regularised-alternating-least-squares-(frals)}
 
-The primary goal of our Flexible Regularised Alternating Least Squares framework is to provide a versatile and user-friendly interface for Canonical Correlation Analysis (CCA). This is achieved by designing the framework to be compatible with any scikit-learn compatible regularised least squares solver. This compatibility is pivotal as it allows researchers and practitioners to leverage the extensive range of solvers available in scikit-learn, a popular machine learning library in Python.
+The primary goal of our Flexible Regularised Alternating Least Squares framework is to provide a versatile and user-friendly interface for Canonical Correlation Analysis (CCA). This is achieved by designing the framework to be compatible with any scikit-learn compatible regularised least squares solver.
+This compatibility is pivotal as it allows researchers and practitioners to leverage the extensive range of solvers available in scikit-learn, a popular machine learning library in Python.
 
 This approach marks a significant departure from traditional methodologies in CCA, which often focused on developing or utilizing specific solvers tailored for particular types of data or computational constraints.
 By contrast, \acrshort{frals} democratises access to advanced CCA techniques, allowing users to select solvers that best fit their specific data characteristics, computational needs, or familiarity.
@@ -296,16 +302,50 @@ In this chapter, we illustrate the power of the \acrshort{frals} framework by im
 
 In summary, the \acrshort{frals} framework is a flexible and user-friendly interface for CCA that allows users to combine scikit-learn compatible regularised least squares solvers to solve regularised CCA problems.
 
+\section{Experiment Design}
 
-\section{Experiments}
-
-In this section, we outline the methodologies employed in our study of \acrshort{frals} and related techniques.
+This section outlines the methodologies used in our study to explore the Flexible Regularized Alternating Least Squares (FRALS) and associated techniques in Canonical Correlation Analysis (CCA). We focus on fitting a single latent dimension for the analyses.
 
 \subsection{Datasets}\label{subsec:datasets}
 
 For this chapter, we chose the \acrshort{hcp} and the \acrshort{adni} datasets to facilitate comparison with two influential brain-behaviour studies \citep{smith2015positive, monteiro2016multiple} as well as the tutorial paper that this chapter is loosely related to \citep{mihalik2022canonical}.
-We are particularly interested in the performance of an Elastic Net \acrshort{frals}  on these datasets as Ridge CCA has been shown to outperform PLS \citep{mihalik2022canonical}, implying that shrinkage regularisation is beneficial, and Sparse PLS has been shown to outperform PLS \citep{monteiro2016multiple}, implying that sparsity is beneficial.
+We are particularly interested in the performance of an Elastic Net \acrshort{frals} on these datasets as Ridge CCA has been shown to outperform PLS \citep{mihalik2022canonical}, implying that shrinkage regularisation is beneficial, and Sparse PLS has been shown to outperform PLS \citep{monteiro2016multiple}, implying that sparsity is beneficial. 
 We therefore expect that Elastic Net \acrshort{frals} will outperform PLS, Ridge CCA, and Sparse PLS on these datasets.
+
+\subsection{The Predictive Framework for CCA}\label{subsec:the-predictive-framework-for-cca}
+
+Our evaluation of CCA models used a standard predictive framework, dividing the data into an 80:20 ratio for training and testing. This method ensures fitting the model on the training set without incorporating information from the test set.
+
+\subsubsection{Model Comparisons}
+
+The experiment aims to demonstrate the effectiveness of tunable shrinkage and sparsity in CCA models, enabled by the FRALS framework.
+We compare the performance of Elastic Net FRALS with other CCA variants such as PCA, PLS, Ridge CCA, SPLS, and Elastic Net CCA, particularly in the context of high-dimensional datasets like HCP and ADNI\@.
+
+\begin{table}[h]
+    \centering
+    \caption{Employed CCA Variants}
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Model}               & \textbf{Abbreviation} & \textbf{Hyperparameters}                         & \textbf{Hyperparameter Range} \\
+        \hline
+        Principal Component Analysis & PCA                   & -                                                & -                             \\
+        \hline
+        Regularised CCA              & RCCA                  & \(c_1, c_2\)                                     & 0-1 (log scaled)              \\
+        \hline
+        FRALS - Elastic              & Elastic               & \(\alpha_1, \alpha_2, \text{l1}_1, \text{l1}_2\) & (1e-5,1e-1), (0-1)            \\
+        \hline
+        Partial Least Squares        & PLS                   & -                                                & -                             \\
+        \hline
+        Sparse PLS                   & SPLS                  & \(\tau_1, \tau_2\)                               & 0-1 (log scaled)              \\
+        \hline
+    \end{tabular}\label{tab:cca-variants}
+\end{table}
+
+\subsubsection{Model Selection}
+
+For models that require hyperparameter tuning, a grid search was employed to find the best hyperparameters. 
+We used 5-fold cross-validation to assess the performance of each model with various hyperparameters across different training data splits. 
+The optimization goal was to achieve the highest average out-of-sample correlation.
 
 \subsubsection{The Human Connectome Project (\acrshort{hcp})}
 
@@ -323,7 +363,7 @@ We summarize the parameters of the \acrshort{hcp} data in table~\ref{tab:hcp-par
         \textbf{Parameter}                        & \textbf{Value} \\
         \hline
         Number of samples (\textit{n})            & 1003           \\
-        Number of features in View 1 (\textit{p}) & 19900          \\
+        Number of features in View 1 (\textit{p}) & 300          \\
         Number of features in View 2 (\textit{q}) & 145            \\
         \hline
     \end{tabular}\label{tab:hcp-parameters}
@@ -365,6 +405,7 @@ This is important to avoid data leakage, where information from the test set is 
 \subsubsection{Model Comparisons}
 In the experiments in this section, we are interested in illustrating the effects of tunable shrinkage and sparsity on the performance and interpretability of CCA models, enabled by the \acrshort{frals} framework.
 To this end, we compare the performance of Elastic Net \acrshort{frals} with other CCA variants, including PCA, PLS, Ridge CCA, Sparse PLS, and Elastic Net CCA\@.
+Since the \acrshort{hcp} and \acrshort{adni} data are high-dimensional, we drop CCA from the analysis since it would produce random results.
 
 \begin{table}[h]
     \centering
@@ -383,7 +424,7 @@ To this end, we compare the performance of Elastic Net \acrshort{frals} with oth
         \hline
         Sparse PLS                   & SPLS                  & \(\tau_1, \tau_2\)                               & 0-1\footnote{As in \citet{witten2013package}, these are converted to 0-$\sqrt {\text{number of features}}$)} (log scaled) \\
         \hline
-    \end{tabular}\label{table:cca-variants}
+    \end{tabular}\label{tab:cca-variants}
 \end{table}
 
 \subsubsection{Model Selection}
@@ -392,13 +433,11 @@ For the models that require hyperparameter tuning, we use a grid search to find 
 Specifically, we use 5-fold cross-validation to evaluate the performance of a model with a given set of hyperparameters on 5 different splits of the training data with non-overlapping validation sets.
 We optimise for the hyperparameters that give the best average out of sample correlation.
 
-
-\section{Results}
+\section{Experiment Results}
 
 \subsection{\acrshort{hcp} Results}
 
 Next, we consider the results of applying the various CCA variants to the \acrshort{hcp} data.
-Since the \acrshort{hcp} data is high-dimensional, we drop CCA from the analysis since it would produce random results.
 
 \subsubsection{Out of Sample Correlation}
 
@@ -409,20 +448,19 @@ On the other hand, while the additional sparsity improved SPLS over PLS (consist
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\linewidth]{figures/hcp/holdout_correlations}
-    \caption{\textbf{HCP:} Out-of-sample canonical correlations for each model.}
+    \caption{\textbf{HCP:} Comparative out-of-sample canonical correlations among PCA, RCCA, ElasticNet, PLS, and SPLS models. The bars represent the correlation coefficients, indicating that Ridge CCA and Elastic Net models have superior performance over PLS and SPLS in capturing holdout correlation.}
+    \label{fig:performance}
 \end{figure}
 
-Nonetheless, the Elastic Net model did produce sparser weights than the Ridge CCA model (Figure~\ref{fig:sparsity}) with the Elastic Net model using 241 and 96 non-zero weights for the brain and behaviour views respectively.
-This is compared to 300 and 145 non-zero weights for the brain and behaviour views respectively for the Ridge CCA model.
-The SPLS model used even fewer variables with 118 and 56 non-zero weights for the brain and behaviour views respectively.
-Given that the Elastic Net model can produce the same performance as the Ridge CCA model with fewer variables, we might then be inclined to prefer the Elastic Net model.
+Nonetheless, the Elastic Net model demonstrated a more sparse representation than the Ridge CCA model, with the Elastic Net model utilizing 241 and 96 non-zero weights for the brain and behaviour views, respectively (Table~\ref{tab:sparse-weights-hcp}). In contrast, the Ridge CCA model used 300 and 145 non-zero weights for the respective views.
+Moreover, the SPLS model achieved an even sparser solution with only 118 and 56 non-zero weights for the brain and behaviour views. Considering the comparable performance of the Elastic Net and Ridge CCA models, the former's sparsity may offer a preferable solution.
 
 \begin{table}[h]
     \centering
-    \caption{\textbf{HCP:} Number of non-zero \gls{weights} for each model.}
+    \caption{\textbf{HCP:} Sparsity of models reflected by the count of non-zero weights. Elastic Net and SPLS demonstrate increased sparsity in the model weights for both brain and behaviour views, compared to PCA, RCCA, and PLS.}
     \begin{tabular}{|c|c|c|}
         \hline
-        Model       & Brain Weights & Behaviour Weights \\
+        Model       & Brain Weights (out of 300) & Behaviour Weights (out of 145) \\
         \hline
         PCA         & 300           & 145               \\
         RCCA        & 300           & 145               \\
@@ -430,17 +468,12 @@ Given that the Elastic Net model can produce the same performance as the Ridge C
         PLS         & 300           & 145               \\
         SPLS        & 118           & 56                \\
         \hline
-    \end{tabular}\label{tab:brain-behaviour-weights-hcp}
+    \end{tabular}\label{tab:sparse-weights-hcp}
 \end{table}
 
 \subsubsection{Behaviour Weights}
 
-Figure\ref{fig:behaviour} plots the top 8 positive and negative non-imaging \gls{weights} for each model.
-This is to illustrate some of the effects we have observed in the previous section.
-PCA finds a mode of variation in the behavioural data that is positively correlated with psychiatric and life function tests and negatively correlated with a number of emotion and personality tests.
-The RCCA and Elastic Net models find a mode of variation in the behavioural data that is negatively correlated with the Line Orientation test and to a lesser extent smoking and positively correlated with a number of other cognitive tests.
-The PLS model finds a mode of variation in the behavioural data that is somewhat similar to the `positive-negative' mode in \citet{smith2015positive} with a positive correlation with agreeableness, vocabulary tests, and feelings about ones' life and a strong negative correlation with smoking, rule-breaking, and antisocial personality traits.
-The SPLS mode is similar but selects out the rule-breaking and antisocial personality traits in favour of the vocabulary tests and smoking. This appears consistent with the additional preprocessing steps in \citet{smith2015positive}, which included a top-100 PCA projection of both the brain and behaviour data.
+Figure~\ref{fig:behaviour} presents the top eight positive and negative non-imaging weights for each model to visualize the behavioural data variations observed in the previous section. The PCA model emphasizes a mode of variation with positive correlations to psychiatric and life function tests, contrasting with negative correlations to certain emotion and personality tests. In comparison, the RCCA and Elastic Net models highlight a variation mode negatively correlated with the Line Orientation test and to a lesser extent, smoking, while showing positive correlations with other cognitive assessments. The PLS model's variation mode echoes the positive-negative pattern identified by \cite{smith2015positive}, showing positive correlations with agreeableness, vocabulary tests, and life satisfaction, juxtaposed with strong negative correlations with smoking and antisocial behaviors. SPLS selects a similar mode but prioritizes vocabulary tests and smoking over rule-breaking and antisocial personality traits, aligning with the preprocessing steps described in \cite{smith2015positive} which incorporated a top-100 PCA projection of both brain and behavioural data.
 
 \begin{figure}[h]
     \centering
@@ -449,7 +482,7 @@ The SPLS mode is similar but selects out the rule-breaking and antisocial person
     \includegraphics[width=0.8\linewidth]{figures/hcp/ElasticNet behaviour weights}
     \includegraphics[width=0.8\linewidth]{figures/hcp/PLS behaviour weights}
     \includegraphics[width=0.8\linewidth]{figures/hcp/SPLS behaviour weights}
-    \caption{\textbf{HCP:} Top 8 positive and negative non-imaging \gls{weights} for each model}\label{fig:behaviour}
+    \caption{\textbf{HCP:} Behavioural weights highlighting the top-8 positive and negative non-imaging weights. Each subfigure represents a distinct model's weight distribution across various behavioural domains such as cognition, emotion, personality, substance use, alertness, and psychiatric and life function. The variations in the weight profiles across models reflect differing patterns of association with the behavioural traits considered in the study.}
 \end{figure}
 
 \subsubsection{Brain Connectivity Weights}
@@ -491,7 +524,7 @@ The RCCA and ElasticNet models might be detecting more integrative and possibly 
     \includegraphics[width=0.49\linewidth]{figures/hcp/PLS brain weights}
     \includegraphics[width=0.49\linewidth]{figures/hcp/SPLS brain weights}
     \includegraphics[width=0.49\linewidth]{figures/hcp/PCA brain weights}
-    \caption{\textbf{HCP:} Chord diagrams of the top 8 positive and negative brain \gls{weights} for each model.}\label{fig:chord_weights}
+    \caption{\textbf{HCP:} Brain connectivity weights visualized through chord diagrams for multiple models. Each diagram portrays the 8 strongest positive (red to blue gradient) and negative (blue to red gradient) weights, grouped by the Yeo 7 network parcellation.}\label{fig:chord_weights}
 \end{figure}
 
 \subsubsection{Model Similarity}
@@ -511,14 +544,14 @@ The story is similar, albeit with marginally lower correlations between the PLS 
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/hcp/brain and behaviour scores correlation}
-    \caption{\textbf{HCP:} Correlation between the brain and behaviour \gls{representations} for each model.}\label{fig:brain-behaviour-scores-sim}
+    \includegraphics[width=0.8\linewidth]{figures/hcp/brain and behaviour scores correlation}
+    \caption{\textbf{HCP:} Pairwise correlation matrix of brain representations across different models. The high correlation coefficients between PCA, PLS, and SPLS indicate a significant overlap in the brain representations they produce, suggesting a bias of PLS toward principal components. Contrarily, the Ridge CCA and Elastic Net models show notably lower correlations with PCA, indicating that these models capture brain representations beyond the first principal components.}\label{fig:brain-behaviour-scores-sim}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.8\linewidth]{figures/hcp/brain and behaviour weights correlation}
-    \caption{\textbf{HCP:} Correlation between the brain and behaviour \gls{weights} for each model.}\label{fig:brain-behaviour-weights-sim}
+    \caption{\textbf{HCP:} Pairwise correlation matrix of the brain and behaviour weights used by each model. Similar to the brain representations, PCA, PLS, and SPLS show a high correlation in their weights, indicating similarity in the factors they consider significant. The lower correlations observed for Ridge CCA and Elastic Net with PCA suggest that these models give importance to different aspects of the data, potentially capturing more nuanced relationships.}\label{fig:brain-behaviour-weights-sim}
 \end{figure}
 
 
@@ -528,7 +561,7 @@ We now turn to the \acrshort{adni} data.
 
 \subsubsection{Out of Sample Correlation}
 
-In this experiment, the Elastic Net model outperformed all other models in terms of out-of-sample correlation (Figure~\ref{fig:performance}).
+In this experiment, the Elastic Net model outperformed all other models in terms of out-of-sample correlation (Figure~\ref{fig:adni-performance}).
 The RCCA model also outperformed the PLS and SPLS models while SPLS outperformed PLS.
 Suprisingly, PCA performed almost as well as PLS.
 This suggests that there is value in both tunable shrinkage and sparsity in this dataset.
@@ -537,7 +570,7 @@ It also reveals that the correlated signal between the brain structure and behav
 \begin{figure}
     \centering
     \includegraphics[width=0.5\linewidth]{figures/adni/holdout_correlations}
-    \caption{\textbf{ADNI:} Out-of-sample canonical correlations for each model.}\label{fig:performance}
+    \caption{\textbf{ADNI:} Comparative out-of-sample canonical correlations among PCA, RCCA, ElasticNet, PLS, and SPLS models. The bars represent the correlation coefficients, indicating that the Elastic Net models has superior performance over Ridge CCA, PLS, and SPLS in capturing holdout correlation.}\label{fig:adni-performance}
 \end{figure}
 
 \subsubsection{Sparsity of Weights}
@@ -553,7 +586,7 @@ On the other hand SPLS finds a much sparser set of behavioural weights.
     \caption{\textbf{ADNI:} Number of non-zero \gls{weights} for each model.}
     \begin{tabular}{|c|c|c|}
         \hline
-        Model       & Brain Weights & Behaviour Weights \\
+        Model       & Brain Weights (out of 168130) & Behaviour Weights (out of 31) \\
         \hline
         PCA         & 168130        & 31                \\
         RCCA        & 168130        & 31                \\
@@ -605,11 +638,12 @@ In this section, we once again compare the models in terms of their similarity.
 In Figure~\ref{fig:brain-behaviour-scores-sim-adni}, we can see that all of the models are highly correlated in terms of their behaviour \gls{representations}.
 The brain \gls{representations} are less correlated, but once again PCA, PLS, and SPLS are highly correlated with one another and less correlated with the Ridge CCA and Elastic Net models.
 
-Suprisingly, in Figure~\ref{fig:brain-behaviour-weights-sim-adni}, we can see that the weights in both views are less correlated. This is particularly true for the brain \gls{weights} where PCA exhibits a very low correlation with Ridge CCA and Elastic Net.
+Suprisingly, in Figure~\ref{fig:brain-behaviour-weights-sim-adni}, we can see that the weights in both views are less correlated.
+This is particularly true for the brain \gls{weights} where PCA exhibits a very low correlation with Ridge CCA and Elastic Net.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/adni/brain and behaviour scores correlation}
+    \includegraphics[width=0.8\linewidth]{figures/adni/brain and behaviour scores correlation}
     \caption{\textbf{ADNI:} Correlation between the brain and behaviour \gls{representations} for each model.}\label{fig:brain-behaviour-scores-sim-adni}
 \end{figure}
 
@@ -619,48 +653,35 @@ Suprisingly, in Figure~\ref{fig:brain-behaviour-weights-sim-adni}, we can see th
     \caption{\textbf{ADNI:} Correlation between the brain and behaviour \gls{weights} for each model.}\label{fig:brain-behaviour-weights-sim-adni}
 \end{figure}
 
-\subsection{Timings}
+\section{Discussion and Limitations}
 
-Finally, we consider the timings of the different models.
-This is an important metric because one of the main reasons for the popularity of SPLS is its speed and therefore convenience.
-Figure \ref{fig:timings} shows an estimate of the time taken to fit each model for each complete training dataset over 10 runs.
-We can see clearly that the Elastic Net is much slower than the other models when using the high dimensional \acrshort{adni} data.
-Despite also being an iterative algorithm, the SPLS model is much faster than the Elastic Net and only slightly slower than the PLS and RCCA models which call optimised solvers in C.
-Since PLS and RCCA both use PCA preprocessing for efficiency, it is unsuprising that PCA is the fastest model.
+
+The Flexible Regularised Alternating Least Squares (FRALS) framework for CCA, introduced in this chapter, exhibits promising performance in terms of out-of-sample correlation.
+Our findings indicate that, while Elastic Net CCA generally outperforms other CCA variants, much of the benefit is derived from using properly tuned Ridge regularization.
+This is most obviously illustrated in the \acrshort{hcp} dataset where sparsity does not appear to be beneficial in terms of out-of-sample correlation and therefore casts doubt on whether the sparsity of the model is interpretable or spurious.
+It also questions whether the additional computational cost of Elastic Net CCA is justified.
+Our experiments reveal that Ridge CCA typically outperforms PLS across both datasets.
+This observation is akin to the dynamics of regularized regression, where maximal ridge regularization is seldom necessary, even in high-dimensional contexts.
+
+\subsection{FRALS Limitations}
+
+The Flexible Regularised Alternating Least Squares (FRALS) framework, while effective in certain aspects, is notably limited by its computational inefficiency. This inefficiency arises from two main factors: the dynamic nature of regression targets and the intensive computation required for each iteration.
+
+\subsubsection{Changing Regression Targets}
+
+In FRALS, regression targets are not static but dynamically evolve during the algorithm's execution. These targets are essentially projections of the other view, and as they change, they alter the optimization landscape. Consequently, the algorithm must frequently recompute the least squares solution for each view. This process results in significant computational overhead and often leads to redundant calculations, thereby contributing to the inefficiency of the FRALS framework.
+
+\subsubsection{Computational Time}
+
+The primary computational challenge in FRALS is the repeated calculation of the least squares solution for each view in every iteration. This requirement is resource-intensive and is the main factor contributing to the slow speed of the FRALS algorithm. Empirical observations from our experiments show that FRALS operates at a pace approximately 10 times slower than Ridge CCA, varying with the specifics of the experimental setup. This disparity in speed is particularly noteworthy given the popularity of SPLS due to its speed and convenience. Figure \ref{fig:timings} provides an estimate of the time taken to fit each model across complete training datasets over multiple runs. It is evident from the figure that Elastic Net CCA, despite being an iterative algorithm, is significantly slower than other models, particularly with the high-dimensional \acrshort{adni} data. While SPLS demonstrates much faster processing, it is only marginally slower than PLS and RCCA, both of which employ optimized solvers in C and use PCA preprocessing for efficiency. Consequently, PCA emerges as the fastest model in these comparisons.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.45\linewidth]{figures/model_fit_timings}
+    \includegraphics[width=0.8\linewidth]{figures/model_fit_timings}
     \caption{Time taken to fit each model.}\label{fig:timings}
 \end{figure}
 
-\section{Discussion and Limitations}
-
-In this section, we discuss the implications of our findings as well as the limitations of our study and the proposed FRALS method, some of which we address in later chapters of this thesis.
-
-\subsection{Discussion}
-
-\paragraph{Ridge CCA is typically much better than PLS across datasets:} Our results show that Ridge CCA is typically much better than PLS across datasets.
-Much like regularised regression, it is unusual to need to use maximal ridge regularisation even in high dimensions.
-This means that while PLS might be more stable for a given dataset, it is not necessarily more stable across random samples from the same population.
-
-\subsection{FRALS Limitations}
-While FRALS offers promising performance in terms of out-of-sample correlation, it does come with significant drawbacks, the most noteworthy being its computational inefficiency.
-Below, we outline the primary factors contributing to the slow speed of FRALS and provide some insights into the computational bottlenecks.
-
-\paragraph{Changing Regression Targets}\label{subsec:changing-regression-targets}
-Adding to the computational burden is the fact that the regression targets, i.e., the projections of the other view, are not static but change dynamically throughout the algorithm's run.
-Each update to the least squares solution consequently alters the global objective, leading to a constantly shifting landscape that the algorithm needs to navigate.
-This also leads to a significant amount of redundant computation, as the algorithm needs to recompute the least squares solution for each view at each iteration.
-
-\paragraph{Computational Time}\label{subsec:computational-time}
-
-The primary bottleneck in FRALS is the computation of the least squares solution.
-For each iteration of the algorithm, we need to compute the least squares solution for each view.
-This is a computationally expensive operation.
-It is the primary factor contributing to the slow speed of FRALS (depending on the experiment around 10 times slower than Ridge CCA).
-
-\section{Conclusion}\label{sec:conclusion}
+\subsection{Conclusion}
 
 In this chapter, we introduced the Flexible Regularised Alternating Least Squares (FRALS) framework for CCA\@.
 We used the FRALS framework to implement Elastic Net CCA\@.

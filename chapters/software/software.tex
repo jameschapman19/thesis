@@ -1,7 +1,7 @@
 \graphicspath{{chapters/software/}}
 
 
-\chapter{CCA-Zoo: A collection of Regularized, Deep Learning-based, Kernel, and Probabilistic methods in a scikit-learn style framework}\label{chap:ccazoo}
+\chapter{CCA-Zoo: A collection of Regularized, Deep Learning-based, Kernel, and Probabilistic methods in a scikit-learn style framework}\label{ch:software}
 
 % \epigraph{And that's really the essence of programming. By the time you've sorted out a complicated idea into little steps that even a stupid machine can deal with, you've learned something about it yourself.}{\textit{Douglas Adams}}
 \section*{Preface}
@@ -23,7 +23,7 @@ The discrepancy between the availability of multiview learning tools in R and Py
 \section{Background}
 
 The research community continues to show a heightened interest in multiview learning.
-Traditionally, this field has been dominated by contributions from statistical learning researchers who predominantly utilized R and MATLAB for their work.
+Traditionally, this field has been dominated by contributions from statistical learning researchers who predominantly used R and MATLAB for their work.
 These platforms have been the birthplace of many state-of-the-art algorithms and methodologies, including Sparse PLS.
 
 However, this posed a challenge for Python-oriented researchers and practitioners, leaving them with two less-than-ideal options: either port existing R or MATLAB code into Python, often a non-trivial task requiring domain expertise, or resort to using the limited set of methods available in native Python libraries like \texttt{scikit-learn}.
@@ -50,15 +50,21 @@ The \texttt{scikit-learn} API is familiar to many machine learning practitioners
 
 \subsection{Usage}
 
-Pipeline:
+The \texttt{CCA-Zoo} package is a comprehensive toolkit that includes modules for datasets, preprocessing, model selection, various models (linear, deep, nonparametric, probabilistic), and visualization.
+It is designed to plug seamlessly into \texttt{scikit-learn} pipelines, allowing users to select and utilize components as needed.
+This design enhances the flexibility and applicability of multiview learning methods.
+
+In this section, we will walk through the complete \texttt{CCA-Zoo} workflow, from data generation to model selection and evaluation.
+We will highlight the package's design choices and its integration capabilities. Figure \ref{fig:cca-zoo-pipeline} illustrates the overall structure and flow of the \texttt{CCA-Zoo} pipeline, demonstrating its compatibility with the \texttt{scikit-learn} API and how it facilitates integration with existing machine learning workflows.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/pipeline}
-    \caption[The \texttt{CCA-Zoo} pipeline]{The \texttt{CCA-Zoo} pipeline. The package is designed to be compatible with the \texttt{scikit-learn} API, allowing for easy integration with existing machine learning pipelines.}\label{fig:cca-zoo-pipeline}
+    \caption[The \texttt{CCA-Zoo} pipeline]{The \texttt{CCA-Zoo} pipeline. Designed for compatibility with the \texttt{scikit-learn} API, it facilitates integration with existing machine learning workflows.}\label{fig:cca-zoo-pipeline}
 \end{figure}
 
-Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonstrated in the following example, which implements a regularized CCA model with a ridge penalty.
+The complete pipeline for \texttt{CCA-Zoo} is straightforward and user-friendly.
+The following example demonstrates the implementation of a regularized CCA model with a ridge penalty, showcasing the practical application of the pipeline:
 
 \begin{minted}{python}
     # Import required libraries
@@ -91,7 +97,11 @@ Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonst
 
     \end{minted}
 
-\subsection{Linear}
+\subsection{Datasets}
+\texttt{CCA-Zoo} provides a range of datasets for testing and benchmarking, which are outlined in Table \ref{tab:class_method_6}.
+These datasets are designed to be compatible with the \texttt{scikit-learn} API, allowing users to easily integrate them into their workflows.
+In particular, this module includes the LatentVariableData class which implements the explicit latent variable model and JointData which implements the implicit latent variable model described in Chapter \ref{ch:loadings}.
+Additionally, \texttt{CCA-Zoo} includes a variety of real-world datasets, including the MNIST, CIFAR10, and Mfeat datasets, as well as the Breast Cancer dataset from the UCI repository which has been used extensively in the literature\cite{witten2009penalized}.
 
 \begin{table}[ht]
     \centering
@@ -99,17 +109,61 @@ Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonst
         \hline
         Class Name & Method Name \\
         \hline
-        MCCA & Multiview CCA \\
-        CCA & Canonical Correlation Analysis \\
-        rCCA & Ridge CCA \\
-        PLS & Partial Least Squares \\
+        LatentVariableData & Latent Variable Data \\
+        JointData & Joint Data \\
+        load\_breast\_data & Breast Cancer Data \\
+        load\_split\_cifar10\_data & CIFAR10 Data \\
+        load\_split\_mnist\_data & MNIST Data \\
+        load\_mfeat\_data & Mfeat Data \\
+        \hline
+    \end{tabular}
+    \caption{Class Names and Method Names}\label{tab:class_method_6}
+\end{table}
+
+\subsection{Model Selection Utilities}
+For model selection and evaluation, \texttt{CCA-Zoo} includes various utilities as shown in Table \ref{tab:class_method_5}.
+The existing \texttt{scikit-learn} API contains a number of methods for model selection, including GridSearchCV and RandomizedSearchCV as well as permutation tests and learning curves.
+Unfortunately, these methods are not compatible with multiview learning methods, which have separate parameters for each view.
+To address this issue, \texttt{CCA-Zoo} puts a thin wrapper around these methods, combining multiview parameter combinations so that they appear as single view models to \texttt{scikit-learn}, but splitting them back into their constituent views when fitting the model.
+This means that \texttt{CCA-Zoo} benefits from the multiprocessor capabilities of \texttt{scikit-learn} as well as a standardized outputs including the \texttt{best\_estimator\_} attribute, model fit times, and a dictionary summarizing the results of the cross-validation.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Class Name & Method Name \\
+        \hline
+        GridSearchCV & Grid Search Cross Validation \\
+        RandomizedSearchCV & Randomized Search Cross Validation \\
+        cross\_validate & Cross Validation \\
+        learning\_curve & Learning Curve \\
+        permutation\_test\_score & Permutation Test Score \\
+        \hline
+    \end{tabular}
+    \caption{Class Names and Method Names}\label{tab:class_method_5}
+\end{table}
+
+\subsection{Linear}
+In this section, we explore a variety of linear multiview learning methods available in \texttt{CCA-Zoo}, as detailed in Table \ref{tab:class_method}.
+
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Class Name & Method Name \\
+        \hline
+        MCCA & Multiview (Ridge) CCA\citep{rupnik2010multi} \\
+        CCA & Canonical Correlation Analysis\citep{hotelling1992relations} \\
+        rCCA & Ridge CCA\citep{vinod1976canonical} \\
+        PLS & Partial Least Squares\cite{wold1975path} \\
         MPLS & Multiview Partial Least Squares \\
-        GCCA & Generalized CCA \\
-        GRCCA & Group Ridge Regularized CCA \\
-        PartialCCA & Partial CCA \\
-        PRCCA &  \\
-        TCCA & Tensor CCA \\
-        PCACCA & PCA CCA \\
+        GCCA & Generalized (Ridge) CCA\citep{carroll1968generalization, tenenhaus2011regularized} \\
+        GRCCA & Group Ridge Regularized CCA\citep{tuzhilina2023canonical} \\
+        PartialCCA & Partial CCA\citep{rotman2018bridging} \\
+        PRCCA &  \citep{tuzhilina2023canonical}\\
+        TCCA & Tensor CCA\citep{kim2007tensor} \\
+        PCACCA & PCA-CCA\citep{mihali} \\
         SCCA\_IPLS & Sparse CCA using Iterative Lasso \\
         ElasticCCA & Elastic CCA using FRALS \\
         PLS\_ALS & PLS using Alternating Least Squares \\
@@ -129,6 +183,7 @@ Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonst
 
 
 \subsection{Deep}
+Table \ref{tab:class_method_2} lists the deep learning methods implemented in \texttt{CCA-Zoo}, offering advanced capabilities for deep canonical correlation analysis and related techniques.
 
 \begin{table}[ht]
     \centering
@@ -156,6 +211,11 @@ Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonst
 \end{table}
 
 \subsection{Probabilistic}
+The probabilistic methods in \texttt{CCA-Zoo}, including variations of probabilistic CCA and PLS, are summarized in Table \ref{tab:class_method_3}.
+While we have not explored these methods in detail in this thesis, they are included in \texttt{CCA-Zoo} for completeness and to facilitate future research.
+Probabilistic methods for multiview learning are an active area of research, that is notably limited by computational constraints.
+Existing publicly available implementations use the Expectation-Maximization algorithm, which is efficient for simple models but can be slow to converge.
+By leveraging a GPU-enabled probabilistic programming language, \texttt{CCA-Zoo} can use stochastic variational inference to speed up the training process, or MCMC sampling to obtain more accurate estimates of the posterior distribution.
 
 \begin{table}[ht]
     \centering
@@ -171,6 +231,8 @@ Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonst
 \end{table}
 
 \subsection{Nonparametric}
+Table \ref{tab:class_method_4} presents the nonparametric methods in \texttt{CCA-Zoo}, focusing on kernel-based techniques for multiview learning.
+
 
 \begin{table}[ht]
     \centering
@@ -185,7 +247,8 @@ Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonst
     \caption{Class Names and Method Names}\label{tab:class_method_4}
 \end{table}
 
-\subsection{Model Selection Utilities}
+\subsection{Visualization}
+\texttt{CCA-Zoo} also provides a range of visualization tools for multiview learning, which are outlined in Table \ref{tab:vis_method}.
 
 \begin{table}[ht]
     \centering
@@ -193,33 +256,19 @@ Use of the \texttt{CCA-Zoo} package is straightforward and intuitive, as demonst
         \hline
         Class Name & Method Name \\
         \hline
-        GridSearchCV & Grid Search Cross Validation \\
-        RandomizedSearchCV & Randomized Search Cross Validation \\
-        cross\_validate & Cross Validation \\
-        learning\_curve & Learning Curve \\
-        permutation\_test\_score & Permutation Test Score \\
+        ExplainedVarianceDisplay & Explained Variance Display \\
+        RepresentationScatterDisplay & Representation Scatter Display \\
+        JointRepresentationScatterDisplay & Joint Representation Scatter Display \\
+        SeparateRepresentationScatterDisplay & Separate Representation Scatter Display \\
+        SeparateJointRepresentationDisplay & Separate Joint Representation Display \\
+        PairRepresentationScatterDisplay & Pair Representation Scatter Display \\
+        ExplainedCovarianceDisplay & Explained Covariance Display \\
+        WeightHeatmapDisplay & Weight Heatmap Display \\
+        CorrelationHeatmapDisplay & Correlation Heatmap Display \\
+        CovarianceHeatmapDisplay & Covariance Heatmap Display \\
         \hline
     \end{tabular}
-    \caption{Class Names and Method Names}\label{tab:class_method_5}
-\end{table}
-
-\subsection{Datasets}
-
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{|c|c|}
-        \hline
-        Class Name & Method Name \\
-        \hline
-        LatentVariableData & Latent Variable Data \\
-        JointData & Joint Data \\
-        load\_breast\_data & Breast Cancer Data \\
-        load\_split\_cifar10\_data & CIFAR10 Data \\
-        load\_split\_mnist\_data & MNIST Data \\
-        load\_mfeat\_data & Mfeat Data \\
-        \hline
-    \end{tabular}
-    \caption{Class Names and Method Names}\label{tab:class_method_6}
+    \caption{Class Names and Method Names for Visualization in \texttt{CCA-Zoo}}\label{tab:vis_method}
 \end{table}
 
 \subsection{Code Availability}
@@ -239,8 +288,10 @@ The package can be installed using \texttt{pip install cca-zoo} or \texttt{poetr
 
 In this section, we compare the performance of \texttt{CCA-Zoo} against \texttt{scikit-learn}, focusing on the efficiency of the basic CCA and PLS methods.
 We conducted experiments on synthetic datasets with varying dimensions to evaluate their average execution time.
-The datasets consisted of random matrices with a varying number of dimensions: \(50\), \(100\), \(200\), \(400\), and \(800\). Each matrix had \(100\) samples. We set the latent dimensions for both CCA and PLS to \(10\).
-    For each dimension, the experiment was repeated \(10\) times to obtain reliable performance metrics.
+The datasets consisted of random matrices with a varying number of dimensions: \(50\), \(100\), \(200\), \(400\), and \(800\).
+Each matrix had \(100\) samples.
+We set the latent dimensions for both CCA and PLS to \(10\).
+For each dimension, the experiment was repeated \(10\) times to obtain reliable performance metrics.
 
 \paragraph{Libraries Used:}
 \begin{itemize}
@@ -249,7 +300,9 @@ The datasets consisted of random matrices with a varying number of dimensions: \
 \end{itemize}
 
 \subsection{Canonical Correlation Analysis:}
-Figure~\ref{fig:cca_benchmark} presents the comparison between \texttt{CCA-Zoo} and \texttt{scikit-learn} for Canonical Correlation Analysis. We observe that \texttt{CCA-Zoo} exhibits a competitive runtime profile when compared to \texttt{scikit-learn} across all dimensions.
+Figure~\ref{fig:cca_benchmark} presents the comparison between \texttt{CCA-Zoo} and \texttt{scikit-learn} for Canonical Correlation Analysis.
+We observe that \texttt{CCA-Zoo} exhibits a competitive runtime profile when compared to \texttt{scikit-learn} across all dimensions.
+This is because \texttt{CCA-Zoo} computes CCA in the principal component space, which is more efficient than the standard approach of computing the covariance matrices directly for high dimensional data.
 
 \begin{figure}[h]
     \centering
@@ -264,7 +317,7 @@ Like the CCA experiment, \texttt{CCA-Zoo} maintains a robust performance profile
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.9\textwidth]{figures/CCA_Speed_Benchmark}
+    \includegraphics[width=0.9\textwidth]{figures/PLS_Speed_Benchmark}
     \caption{Performance comparison for PLS methods}
     \label{fig:pls_benchmark}
 \end{figure}
@@ -274,5 +327,18 @@ These experiments underscore the capability of \texttt{CCA-Zoo} to handle high-d
 
 \subsection{Conclusion}
 
-\texttt{CCA-Zoo} has not only served as a tool for my research but aims to be a community resource that can accelerate research and application in multiview learning.
-Its design decisions, such as API compatibility and focus on both linear and deep models, reflect a comprehensive understanding of the challenges and opportunities in this field.
+\texttt{CCA-Zoo} fills a big gap in Python's tools for multiview learning.
+It makes many multiview learning methods easy to use for Python users.
+This package works well with known Python libraries like \texttt{scikit-learn}, \texttt{PyTorch}, and others, making it user-friendly.
+
+\texttt{CCA-Zoo} is as good as \texttt{scikit-learn} in speed, especially for big data tasks in CCA and PLS. This is important for fields like bioinformatics where data is often large.
+
+The package offers various methods, like linear, deep, and probabilistic models, and includes many datasets and tools for picking models and showing results.
+This makes \texttt{CCA-Zoo} flexible and useful for different tasks.
+
+A key goal of this thesis was to create practical tools for researchers, and \texttt{CCA-Zoo} achieves this.
+It includes most methods from the thesis, ready for use.
+This should help more people use and develop multiview learning methods.
+
+In conclusion, \texttt{CCA-Zoo} is a valuable addition to Python's machine learning tools.
+It offers a wide range of multiview learning methods in an efficient, easy-to-use package.

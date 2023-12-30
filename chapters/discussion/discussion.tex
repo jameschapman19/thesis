@@ -1,13 +1,45 @@
 \chapter*{Thoughts and Implications}
 \label{chap:discussion}
 
-\section*{Summary of findings}
+This chapter summarizes the main findings of this thesis and discusses their implications.
+It also discusses the limitations of the work and suggests directions for future research.
 
-\section*{Implications}
+\section{Summary of findings}
 
-\section*{Limitations}
+\section{Implications}
 
-\section*{Future work}
+Chapter \ref{ch:loadings} has important consequences for the interpretation of CCA models as well as the motivation behind variants of regularized CCA including our own contribution in chapter \ref{ch:als}.
+In the context of Linear Regression and Lasso regularization, we can interpret the Lasso as a Bayesian prior on the regression coefficients.
+In the context of CCA,
 
-\section*{Conclusion}
+\section{Future work}
 
+\subsection{Applications}
+
+One of the disappointing aspects of this thesis is that, with the exception of the UK Biobank application in chapter \ref{ch:deep_learning}, we have not discovered new associations within the limited datasets we have worked with.
+This is perhaps not suprising given the great popularity of the \acrshort{hcp} and \acrshort{adni} datasets we presented in chapter \ref{ch:als}.
+Nonetheless, the scalable methods we have developed in chapters \ref{ch:gradient_descent} and \ref{ch:deep_learning} are well-suited to the analysis of larger datasets including the UK Biobank and Adolescent Brain Cognitive Development (\acrshort{abcd}) datasets.
+We worked briefly with the \acrshort{abcd} dataset to explore the possibility of regularisation by proximal gradient descent on regularised versions of the family of objectives we defined in chapter \ref{ch:gradient_descent}.
+These results showed early promise but were too immature to include in this thesis.
+We expect that the \acrshort{ukbb} dataset will be a fruitful source of new associations for the foreseeable future and we believe that the methods we have developed in this thesis will be well-suited to this task.
+We also hope that by linking \acrshort{cca} to gradient descent, we have opened the door to the application of deep learning methods to \acrshort{cca}.
+With the great success of deep learning in imaging, text, and other domains, we believe that this is a promising direction for future research.
+In particular it opens up the possibility of using \acrshort{cca} methods to combine other non-imaging modalities such as Electronic Health Records or audio transcripts with imaging data given the success of the transformer architecture in natural language processing \citep{vaswani2017attention}.
+
+\subsection{Methods}
+
+
+
+
+\section{Closing Remarks}
+
+Reflecting on my undergraduate years in Engineering Science, I remember struggling to grasp the concepts of Eigenvalues and Eigenvectors.
+
+This now seems like a distant memory as I conclude my doctoral research, immersed in the nuances of a specific class of Eigenvalue problems, and most of all, Canonical Correlation Analysis.
+
+Far from being a narrow topic, understanding this problem has led me to explore a wide variety of topics including optimization, Bayesian statistics, deep learning, and Software Engineering.
+
+With a history stretching back to the 1930s, \acrshort{cca} has been used to discover new associations in a wide variety of domains.
+We hope that this thesis has illustrated and contributed to the continued relevance of \acrshort{cca} in the modern era of large datasets and deep learning.
+
+Thank you for reading.
