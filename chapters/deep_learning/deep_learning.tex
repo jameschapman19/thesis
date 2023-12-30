@@ -1,6 +1,6 @@
 \graphicspath{{chapters/deep_learning/}}
 
-\chapter{Deep CCA and CCA for Self-Supervised Learning}\label{ch:deep_learning}
+\chapter{Deep CCA and Self-Supervised Learning: Non-Linear Functions}\label{ch:deep_learning}
 \minitoc
 % chktex-file 44
 % chktex-file 3
@@ -383,12 +383,16 @@ evolution of the correlation, measured by $\LEY$, suggests a new avenue for moni
 
 \section{Discussion}
 
-Our innovative formulation of DCCA-EY successfully addresses the limitations of traditional DCCA methods, particularly in stochastic settings. The experimental results on Split MNIST and XRMB datasets unequivocally demonstrate DCCA-EY's superior capability in capturing correlations efficiently across a range of mini-batch sizes, thereby validating its scalability and robustness. Furthermore, our method shows notable improvements in convergence speed and reduced sensitivity to hyperparameter tuning, aspects critically important for practical applications.
+Our innovative formulation of DCCA-EY successfully addresses the limitations of traditional DCCA methods, particularly in stochastic settings.
+The experimental results on Split MNIST and XRMB datasets demonstrate DCCA-EY's superior capability in capturing correlations efficiently across a range of mini-batch sizes, thereby validating its scalability and robustness.
+Furthermore, our method shows notable improvements in convergence speed and reduced sensitivity to hyperparameter tuning, aspects critically important for practical applications.
 
-In SSL, SSL-EY stands out as a competitive and robust approach. Our experiments on CIFAR-10 and CIFAR-100 highlight SSL-EY's ability to achieve comparable performance with state-of-the-art methods like Barlow Twins and VICReg, even while using general hyperparameters. This underscores SSL-EY's adaptability and robustness in different settings. Particularly noteworthy is its performance with reduced or absent projectors, indicating its efficiency and potential for broader applications in SSL.
-
+In SSL, SSL-EY stands out as a competitive and robust approach.
+Our experiments on CIFAR-10 and CIFAR-100 highlight SSL-EY's ability to achieve comparable performance with state-of-the-art methods like Barlow Twins and VICReg, even while using general hyperparameters.
+This is important given the time it takes to run experiments with SSL methods which, as here, can be up to 1,000 epochs.
+This underscores SSL-EY's adaptability and robustness in different settings.
+Particularly noteworthy is its performance with reduced or absent projectors, indicating its efficiency and potential for broader applications in SSL\@.
 Moreover, the insights gleaned from the correlation of EY loss with classification accuracy in SSL-EY open new avenues for understanding and leveraging canonical correlations in SSL. The observed relationships provide a promising direction for future research in developing more effective and efficient SSL methods.
 
 Our work bridges significant gaps in the literature and establishes a strong foundation for future explorations in both DCCA and SSL. The proposed methods not only enhance our understanding of these domains but also pave the way for practical applications where scalability, efficiency, and robustness are paramount.
-
 In summary, this chapter contributes to the advancement of DCCA and SSL by introducing novel approaches that are not only theoretically sound but also practically viable, offering valuable tools for researchers and practitioners alike in the ever-evolving landscape of machine learning.

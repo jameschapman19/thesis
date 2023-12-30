@@ -7,48 +7,37 @@
 
 \section{Introduction to Machine Learning and Multiview Learning}
 
-In this chapter, we gather the necessary background knowledge needed to motivate and understand the contributions of this thesis.
+This chapter provides the foundational knowledge needed for the thesis, focusing on machine learning paradigms, with a particular emphasis on multiview and self-supervised learning.
 
-Machine learning enables models to automatically learn patterns and make decisions from data.
-Machine learning comprises three primary paradigms: supervised, self-supervised (or unsupervised), and reinforcement learning, each distinct in its approach to learning from data.
-This thesis focuses on multiview self-supervised machine learning, which aims to develop robust representations by uncovering associations between various data types within datasets.
-These data types, known as \gls{views} may include distinct sources of information such as neuroimaging modalities, genomics, and clinical records in the context of patient data analysis.
+Machine learning encompasses methods that enable models to learn patterns and make decisions from data.
+Machine learning methods are typically categorised by a training set of data, which is used to learn a model, and a test set of data, which is used to evaluate the model.
+Arguably the most common machine learning paradigm is supervised learning, where the training data consists of pairs of inputs and outputs, and the model learns to predict a function which maps the inputs to the outputs.
+This function is then used to predict the outputs for new inputs.
+The goal of supervised learning is to learn a function that generalizes well to new data, i.e. to make accurate predictions on unseen data.
+Unsupervised, or self-supervised learning is another common machine learning paradigm, where the training data consists of inputs only, and the model learns to find patterns in the data.
+Unsupervised learning is often used for dimensionality reduction, clustering, and generative modelling.
+Self-supervised learning is a special case of unsupervised learning, where the training data is generated from the data itself, rather than being provided by an external source.
+Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels \citep{balestriero2023cookbook}.
+The cornerstone of SSL is the concept of a `pretext task', a learning task created from the data that trains the model to capture useful features or representations.
+
 
 \subsection{Multiview Machine Learning}
-
+This thesis specifically delves into the area of multiview machine learning.
+Here, data from different sources or modalities, referred to as \gls{views}, such as neuroimaging, genomics, and clinical records, are analyzed collectively to unveil underlying patterns.
 Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as \gls{views}.
 These techniques can be broadly classified into supervised and self-supervised (or sometimes, equivalently, unsupervised) multiview learning, with some algorithms straddling the boundary between the two.
 
-\subsubsection{Supervised Multiview Learning}
-
-In supervised multiview learning, one view serves as the input while the other view is treated as the target label.
-The algorithm learns to predict the target view based on the input view, leveraging the information from both to enhance the predictive performance \citep{zong2023self}. These can in principal encompass both regression and classification tasks depending on the nature of the target view (continuous or discrete). In a sense, we can think of this in exactly the same way as supervised learning, where the features are one view and the target is the other view. However, multiview learning is not restricted to a single view as input or target.
+In supervised multiview learning, one view serves as the target while the other views are the inputs \citep{zong2023self}.
+This encompasses Multiple Kernel Learning (MKL) \citep{gonen2011multiple}, where the algorithm learns to combine kernel representations of the different views to improve the predictive performance of the model as compared to using a single kernel.
+With the advent of deep learning, the underlying idea of MKL has been extended to deep learning architectures, where the model learns to combine the representations of the different views \citep{guo2019deep}.
 
 \subsubsection{Self-Supervised Multiview Learning}
 
-Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels \citep{balestriero2023cookbook}.
-The cornerstone of SSL is the concept of a `pretext task', a learning task created from the data that trains the model to capture useful features or representations.
-In the context of multiview machine learning, self-supervised learning often operates under the assumption that different \gls{views} are generated from a common, but unobserved, latent source.
+In the context of multiview machine learning, self-supervised learning often operates under the assumption that different \gls{views} are generated from a common, but unobserved, latent source \citep{zong2023self}.
 A natural pretext task, in this case, is to predict or estimate this source from the given \gls{views}.
 Dimensionality reduction is a common example of this, where the model learns to estimate a low-dimensional representation of the data from the \gls{views}.
 In this case, the model is forced to learn the underlying latent variable structure of the data without any direct supervision.
 This not only enables the model to learn associations between \gls{views} but also allows it to derive robust and informative representations for subsequent tasks like classification or regression.
-
-\subsection{Types of Multiview Data}
-
-In neuroscience and genetics, two specific types of multiview studies are particularly relevant to this thesis: brain-behavior studies and imaging-genetics.
-Both involve the integration of data from multiple sources, offering rich insights into complex phenomena.
-
-Brain-behavior studies typically involve pairing neuroimaging data, such as that obtained from Structural MRI (sMRI) or Functional MRI (fMRI), with non-imaging data like responses from questionnaires, cognitive test results, and other behavioral assessments.
-sMRI provides detailed anatomical brain images, essential for understanding brain structure and neurological disorders \citep{kanai2011structural}, while fMRI focuses on brain function by mapping activity during cognitive tasks \citep{miranda2021systematic}.
-The integration of these imaging techniques with behavioral data offers a comprehensive view of how brain structures and functions correlate with behavioral and cognitive patterns \citep{rypma2001age,genon2022linking}.
-
-Imaging-Genetics, another critical multiview approach, combines neuroimaging data with genetics and omics information \citep{le2008sparse}.
-This interdisciplinary field seeks to understand the genetic influences on brain structure and function, thereby illuminating the genetic basis of neuropsychiatric disorders and cognitive traits \citep{bogdan2017imaging}.
-Studies in this area might explore how specific genetic variations correlate with differences in brain morphology or activity patterns observed in neuroimaging \citep{liu2014review}.
-
-Together, these multiview approaches are fundamental in advancing our understanding of the brain's structure, function, and its interactions with genetic and behavioral factors.
-They represent key applications of SSL in neuroscience and genetics, providing comprehensive insights that underpin developments in these fields.
 
 \subsection{Conditional Independence, Causality, and Multiview Learning}
 
@@ -84,7 +73,7 @@ However, it is essential to recognize that the presence of a common latent varia
 
 \subsubsection{Complementary and Redundant Information}
 The nature of the information provided by different \gls{views} (such as neuroimaging and behavioral data) is important for understanding multiview learning models.
-A particularly useful distinction is between complementary and redundant information \citep{nguyen2020multiview,lyu2021understanding}.
+A particularly useful distinction is between complementary and redundant information \citep{nguyen2020multiview,lyu2021understanding, chen2022representation}.
 When views contain complementary information, they provide different perspectives on the same subject or sample.
 For example, we can understand different aspects of a mental health condition by examining both neuroimaging and behavioral data.
 On the other hand, when \gls{views} contain redundant information about the latent variables, they provide the same information from different perspectives.
@@ -511,7 +500,8 @@ In machine learning, data is typically partitioned into training, validation, an
 
 \paragraph{Cross-Validation}
 
-A fundamental technique in machine learning, cross-validation involves dividing the training dataset into smaller subsets for training and validation. This approach provides insights into the model's performance across different data segments.
+A fundamental technique in machine learning, cross-validation involves dividing the training dataset into smaller subsets for training and validation.
+This approach provides insights into the model's performance across different data segments.
 
 \paragraph{Holdout Method}
 
@@ -556,6 +546,24 @@ It is important to note that while we focus on the top-1 component, the later se
 
 
 \section{Multiview Learning in Neuroimaging}
+
+\subsection{Multiview Data in Neuroscience and Genetics}
+
+In neuroscience and genetics, two specific types of multiview studies are particularly relevant to this thesis: brain-behavior studies and imaging-genetics.
+Both involve the integration of data from multiple sources, offering rich insights into complex phenomena.
+
+Brain-behavior studies typically involve pairing neuroimaging data, such as that obtained from Structural MRI (sMRI) or Functional MRI (fMRI), with non-imaging data like responses from questionnaires, cognitive test results, and other behavioral assessments.
+sMRI provides detailed anatomical brain images, essential for understanding brain structure and neurological disorders \citep{kanai2011structural}, while fMRI focuses on brain function by mapping activity during cognitive tasks \citep{miranda2021systematic}.
+The integration of these imaging techniques with behavioral data offers a comprehensive view of how brain structures and functions correlate with behavioral and cognitive patterns \citep{rypma2001age,genon2022linking}.
+
+Imaging-Genetics, another critical multiview approach, combines neuroimaging data with genetics and omics information \citep{le2008sparse}.
+This interdisciplinary field seeks to understand the genetic influences on brain structure and function, thereby illuminating the genetic basis of neuropsychiatric disorders and cognitive traits \citep{bogdan2017imaging}.
+Studies in this area can explore how specific genetic variations correlate with differences in brain morphology or activity patterns observed in neuroimaging \citep{liu2014review}.
+
+Together, these multiview approaches are fundamental in advancing our understanding of the brain's structure, function, and its interactions with genetic and behavioral factors.
+They represent key applications of SSL in neuroscience and genetics, providing comprehensive insights that underpin developments in these fields.
+
+\subsection{Applications of Multiview Learning in Neuroimaging}
 
 There have been a number of applications of \acrshort{cca} and related methods to multiview problems in neuroimaging.
 Using resting state fMRI data, modes of correlation have been found that relate to differences in sex and age relating to drug and alcohol abuse, depression and self harm \citep{mihalik2019brain}.

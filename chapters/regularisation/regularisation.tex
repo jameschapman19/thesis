@@ -1,7 +1,7 @@
 \graphicspath{{chapters/regularisation}}
 
 
-\chapter{Regularisation of CCA Models}\label{ch:als}
+\chapter{Regularisation of CCA Models: A Flexible Framework based on Alternating Least Squares}\label{ch:als}
 
 \minitoc
 % chktex-file 44 
@@ -46,10 +46,10 @@ This means regularisation can improve the generalizability of models in high-dim
 \paragraph{Implicit and Explicit Regularisation}
 
 We can implement regularisation in two different ways.
-\textit{Explicit} regularisation is achieved by adding a penalty term to the objective function.
+Explicit regularisation is achieved by adding a penalty term to the objective function.
 This weights the objective function against a term that penalises complexity.
 
-\textit{Implicit} regularisation is achieved by changing the optimisation algorithm and can include dimensionality reduction, as well as certain optimisation procedures like using stochastic gradient descent in place of gradient descent \citep{ali2020implicit}, and early stopping of optimization routines \citep{yao2007early}
+Implicit regularisation is achieved by changing the optimisation algorithm and can include dimensionality reduction, as well as certain optimisation procedures like using stochastic gradient descent in place of gradient descent \citep{ali2020implicit}, and early stopping of optimization routines \citep{yao2007early}
 
 \subsection{Shrinkage Regularisation}
 
@@ -72,7 +72,7 @@ For example, parameters associated with noisy features might `cancel out' in the
 The premise of shrinkage regularisation in all these cases is that the latent variables or predictions are too sensitive to small changes in the data because the model parameters are too large.
 Shrinkage regularisation works by shrinking the model parameters towards zero, so that small changes in the data do not lead to large changes in the model estimates.
 
-\paragraph{PLS as Shrinkage Regularisation} PLS can be interpreted as a form of shrinkage regularisation applied to CCA. We can explain this by considering an analogy between CCA and \textit{Linear Regression}\footnote{indeed Linear Regression is a special case of CCA where \(X^{(2)}\) has one feature}.
+\paragraph{PLS as Shrinkage Regularisation} PLS can be interpreted as a form of shrinkage regularisation applied to CCA. We can explain this by considering an analogy between CCA and Linear Regression\footnote{indeed Linear Regression is a special case of CCA where \(X^{(2)}\) has one feature}.
 
 In Linear Regression, the ridge regression solution is given by:
 \begin{align}
@@ -119,7 +119,7 @@ Although one would rarely resort to maximally regularised ridge regression excep
 One of the core contributions of this chapter will be to demonstrate that PLS is usually a poor choice for regularisation even in these very high-dimensional settings and that more nuanced regularisation methods can offer significant improvements in performance and interpretability.
 PLS is evidently not a nuanced tool for regularisation because it offers no control over the degree of regularisation applied.
 
-\paragraph{Ridge Regularisation} For this reason, \citet{vinod1976canonical} proposed the \textit{Canonical Ridge} or \textit{Ridge CCA}, which combined the PLS and CCA constraints in a single constrained optimisation:
+\paragraph{Ridge Regularisation} For this reason, \citet{vinod1976canonical} proposed the Canonical Ridge or Ridge CCA, which combined the PLS and CCA constraints in a single constrained optimisation:
 
 \begin{align}
     & u\sps{1}_{\text{opt}} = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spsT{1} \hat{\Sigma_{12}} u\sps{2} \} \\
@@ -253,7 +253,7 @@ Not just a matter of convenience, this means that these methods are not compatib
 
 As highly structured data, linear models using both structural \acrshort{mri} and f\acrshort{mri} data have been shown to benefit from structured regularisation methods but notably these methods have not been applied to CCA.
 Total variation regularisation, which biases spatially neighboring weights to be similar, has been shown to improve the performance of PCA \citep{de2017structured} and regression \citep{michel2011total,dohmatob2014benchmarking, baldassarre2012structured}.
-Similarly, Laplacian (or \textit{GraphNet}) regularisation, which induces a similar spatial bias with additional smoothness, has been shown to improve the performance of CCA on functional MRI data \citep{grosenick2013interpretable}.
+Similarly, Laplacian (or GraphNet) regularisation, which induces a similar spatial bias with additional smoothness, has been shown to improve the performance of CCA on functional MRI data \citep{grosenick2013interpretable,cuingnet2012spatial}.
 
 Having discussed the benefits of both shrinkage (e.g., PCA-CCA, Ridge CCA, PLS), sparsity (SPLS, Sparse CCA), and structure (Total Variation, Laplacian) in handling high-dimensional, noisy, and structured data, a natural progression is to integrate these advantages.
 Specifically, the challenge lies in creating a framework that allows for users to match the regularisation method to their data and research question, enhancing the interpretability and performance of Brain-Behaviour association models.
