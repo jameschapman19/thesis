@@ -5,45 +5,58 @@
  \epigraph{Principal Component Analysis is a dimensionally invalid method that gives people a delusion that they are doing something useful with their data. If you change the units that one of the variables is measured in, it will change all the “principal components”! It’s for that reason that I made no mention of PCA in my book.}{Professor David MacKay}
 \minitoc
 
-\section{Introduction to Machine Learning and Multiview Learning}
+\section{Introduction}
 
-This chapter provides the foundational knowledge needed for the thesis, focusing on machine learning paradigms, with a particular emphasis on multiview and self-supervised learning.
+This chapter provides the foundational knowledge needed to understand the thesis as a whole, while the individual chapters will provide more specific background information as needed.
+
+\section{Machine Learning and Multiview Learning}
 
 Machine learning encompasses methods that enable models to learn patterns and make decisions from data.
 Machine learning methods are typically categorised by a training set of data, which is used to learn a model, and a test set of data, which is used to evaluate the model.
 Arguably the most common machine learning paradigm is supervised learning, where the training data consists of pairs of inputs and outputs, and the model learns to predict a function which maps the inputs to the outputs.
 This function is then used to predict the outputs for new inputs.
 The goal of supervised learning is to learn a function that generalizes well to new data, i.e. to make accurate predictions on unseen data.
-Unsupervised, or self-supervised learning is another common machine learning paradigm, where the training data consists of inputs only, and the model learns to find patterns in the data.
-Unsupervised learning is often used for dimensionality reduction, clustering, and generative modelling.
-Self-supervised learning is a special case of unsupervised learning, where the training data is generated from the data itself, rather than being provided by an external source.
-Self-Supervised Learning (SSL) is a paradigm where the training signal is derived from the data itself, rather than relying on external labels \citep{balestriero2023cookbook}.
+Unsupervised and self-supervised learning are common machine learning paradigms where the training data consists of inputs only, and the model learns to find patterns in the data.
+While the distinction between the two is somtimes blurred, unsupervised learning has been used to describe dimensionality reduction, clustering, and generative modelling algorithms.
+Self-supervised learning (SSL) has been used to describe a special case of unsupervised learning, where labels are generated from the data itself, rather than being provided by an external source.
+SSL  is a paradigm where the training signal is derived from the data itself, rather than relying on external labels \citep{balestriero2023cookbook}.
 The cornerstone of SSL is the concept of a `pretext task', a learning task created from the data that trains the model to capture useful features or representations.
+Most famously, SSL is the backbone to the success of Large Language Models \citep{vaswani2017attention} and in particular ChatGPT \citep{chatgpt}, a language model trained on a pretext task of predicting masked words in a sentence.
+SSL methods have also recently been shown to outperform supervised methods for certain computer vision tasks for large datasets \citep{goyal2019scaling}.
 
 
 \subsection{Multiview Machine Learning}
-This thesis specifically delves into the area of multiview machine learning.
+This thesis is focussed on multiview machine learning.
 Here, data from different sources or modalities, referred to as \gls{views}, such as neuroimaging, genomics, and clinical records, are analyzed collectively to unveil underlying patterns.
 Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as \gls{views}.
-These techniques can be broadly classified into supervised and self-supervised (or sometimes, equivalently, unsupervised) multiview learning, with some algorithms straddling the boundary between the two.
+These techniques can also be broadly classified into supervised and self-supervised multiview learning, with some algorithms straddling the boundary between the two.
 
-In supervised multiview learning, one view serves as the target while the other views are the inputs \citep{zong2023self}.
-This encompasses Multiple Kernel Learning (MKL) \citep{gonen2011multiple}, where the algorithm learns to combine kernel representations of the different views to improve the predictive performance of the model as compared to using a single kernel.
-With the advent of deep learning, the underlying idea of MKL has been extended to deep learning architectures, where the model learns to combine the representations of the different views \citep{guo2019deep}.
+\subsubsection{Supervised Multiview Learning}
+
+In supervised multiview learning, the goal is to integrate information from multiple distinct views or feature sets to improve the predictive performance of a model. This approach often involves using one view as the target, with other views serving as inputs. For instance, in the context of mental health, we can consider behavioural data as a dependent variable influenced by multiple independent variables like brain activity and demographics. Figure \ref{fig:mentalhealthsupervised} illustrates this concept, where behavioural patterns ($y_1$) are predicted based on features from brain activity ($x_1$) and demographic information ($x_2$).
+
+\begin{figure}
+    \centering
+    \tikz{
+    % nodes
+        \node[obs, minimum size=2cm, align=center] (y1) {Behaviour\\$y_1$}; % Behaviour node as y1
+        \node[obs, left=of y1, minimum size=2cm, align=center] (x1) {Brain\\$x_1$}; % Brain node as x1
+        \node[obs, below=of x1, minimum size=2cm, align=center] (x2) {Demographics\\$x_2$};
+        \edge{x1} {y1}
+        \edge{x2} {y1}}
+        \caption[Independent and Dependent Variable Model of Mental Health]{\textit{\textbf{Independent and Dependent Variable Model of Mental Health:}} From this perspective, behavioural data is considered to be dependent on brain activity and demographics}\label{fig:mentalhealthsupervised}
+\end{figure}
+
+Multiple Kernel Learning (MKL) \citep{gonen2011multiple} is a prominent example of supervised multiview learning, where the algorithm learns to combine kernel representations of the different views.
+This enhances the model's predictive capabilities compared to using a single kernel.
+With the advent of deep learning, the underlying concept of MKL has been extended to deep learning architectures.
+These architectures enable the model to learn and combine representations from various views more effectively \citep{guo2019deep}.
+I contributed to this line of research through the software package Fusili \citep{florence_townend_2023_10228564}, which implements a number of deep-learning based multi-modal data fusion methods for supervised learning.
 
 \subsubsection{Self-Supervised Multiview Learning}
 
-In the context of multiview machine learning, self-supervised learning often operates under the assumption that different \gls{views} are generated from a common, but unobserved, latent source \citep{zong2023self}.
-A natural pretext task, in this case, is to predict or estimate this source from the given \gls{views}.
-Dimensionality reduction is a common example of this, where the model learns to estimate a low-dimensional representation of the data from the \gls{views}.
-In this case, the model is forced to learn the underlying latent variable structure of the data without any direct supervision.
-This not only enables the model to learn associations between \gls{views} but also allows it to derive robust and informative representations for subsequent tasks like classification or regression.
-
-\subsection{Conditional Independence, Causality, and Multiview Learning}
-
-Consider the graphical model depicted in Figure~\ref{fig:mentalhealthselfsupervised}.
-It comprises two distinct observed \gls{views}: a brain modality and a behavioral modality.
-The graphical represents the assumption that the brain and behaviour are conditionally independent given the severity of an unobserved `latent' mental health condition.
+In contrast to supervised multiview learning, where explicit labels guide the learning process, self-supervised multiview learning operates under the hypothesis that different views are manifestations of a shared, yet hidden, latent variable \citep{zong2023self}.
+This approach, as evidenced in the latent variable model of mental health illustrated in Figure \ref{fig:mentalhealthselfsupervised}, suggests that both neuroimaging and behavioural data are influenced by an underlying factor, such as the severity of a mental health condition, which remains unobserved.
 
 \begin{figure}
     \centering
@@ -59,8 +72,20 @@ The graphical represents the assumption that the brain and behaviour are conditi
     \caption[Latent Variable Model of Mental Health]{\textit{\textbf{Latent Variable Model of Mental Health:}} From this perspective the neuroimaging modality and behavioural data are both considered to have been generated with distributions conditioned on the severity of a mental health condition}\label{fig:mentalhealthselfsupervised}
 \end{figure}
 
-In multiview machine learning, the relationship between conditional independence and causality is nuanced but crucial \citep{pearl2009causality}.
-When examining dependencies between events, such as those observed between brain activity and behavior, several scenarios emerge:
+A key challenge in self-supervised learning is designing pretext tasks to infer this latent source from the available views.
+A common approach is to estimate a common low-dimensional representation of the variance in the data from both \gls{views}.
+In most objectives of this form, this ammounts to identifying the mutual information between the \gls{views}.
+These representations may be informative for their own sake, identifying common factors between the \gls{views}, or they may be used as inputs to a downstream task, such as classification or regression.
+
+\subsection{Conditional Independence, Causality, and Multiview Learning}
+
+The graphical model in Figure \ref{fig:mentalhealthsupervised} represents the assumption that the brain and demographics are independent variables, and that the behaviour is a conditional variable, dependent on both the brain and demographics.
+
+On the other hand, the graphical model in Figure \ref{fig:mentalhealthselfsupervised} represents the assumption that the brain and behaviour are conditionally independent given the severity of an unobserved `latent' mental health condition.
+
+\citet{reichenbach1956direction} introduced the epoynmous Reichenbach's principle, which states that if two variables are correlated, then either one causes the other, or both are caused by a third variable.
+While the relationship between conditional independence and causality is nuanced \citep{pearl2009causality}, it is clear that our assumptions about the causal structure of the data can inform our choice of multiview learning algorithm.
+In particular, we could envision a number of causal structures that could give rise to the observed data in Figure \ref{fig:mentalhealthselfsupervised}:
 
 \begin{itemize}
     \item direct causation (brain influencing behavior or vice versa or even both)
@@ -68,23 +93,23 @@ When examining dependencies between events, such as those observed between brain
     \item no direct causal link between them
 \end{itemize}
 
-Importantly, if a common cause does exist, conditioning on it renders brain and behavior independent; this `screens off' their dependence, revealing key insights for our models \citep{reichenbach1956direction}.
-However, it is essential to recognize that the presence of a common latent variable, inferred from these \gls{views}, does not automatically imply causality in the observed data.
+In the first case, we might be more inclined to use a supervised multiview learning algorithm to predict one view from the other.
+In the second case, we might be more inclined to use a self-supervised multiview learning algorithm to estimate the latent variable.
 
 \subsubsection{Complementary and Redundant Information}
 The nature of the information provided by different \gls{views} (such as neuroimaging and behavioral data) is important for understanding multiview learning models.
 A particularly useful distinction is between complementary and redundant information \citep{nguyen2020multiview,lyu2021understanding, chen2022representation}.
-When views contain complementary information, they provide different perspectives on the same subject or sample.
-For example, we can understand different aspects of a mental health condition by examining both neuroimaging and behavioral data.
-On the other hand, when \gls{views} contain redundant information about the latent variables, they provide the same information from different perspectives.
-For example, a disease diagnosis might be encoded in both neuroimaging and blood test results.
-This does not make the \gls{views} useless, however, because they can be used to denoise each other, enhancing the clarity and reliability of the data.
-We can be more confident that a diagnosis is correct if it is supported by both neuroimaging and blood test results.
-A particularly famous example of this principle is the `Wisdom of Crowds' effect, where the average of multiple noisy estimates is more accurate than any individual estimate \citep{galton1907vox}.
-This process exploits the overlap in information to correct or reduce noise and errors, a principle fundamental to many denoising techniques in machine learning.
+The complementary information in views offers unique insights into different aspects of the same subject. For instance, in mental health studies, neuroimaging might reveal structural changes in the brain that are not (yet) present in presented behavioural phenotypes, while behavioral data could be influenced by demographic factors that do not present as structural differences in the brain. Both these views together provide a more holistic understanding of a mental health condition.
+Conversely, redundant information in different views refers to overlapping or similar data presented from various angles. For instance, a specific mental health condition may manifest in both observable behavioral changes and detectable neuroimaging markers. While each view alone could suggest the presence of the condition, their combination, due to redundancy, can enhance the reliability of the diagnosis. This redundancy is not merely repetitive; it plays a crucial role in denoising and validating findings. In essence, if both neuroimaging and behavioral data independently point to the same diagnosis, the confidence in this diagnosis increases.
+The `Wisdom of Crowds' phenomenon, where the collective average of multiple estimates tends to be more accurate than individual estimates, exemplifies the strength of redundant information \citep{galton1907vox}, as illustrated in Figure \ref{fig:wisdomofcrowds}. This principle is akin to the redundancy in multiview data, where multiple views converge to a more accurate or robust conclusion than any single view alone.
 
-In this thesis we will work with Canonical Correlation Analysis, a multiview learning method which assumes that the \gls{views} contain complementary information about latent variables.
-The next section builds a formal understanding of the principles behind Canonical Correlation Analysis and its variants.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/cow.png}
+    \caption[The Wisdom of Crowds]{\textit{\textbf{The Wisdom of Crowds:}} The average of multiple noisy estimates of the weight of a cow is more accurate than any individual estimate.}\label{fig:wisdomofcrowds}
+\end{figure}
+
+In this thesis, we will explore Canonical Correlation Analysis, a multiview learning method predicated on the assumption that different \gls{views} provide complementary information about latent variables. The following sections will establish a formal framework for representation learning and motivate the use of Canonical Correlation Analysis in harnessing complementary information from multiview data.
 
 \section{Learning Representations: Definitions and Notation}
 
@@ -101,11 +126,14 @@ $d \in [D_i]$ for dimensions of input variables;
 and $l,k \in [K]$ for dimensions of representations - i.e. to subscript dimensions of $Z\sps{i}, f\sps{i}$.
 Later on we will introduce total number of samples $N$.
 
-In this report, when the functions $f$ are linear, we will typically refer to $u_k$ as \gls{weights}, $Z_k = X_k u_k$ as \gls{representations} or \gls{latent variables} (and in the CCA literature as canonical variables \citep{borga_learning_1998}), depending on the context.
+In this report, when the functions $f$ are linear, we will typically refer to $u_k$ as \gls{weights}, $Z_k = X_k u_k$ as \gls{representations} or \gls{latent variables} (noting that in the CCA literature they are sometimes referred to as canonical variables \citep{borga_learning_1998}), depending on the context.
 We will sometimes consider a matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of \gls{weights}, and a matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations.
 We will refer to the Pearson correlation between features and their respective latent variable $\Corr(X\sps{i}_j, Z_k)$ as the \gls{loadings} of $X\sps{i}_j$ on $Z_k$ \citep{rosipal2005overview, alpert1972interpretation, borga_learning_1998}, noting that the same concept has also been referred to as structure correlations \citep{meredith1964canonical}.
 
-\subsection{Background: Generalized Eigenvalue Problems in linear algebra}
+%Covariance matrices
+We will use the notation $\Sigma_{ij}=\Cov(X\sps{i}, X\sps{j})$ for the population covariance matrix between the random variables associated with view $i$ and $j$. We will also use $\Sigma_{ii}= \Cov(X\sps{i})$ for the population covariance matrix of the random variables associated with view $i$ with each other.
+
+\subsection{Generalized Eigenvalue Problems in linear algebra}
 A Generalized Eigenvalue Problem (GEP) is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}.
 They are usually characterized by the set of solutions to the equation:
 \begin{align}
@@ -113,9 +141,7 @@ They are usually characterized by the set of solutions to the equation:
     Au=\lambda Bu
 \end{align}
 with $\lambda \in \R, u \in \R^D$, called (generalized) eigenvalue and (generalized) eigenvector respectively.
-We shall only consider the case where $B$ is positive definite to avoid degeneracy.
-Then the GEP becomes equivalent to an eigen-decomposition of the symmetric matrix $B^\mhalf A B^\mhalf$.
-This is key to the proof of our new characterization.
+When $B$ is positive definite, then the GEP becomes equivalent to an eigen-decomposition of the symmetric matrix $B^\mhalf A B^\mhalf$ \citep{ghojogh2019eigenvalue}.
 In addition, one can find a basis of eigenvectors spanning $\R^D$.
 We define a top-$K$ subspace to be one spanned by some set of eigenvectors {$u_1,\dots,u_K$} with the top-$K$ associated eigenvalues $\lambda_1 \geq \dots \geq \lambda_K$.
 We say a matrix $U \in \R^{D \times K}$ defines a top-$K$ subspace if its columns span one.
@@ -134,14 +160,14 @@ In \acrshort{pca}, the representations are constrained to be linear transformati
     \label{eq:pca-linear-function-def}
     Z_k = X u_k,
 \end{equation}
-where $u_k$ are the orthonormal basis vectors such that:
+where $u_k$ are orthonormal basis vectors such that:
 \begin{equation}
     \label{eq:pca-orthonormality-constraint}
     u_k^\top u_k = 1, \quad
     u_k^\top u_l = \delta_{kl} \text{ for } k \neq l.
 \end{equation}
 
-The primary goal of \acrshort{pca} is to maximize the variance of the representations \(Z_k\).
+The primary goal of \acrshort{pca} is to maximize the variance of the representations \(Z_k\), finding the directions of maximal variance in the data.
 
 \subsubsection{Optimization and Solution}
 Mathematically, for the first principal component, this can be formulated as:
@@ -152,13 +178,14 @@ Mathematically, for the first principal component, this can be formulated as:
     u^\top u       & = 1 \notag
 \end{align}
 
-Where \(\Sigma = \mathbb{E}[X^\top X]\) is the covariance matrix of the data.
+Where \(\Sigma = \mathbb{E}[X^\top X]\) is the population covariance matrix of the single view data $X$.
 
 The Lagrangian for this problem is:
 \begin{equation}
     f(u,\lambda) = u^\top \Sigma u + \lambda(1 - u^\top u),
 \end{equation}
-where \(\lambda\) is the Lagrange multiplier. Differentiating the Lagrangian yields the first-order conditions:
+where \(\lambda\) is the Lagrange multiplier.
+Differentiating the Lagrangian yields the first-order conditions:
 \begin{align}
     \Sigma u & = \lambda u, \\
     u^\top u & = 1.
@@ -172,16 +199,30 @@ The first principal component therefore corresponds to the eigenvector associate
 Subsequent components are the remaining eigenvectors ordered by their corresponding eigenvalues.
 
 \subsubsection{Limitations}
-However, when applying \acrshort{pca} to datasets such as high-dimensional neuroimaging and behavioral
-data, \acrshort{pca}\('\)s main limitation arises: it only accounts for variance within a single dataset, so it cannot take advantage of either the redundancy or the complementary information in multiview data.
+There are two major limitations of \acrshort{pca} that are relevant to this thesis.
+The first is revealed by the epigraph of this chapter, which highlights the fact that \acrshort{pca} is not scale invariant.
+This means that the principal components are sensitive to the scale of the data, and therefore the units in which the data is measured.
+Furthermore, the interpretation of the principal components is challenging; they are linear combinations of all of the original features. For this reason, sparse variants of \acrshort{pca} have been developed \citep{zou2006sparse,zou2018selective}, which aim to find sparse linear combinations of the original features; interpretable as a subset of the original features contributing to a significant proportion of the variance in the data.
+Another major limitation of \acrshort{pca} in the context of multiview learning is that it does not explicitly take advantage of either the redundancy or the complementary information in multiview data, even if we concatenate the views into a single random variable $X$.
+Nevertheless, \acrshort{pca} remains a popular tool in practice \citep{greenacre2022principal} and is a useful baseline for multiview learning methods, and we will use it as a point of comparison throughout this thesis.
 
 \subsection{Partial Least Squares}
 
 Partial Least Squares (PLS) \citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as \gls{views}. \acrshort{pls} can be seen as a generalization of \acrshort{pca}, where \acrshort{pca} becomes a special case when the two \gls{views} are identical.
 
+\acrshort{pls} optimises for the dot product between the two views, a measure of similarity.
+
+\begin{align}
+    \label{eq:dot-product}
+    \langle u^{(1)}, \Sigma_{12}u^{(2)} \rangle =u\spsT{1}\Sigma_{12}u\sps{2} = \sqrt{u\spsT{1}\Sigma_{11}u\sps{1}} \sqrt{u\spsT{2}\Sigma_{22}u\sps{2}} \cos(\theta)
+\end{align}
+
+Where $\theta$ is the angle between the two representations.
+In order to constrain the problem, we set the norms of the weights to 1.
+
 \subsubsection{Optimization and Solution}
 
-The optimization problem for \acrshort{pls} can be formulated as:
+The constrained optimization problem for \acrshort{pls} can therefore be formulated as:
 
 \begin{align}
     u\sps{1}_{\text{opt}} & = \underset{u\sps{1}}{\mathrm{argmax}} \{ u\spsT{1} \Sigma_{12} u\sps{2} \} \\
@@ -189,8 +230,6 @@ The optimization problem for \acrshort{pls} can be formulated as:
     u\spsT{1}u\sps{1}   & = 1 \notag                                                                    \\
     u\spsT{2}u\sps{2}   & = 1 \notag
 \end{align}
-
-where \( X\sps{1} \in \mathbb{R}^{n \times p_1} \) and \( X\sps{2} \in \mathbb{R}^{n \times p_2} \), meaning we have two \gls{views} with the same number of samples but potentially different number of features.
 
 The Lagrangian for this optimization problem can be formulated as:
 
@@ -242,28 +281,33 @@ We can also represent the system of equations in matrix form as follows:
 
 Which is of the form $A v = \lambda B v$. \acrshort{pls} is therefore also defined by the solution to a single generalized eigenvalue problem.
 
-Given the notions of uniqueness in GEPs, the weights $u$ are not in general unique but we can write the vector of generalized eigenvalues, here representing covariances, as
+Given the notions of uniqueness in GEPs, the weights $u$ are not in general unique but we can write the vector of generalized eigenvalues $(\lambda_1, \dots, \lambda_K)$ representing covariances as:
+
 \begin{align}
     \label{eq:pls-vector-of-correlations-def}
-    \PLS_K(X^{(1)},X^{(2)}) \defeq (\rho_k)_{k=1}^K
+    \PLS_K(X^{(1)},X^{(2)}) \defeq (\lambda_k)_{k=1}^K
 \end{align}
 
-\subsubsection{Limitations} The problem with applying \acrshort{pls} to neuroimaging and behavioural modalities is that \acrshort{pls} is not scale invariant and
-is therefore biased towards the largest principal components in the data \citep{helmer2020stability}.
-This is particularly problematic when there is a low signal to noise ratio since \acrshort{pls} may find directions in either dataset which correspond to the largest directions of noise in the other.
-Additionally, \acrshort{pls} assumes that the structures contributing to variance in both datasets are linearly related, which
-may not be the case in complex biological systems like the brain or in intricate behavioral patterns \citep{rosipal2005overview}.
-The linearity assumption can sometimes be overly restrictive, failing to capture more complicated, nonlinear relationships between the data modalities.
-Another issue is the lack of sparsity in the \acrshort{pls} solution.
-Traditional \acrshort{pls} methods do not provide sparse weight vectors, which makes the interpretation of results challenging in high-dimensional settings such as neuroimaging where only a subset of features might be relevant.
-There are sparse variants of \acrshort{pls} available, but these typically introduce additional complexity and may require fine-tuning of regularization parameters \citep{chun2010sparse, witten2009penalized}.
-Furthermore, \acrshort{pls} can be sensitive to outliers, which are not uncommon in neuroimaging data due to motion artifacts or other sources of noise.
-Since the method aims to maximize covariance, extreme values in one dataset can disproportionately affect the resulting latent variables \citep{Wold1973}.
+\subsubsection{Limitations} Like \acrshort{pca}, a major problem with applying \acrshort{pls} to neuroimaging and behavioural modalities is that \acrshort{pls} is not scale invariant.
+This is because the dot product in equation~\ref{eq:dot-product} is not scale invariant since it is not normalized by the norms of the representations.
+Since representations with larger norms will have larger dot products, \acrshort{pls} is biased towards larger representations.
+It is therefore also biased towards the largest principal components in the data \citep{helmer2020stability}.
+This is particularly problematic when there is a low signal to noise ratio since \acrshort{pls}.
+Like \acrshort{pca}, another issue is the lack of sparsity in the \acrshort{pls} solution which has been an active area of research \citep{chun2010sparse, witten2009penalized}.
 
 \subsection{Canonical Correlation Analysis}\label{sec:cca}
 
 In Canonical Correlation Analysis (\acrshort{cca}), we aim to find the directions that maximize correlation, as opposed to maximizing covariance between two \gls{views} of a dataset.
-This nuance renders \acrshort{cca} invariant to feature scale.
+As compared to \acrshort{pls}, \acrshort{cca} optimizes for the correlation between the two views, rather than the covariance.
+This can be viewed as maximizing the cosine similarity between the two views, rather than the dot product, as in \acrshort{pls}.
+
+\begin{align}
+    \label{eq:cosine-similarity}
+    \cos(\theta) = \frac{\langle u^{(1)}, \Sigma_{12}u^{(2)} \rangle}{\sqrt{\langle u^{(1)}, \Sigma_{11}u^{(1)} \rangle} \cdot \sqrt{\langle u^{(2)}, \Sigma_{22}u^{(2)} \rangle}} = \frac{u\spsT{1}\Sigma_{12}u\sps{2}}{\sqrt{u\spsT{1}\Sigma_{11}u\sps{1}} \sqrt{u\spsT{2}\Sigma_{22}u\sps{2}}}
+\end{align}
+
+By dividing by the norms of the representations, we can see that \acrshort{cca} is scale invariant, unlike \acrshort{pls}.
+All that matters is the angle between the representations, not their magnitude.
 
 \subsubsection{Optimization and Solution}
 The optimization problem for \acrshort{cca} can be expressed as:
@@ -343,6 +387,12 @@ Given the notions of uniqueness in GEPs, the weights $u$ are not in general uniq
     \label{eq:cca-vector-of-correlations-def}\small
     \CCA_K(X^{(1)},X^{(2)}) \defeq (\rho_k)_{k=1}^K
 \end{align}
+
+\subsubsection{Limitations}
+
+Additionally, \acrshort{pls} assumes that the structures contributing to variance in both datasets are linearly related, which
+may not be the case in complex biological systems like the brain or in intricate behavioral patterns \citep{rosipal2005overview}.
+The linearity assumption can sometimes be overly restrictive, failing to capture more complicated, nonlinear relationships between the data modalities.
 
 \subsection{Multiview \acrshort{cca}}
 
@@ -515,9 +565,9 @@ Specific to canonical correlation analysis, this involves measuring the correlat
 
 Evaluating model performance on downstream tasks like classification or prediction can offer practical insights into the utility of the learned representations.
 
-\subsection{Components and Subspaces in CCA: A Subspace Perspective}
+\subsection{Components and Subspaces in CCA}
 
-\subsubsection{Context: Eigenvalue Problems in CCA}\label{subsec:orthogonality}
+\subsubsection{Context: Eigenvalue Problems in CCA}
 
 While our focus so far has primarily been on the top-1 eigenvector-eigenvalue pair, it's important to note that the methodology also extends to the top-k subspace problem. This broader approach involves identifying the top-k eigenvectors and their corresponding eigenvalues.
 

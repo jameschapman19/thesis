@@ -331,7 +331,7 @@ This could lead to varying and potentially misleading interpretations.
 
 Whereas priors on the loadings in the explicit latent variable model are intuitive, priors on the weights in the implicit latent variable model are evidently less so.
 
-\section{Invariance of Loadings in CCA}
+\section{Proving the Invariance of Loadings in CCA}
 
 Building on these observations, we now shift our focus to a mathematical argument favoring the use of \gls{loadings} over weights for the interpretation of \acrshort{cca} models.
 Specifically, we demonstrate that \gls{loadings} are invariant to columnwise transformations of the data matrix, a property not shared by weights.
@@ -578,7 +578,7 @@ In the sections so far, we have discussed the mathematical properties of weights
 We have also shown how to efficiently sample from these generative models.
 In the next section, we will present a number of experiments demonstrating the relationship between weights and \gls{loadings} in simulated data.
 
-\section{Experiment Design of Simulations}
+\section{Experiment Design}
 
 Our goal in this section is to empirically demonstrate the relationship between weights and \gls{loadings} in \acrshort{cca} models as well as to better understand the behavior of \acrshort{cca} models in the high-dimensional settings that section \ref{sec:efficient} enables, and which are of interest in the neuroimaging community.
 
@@ -668,7 +668,7 @@ Recalling table \ref{tab:covariance-structures}, note that in the implicit laten
 In the explicit latent variable models, these covariance matrices are just the covariance matrices of the noise to which we add the signal covariance matrices.
 Nonetheless, for strong enough noise, this process ensures that there are large correlations between features.
 
-\section{Results of Simulations}
+\section{Experiment Results}
 
 \subsection{Exploring the Relationship Between Weights and Loadings in CCA Using Simulated Data}
 
@@ -874,9 +874,6 @@ It is interesting that performance of the Ridge CCA improves across the board wi
 
 \section{Discussion}
 
-
-
-
 Given our theoretical observations in this chapter, a natural question to ask is whether we can construct a regularization functional that imposes sparsity on the \gls{loadings} (instead of the weights).
 The answer is yes, but it is not straightforward and in the small sample setting, it is not clear that it is a good idea.
 The principle would be much the same as the Lasso, but we would need to use the sample covariance matrix to define the norm:
@@ -890,6 +887,10 @@ Which imposes an L1 penalty on the \gls{loadings} via an L1 penalty on the \gls{
 We could in principle apply the soft-thresholding operator to the estimated loadings.
 However we would need to be careful to ensure that the sample covariance matrix is invertible in order to get back to the weights.
 This is of course not guaranteed in the small sample setting.
+
+\subsection{Limitations}
+
+
 
 \subsection{Conclusion}
 

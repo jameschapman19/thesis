@@ -23,7 +23,7 @@ In this chapter, we propose a novel formulation of Deep CCA that is unbiased in 
 We also propose a novel SSL method, SSL-EY, that is competitive with existing methods on CIFAR-10 and CIFAR-100.
 We highlight the connections between our work and existing SSL methods, and show that our method is more robust to hyperparameter tuning.
 
-\section{Background}
+\section{Background: Deep Representation Learning}
 
 \subsection{Deep Learning}
 
@@ -383,6 +383,8 @@ evolution of the correlation, measured by $\LEY$, suggests a new avenue for moni
 
 \section{Discussion}
 
+\subsection{Limitations}
+
 Our innovative formulation of DCCA-EY successfully addresses the limitations of traditional DCCA methods, particularly in stochastic settings.
 The experimental results on Split MNIST and XRMB datasets demonstrate DCCA-EY's superior capability in capturing correlations efficiently across a range of mini-batch sizes, thereby validating its scalability and robustness.
 Furthermore, our method shows notable improvements in convergence speed and reduced sensitivity to hyperparameter tuning, aspects critically important for practical applications.
@@ -393,6 +395,8 @@ This is important given the time it takes to run experiments with SSL methods wh
 This underscores SSL-EY's adaptability and robustness in different settings.
 Particularly noteworthy is its performance with reduced or absent projectors, indicating its efficiency and potential for broader applications in SSL\@.
 Moreover, the insights gleaned from the correlation of EY loss with classification accuracy in SSL-EY open new avenues for understanding and leveraging canonical correlations in SSL. The observed relationships provide a promising direction for future research in developing more effective and efficient SSL methods.
+
+\subsection{Conclusion}
 
 Our work bridges significant gaps in the literature and establishes a strong foundation for future explorations in both DCCA and SSL. The proposed methods not only enhance our understanding of these domains but also pave the way for practical applications where scalability, efficiency, and robustness are paramount.
 In summary, this chapter contributes to the advancement of DCCA and SSL by introducing novel approaches that are not only theoretically sound but also practically viable, offering valuable tools for researchers and practitioners alike in the ever-evolving landscape of machine learning.
