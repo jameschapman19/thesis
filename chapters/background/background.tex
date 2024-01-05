@@ -39,9 +39,9 @@ In supervised multiview learning, the goal is to integrate information from mult
     \centering
     \tikz{
     % nodes
-        \node[obs, minimum size=2cm, align=center] (y1) {Behaviour\\$y_1$}; % Behaviour node as y1
-        \node[obs, left=of y1, minimum size=2cm, align=center] (x1) {Brain\\$x_1$}; % Brain node as x1
-        \node[obs, below=of x1, minimum size=2cm, align=center] (x2) {Demographics\\$x_2$};
+        \node[obs, minimum size=3cm, align=center] (y1) {Behaviour\\$y_1$}; % Behaviour node as y1
+        \node[obs, left=of y1, minimum size=3cm, align=center] (x1) {Brain\\$x_1$}; % Brain node as x1
+        \node[obs, below=of x1, minimum size=3cm, align=center] (x2) {Demographics\\$x_2$};
         \edge{x1} {y1}
         \edge{x2} {y1}}
         \caption[Independent and Dependent Variable Model of Mental Health]{\textit{\textbf{Independent and Dependent Variable Model of Mental Health:}} From this perspective, behavioural data is considered to be dependent on brain activity and demographics}\label{fig:mentalhealthsupervised}
@@ -106,7 +106,7 @@ The `Wisdom of Crowds' phenomenon, where the collective average of multiple esti
 \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{figures/cow.png}
-    \caption[The Wisdom of Crowds]{\textit{\textbf{The Wisdom of Crowds:}} The average of multiple noisy estimates of the weight of a cow is more accurate than any individual estimate.}\label{fig:wisdomofcrowds}
+    \caption[The Wisdom of Crowds]{\textit{\textbf{The Wisdom of Crowds:}} The average of multiple noisy estimates of the weight of a cow is more accurate than any individual estimate. Created with the assistance of DALL·E 2}\label{fig:wisdomofcrowds}
 \end{figure}
 
 In this thesis, we will explore Canonical Correlation Analysis, a multiview learning method predicated on the assumption that different \gls{views} provide complementary information about latent variables. The following sections will establish a formal framework for representation learning and motivate the use of Canonical Correlation Analysis in harnessing complementary information from multiview data.
@@ -214,7 +214,7 @@ Partial Least Squares (PLS) \citep{wold1975path} aims to maximize the shared cov
 
 \begin{align}
     \label{eq:dot-product}
-    \langle u^{(1)}, \Sigma_{12}u^{(2)} \rangle =u\spsT{1}\Sigma_{12}u\sps{2} = \sqrt{u\spsT{1}\Sigma_{11}u\sps{1}} \sqrt{u\spsT{2}\Sigma_{22}u\sps{2}} \cos(\theta)
+    \langle X\sps{1}u^{(1)}, X\sps{2}u^{(2)} =\sqrt{u\spsT{1}\Sigma_{11}u\sps{1}} \sqrt{u\spsT{2}\Sigma_{22}u\sps{2}} \cos(\theta)
 \end{align}
 
 Where $\theta$ is the angle between the two representations.
@@ -298,16 +298,17 @@ Like \acrshort{pca}, another issue is the lack of sparsity in the \acrshort{pls}
 \subsection{Canonical Correlation Analysis}\label{sec:cca}
 
 In Canonical Correlation Analysis (\acrshort{cca}), we aim to find the directions that maximize correlation, as opposed to maximizing covariance between two \gls{views} of a dataset.
-As compared to \acrshort{pls}, \acrshort{cca} optimizes for the correlation between the two views, rather than the covariance.
 This can be viewed as maximizing the cosine similarity between the two views, rather than the dot product, as in \acrshort{pls}.
+Rearranging equation~\ref{eq:dot-product} yields:
 
 \begin{align}
     \label{eq:cosine-similarity}
-    \cos(\theta) = \frac{\langle u^{(1)}, \Sigma_{12}u^{(2)} \rangle}{\sqrt{\langle u^{(1)}, \Sigma_{11}u^{(1)} \rangle} \cdot \sqrt{\langle u^{(2)}, \Sigma_{22}u^{(2)} \rangle}} = \frac{u\spsT{1}\Sigma_{12}u\sps{2}}{\sqrt{u\spsT{1}\Sigma_{11}u\sps{1}} \sqrt{u\spsT{2}\Sigma_{22}u\sps{2}}}
+    \cos(\theta) = \frac{\langle X\sps{1}u^{(1)}, X\sps{2}u^{(2)}}{\sqrt{\langle X\sps{1}u^{(1)}, X\sps{1}u^{(1)}}\cdot \sqrt{\langle X\sps{2}u^{(2)}, X\sps{2}u^{(2)}}}= \frac{u\spsT{1}\Sigma_{12}u\sps{2}}{\sqrt{u\spsT{1}\Sigma_{11}u\sps{1}} \sqrt{u\spsT{2}\Sigma_{22}u\sps{2}}}
 \end{align}
 
-By dividing by the norms of the representations, we can see that \acrshort{cca} is scale invariant, unlike \acrshort{pls}.
+and we can see that the dot product from equation~\ref{eq:dot-product} is normalised by the inner products so that \acrshort{cca} is scale invariant, unlike \acrshort{pls}.
 All that matters is the angle between the representations, not their magnitude.
+Once again, in order to constrain the problem, we this time set the norms of the representations to 1.
 
 \subsubsection{Optimization and Solution}
 The optimization problem for \acrshort{cca} can be expressed as:
@@ -333,25 +334,25 @@ The first-order conditions derived in the same manner as the \acrshort{pls} case
 
 \paragraph{Eigenvalue Problems}
 
-Substituting the second two conditions into the first two, we get \(\lambda\sps{1}=\lambda\sps{2}=\lambda\). Then, recognizing \(X_i^{\top}X_i\) as the covariance matrix \(\Sigma_{ii}\) and \(X_i^{\top}X_j\) as the cross-covariance matrix \(\Sigma_{ij}\), we obtain another pair of eigenvalue problems:
+Substituting the second two conditions into the first two, we get \(\lambda\sps{1}=\lambda\sps{2}=\lambda\). Finally, substituting the first two conditions into each other, we find the eigenvalue problems:
 
-\begin{align}
-    & \Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}u\sps{1}=\lambda^2u\sps{1} \notag \\
-    & \Sigma_{22}^{-1}\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}u\sps{2}=\lambda^2u\sps{2} \notag
+\begin{align}\label{eq:cca-eigenvalue-problems}
+    & \Sigma_{11}^{-1}\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}u\sps{1}=\lambda^2u\sps{1} \\
+    & \Sigma_{22}^{-1}\Sigma_{21}\Sigma_{11}^{-1}\Sigma_{12}u\sps{2}=\lambda^2u\sps{2}
 \end{align}
 
 An alternative form of the \acrshort{cca} problem can be developed by reparameterizing \(u\sps{i*}=\Sigma_{ii}^{-\frac{1}{2}}u\sps{i}\). The optimization problem then becomes:
 
-\begin{align}
+\begin{align}\label{eq:cca-reparameterized}
     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spsT{1}\Sigma_{11}^{-\frac{1}{2}}\Sigma_{12}\Sigma_{22}^{-\frac{1}{2}}u\sps{2} \} \\
     & \text{subject to:} \notag                                                                                                            \\
     & u\spsT{1}u\sps{1}=1 \notag                                                                                                         \\
     & u\spsT{2}u\sps{2}=1 \notag
 \end{align}
 
-This reparameterized form will later underpin Deep Canonical Correlation Analysis (\acrshort{dcca}).
-
-This form also shows that \acrshort{pls} and \acrshort{cca} can be made equivalent by whitening the data matrices before constructing the covariance matrix. When the number of features exceeds the number of samples (\(p>n\)), \acrshort{cca} becomes degenerate because the within-view covariance matrices cannot be inverted—contrasting with \acrshort{pls}, which is always computable.
+This reparameterized form will later underpin Deep Canonical Correlation Analysis (\acrshort{dcca}) through the matrix $T=\Sigma_{11}^{-\frac{1}{2}}\Sigma_{12}\Sigma_{22}^{-\frac{1}{2}}$.
+This form also shows that \acrshort{pls} and \acrshort{cca} can be made equivalent by whitening the data matrices before constructing the covariance matrix.
+When the number of features exceeds the number of samples (\(p>n\)), \acrshort{cca} becomes degenerate because the within-view covariance matrices cannot be inverted—contrasting with \acrshort{pls}, which is always computable.
 
 \paragraph{Generalized Eigenvalue Problem}
 
@@ -390,9 +391,7 @@ Given the notions of uniqueness in GEPs, the weights $u$ are not in general uniq
 
 \subsubsection{Limitations}
 
-Additionally, \acrshort{pls} assumes that the structures contributing to variance in both datasets are linearly related, which
-may not be the case in complex biological systems like the brain or in intricate behavioral patterns \citep{rosipal2005overview}.
-The linearity assumption can sometimes be overly restrictive, failing to capture more complicated, nonlinear relationships between the data modalities.
+A major limitation of \acrshort{cca} is revealed by the forms in equations \ref{eq:cca-eigenvalue-problems} and equation~\ref{eq:cca-reparameterized}; \acrshort{cca} in general requires the inversion of covariance matrices, which is computationally expensive, potentially numerically unstable, and impossible when the number of features exceeds the number of samples such that the covariance matrices are not full rank.
 
 \subsection{Multiview \acrshort{cca}}
 
@@ -483,7 +482,8 @@ Thus, LDA can be thought of as a constrained form of \acrshort{cca}, tailored to
 This perspective unifies the two algorithms and shows that the core objective—finding meaningful relationships or directions in the data—is shared between both \acrshort{cca} and LDA.
 
 \subsection{Sample Covariance and Population Covariance}
-In the previous sections, the methods were described in terms of population covariance matrices such as \(\Sigma_{11}=\mathbb{E}[X\spsT{1} X\sps{1}]\), \(\Sigma_{22}=\mathbb{E}[X\spsT{2} X\sps{2}]\), and \(\Sigma_{12}=\mathbb{E}[X\spsT{1} X\sps{2}]\). These population covariances assume an underlying probability distribution from which the data are drawn.
+In the previous sections, the methods were described in terms of population covariance matrices such as \(\Sigma_{11}=\mathbb{E}[X\spsT{1} X\sps{1}]\), \(\Sigma_{22}=\mathbb{E}[X\spsT{2} X\sps{2}]\), and \(\Sigma_{12}=\mathbb{E}[X\spsT{1} X\sps{2}]\).
+These population covariances assume an underlying probability distribution from which the data are drawn.
 
 \textbf{Sample Covariance:} In practical settings, we often do not have access to the entire population but only to a sample. Hence, we can use the Sample Average Approximation to estimate these covariances:
 
@@ -492,8 +492,10 @@ In the previous sections, the methods were described in terms of population cova
 \]
 
 Here, \(b\) denotes the size of the minibatch, and \(\mathbf{X}\sps{1} \in \mathbb{R}^{p \times b}\) and \(\mathbf{X}\sps{2} \in \mathbb{R}^{q \times b}\) are the data matrices for the samples from \(X\sps{1}\) and \(X\sps{2}\), respectively. The bar over \(\mathbf{X}\sps{1}\) and \(\mathbf{X}\sps{2}\) signifies that these are centered versions of the matrices, i.e., the mean has been subtracted from each column.
+For the ease of both reader and writer, we will drop the bars for the remainder of the thesis and assume that the data are always centered without loss of generality.
 
-\textbf{Practical Implications:} Using sample covariance matrices introduces some estimation error but allows us to apply the methods in real-world scenarios where population-level data are unattainable. Additionally, the use of minibatches provides a computationally efficient way to estimate these covariances in large-scale problems, at the cost of some additional statistical noise.
+\textbf{Practical Implications:} Using sample covariance matrices introduces some estimation error but allows us to apply the methods in real-world scenarios where population-level data are unattainable.
+Additionally, the use of minibatches (chunks of data) in later chapters provides a computationally efficient way to estimate these covariances in large-scale problems, at the cost of some additional statistical noise.
 
 \textbf{Connection to Previous Methods:} The use of sample covariance matrices is directly applicable to algorithms like \acrshort{cca} and LDA. When replacing the population covariances \(\Sigma\sps{ij}\) with sample estimates, the optimization problems remain structurally similar but are solved using the sample data.
 
@@ -501,73 +503,53 @@ This dual perspective—considering both population and sample covariance matric
 It will be particularly useful in the context of chapter \ref{ch:loadings} where we will use population variables as ground truth while estimating the models using sample data.
 
 
-\section{Practical Frameworks for Multiview Learning}
+\section{Practical Frameworks for Evaluating Multiview Learning Methods}
 
-At this point, we have introduced the theoretical foundations of multiview learning, including \acrshort{cca} and its variants.
-However, it is not yet clear how we should apply these methods to real-world datasets.
+At this point, we have introduced the theoretical foundations of multiview learning, and a number of classical representation learning algorithms including \acrshort{cca} and its variants.
+However, it is not yet clear how we should evaluate these methods in practice.
+In this section, we compare the machine learning and the statistical approach of permutation testing.
+These two approaches are not mutually exclusive, and statistical learning theory has emerged as a unifying framework for both perspectives \citep{vapnik1999nature, hastie2009elements}.
 
-\subsection{Machine Learning and Statistical Inference}
+\subsubsection{Permutation Testing}
 
-Canonical Correlation Analysis (\acrshort{cca}) has been studied from both machine learning and statistical inference perspectives.
-At its core, machine learning focuses on prediction, while statistical inference focuses on understanding the underlying data structure\citep{ij2018statistics}.
-However, these two approaches are not mutually exclusive, and statistical learning theory has emerged as a unifying framework for both perspectives \citep{vapnik1999nature, hastie2009elements}.
-In this section, we will review the differences between these two approaches and their implications for multiview learning.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/permutation_test.png}
+    \caption{Schematic of the permutation testing procedure. The original data are randomly shuffled, and the model is retrained on the shuffled data. This process is repeated multiple times, and the model's performance on the original data is compared to the distribution of performances on the shuffled data.}
+    \label{fig:statistical-inference}
+\end{figure}
 
-\subsubsection{Statistical Inference Evaluation Framework}
+Permutation testing offers a robust way to evaluate the significance of the results obtained by multiview learning methods and, for a single component, is a relatively simple process \citep{winkler2020permutation}.
+As illustrated in Figure~\ref{fig:statistical-inference}, the views are randomly and separately shuffled, and the model is then trained and tested on this permuted data.
+This process is repeated multiple times, generating a distribution of performance metrics under the null hypothesis, where there is no relationship between the views.
+The actual performance of the model on the unshuffled data is then compared to this distribution.
+If the actual performance is significantly better than the permuted performance, it suggests that the model is capturing meaningful relationships in the data.
 
-Statistical inference approaches provide a contrasting perspective to machine learning methods, focusing on understanding and quantifying the underlying data structure:
+\subsubsection{Machine Learning}
 
-\paragraph{Parameter Estimation}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/cross-validation.png}
+    \caption{Schematic of the cross-validation procedure. The original data are partitioned into training and test sets. In cross-validation, the training set is further partitioned into training and validation sets. The model is trained on the training set and evaluated on the validation set for different parameter values. The parameter value with the best performance on the validation set is selected, and the model is retrained on the entire training set. The final model is evaluated on the single test or holdout set.}
+    \label{fig:machine-learning}
+\end{figure}
 
-In statistical inference, parameter estimation involves estimating model parameters and their uncertainties.
-This process is fundamental to understanding the data and the model's fit.
+The machine learning approach to evaluating multiview learning methods is to use a holdout or test set to estimate the out-of-sample performance of the model.
+Within the training set, where necessary, cross-validation is used to select the best model hyperparameters.
+Cross-validation involves partitioning the training set into training and validation sets, training the model on the training set, and evaluating the model on the validation set.
+When this is performed for multiple subsets of the training set, it is referred to as \(k\)-fold cross-validation as illustrated in figure \ref{fig:machine-learning}.
+The model hyperparameters are then selected based on the performance across the validation sets.
+The model is then retrained on the entire training set using the best hyperparameters, and evaluated on the test set.
 
-\paragraph{Hypothesis Testing}
-
-Hypothesis testing assesses the statistical significance of the relationships found by the model.
-It tests whether the observed data patterns are likely to have occurred under the null hypothesis.
-
-\paragraph{Confidence Intervals}
-
-Confidence intervals provide ranges within which the true parameter values are likely to fall, considering uncertainty.
-They are essential for understanding the reliability of parameter estimates.
-
-\paragraph{Permutation Testing}
-
-Permutation testing is a non-parametric method that evaluates the significance of models. It compares model performance on the original data with performance on randomly shuffled data, helping to ascertain the results' robustness.
-
-\subsubsection{Machine Learning Evaluation Framework}
-
-\paragraph{Training, Validation, and Test Sets}
-
-In machine learning, data is typically partitioned into training, validation, and test sets, each serving a specific purpose in the model development process:
-
-\begin{itemize}
-    \item Training Set: Used for fitting the model.
-    \item Validation Set: Assists in model parameter tuning.
-    \item Test Set: Evaluates the model's generalization capability.
-\end{itemize}
-
-\paragraph{Cross-Validation}
-
-A fundamental technique in machine learning, cross-validation involves dividing the training dataset into smaller subsets for training and validation.
-This approach provides insights into the model's performance across different data segments.
-
-\paragraph{Holdout Method}
-
-The holdout method involves using a separate dataset, not involved in training or validation, for final model assessment. This ensures an unbiased performance evaluation.
-
-\paragraph{Out of Sample Correlation}
-
-Specific to canonical correlation analysis, this involves measuring the correlation between latent variables in new datasets, assessing the model's ability to uncover relationships in unseen data.
-
-\paragraph{Downstream Tasks}
-
-Evaluating model performance on downstream tasks like classification or prediction can offer practical insights into the utility of the learned representations.
+In this thesis, we will use the machine learning approach throughout.
+This is because in scaling up to large datasets, permutation testing becomes computationally intractable.
+This is because permutation testing requires retraining the model multiple times on the permuted data.
+This comes at the cost of only being able to evaluate models with a point estimate of performance, rather than a distribution.
+In chapter \ref{ch:loadings}, we observe and argue that signals of interest have a large effect size, and therefore permutation testing is not necessary to evaluate the significance of the results.
 
 \subsection{Components and Subspaces in CCA}
 
-\subsubsection{Context: Eigenvalue Problems in CCA}
+\subsubsection{Eigenvalue Problems in CCA}
 
 While our focus so far has primarily been on the top-1 eigenvector-eigenvalue pair, it's important to note that the methodology also extends to the top-k subspace problem. This broader approach involves identifying the top-k eigenvectors and their corresponding eigenvalues.
 
@@ -580,10 +562,10 @@ Different deflation methods enforce different forms of orthogonality, which can 
 
 \subsubsection{Non-Uniqueness of Components}
 
-Furthermore, non-uniqueness is a significant challenge in CCA, particularly when eigenvectors have repeated eigenvalues. Imagine a scenario where the top-1 eigenvalue is repeated \(k\) times. In this case, there are \(k\) possible eigenvectors that can be associated with the top-1 eigenvalue. While this is unlikely to occur in practice, the eigenvalues can in practice be very close to each other, leading to numerical instability and non-uniqueness in the components. Particularly true in cross-validation settings, this non-uniqueness can lead to instability in the components, complicating their interpretation and comparison.
+Furthermore, non-uniqueness is a significant challenge in representation learning, particularly when eigenvectors have repeated eigenvalues. Imagine a scenario where the top-1 eigenvalue is repeated \(k\) times. In this case, there are \(k\) possible eigenvectors that can be associated with the top-1 eigenvalue. While this is unlikely to occur in practice, the eigenvalues can in practice be very close to each other, leading to numerical instability and non-uniqueness in the components. Particularly true in cross-validation settings, this non-uniqueness can lead to instability in the components, complicating their interpretation and comparison.
 For example, the top-1 component in one analysis might be the second component in another analysis, making it difficult to compare the results.
 
-This non-uniqueness also has a grounding in the probabilistic perspectives on PCA and CCA, where the latent variables are considered unique only up to a rotation.
+This non-uniqueness also has a grounding in the probabilistic perspectives on PCA and CCA (introduced in chapter \ref{ch:loadings}), where the latent variables are considered unique only up to a rotation.
 This perspective further reinforces the subspace approach, emphasizing the identification of a subspace rather than specific directions within it.
 
 \paragraph{Thesis Approach: Concentrating on the Top-1 Component}
@@ -596,6 +578,8 @@ It is important to note that while we focus on the top-1 component, the later se
 
 
 \section{Multiview Learning in Neuroimaging}
+
+Finally, we review important applications of multiview learning from the literature in neuroimaging, which will be our reference in chapters \ref{ch:als} and \ref{ch:loadings}.
 
 \subsection{Multiview Data in Neuroscience and Genetics}
 
