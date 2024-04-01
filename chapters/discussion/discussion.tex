@@ -1,45 +1,48 @@
-\chapter{ Thoughts and Implications}
+\chapter{Conclusion}
 \label{ch:discussion}
 
-This chapter summarizes the main findings of this thesis and discusses their implications.
-It also discusses the limitations of the work and suggests directions for future research.
+As we reach the end of this journey exploring the depths of multiview learning and Canonical Correlation Analysis (CCA), it's time to reflect on the main findings of this thesis, their implications, and the potential avenues for future research. This chapter serves as a culmination of our efforts, tying together the various threads we've explored and setting the stage for further advancements in this field.
 
-\section{Summary of findings}
+\section{Summary of Findings}
+
+Throughout this thesis, we have considered the intricacies of CCA and its variants, focusing on their applications in neuroimaging and genetics. We have proposed novel methods for regularization and interpretation of CCA models, as detailed in Chapters \ref{ch:als} and \ref{ch:loadings}. These contributions aim to enhance the interpretability and robustness of CCA in high-dimensional settings, addressing key challenges in the field.
+
+Moreover, we have developed efficient algorithms for handling large-scale datasets, as presented in Chapters \ref{ch:gradient_descent} and \ref{ch:deep_learning}. These scalable methods have the potential to unlock new insights from massive datasets like the UK Biobank and the Adolescent Brain Cognitive Development (ABCD) study. By leveraging the power of gradient descent and deep learning, we have expanded the applicability of CCA to a wider range of problems and modalities.
 
 \section{Implications}
 
-Chapter \ref{ch:loadings} has important consequences for the interpretation of CCA models as well as the motivation behind variants of regularized CCA including our own contribution in chapter \ref{ch:als}.
-In the context of Linear Regression and Lasso regularization, we can interpret the Lasso as a Bayesian prior on the regression coefficients.
-In the context of CCA,
+The findings of this thesis have significant implications for both the theoretical understanding and practical application of CCA. Chapter \ref{ch:loadings}, in particular, sheds light on the interpretation of CCA models and provides a strong motivation for the development of regularized variants, including our own contribution in Chapter \ref{ch:als}. By drawing parallels with Linear Regression and Lasso regularization, we can interpret regularized CCA through the lens of Bayesian priors on the canonical weights, offering a new perspective on these methods.
 
-\section{Future work}
+The scalable algorithms presented in Chapters \ref{ch:gradient_descent} and \ref{ch:deep_learning} have the potential to revolutionize the application of CCA to large-scale datasets. By enabling the efficient analysis of datasets like the UK Biobank and ABCD, these methods can help uncover novel associations and insights that were previously inaccessible due to computational limitations. This opens up exciting possibilities for advancing our understanding of brain structure, function, and their relationships with genetics and behavior.
+
+Furthermore, by establishing the connection between CCA and gradient descent, we have paved the way for the integration of deep learning techniques with CCA. This synergy has the potential to leverage the successes of deep learning in various domains, such as imaging and natural language processing, and apply them to multiview learning problems. The application of transformers and other state-of-the-art architectures to CCA could lead to groundbreaking discoveries and a new era of multimodal data analysis.
+
+\section{Future Work}
 
 \subsection{Applications}
 
-One of the disappointing aspects of this thesis is that, with the exception of the UK Biobank application in chapter \ref{ch:deep_learning}, we have not discovered new associations within the limited datasets we have worked with.
-This is perhaps not suprising given the great popularity of the \acrshort{hcp} and \acrshort{adni} datasets we presented in chapter \ref{ch:als}.
-Nonetheless, the scalable methods we have developed in chapters \ref{ch:gradient_descent} and \ref{ch:deep_learning} are well-suited to the analysis of larger datasets including the UK Biobank and Adolescent Brain Cognitive Development (\acrshort{abcd}) datasets.
-We worked briefly with the \acrshort{abcd} dataset to explore the possibility of regularisation by proximal gradient descent on regularised versions of the family of objectives we defined in chapter \ref{ch:gradient_descent}.
-These results showed early promise but were too immature to include in this thesis.
-We expect that the \acrshort{ukbb} dataset will be a fruitful source of new associations for the foreseeable future and we believe that the methods we have developed in this thesis will be well-suited to this task.
-We also hope that by linking \acrshort{cca} to gradient descent, we have opened the door to the application of deep learning methods to \acrshort{cca}.
-With the great success of deep learning in imaging, text, and other domains, we believe that this is a promising direction for future research.
-In particular it opens up the possibility of using \acrshort{cca} methods to combine other non-imaging modalities such as Electronic Health Records or audio transcripts with imaging data given the success of the transformer architecture in natural language processing \citep{vaswani2017attention}.
+One of the most rewarding aspects of this thesis has been seeing the software we developed, such as the CCA-Zoo package, being used by researchers across different fields to tackle a wide range of problems. It has been truly inspiring to witness the impact of our work and to see how it has enabled others to push the boundaries of multiview learning.
+
+While the applications presented in this thesis, particularly the UK Biobank analysis in Chapter \ref{ch:deep_learning}, have demonstrated the potential of our methods, there is still vast untapped potential in applying these techniques to even larger and more diverse datasets. The ABCD dataset, for instance, offers a rich source of multimodal data that could benefit from the regularized and scalable CCA methods developed in this thesis. Preliminary results on this dataset have shown promise, and we believe that further exploration will yield valuable insights into brain development and its associated factors.
+
+Moreover, the integration of non-imaging modalities, such as Electronic Health Records and audio transcripts, with neuroimaging data presents an exciting avenue for future research. The success of transformer architectures in natural language processing suggests that these methods could be powerful tools for analyzing and integrating textual and auditory data with brain imaging. By leveraging the capabilities of deep learning and the multiview learning framework of CCA, we can uncover complex relationships across modalities and gain a more comprehensive understanding of human health and behavior.
 
 \subsection{Methods}
 
+From a methodological perspective, there are several directions in which the work presented in this thesis could be extended. One promising avenue is the further development of regularization techniques for CCA, building upon the ideas introduced in Chapters \ref{ch:als} and \ref{ch:loadings}. Exploring alternative priors and regularization schemes could lead to more interpretable and robust CCA models, particularly in high-dimensional settings.
 
-
+Another area of interest is the adaptation of the scalable algorithms presented in Chapters \ref{ch:gradient_descent} and \ref{ch:deep_learning} to other multiview learning methods beyond CCA. Techniques such as Partial Least Squares (PLS) and multi-view clustering could potentially benefit from the efficient optimization and deep learning approaches developed in this thesis. Extending these methods to a broader range of multiview learning problems could have a significant impact on various fields, from bioinformatics to social network analysis.
 
 \section{Closing Remarks}
 
-Reflecting on my undergraduate years in Engineering Science, I remember struggling to grasp the concepts of Eigenvalues and Eigenvectors.
+As I reflect on my journey from struggling with the concepts of eigenvalues and eigenvectors as an undergraduate to delving into the intricacies of CCA as a doctoral researcher, I am struck by the depth and breadth of this field. Far from being a narrow topic, CCA has served as a gateway to explore a wide range of subjects, from optimization and Bayesian statistics to deep learning and software engineering.
 
-This now seems like a distant memory as I conclude my doctoral research, immersed in the nuances of a specific class of Eigenvalue problems, and most of all, Canonical Correlation Analysis.
+One of the most exciting aspects of this journey has been witnessing the rapid growth and evolution of multiview and self-supervised learning during my PhD. The convergence of these fields with CCA has been truly remarkable, and I am thrilled to have been a part of this exciting development. The methods and insights gained from this thesis have the potential to contribute to the continued growth and impact of these areas.
 
-Far from being a narrow topic, understanding this problem has led me to explore a wide variety of topics including optimization, Bayesian statistics, deep learning, and Software Engineering.
+Although we have been limited by access to data, I am confident that the work presented in this thesis has made a meaningful impact on the field of multiview learning. The software tools we have developed, such as CCA-Zoo, have already been adopted by researchers across various domains, enabling them to push the boundaries of what is possible with CCA and related methods.
 
-With a history stretching back to the 1930s, \acrshort{cca} has been used to discover new associations in a wide variety of domains.
-We hope that this thesis has illustrated and contributed to the continued relevance of \acrshort{cca} in the modern era of large datasets and deep learning.
+With its rich history dating back to the 1930s, CCA has been a powerful tool for discovering new associations across various domains. The work presented in this thesis aims to contribute to the continued relevance and applicability of CCA in the era of big data and deep learning. By developing interpretable, regularized, and scalable methods, we have sought to unlock the full potential of CCA and multiview learning.
+
+As we look to the future, I am excited by the prospects of further advancements in this field. The integration of deep learning with CCA, the application of these methods to ever-larger and more diverse datasets, and the potential for uncovering groundbreaking insights all point to a bright future for multiview learning. I hope that this thesis has not only made valuable contributions to the field but also inspired others to explore the fascinating world of CCA and its applications.
 
 Thank you for reading.

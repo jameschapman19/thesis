@@ -161,28 +161,25 @@ Stochastic algorithms also introduce a form of implicit regularisation \citep{sm
 
 \section{Methods: Novel Objectives and Algorithms}\label{sec:contributions}
 
-In this section, we introduce a novel class of objectives for GEPs, which we call the Eckhart--Young (EY) objectives.
-They can be applied to any GEP, including CCA, PLS, and PCA but we will focus on CCA.
-
-\subsection{Unconstrained objective for GEPs}\label{sec:gep-ey-formulation}
-First, we present proposition \ref{prop:EY-charac}, a formulation of the top-$K$ subspace of GEP problems, which follows by applying the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. However, making this rigorous requires some technical care which we defer to the proof in supplement \ref{app:proofs}.
+First, we present proposition \ref{prop:EY-charac}, a formulation of the top-$K$ subspace of GEP problems, which follows by applying the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. However, making this rigorous requires some technical care which we defer to the proof in supplement \ref{supp:proofs}.
 
 \begin{restatable}[Eckhart--Young inspired objective for GEPs]{proposition}{EYcharac}
-    \label{prop:EY-charac}
+\label{prop:EY-charac}
     The top-$K$ subspace of the GEP $(A,B)$ can be characterized by minimizing the following objective over $U \in \R^{D \times K}$:
     \begin{align}\label{eq:EY-charac}
-    \LEYGEP(U) \defeq \tr \left( - 2\,U^T A U + \left(U^T B U\right) \left(U^T B U\right) \right)
+        \LEYGEP(U) \defeq \tr \left( - 2\,U^\top A U + \left(U^\top B U\right) \left(U^\top B U\right) \right)
     \end{align}
     Moreover, the minimum value is precisely $- \sum_{k=1}^K \lambda_k^2$, where $(\lambda_k)$ are the generalized eigenvalues.
 \end{restatable}
 
-This objective also has appealing geometrical properties.
-It is closely related to a wide class of unconstrained objectives for PCA and matrix completion which have no spurious local optima \citep{ge_no_2017}, i.e. all local optima are in fact global optima.
+This objective also has appealing geometrical properties. 
+It is closely related to a wide class of unconstrained objectives for PCA and matrix completion which have no spurious local optima \citep{ge_no_2017}, i.e. all local optima are in fact global optima. 
 This implies that certain local search algorithms, such as stochastic gradient descent, should indeed converge to a global optimum.
 
-\begin{restatable}{proposition}{NoSpuriousLocalMinima}[No spurious local minima]\label{prop:no-spurious}
-The objective $\LEYGEP$ has no spurious local minima.
-That is, any matrix $\bar{U}$ that is a local minimum of $\LEYGEP$ must in fact be a global minimum.
+\begin{restatable}{proposition}{NoSpuriousLocalMinima}\label{prop:no-spurious}
+    The objective $\LEYGEP$ has no spurious local minima.
+    That is, any matrix $\bar{U}$ that is a local minimum of $\LEYGEP$ must in fact be a global minimum.
+    %of the form described in \cref{prop:EY-charac}
 \end{restatable}
 
 It is also possible to make this argument quantitative by proving a version of the strict saddle property from \cite{ge_no_2017,ge2015escaping}; we state an informal version here and give full details in \cref{supp:tractable-optimization}.
@@ -190,76 +187,72 @@ It is also possible to make this argument quantitative by proving a version of t
 \begin{corollary}[Informal: Polynomial-time Optimization]
     Under certain conditions on the eigenvalues and generalized eigenvalues of $(A,B)$, one can make quantitative the claim that:
     any $U_K \in \R^{D \times K}$ is either close to a global optimum, has a large gradient $\nabla \LEYGEP$, or has Hessian $\nabla^2 \LEYGEP$ with a large negative eigenvalue.
-
+    
     Therefore, for appropriate step-size sequences, certain local search algorithms, such as sufficiently noisy SGD, will converge in polynomial time with high probability.
+    % still need to sort out - polynomial in what exactly!
 \end{corollary}
 
 \subsection{Corresponding Objectives for the CCA family}
-For the case of linear CCA we have $U^T A U = \sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j}), U^T B U = \sum_{i} \Var(Z\sps{i})$.
-To help us extend this to the general case of nonlinear transformations, \cref{eq:general-form-of-representations}, we define the analogous matrices of total between-view covariance and total within-view variance
+For the case of linear CCA we have $U^\top A U = \sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j}),\,  U^\top B U = \sum_{i} \Var(Z\sps{i})$. 
+To extend this to the general case of nonlinear transformations, \cref{eq:general-form-of-representations}, we define the analogous matrices of total between-view covariance and total within-view variance 
 \begin{align}\label{eq:def-C-V-matrices}
-\vphantom{\bigl(\bigr)} % increase vertical space
-C(\theta) = \sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j}), \quad
-V(\theta) = \sum_{i} \Var(Z\sps{i})
+    \vphantom{\bigl(\bigr)} % increase vertical space
+    C(\theta) = \sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j}), \quad 
+    V(\theta) = \sum_{i} \Var(Z\sps{i})
 \end{align}
-In the case of linear transformations:
-
-\begin{equation}\label{eq:cca-linear-function-def}
-Z\sps{i}_k = \langle u_k\sps{i} , X\sps{i} \rangle.
-\end{equation}
-
-it makes sense to add a ridge penalty so we can define
+For linear transformations, \cref{eq:cca-linear-function-def}, it makes sense to add a ridge penalty so we can define
 \begin{align}\label{eq:v-alpha-ridge-definition}
-V_\alpha(\theta) = \sum_i \alpha_i {U\spsT{i}} U\sps{i} +  (1 - \alpha_i) \Var(Z\sps{i})
+    V_\alpha(\theta) = \sum_i \alpha_i {U\spsT{i}} U\sps{i} +  (1 - \alpha_i) \Var(Z\sps{i})
 \end{align}
-This immediately leads to following unconstrained objective for the CCA-family of problems.
+This leads to the following unconstrained objective for the CCA-family of problems.
 \begin{definition}[Family of EY Objectives]
     Learn representations $Z\sps{i} = f\sps{i}( X\sps{i}; \theta\sps{i})$ minimizing
     \begin{align}\label{eq:EY-loss-def-C-V}
-    \LEY(\theta) = - 2 \tr C(\theta) + \norm{V_\alpha(\theta)}_F^2
+        \LEY(\theta) = - 2 \tr C(\theta) + \norm{V_\alpha(\theta)}_F^2
     \end{align}
 \end{definition}
 
-\paragraph{Unbiased estimates}
+\textbf{Unbiased estimates:}
 since empirical covariance matrices are unbiased, we can construct unbiased estimates to $C, V$ from a batch of transformed variables $\Z$.
 \begin{align}\label{eq:def-C-V-matrices-empirical}
-\hat{C}(\theta)[\Z] = \sum_{i \neq j} \empCov(\Z\sps{i}, \Z\sps{j}), \quad
-\hat{V}(\theta)[\Z] = \sum_{i} \empVar(\Z\sps{i})
+    \hat{C}(\theta)[\Z] = \sum_{i \neq j} \empCov(\Z\sps{i}, \Z\sps{j}), \quad 
+    \hat{V}(\theta)[\Z] = \sum_{i} \empVar(\Z\sps{i})
 \end{align}
 In the linear case we can construct $\hat{V}_\alpha(\theta)[\Z]$ analogously by plugging sample covariances into \cref{eq:v-alpha-ridge-definition}.
 Then if $\Z, \Z'$ are two independent batches of transformed variables, the batch loss
 \begin{align}\label{eq:empirical-EY-loss-estimate-def}
-\empLEY[\Z, \Z'] \defeq - 2 \tr \hat{C}[\Z] + \langle \hat{V}_\alpha[\Z], \hat{V}_\alpha[\Z'] \rangle_F
+    \empLEY[\Z, \Z'] \defeq - 2 \tr \hat{C}[\Z] + \langle \hat{V}_\alpha[\Z], \hat{V}_\alpha[\Z'] \rangle_F
 \end{align}
-gives an unbiased estimate of $\LEY(\theta)$.
+gives an unbiased estimate of $\LEY(\theta)$.%\footnote{Where again $\alpha > 0$ only makes sense in the linear case, and otherwise we may omit the $\alpha$s}
 This loss is a differentiable function of $\Z, \Z'$ and so also of $\theta$.
 
-\paragraph{Simple algorithms:}
-We first define a very general algorithm using these estimates in Algorithm \ref{alg:general}.
-In the next section we apply this algorithm to multi-view stochastic CCA and PLS.
+\textbf{Simple algorithms:}
+We first define a general algorithm using these estimates in Algorithm \ref{alg:general}. In the next section we apply this algorithm to multiview stochastic CCA (\textbf{CCA-EY}) and PLS (\textbf{PLS-EY}), Deep CCA (\textbf{DCCA-EY}), and SSL (\textbf{SSL-EY}).
 
 \begin{algorithm}
-    \caption{GEP-EY: General algorithm for learning correlated representations}
-    \label{alg:general}
-    \begin{algorithmic}
-        \STATE {\bfseries Input:} data stream of mini-batches $(\X(b))_{b=1}^\infty$ where each consists of $M$ samples from the original dataset. Learning rate $(\eta_t)_t$. Number of time steps $T$. Class of functions $f(\cdot; \theta)$ whose outputs are differentiable with respect to $\theta$.
-        \STATE {\bfseries Initialize:} $\hat{\theta}$ with suitably random entries
-        \FOR{$t=1$ {\bfseries to} $T$}
-        \STATE Obtain two independent mini-batches \( \X(b), \X(b') \) by sampling \( b, b' \) independently
-        \STATE Compute batches of transformed variables $\Z(b) = f(\X(b); \theta), \Z(b') = f(\X(b'); \theta)$
-        \STATE Estimate loss $\empLEY(\theta)$ using \cref{eq:empirical-EY-loss-estimate-def}
-        \STATE Obtain gradients by back-propagation and step with your favourite optimizer.
-        \ENDFOR
-    \end{algorithmic}
+   \caption{\textbf{GEP-EY}: General algorithm for learning correlated representations}
+   \label{alg:general}
+\begin{algorithmic}
+   \STATE {\bfseries Input:} data stream of mini-batches $(\X(b))_{b=1}^\infty$ where each consists of $M$ samples from the original dataset. Learning rate $(\eta_t)_t$. Number of time steps $T$. Class of functions $f(\cdot; \theta)$ whose outputs are differentiable with respect to $\theta$.
+   \STATE {\bfseries Initialize:} $\hat{\theta}$ with suitably random entries
+   \FOR{$t=1$ {\bfseries to} $T$}
+       \STATE Obtain two independent mini-batches \( \X(b), \X(b') \) by sampling \( b, b' \) independently
+       \STATE Compute batches of transformed variables $\Z(b) = f(\X(b); \theta), \Z(b') = f(\X(b'); \theta)$
+       %\STATE Construct unbiased estimates $C(\theta)[\Z], \hat{V}(\theta)[\Z], \hat{V}(\theta)[\Z']$ \COMMENT{As defined in \cref{eq:def-C-V-matrices-empirical}}
+       \STATE Estimate loss $\empLEY(\theta)$ using \cref{eq:empirical-EY-loss-estimate-def}
+       \STATE Obtain gradients by back-propagation and step with your favourite optimizer.
+   \ENDFOR
+\end{algorithmic}
 \end{algorithm}
 
-\subsection{Applications to (multi-view) stochastic CCA and PLS}
-\begin{lemma}[Objective recovers GEP formulation of linear (multi-view) CCA]
-    When $f\sps{i}$ are linear, as in \ref{eq:cca-linear-function-def}, the population loss from \cref{eq:EY-loss-def-C-V} recovers MCCA.
+\subsection{Applications to multiview stochastic CCA and PLS, and Deep CCA}
+\begin{lemma}[Objective recovers GEP formulation of linear multiview CCA]
+    When the $f\sps{i}$ are linear, as in \cref{eq:cca-linear-function-def}, the population loss from \cref{eq:EY-loss-def-C-V} recovers MCCA as defined in \cref{sec:CCA-family}. %Moreover, the minimal loss value is precisely $-\norm{\MCCA_K(X)}$
 \end{lemma}
 \begin{proof}
-    By construction, for linear MCCA we have $C = U^T A U,\, V_\alpha=U^T B_\alpha U$, where $(A, B_\alpha)$ define the GEP for MCCA introduced in \cref{eq:gep-most-general-formulation}.
+    By construction, for linear MCCA we have $C = U^\top A U,\, V_\alpha=U^\top B_\alpha U$, where $(A, B_\alpha)$ define the GEP for MCCA introduced in \cref{eq:gep-most-general-formulation}. 
     So $\LEY(U) = \LEYGEP(U)$ and by \cref{prop:EY-charac} the optimal set of weights define a top-$K$ subspace of the GEP, and so is a MCCA solution.
+    %; by definition, $\MCCA_K$ is the vector of top-$K$ generalised eigenvalues, so the optimal value is as claimed.
 \end{proof}
 
 Moreover, by following through the chain of back-propagation, we obtain gradient estimates in $\mathcal{O}(MKD)$ time.
