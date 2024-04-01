@@ -551,7 +551,8 @@ In chapter \ref{ch:loadings}, we observe and argue that signals of interest have
 
 \subsubsection{Eigenvalue Problems in CCA}
 
-While our focus so far has primarily been on the top-1 eigenvector-eigenvalue pair, it's important to note that the methodology also extends to the top-k subspace problem. This broader approach involves identifying the top-k eigenvectors and their corresponding eigenvalues.
+While our focus so far has primarily been on the top-1 eigenvector-eigenvalue pair, it's important to note that the methodology also extends to the top-k subspace problem.
+This broader approach involves identifying the top-k eigenvectors and their corresponding eigenvalues.
 
 \subsubsection{Addressing the Top-k Problem}
 
@@ -610,28 +611,16 @@ In particular, \acrshort{cca} and clustering have been used to identify depressi
 CCA has also been used in the manner we described to denoise two \gls{views} of a dataset such as separate measures of neuroimaging data \citep{zhuang2020technical} to remove artefacts.
 Deep \acrshort{cca} has recently been used to extract features for the diagnosis of schizophrenia\citep{qi2016deep}.
 
-%\section{Open challenges in Multiview Learning and CCA}
-%
-%This thesis has been motivated by a number of open challenges in multiview learning and canonical correlation analysis.
-%Chapter \ref{ch:als} and \ref{ch:loadings} will address the first challenge, which is the regularisation of \acrshort{cca} in high dimensional settings and the interpretation of the resulting components.
-%Chapters \ref{ch:gradient_descent}, \ref{ch:deep_learning}, and \ref{ch:software} will address the second challenge, the efficient application of \acrshort{cca} to big data.
-%Finally \ref{ch:deep_learning} will also address the third challenge, extending \acrshort{cca} to Deep Self-Supervised Learning.
-%
-%\subsection{Interpretability and Regularization}
-%
-%\textcolor{red}{TODO: Add a paragraph on interpretability and regularization}
-%
-%\subsection{Efficient Algorithms for High-Dimensional Data}
-%
-%\textcolor{red}{TODO: Add a paragraph on efficient algorithms for high-dimensional data}
-%
-%\subsection{Non-linear \acrshort{cca} and Joint Embedding Self-Supervised Learning}
-%
-%\textcolor{red}{TODO: Add a paragraph on non-linear \acrshort{cca} and Joint Embedding Self-Supervised Learning}
-%
-%
+\section{Conclusion}
 
+In this chapter, we have provided a comprehensive overview of multiview learning, with a particular focus on its applications in neuroimaging and genetics. We have discussed the fundamental concepts and methods in multiview learning, such as Canonical Correlation Analysis (CCA), Partial Least Squares (PLS), and their variants, highlighting their strengths and limitations.
 
+The review has emphasized the importance of regularization techniques in high-dimensional settings, as well as the challenges associated with interpreting the resulting components. We have also touched upon the need for efficient algorithms that can handle large-scale datasets, and the potential of non-linear extensions of CCA and joint embedding self-supervised learning approaches.
 
+Furthermore, we have discussed the practical frameworks for evaluating multiview learning methods, comparing the traditional statistical approach of permutation testing with the machine learning approach of cross-validation and holdout testing. We have also considered the complexities of identifying and interpreting top-k subspaces in CCA, and the reasons for focusing on the top-1 component in this thesis.
 
+The applications of multiview learning in neuroimaging and genetics have been highlighted, with a particular emphasis on brain-behavior studies and imaging-genetics. These studies have demonstrated the potential of multiview learning in uncovering the complex relationships between brain structure, function, genetics, and behavior, thereby advancing our understanding of neurological disorders and cognitive traits.
 
+Despite the significant progress made in multiview learning, several challenges remain. These include the need for more interpretable and regularized methods, particularly in high-dimensional settings, the development of efficient algorithms for handling large-scale datasets, and the extension of CCA to non-linear and deep learning-based approaches.
+
+In the following chapters, this thesis aims to address these challenges by proposing novel methods and techniques for multiview learning. We will explore regularized and interpretable extensions of CCA, develop efficient algorithms for high-dimensional data, and investigate the potential of deep learning-based approaches for multiview learning. By tackling these challenges, we hope to contribute to the advancement of multiview learning and its applications in neuroimaging, genetics, and beyond.

@@ -29,19 +29,21 @@ Our experimental design focuses on two main aspects: firstly, evaluating the abi
 Our experiments focus on two main aspects: firstly, evaluating the ability of CCA models to accurately recover the true model weights and loadings, and secondly, examining the out-of-sample performance, which is often observed to be poor in practical datasets despite statistical significance, in particular for PLS-based models.
 This observation led us to question whether the issue lies in poor model fit, or a lack of signal in the data with weak or biologically spurious correlations.
 
-One of our most striking findings is the efficacy of Ridge Regularized CCA models as opposed to PLS models in identifying high correlations under anisotropic noise conditions.
+One of our most striking findings, consistent with the previous chapter, is the efficacy of Ridge Regularized CCA models as opposed to PLS models in identifying high correlations under anisotropic noise conditions.
 This complements earlier work \citep{helmer2020stability} that found that the number of samples needed to find high correlations increases with the dimensionality; our results suggest that the important variable is the dimensionality of the smaller view.
 
 \section{Background: Weights and Loadings in Canonical Correlation Analysis}
 
-Canonical Correlation Analysis (CCA), as discussed in chapter \ref{ch:background}, finds linear combinations of variables in two datasets that exhibit the highest correlation.
-Introducing the concept of latent variables, especially in biomedical applications, helps uncover underlying factors influencing these observable data.
+As discussed in chapter \ref{ch:background}, CCA can be interpreted in two ways.
+Either it finds linear combinations of variables in two datasets that exhibit the highest correlation.
+Or it finds latent variables that are maximally correlated.
+Introducing the concept of latent variables, especially in biomedical applications, can help uncover underlying factors influencing these observable data.
 This is crucial in understanding processes like gene expression or pathologies, and more broadly, in normative health distributions \citep{lawry2023multi}.
 
 CCA's practical application revolves around two main approaches: the discriminative approach, which uses weights to estimate highly correlated latent variables from observed data, and the generative approach, focusing on the data generation process with loadings to describe the relationship between latent variables and observed data.
 The discriminative approach, represented as the `backward model' in Figure~\ref{fig:forward-backward-models}, estimates the distribution $P(Z|X\sps{1},X\sps{2})$.
 Conversely, the generative approach, the `forward model', is concerned with $P(X\sps{1},X\sps{2}|Z)$.
-Similar arguments have also been made in the context of PCA \citep{park2023critical} which also has both a generative \citep{tipping1999probabilistic} and discriminative\citep{hotelling1933analysis} interpretation.
+Similar arguments have also been made in the context of PCA \citep{park2023critical} which also has both a generative \citep{tipping1999probabilistic} and discriminative \citep{hotelling1933analysis} interpretation.
 
 \begin{figure}
     \centering
@@ -56,7 +58,7 @@ Similar arguments have also been made in the context of PCA \citep{park2023criti
         \edge[red, tension=0.1]{x1} {Z};
         \edge[red, tension=0.1]{x2} {Z};
     }
-    \caption[Forward and Backward Multiview Models]{\textit{\textbf{Forward and Backward Multiview Models:}} The \textcolor{blue}{generative} and \textcolor{red}{discriminative} approaches in \acrshort{cca}.}\label{fig:forward-backward-models}
+    \caption[Forward and Backward Multiview Models]{\textit{\textbf{Forward and Backward Multiview Models:}} The \textcolor{blue}{generative/forward} and \textcolor{red}{discriminative/backward} approaches in \acrshort{cca}.}\label{fig:forward-backward-models}
 \end{figure}
 
 The ongoing debate in \acrshort{cca} research, highlighted by \citet{gu2018simultaneous} and others, centers around the interpretation of models in terms of weights or loadings.
@@ -68,6 +70,10 @@ Of particular importance to us given our work in chapter \ref{ch:als}, as well a
 
 This section categorizes the generative models in CCA literature into explicit and implicit latent variable types, each offering distinct insights into the data generation process and the relationship between weights and loadings.
 
+We will use some additional notational convention to describe probabilistic models.
+We will use lowercase letters to represent samples from a distribution, and uppercase letters to represent random variables.
+For example, \(x\) represents a sample from the distribution \(P(X)\), and \(X\) represents the random variable \(X\).
+
 \subsection{Explicit Latent Variable Models: Probabilistic CCA and GFA}
 
 In explicit latent variable models, we assume each view is generated from a linear model with added noise, conditional on the latent variable.
@@ -78,7 +84,7 @@ The distributions for the two views are given by:
     x\sps{i} &\sim \mathcal{N}(W\sps{i} z + \mu\sps{i}, \Psi\sps{1})
 \end{align}
 
-Where \(z\) represents the latent variable, \(x\sps{i}\) represents the \(i\)-th view, \(W\sps{i}\) represents the model loadings, \(\mu\sps{i}\) represents the mean, and \(\Psi_{i}\) represents the noise covariance matrix for the \(i\)-th view.
+Where \(z\) represents a sample from the latent guassian distribution, \(x\sps{i}\) represents a sample from the \(i\)-th view, \(W\sps{i}\) represents the model loadings, \(\mu\sps{i}\) represents the mean, and \(\Psi_{i}\) represents the noise covariance matrix for the \(i\)-th view.
 
 \citet{bach2005probabilistic} established that the maximum likelihood solution of this model relates the \acrshort{cca} weights to the loadings by the within-view covariance \(\Sigma_{ii}\):
 
@@ -228,7 +234,7 @@ Linear regression assumes data generation from a linear model with added noise:
     y = xU + \epsilon, \quad \epsilon \sim \mathcal{N}(0, \sigma^2 I)
 \end{align}
 
-Here, $y$ is the target variable, $x$ the data matrix, $U$ the regression coefficients, and $\epsilon$ represents i.i.d. Gaussian noise.
+Here, $y$ are samples of the target variable, $x$ samples from the data matrix, $U$ the regression coefficients, and $\epsilon$ represents independent and identically distributed (i.i.d.) Gaussian noise.
 
 \paragraph{Lasso Regression}
 The Lasso imposes a Laplace prior on the regression coefficients, leading to a double-exponential prior on weights:
@@ -245,7 +251,7 @@ Ridge regression, in contrast, employs a Gaussian prior on the regression coeffi
 \end{align}
 
 \subsubsection{Regularization and Generative Models for CCA}
-CCA models differ in their approach to regularization compared to linear regression.
+CCA models differ in their approach to regularization compared to linear regression because they are latent variable models.
 
 \paragraph{Explicit Latent Variable Model}
 Regularization in the context of the explicit latent variable naturally relates to priors on the loadings \(W\sps{i}\).

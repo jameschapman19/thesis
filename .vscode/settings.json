@@ -26,5 +26,6 @@
         "**.slo":true,
         "**.sls":true,
         "**.slg":true,
+        "**.aux":true
     },
 }

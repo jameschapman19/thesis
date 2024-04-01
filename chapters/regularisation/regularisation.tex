@@ -14,7 +14,7 @@ In this chapter, I build upon my earlier work presented at the OHBM conference a
 
 This chapter introduces a novel approach for analyzing large-scale neuroimaging datasets, such as the Human Connectome Project (\acrshort{hcp} \citep{van2013wu}) and Alzheimer's Disease Neuroimaging Initiative (\acrshort{adni}), to understand the relationship between brain structure, function, and behavior \citep{SMITH2018263,BZDOK2017549,wang2020finding}.
 These datasets are characterized by a disproportion between the number of subjects and the volume of features, posing a challenge for Canonical Correlation Analysis (CCA) models due to the risk of overfitting and spurious correlations \citep{wang2018finding}.
-For example, the \acrshort{hcp} dataset used in this chapter contains 1003 subjects and 19,900 features in the functional MRI (fMRI) view alone while the \acrshort{adni} dataset contains 592 subjects and  168,130 features in the structural MRI (sMRI) view alone.
+For example, the \acrshort{hcp} dataset used in this chapter contains 1003 subjects and 300 features in the functional MRI (fMRI) view while the \acrshort{adni} dataset contains 592 subjects and  168,130 features in the structural MRI (sMRI) view alone.
 
 In response to the reproducibility crisis in neuroscience \citep{button2013power}, this chapter focuses on enhancing the generalizability of CCA models through regularization, a technique that introduces a bias towards more interpretable and generalizable models \citep{engl1996regularisation,bzdok2019towards}.
 Existing regularization methods in CCA, such as `sparse CCA' with Partial Least Squares (PLS) objectives \citep{le2008sparse,witten2009penalized,lindenbaum2021l0}, are limited by their inherent bias towards the largest principal components \citep{mihalik_canonical_2022}.
@@ -557,7 +557,6 @@ The story is similar, albeit with marginally lower correlations between the PLS 
 
 \subsection{\acrshort{adni} Results}\label{subsec:adni}
 
-We now turn to the \acrshort{adni} data.
 
 \subsubsection{Out of Sample Correlation}
 
@@ -673,12 +672,12 @@ In FRALS, regression targets are not static but dynamically evolve during the al
 
 \subsubsection{Computational Time}
 
-The primary computational challenge in FRALS is the repeated calculation of the least squares solution for each view in every iteration. This requirement is resource-intensive and is the main factor contributing to the slow speed of the FRALS algorithm. Empirical observations from our experiments show that FRALS operates at a pace approximately 10 times slower than Ridge CCA, varying with the specifics of the experimental setup. This disparity in speed is particularly noteworthy given the popularity of SPLS due to its speed and convenience. Figure \ref{fig:timings} provides an estimate of the time taken to fit each model across complete training datasets over multiple runs. It is evident from the figure that Elastic Net CCA, despite being an iterative algorithm, is significantly slower than other models, particularly with the high-dimensional \acrshort{adni} data. While SPLS demonstrates much faster processing, it is only marginally slower than PLS and RCCA, both of which employ optimized solvers in C and use PCA preprocessing for efficiency. Consequently, PCA emerges as the fastest model in these comparisons.
+The primary computational challenge in FRALS is the repeated calculation of the least squares solution for each view in every iteration. This requirement is resource-intensive and is the main factor contributing to the slow speed of the FRALS algorithm. Empirical observations from our experiments show that FRALS operates at a pace approximately 10 times slower than Ridge CCA, varying with the specifics of the experimental setup. This disparity in speed is particularly noteworthy given the popularity of SPLS due to its speed and convenience. Figure \ref{fig:timings} provides an estimate of the time taken to fit each model across complete training datasets over ten runs. It is evident from the figure that Elastic Net CCA, despite being an iterative algorithm, is significantly slower than other models, particularly with the high-dimensional \acrshort{adni} data. While SPLS demonstrates much faster processing, it is only marginally slower than PLS and RCCA, both of which employ optimized solvers in C and use PCA preprocessing for efficiency. Consequently, PCA emerges as the fastest model in these comparisons.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.8\linewidth]{figures/model_fit_timings}
-    \caption{Time taken to fit each model.}\label{fig:timings}
+    \caption{Time taken to fit each model over ten runs. The interquartile range is plotted as a box with whiskers drawn to the farthest datapoint within 1.5 times the interquartile range.}\label{fig:timings}
 \end{figure}
 
 \subsection{Conclusion}
