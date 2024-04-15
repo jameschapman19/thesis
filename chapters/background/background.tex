@@ -72,7 +72,7 @@ This approach, as evidenced in the latent variable model of mental health illust
     \caption[Latent Variable Model of Mental Health]{\textit{\textbf{Latent Variable Model of Mental Health:}} From this perspective the neuroimaging modality and behavioural data are both considered to have been generated with distributions conditioned on the severity of a mental health condition}\label{fig:mentalhealthselfsupervised}
 \end{figure}
 
-A key challenge in self-supervised learning is designing pretext tasks to infer this latent source from the available views.
+A key challenge in self-supervised learning is designing pretext tasks to estimate this latent source from the available views.
 A common approach is to estimate a common low-dimensional representation of the variance in the data from both \gls{views}.
 In most objectives of this form, this ammounts to identifying the mutual information between the \gls{views}.
 These representations may be informative for their own sake, identifying common factors between the \gls{views}, or they may be used as inputs to a downstream task, such as classification or regression.
@@ -572,7 +572,6 @@ In this thesis, we will use the machine learning approach throughout.
 This is because in scaling up to large datasets, permutation testing becomes computationally intractable.
 This is because permutation testing requires retraining the model multiple times on the permuted data.
 This comes at the cost of only being able to evaluate models with a point estimate of performance, rather than a distribution.
-In chapter \ref{ch:loadings}, we observe and argue that signals of interest have a large effect size, and therefore permutation testing is not necessary to evaluate the significance of the results.
 
 \subsection{Components and Subspaces in CCA}
 

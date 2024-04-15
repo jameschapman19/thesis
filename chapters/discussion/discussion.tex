@@ -1,12 +1,32 @@
 \chapter{Conclusion}\label{ch:discussion}
 
-This chapter provides a summary of the findings of this thesis, discusses their implications, and outlines potential directions for future work. We reflect on the contributions of this thesis to the field of canonical correlation analysis (CCA) and multiview learning, highlighting the opportunities and challenges that lie ahead. By examining the impact of our work on both theory and practice, we aim to inspire further research in this exciting and rapidly evolving field.
+This chapter provides a summary of the findings of this thesis, discusses their implications, and outlines potential directions for future work. 
 
-\section{Summary of Findings}
+\subsection{Regularisation of CCA Models:
+A Flexible Framework based on
+Alternating Least Squares}
+This chapter presented the FRALS framework for CCA, addressing challenges in analyzing large-scale neuroimaging datasets from projects such as the Human Connectome Project and the Alzheimer's Disease Neuroimaging Initiative. Incorporating structured priors through regularization, particularly the elastic net penalty, FRALS enhanced the interpretability and generalizability of CCA models. This method, documented in the work presented at the OHBM \citep{chapman2023als}, has been effective in uncovering significant brain-behavior associations, showing superior out-of-sample performance compared to traditional methods.
 
+\subsection{Insights From Generating
+Simulated Data for CCA}
+This chapter contributed to the debate on the interpretation of model weights versus loadings in CCA. By generating high-dimensional simulated data and categorizing methods into explicit and implicit latent variable models, the chapter highlights the robustness of loadings to columnwise transformations in data matrices, a feature not shared with weights. The simulated data strategies formed part of the analysis in \citet{mihalik2022canonical} and influenced the analysis in \citet{ADAMS2024}.
 
+\subsection{Efficient Algorithms for the
+CCA Family: Unconstrained
+Losses with Unbiased
+Gradients}
+Focusing on scaling challenges for CCA and PLS in the context of large-scale biomedical datasets like the UK Biobank, this chapter introduces a new gradient descent algorithm tailored for generalized eigenvalue problems. The methods developed, informed by publications \citep{chapman2022generalized, chapman2023efficient, chapman2023cca}, enable the application of multiview CCA and PLS to datasets with extensive dimensions and complex structures.
 
-\section{Implications}
+\subsection{Deep CCA and Self-Supervised
+Learning}
+This chapter introduces a novel formulation of Deep CCA optimized for the stochastic minibatch setting and proposes SSL-EY, a new competitive SSL method. Grounded in findings from \citep{chapman2023cca} and \citep{chapman2023efficient}, the chapter demonstrates the robustness of these methods against hyperparameter sensitivity and elucidates connections between CCA-based SSL methods and other contemporary SSL approaches.
+
+\subsection{CCA-Zoo: A collection of
+Regularized, Deep
+Learning-based, Kernel, and
+Probabilistic methods in a
+scikit-learn style framework}
+Presenting \texttt{CCA-Zoo}, a Python library that consolidates and enhances the accessibility of multiview learning methods, this chapter details the development and capabilities of the library, which implements a variety of CCA, PLS, and related techniques. As detailed in \citep{chapman2021cca}, \texttt{CCA-Zoo} addresses gaps in existing software offerings and facilitates broader adoption and innovation within the research community.
 
 \section{Future Work}
 
@@ -20,9 +40,9 @@ Moreover, the integration of non-imaging modalities, such as Electronic Health R
 
 \subsection{Methods}
 
-From a methodological perspective, there are several directions in which the work presented in this thesis could be extended. One promising avenue is the further development of regularization techniques for CCA, building upon the ideas introduced in Chapters \ref{ch:als} and \ref{ch:loadings}. Exploring alternative priors and regularization schemes could lead to more interpretable and robust CCA models, particularly in high-dimensional settings.
+Proximal gradient descent
 
-Another area of interest is the adaptation of the scalable algorithms presented in Chapters \ref{ch:gradient_descent} and \ref{ch:deep_learning} to other multiview learning methods beyond CCA. Techniques such as Partial Least Squares (PLS) and multi-view clustering could potentially benefit from the efficient optimization and deep learning approaches developed in this thesis. Extending these methods to a broader range of multiview learning problems could have a significant impact on various fields, from bioinformatics to social network analysis.
+Better theory for Self Supervised Learning.
 
 \section{Closing Remarks}
 
