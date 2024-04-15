@@ -11,29 +11,27 @@ This chapter provides the foundational knowledge needed to understand the thesis
 
 \section{Machine Learning and Multiview Learning}
 
-Machine learning encompasses methods that enable models to learn patterns and make decisions from data.
-Machine learning methods are typically categorised by a training set of data, which is used to learn a model, and a test set of data, which is used to evaluate the model.
-Arguably the most common machine learning paradigm is supervised learning, where the training data consists of pairs of inputs and outputs, and the model learns to predict a function which maps the inputs to the outputs.
-This function is then used to predict the outputs for new inputs.
-The goal of supervised learning is to learn a function that generalizes well to new data, i.e. to make accurate predictions on unseen data.
-Unsupervised and self-supervised learning are common machine learning paradigms where the training data consists of inputs only, and the model learns to find patterns in the data.
-While the distinction between the two is somtimes blurred, unsupervised learning has been used to describe dimensionality reduction, clustering, and generative modelling algorithms.
-Self-supervised learning (SSL) has been used to describe a special case of unsupervised learning, where labels are generated from the data itself, rather than being provided by an external source.
-SSL  is a paradigm where the training signal is derived from the data itself, rather than relying on external labels \citep{balestriero2023cookbook}.
-The cornerstone of SSL is the concept of a `pretext task', a learning task created from the data that trains the model to capture useful features or representations.
-Most famously, SSL is the backbone to the success of Large Language Models \citep{vaswani2017attention} and in particular ChatGPT \citep{chatgpt}, a language model trained on a pretext task of predicting masked words in a sentence.
-SSL methods have also recently been shown to outperform supervised methods for certain computer vision tasks for large datasets \citep{goyal2019scaling}.
+Machine learning encompasses methods that enable models to learn patterns and make decisions from data. Machine learning methods are typically categorized by a training set of data, which is used to learn a model, and a test set of data, which is used to evaluate the model.
+
+Arguably the most common machine learning paradigm is supervised learning, where the training data consists of pairs of inputs and outputs, and the model learns to predict a function that maps the inputs to the outputs. This function is then used to predict the outputs for new inputs. The goal of supervised learning is to learn a function that generalizes well to new data, i.e., to make accurate predictions on unseen data.
+At the heart of many machine learning algorithms lies the concept of representation learning - the process of automatically discovering and extracting meaningful features or representations from raw data. Representation learning aims to transform high-dimensional, complex data into a lower-dimensional space that captures the most salient aspects of the original data. This process not only reduces computational complexity but also uncovers hidden structures and relationships within the data, which can then be leveraged for various tasks such as classification, regression, or clustering.
+
+Unsupervised and self-supervised learning are common machine learning paradigms that often involve learning low-dimensional `latent' representations of the input data. In these paradigms, the training data consists of inputs only, and the model learns to find patterns or structure in the data without explicit output labels. `Downstream' models can use these learned representations as their inputs rather than the original data.
+
+While the distinction between unsupervised and self-supervised learning is sometimes blurred, unsupervised learning has typically been used to describe dimensionality reduction, clustering, and generative modeling algorithms. Self-supervised learning (SSL) describes a special case of unsupervised learning where the system derives `labels' from the data itself \citep{balestriero2023cookbook}. The cornerstone of SSL is the concept of a `pretext task', a learning task created from the data that trains the model to capture useful features or representations. Most famously, SSL is the backbone to the success of Large Language Models \citep{vaswani2017attention} and in particular ChatGPT \citep{chatgpt}, a language model trained on a pretext task of predicting masked words in a sentence. SSL methods have also recently been shown to outperform supervised methods for certain computer vision tasks for large datasets \citep{goyal2019scaling}.
 
 
 \subsection{Multiview Machine Learning}
 This thesis is focussed on multiview machine learning.
 Here, data from different sources or modalities, referred to as \gls{views}, such as neuroimaging, genomics, and clinical records, are analyzed collectively to unveil underlying patterns.
 Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as \gls{views}.
-These techniques can also be broadly classified into supervised and self-supervised multiview learning, with some algorithms straddling the boundary between the two.
+These techniques broadly fall into categories of supervised and self-supervised multiview learning, with some algorithms straddling the boundary between the two.
 
 \subsubsection{Supervised Multiview Learning}
 
-In supervised multiview learning, the goal is to integrate information from multiple distinct views or feature sets to improve the predictive performance of a model. This approach often involves using one view as the target, with other views serving as inputs. For instance, in the context of mental health, we can consider behavioural data as a dependent variable influenced by multiple independent variables like brain activity and demographics. Figure \ref{fig:mentalhealthsupervised} illustrates this concept, where behavioural patterns ($y_1$) are predicted based on features from brain activity ($x_1$) and demographic information ($x_2$).
+In supervised multiview learning, the goal is to fuse information from multiple distinct views or feature sets to improve the predictive performance of a model. This approach involves integrating the various views, often using one view as the target variable and the others as predictors. The model learns to combine the information from the different views to make more accurate predictions than would be possible using any single view alone.
+
+For instance, in the context of mental health, we can consider behavioral data as a dependent variable influenced by multiple independent variables like brain activity and demographics. Figure \ref{fig:mentalhealthsupervised} illustrates this concept, where behavioral patterns ($y_1$) are predicted based on features from brain activity ($x_1$) and demographic information ($x_2$). The model learns to fuse the information from the brain and demographic views to form a more comprehensive understanding of the factors influencing behavior.
 
 \begin{figure}
     \centering
@@ -44,14 +42,16 @@ In supervised multiview learning, the goal is to integrate information from mult
         \node[obs, below=of x1, minimum size=3cm, align=center] (x2) {Demographics\\$x_2$};
         \edge{x1} {y1}
         \edge{x2} {y1}}
-        \caption[Independent and Dependent Variable Model of Mental Health]{\textit{\textbf{Independent and Dependent Variable Model of Mental Health:}} From this perspective, behavioural data is considered to be dependent on brain activity and demographics}\label{fig:mentalhealthsupervised}
+        \caption[Supervised multiview learning in mental health]{\textit{\textbf{Supervised multiview learning in mental health:}} An example of how different views (brain activity and demographics) can be fused to predict a target variable (behavior) in a supervised learning setting.}\label{fig:mentalhealthsupervised}
 \end{figure}
 
-Multiple Kernel Learning (MKL) \citep{gonen2011multiple} is a prominent example of supervised multiview learning, where the algorithm learns to combine kernel representations of the different views.
-This enhances the model's predictive capabilities compared to using a single kernel.
-With the advent of deep learning, the underlying concept of MKL has been extended to deep learning architectures.
-These architectures enable the model to learn and combine representations from various views more effectively \citep{guo2019deep}.
-I contributed to this line of research through the software package Fusili \citep{florence_townend_2023_10228564}, which implements a number of deep-learning based multi-modal data fusion methods for supervised learning.
+Multiple Kernel Learning (MKL) \citep{gonen2011multiple} is a prominent example of supervised multiview learning, where the algorithm learns to combine kernel representations of the different views. By fusing the information from the various kernels, MKL enhances the model's predictive capabilities compared to using a single kernel.
+
+With the advent of deep learning, the underlying concept of MKL has been extended to deep learning architectures. These architectures enable the model to learn and fuse representations from various views more effectively \citep{guo2019deep}. The deep learning models can automatically learn the most informative features from each view and combine them in non-linear ways to make predictions.
+
+I contributed to this line of research through the software package Fusili \citep{florence_townend_2023_10228564}, which implements a number of deep-learning based multi-modal data fusion methods for supervised learning. Fusili provides a flexible framework for building models that can fuse information from various data modalities, such as images, text, and structured data, to make more accurate predictions.
+
+In summary, supervised multiview learning involves fusing information from multiple views to improve predictive performance. By combining the unique perspectives offered by each view, these methods can form a more comprehensive understanding of the problem and make more accurate predictions than would be possible using any single view alone.
 
 \subsubsection{Self-Supervised Multiview Learning}
 
@@ -106,7 +106,7 @@ The `Wisdom of Crowds' phenomenon, where the collective average of multiple esti
 \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{figures/cow.png}
-    \caption[The Wisdom of Crowds]{\textit{\textbf{The Wisdom of Crowds:}} The average of multiple noisy estimates of the weight of a cow is more accurate than any individual estimate. Created with the assistance of DALL·E 2}\label{fig:wisdomofcrowds}
+    \caption[The Wisdom of Crowds]{\textit{\textbf{The Wisdom of Crowds:}} The average of multiple noisy estimates of the weight of a cow is more accurate than any individual estimate}\label{fig:wisdomofcrowds}
 \end{figure}
 
 In this thesis, we will explore Canonical Correlation Analysis, a multiview learning method predicated on the assumption that different \gls{views} provide complementary information about latent variables. The following sections will establish a formal framework for representation learning and motivate the use of Canonical Correlation Analysis in harnessing complementary information from multiview data.
@@ -133,6 +133,8 @@ We will refer to the Pearson correlation between features and their respective l
 %Covariance matrices
 We will use the notation $\Sigma_{ij}=\Cov(X\sps{i}, X\sps{j})$ for the population covariance matrix between the random variables associated with view $i$ and $j$. We will also use $\Sigma_{ii}= \Cov(X\sps{i})$ for the population covariance matrix of the random variables associated with view $i$ with each other.
 
+Many classical subspace learning algorithms can be formulated as Generalized Eigenvalue Problems (GEPs) constructed from covariance matrices. In the following subsection, we introduce the concept of GEPs and discuss their properties, which will be useful for understanding the optimization problems and solutions of these algorithms.
+
 \subsection{Generalized Eigenvalue Problems in linear algebra}
 A Generalized Eigenvalue Problem (GEP) is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}.
 They are usually characterized by the set of solutions to the equation:
@@ -149,6 +151,8 @@ We say a matrix $U \in \R^{D \times K}$ defines a top-$K$ subspace if its column
 \paragraph{Uniqueness}
 In GEPs, the eigenvectors $u$ are not in general unique, but the generalized eigenvalues $1 \geq \lambda_1 \geq \lambda_2 \geq \dots \geq 0$ are unique \citep{mills1988calculation}.
 
+\section{Classical Subspace Learning Algorithms}
+
 \subsection{Principal Components Analysis}
 
 Principal Components Analysis \citep{hotelling1933analysis} (\acrshort{pca}) is a classical method in unsupervised machine learning for representation learning.
@@ -164,7 +168,7 @@ where $u_k$ are orthonormal basis vectors such that:
 \begin{equation}
     \label{eq:pca-orthonormality-constraint}
     u_k^\top u_k = 1, \quad
-    u_k^\top u_l = \delta_{kl} \text{ for } k \neq l.
+    u_k^\top u_l = 0 \text{ for } k \neq l.
 \end{equation}
 
 The primary goal of \acrshort{pca} is to maximize the variance of the representations \(Z_k\), finding the directions of maximal variance in the data.
@@ -173,22 +177,28 @@ The primary goal of \acrshort{pca} is to maximize the variance of the representa
 Mathematically, for the first principal component, this can be formulated as:
 
 \begin{align}
-    u_{\text{opt}} & = \underset{u}{\text{argmax}} \left( u^\top \Sigma u \right) \\
-    \text{subject to:} \notag                                                     \\
+    u_{\text{opt}} & = \underset{u}{\text{argmax}} \left( u^\top \Sigma u \right) \
+    \text{subject to:} \notag                                                     \
     u^\top u       & = 1 \notag
 \end{align}
 
 Where \(\Sigma = \mathbb{E}[X^\top X]\) is the population covariance matrix of the single view data $X$.
 
-The Lagrangian for this problem is:
+To solve this constrained optimization problem, we can use the method of Lagrange multipliers. The key idea behind Lagrange multipliers is to transform a constrained optimization problem into an unconstrained one by incorporating the constraints into the objective function. The Lagrange multiplier, denoted by $\lambda$, can be thought of as a `price' or `penalty' for violating the constraint. By setting the Lagrange multiplier to a large enough value, we ensure that the optimal solution satisfies the constraint.
+
+The Lagrangian function for the PCA optimization problem is constructed by adding the constraint multiplied by the Lagrange multiplier to the original objective function:
+
 \begin{equation}
     f(u,\lambda) = u^\top \Sigma u + \lambda(1 - u^\top u),
 \end{equation}
 where \(\lambda\) is the Lagrange multiplier.
-Differentiating the Lagrangian yields the first-order conditions:
+
+Intuitively, the first term in the Lagrangian represents the objective function (maximizing the variance), while the second term penalizes solutions that violate the constraint (unit norm). By finding the stationary points of the Lagrangian with respect to both $u$ and $\lambda$, we obtain the optimal solution that maximizes the variance while satisfying the unit norm constraint.
+
+Differentiating the Lagrangian with respect to $u$ and setting it to zero yields the first-order conditions (which are necessary for optimality for the optimal $u$):
 \begin{align}
-    \Sigma u & = \lambda u, \\
-    u^\top u & = 1.
+\Sigma u & = \lambda u, \
+u^\top u & = 1.
 \end{align}
 
 \paragraph{Eigenvalue Problem}
@@ -199,26 +209,44 @@ The first principal component therefore corresponds to the eigenvector associate
 Subsequent components are the remaining eigenvectors ordered by their corresponding eigenvalues.
 
 \subsubsection{Limitations}
-There are two major limitations of \acrshort{pca} that are relevant to this thesis.
-The first is revealed by the epigraph of this chapter, which highlights the fact that \acrshort{pca} is not scale invariant.
-This means that the principal components are sensitive to the scale of the data, and therefore the units in which the data is measured.
-Furthermore, the interpretation of the principal components is challenging; they are linear combinations of all of the original features. For this reason, sparse variants of \acrshort{pca} have been developed \citep{zou2006sparse,zou2018selective}, which aim to find sparse linear combinations of the original features; interpretable as a subset of the original features contributing to a significant proportion of the variance in the data.
-Another major limitation of \acrshort{pca} in the context of multiview learning is that it does not explicitly take advantage of either the redundancy or the complementary information in multiview data, even if we concatenate the views into a single random variable $X$.
+There are three major limitations of \acrshort{pca} that are relevant to this thesis.
+
+\begin{enumerate}
+    \item \textbf{Scale Invariance}: as highlighted in the epigraph to this chapter, \acrshort{pca} is not scale invariant, meaning that the importance of a principal component can be disproportionately affected by the scale of the variables in the data. Variables measured at larger scales can dominate over those measured at smaller scales unless the data is normalized. This sensitivity to the scale of the data can lead to misleading directions that do not necessarily capture the most meaningful underlying structures.
+
+    \item \textbf{Sparsity and Interpretability}: Although \acrshort{pca} reduces dimensionality by projecting the data onto new axes, the resulting principal components are linear combinations of \textit{all} the original features. This complex aggregation can make it difficult to interpret the components, especially when each component is influenced by many original variables. For this reason, sparse variants of \acrshort{pca} have been developed \citep{zou2006sparse,zou2018selective}, which aim to find sparse linear combinations of the original features; interpretable as a subset of the original features contributing to a significant proportion of the variance in the data.
+
+    \item \textbf{Multiview Data Utilization}: \acrshort{pca} is primarily designed for analyzing a single dataset and does not naturally accommodate multiview data, where multiple independent sets of variables (views) describe the data. While it is possible to concatenate these views into a single dataset prior to analysis, this approach does not take advantage of the potential interactions and complementary information across the views, which can be critical for more insightful analysis in applications such as image processing, bioinformatics, and social sciences.
+\end{enumerate}
+
 Nevertheless, \acrshort{pca} remains a popular tool in practice \citep{greenacre2022principal} and is a useful baseline for multiview learning methods, and we will use it as a point of comparison throughout this thesis.
 
 \subsection{Partial Least Squares}
 
+Given the inherent limitations of \acrshort{pca}, especially in handling multiview datasets where capturing interactive and complementary information between different data sources is crucial, Partial Least Squares (PLS) emerges as a potent alternative. PLS extends the principles of PCA to analyze two correlated datasets simultaneously, optimizing for the shared covariance rather than variance within a single dataset. This approach makes PLS particularly valuable in multiview settings where the goal is to uncover the latent structures that explain the relationships between datasets.
+
 Partial Least Squares (PLS) \citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as \gls{views}. \acrshort{pls} can be seen as a generalization of \acrshort{pca}, where \acrshort{pca} becomes a special case when the two \gls{views} are identical.
 
-\acrshort{pls} optimises for the dot product between the two views, a measure of similarity.
+\acrshort{pls} optimises for the dot product between the representations of two views, a measure of similarity.
 
 \begin{align}
     \label{eq:dot-product}
-    \langle X\sps{1}u^{(1)}, X\sps{2}u^{(2)} =\sqrt{u\spsT{1}\Sigma_{11}u\sps{1}} \sqrt{u\spsT{2}\Sigma_{22}u\sps{2}} \cos(\theta)
+    \langle X\sps{1}u^{(1)}, X\sps{2}u^{(2)}\rangle =\sqrt{u\spsT{1}\Sigma_{11}u\sps{1}} \sqrt{u\spsT{2}\Sigma_{22}u\sps{2}} \cos(\theta)
 \end{align}
 
 Where $\theta$ is the angle between the two representations.
-In order to constrain the problem, we set the norms of the weights to 1.
+Much like for PCA, the representations are constrained to be linear transformations of the form:
+
+\begin{align}
+    Z\sps{i} = X\sps{i} u\sps{i}
+\end{align}
+
+Where $u\sps{i}$ are orthonormal basis vectors such that:
+
+\begin{align}
+    u\spsT{i}u\sps{i} & = 1 \\
+    u\spsT{i}u\sps{j} & = 0 \text{ for } i \neq j
+\end{align}
 
 \subsubsection{Optimization and Solution}
 
@@ -231,7 +259,7 @@ The constrained optimization problem for \acrshort{pls} can therefore be formula
     u\spsT{2}u\sps{2}   & = 1 \notag
 \end{align}
 
-The Lagrangian for this optimization problem can be formulated as:
+The Lagrangian for this optimization problem once again integrates the constraints as penalties:
 
 \begin{equation}
     f(u\sps{1}, \lambda) = u\spsT{1} \Sigma_{12} u\sps{2} + \lambda_1 (1 - u\spsT{1}u\sps{1}) + \lambda_2 (1 - u\spsT{2}u\sps{2})
@@ -288,27 +316,26 @@ Given the notions of uniqueness in GEPs, the weights $u$ are not in general uniq
     \PLS_K(X^{(1)},X^{(2)}) \defeq (\lambda_k)_{k=1}^K
 \end{align}
 
-\subsubsection{Limitations} Like \acrshort{pca}, a major problem with applying \acrshort{pls} to neuroimaging and behavioural modalities is that \acrshort{pls} is not scale invariant.
-This is because the dot product in equation~\ref{eq:dot-product} is not scale invariant since it is not normalized by the norms of the representations.
-Since representations with larger norms will have larger dot products, \acrshort{pls} is biased towards larger representations.
-It is therefore also biased towards the largest principal components in the data \citep{helmer2020stability}.
-This is particularly problematic when there is a low signal to noise ratio since \acrshort{pls}.
-Like \acrshort{pca}, another issue is the lack of sparsity in the \acrshort{pls} solution which has been an active area of research \citep{chun2010sparse, witten2009penalized}.
+\subsubsection{Limitations} 
+
+Despite the advantages of \acrshort{pls} over \acrshort{pca} in handling multiview datasets, PLS has its own limitations that can impact its effectiveness in certain applications:
+\begin{enumerate}
+    \item \textbf{Scale Invariance}: Similar to \acrshort{pca}, \acrshort{pls} is not scale invariant. This means that the model's outcomes are affected by the scale of the features, potentially leading to biased weights towards features with larger scale unless data is normalized.
+    \item \textbf{Sparsity and Interpretability}: \acrshort{pls} does not inherently produce sparse models. The components derived from PLS are linear combinations of all input features, which can make the model difficult to interpret, particularly in high-dimensional contexts such as genomics or text processing. Sparse \acrshort{pls} has also been an active area of research \citep{chun2010sparse, witten2009penalized}.
+\end{enumerate}
 
 \subsection{Canonical Correlation Analysis}\label{sec:cca}
 
-In Canonical Correlation Analysis (\acrshort{cca}), we aim to find the directions that maximize correlation, as opposed to maximizing covariance between two \gls{views} of a dataset.
-This can be viewed as maximizing the cosine similarity between the two views, rather than the dot product, as in \acrshort{pls}.
-Rearranging equation~\ref{eq:dot-product} yields:
+Canonical Correlation Analysis (\acrshort{cca}) is introduced as an advancement over \acrshort{pls}, designed to maximize the correlation instead of covariance between representations. This focus on correlation allows for a more nuanced understanding of the relationships between datasets, making \acrshort{cca} particularly useful in scenarios where the goal is to explore how datasets relate on a normalized scale.
+
+\acrshort{cca} achieves this by optimizing the cosine of the angle between the representations, thus normalizing the effect of the scale of the data:
 
 \begin{align}
     \label{eq:cosine-similarity}
-    \cos(\theta) = \frac{\langle X\sps{1}u^{(1)}, X\sps{2}u^{(2)}}{\sqrt{\langle X\sps{1}u^{(1)}, X\sps{1}u^{(1)}}\cdot \sqrt{\langle X\sps{2}u^{(2)}, X\sps{2}u^{(2)}}}= \frac{u\spsT{1}\Sigma_{12}u\sps{2}}{\sqrt{u\spsT{1}\Sigma_{11}u\sps{1}} \sqrt{u\spsT{2}\Sigma_{22}u\sps{2}}}
+    \cos(\theta) = \frac{\langle X\sps{1}u^{(1)}, X\sps{2}u^{(2)}\rangle}{\sqrt{\langle X\sps{1}u^{(1)}, X\sps{1}u^{(1)}\rangle}\cdot \sqrt{\langle X\sps{2}u^{(2)}, X\sps{2}u^{(2)}\rangle}}= \frac{u\spsT{1}\Sigma_{12}u\sps{2}}{\sqrt{u\spsT{1}\Sigma_{11}u\sps{1}} \sqrt{u\spsT{2}\Sigma_{22}u\sps{2}}}
 \end{align}
 
-and we can see that the dot product from equation~\ref{eq:dot-product} is normalised by the inner products so that \acrshort{cca} is scale invariant, unlike \acrshort{pls}.
-All that matters is the angle between the representations, not their magnitude.
-Once again, in order to constrain the problem, we this time set the norms of the representations to 1.
+By focusing on correlation, \acrshort{cca} normalizes the contributions of each variable, ensuring that the analysis is not unduly influenced by the magnitude of the data. This normalization is particularly valuable in multiview settings where the scales of the data sources may differ significantly.
 
 \subsubsection{Optimization and Solution}
 The optimization problem for \acrshort{cca} can be expressed as:
@@ -510,7 +537,7 @@ However, it is not yet clear how we should evaluate these methods in practice.
 In this section, we compare the machine learning and the statistical approach of permutation testing.
 These two approaches are not mutually exclusive, and statistical learning theory has emerged as a unifying framework for both perspectives \citep{vapnik1999nature, hastie2009elements}.
 
-\subsubsection{Permutation Testing}
+\subsection{Permutation Testing}
 
 \begin{figure}
     \centering
@@ -525,7 +552,7 @@ This process is repeated multiple times, generating a distribution of performanc
 The actual performance of the model on the unshuffled data is then compared to this distribution.
 If the actual performance is significantly better than the permuted performance, it suggests that the model is capturing meaningful relationships in the data.
 
-\subsubsection{Machine Learning}
+\subsection{Machine Learning}
 
 \begin{figure}
     \centering
