@@ -72,7 +72,7 @@ Another key design principle of \texttt{CCA-Zoo} is modularity. The library is o
 \item \texttt{model\_selection}: Wrappers for \texttt{scikit-learn}'s cross-validation and hyperparameter tuning utilities, adapted for multiview settings.
 \item \texttt{linear}: Estimators for linear CCA, PLS, and their variants.
 \item \texttt{deep}: Deep learning-based approaches, built on top of \texttt{PyTorch} \citep{paszke2019pytorch} and \texttt{PyTorch Lightning} \citep{falcon2019pytorch}.
-\item \texttt{probabilistic}: Bayesian multiview learning methods, implemented with \texttt{NumPyro} \citep{phan2019composable}, a probabilistic programming library built on top of \texttt{JAX} \citep{jax2018github}.
+\item \texttt{probabilistic}: Bayesian multiview learning methods, implemented with \texttt{NumPyro} \citep{phan2019composable}, a probabilistic programming library built on top of \texttt{JAX} \citep{deepmind2020jax}.
 \item \texttt{visualization}: Functions for visualizing model parameters, latent spaces, and performance metrics.
 \end{itemize}
 
@@ -174,7 +174,7 @@ These choices reflect \texttt{CCA-Zoo}'s goal of providing a powerful yet access
 
 Here's an improved version of the Experiments section that highlights the use of CCA-Zoo throughout the thesis and includes additional benchmarking details:
 
-\section{Experiments}
+\section{Experiments}\label{sec:experiments}
 
 Throughout this thesis, the \texttt{CCA-Zoo} package has been used extensively for conducting experiments and evaluating the proposed multiview learning methods. The library's comprehensive set of tools and its seamless integration with the Python data science ecosystem have greatly facilitated the implementation and assessment of these methods on a wide range of datasets and tasks.
 

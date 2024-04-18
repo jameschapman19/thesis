@@ -2,7 +2,7 @@
 
 
 \chapter{Efficient Algorithms for the CCA Family: Unconstrained Losses with Unbiased Gradients}\label{ch:gradient_descent}
-%\epigraph{It seems easier to train a bi-directional LSTM with attention than to compute the SVD of a large matrix}{Chris Ré}\cite{gemp2021}
+\epigraph{It seems easier to train a bi-directional LSTM with attention than to compute the SVD of a large matrix}{Chris Ré}\citep{gemp2021}
 \minitoc
 % chktex-file 44
 % chktex-file 3
@@ -17,46 +17,66 @@ In this thesis I include much of the work from these papers, but I exclude many 
 Classical algorithms for linear CCA methods require computing full covariance matrices and so scale quadratically with dimension, becoming intractable for many large-scale datasets of practical interest.
 There is therefore great interest in approximating solutions for CCA in stochastic or data-streaming settings \citep{arora2012stochastic}.
 
-\section{Background: Efficient CCA}\label{sec:background-unified}
+In this chapter, we propose a novel approach to solving the Generalized Eigenvalue Problem (GEP) for CCA and related methods.
+Our method is based on a novel objective function inspired by the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990}.
+We show that this objective has no spurious local minima and can be optimized efficiently using stochastic gradient descent.
+We apply this method to CCA and Partial Least Squares (PLS), and show that it can outperform existing methods in terms of convergence speed and robustness to hyperparameter settings.
 
-\subsection{Challenges in Solving Generalized Eigenvalue Problems}
+\section{Background: Solutions to CCA}\label{sec:background-unified}
+
+\subsection{Solving High-Dimensional Generalized Eigenvalue Problems}
 
 The GEP is often represented as \( Au = \lambda Bu \), where \( A \) and \( B \) are matrices. To generalize the dimensions of these matrices, let's denote them as \( m \times m \). This dimension \( m \) can vary based on the specific method in use. For instance, in Principal Component Analysis (PCA), represented as \acrshort{pca}, \( m \) would be equal to \( p \) since \( A \) and \( B \) are \( p \times p \) matrices. In methods like Partial Least Squares (PLS) and Canonical Correlation Analysis (CCA), represented as \acrshort{pls} and \acrshort{cca} respectively, \( m \) would be \( p_1+p_2 \), as \( A \) and \( B \) in these cases are \( (p_1+p_2) \times (p_1+p_2) \).
 
-% Table summarizing the definitions of A and B for various methods
+Table \ref{tab:subspace} provides a comprehensive overview of the definitions and dimensions of \( A \) and \( B \) for various subspace learning methods. 
+
 \begin{table}[h]
     \centering
+    \tiny
     \begin{tabular}{|c|c|c|c|c|}
         \hline
         Method         & \( A \)           & \( B \)   & \( u \)        & Dimensions       \\
         \hline
-        \acrshort{pca} & \( \Sigma_{11} \) & \( I \)   & \( u\sps{1} \) & \( p \times p \) \\
+        PCA & \( \Sigma_{11} \) & \( I \)   & \( u\sps{1} \) & \( p \times p \) \\
         \hline
-        LDA            & \( S_B \)         & \( S_W \) & \( u\sps{1} \) & \( p \times p \) \\
+        CCA & \( \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} \Sigma_{11} & 0 \\ 0 & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
         \hline
-        \acrshort{cca} & \( \begin{pmatrix}
-                                \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22}
-        \end{pmatrix} \) & \( \begin{pmatrix}
-                                  \Sigma_{11} & 0 \\ 0 & \Sigma_{22}
-        \end{pmatrix} \) & \( \begin{pmatrix}
-                                  u\sps{1} \\ u\sps{2}
-        \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
+        PLS & \( \begin{pmatrix} 0 & \Sigma_{12} \\ \Sigma_{21} & 0 \end{pmatrix} \) & \( I \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
         \hline
-        \acrshort{pls} & \( \begin{pmatrix}
-                                0 & \Sigma_{12} \\ \Sigma_{21} & 0
-        \end{pmatrix} \) & \( I \) & \( \begin{pmatrix}
-                                            u\sps{1} \\ u\sps{2}
-        \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
+        Ridge CCA   & \( \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} \alpha_1 I + (1-\alpha_1)\Sigma_{11} & 0 \\ 0 & \alpha_2 I + (1-\alpha_2)\Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
+        \hline
+        MCCA &   \( \begin{pmatrix} 0 & \Sigma_{12} & \cdots & \Sigma_{1m} \\ \Sigma_{21} & 0 & \cdots & \Sigma_{2m} \\ \vdots & \vdots & \ddots & \vdots  \\ \Sigma_{m1} & \Sigma_{m2} & \cdots & 0 \end{pmatrix} \) &  \(    \begin{pmatrix} \Sigma_{11} & 0 & \cdots & 0  \\ 0 & \Sigma_{22} & \cdots & 0  \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \cdots & \Sigma_{mm} \end{pmatrix} \) & \( \begin{pmatrix}  u\sps{1} \\ u\sps{2} \\ \vdots \\ u\sps{m} \end{pmatrix} \) & \( \sum_{i=1}^I p_i \times \sum_{i=1}^I p_i \)    \\
         \hline
     \end{tabular}
-    \caption{Definitions and dimensions of \( A \)and \( B \) for different subspace learning methods.}
+    \caption{Definitions and dimensions of \( A \) and \( B \) for different subspace learning methods.}
     \label{tab:subspace}
 \end{table}
+
+\subsection{Unified GEP formulation for CCA, Ridge CCA, PLS, and PCA} 
+We break down these barriers by introducing a remarkably elegant Generalized Eigenvalue Problem (GEP) formulation that seamlessly encompasses all of them.
+
+In this framework, we now take $A,B_\alpha \in \R^{D \times D}$ to be block matrices $A = (A\sps{ij})_{i,j=1}^I, B_\alpha = (B_\alpha\sps{ij})_{i,j=1}^I$ where the diagonal blocks of $A$ are zero, the off-diagonal blocks of $B_\alpha$ are zero, and the remaining blocks are defined by:
+\begin{align}\label{eq:gep-most-general-formulation}%\small
+    A^{(ij)} &= \Cov(X\sps{i}, X\sps{j}) \text{ for } i \neq j, \quad % \text{ for } i,j \in [I], ; \:\:
+    B_\alpha^{(ii)} = \alpha_i I_{D\sps{i}} + (1-\alpha_i) \Var(X\sps{i})  %\text{ for } i \in [I]
+\end{align}
+Where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters. By manipulating its elements, we control ridge regularization:
+\begin{itemize}
+    \item Pure CCA: Setting $\alpha_i = 0 \: \forall i$ recovers the classic CCA problem. Here, $\MCCA_K(X\sps{1},\dots,X\sps{I})$ denotes the vector containing the top-K generalized eigenvalues.
+    \item Ridge Extensions: Smoothly transition to ridge-regularized CCA or PLS by selectively adjusting values within \(\alpha\).
+    \item PCA Subsumption: Even PCA emerges as a special case – a single-view form of ridge-regularized PLS.
+\end{itemize}
+
+Crucially, this unification allows us to focus on solving the core CCA problem for the remainder of the chapter. The insights and solutions we develop will naturally generalize to the entire family of CCA, PLS, ridge-regularized extensions, and even PCA.
+
+\subsection{Classical Methods for Solving CCA}
+
+\subsubsection{Direct Solution}
 
 To solve the GEP, one common technique is to transform it into a standard eigenvalue problem \( B^{-\frac{1}{2}} A B^{-\frac{1}{2}} y = \lambda y \), followed by eigendecomposition.
 However, this approach has computational complexity \( \mathcal{O}((p_1+p_2)^3) \) and may suffer from numerical instability.
 
-\subsection{\acrshort{pca}-CCA}
+\subsubsection{\acrshort{pca}-CCA}
 
 One way to reduce the complexity of solving GEPs is to use the \acrshort{pca}-CCA method, which first applies \acrshort{pca} to the data and then solves the GEP in the reduced space.
 An important advantage of using \acrshort{pca}-CCA is computational efficiency, especially for high-dimensional data.
@@ -81,7 +101,7 @@ We illustrate this in a simple simulation study in Figure \ref{fig:pca-cca-compl
 This approach has been employed to great effect in neuroimaging but suprisingly is not used even in the scikit-learn implementation of \acrshort{cca} \citep{pedregosa2011scikit}.
 Nonetheless, for the large sample sizes (desirable for machine learning frameworks as well as statistical power), the complexity of even \acrshort{pca}-CCA can render the problems nearly intractable.
 
-\subsection{Kernel CCA}
+\subsubsection{Kernel CCA}
 
 Kernel \acrshort{cca} (\acrshort{kcca}) also offers computational efficiency for high-dimensional data (\(p_i>n\)) as its complexity scales with the number of samples \(n\), not the number of features \(p_i\)\citep{akaho2006kernel}.
 It casts the CCA optimisation as a dual problem:
@@ -100,68 +120,84 @@ The complexity of \acrshort{kcca} is \(\mathcal{O}(n^3)\), which can be much low
 However, a significant drawback of KCCA is the need for access to all training data at test time, which raises concerns about efficiency and scalability.
 Furthermore, when the number of samples is large, the kernel matrix can itself be too large to fit in memory.
 
-\subsection{Stochastic PLS and CCA}
+\subsection{Stochastic Algorithms for CCA}
 A number of algorithms have been proposed to approximate GEPs including PCA and PLS \citep{arora2012stochastic}, and CCA specifically \citep{bhatia2018gen}, in the `stochastic' or `data-streaming' setting; these can have big computational savings.
 \citet{arora2016stochastic} demonstrate that PLS can be approximated by applying a stochastic Power Method. For PLS, the iterations are computed by:
 \begin{align*}
-    U^{(1)}_t &= \mathcal{P}_{\text{orth}} \left( U^{(1)}_{t-1} + \eta_t X_t Y_t^\top U^{(2)}_{t-1} \right), \\
-    U^{(2)}_t &= \mathcal{P}_{\text{orth}} \left( U^{(2)}_{t-1} + \eta_t Y_t X_t^\top U^{(1)}_{t-1} \right),
+U^{(1)}t &= \mathcal{P}{\text{orth}} \left( U^{(1)}{t-1} + \eta_t X_t Y_t^\top U^{(2)}{t-1} \right), \
+U^{(2)}t &= \mathcal{P}{\text{orth}} \left( U^{(2)}{t-1} + \eta_t Y_t X_t^\top U^{(1)}{t-1} \right),
 \end{align*}
 where \( \mathcal{P}_{\text{orth}}(\cdot) \) represents an orthogonal projection operator that projects a vector or matrix onto the space orthogonal to the current subspace. \( \hat{U}^{(1)}_t \) and \( \hat{U}^{(2)}_t \) are the current estimates of the left and right singular vectors for the two views, \( X_t \) and \( Y_t \) are the new data points at time \( t \), and \( \eta_t \) is the learning rate at time \( t \).
 The approach has low computational complexity, $\mathcal{O}(k(p_1+ p_2))$.
-However there are two main drawbacks to this approach.
+However, there are two main drawbacks to this approach.
 First, convergence is not guaranteed.
 Second, the orthogonal projection step does not extend naturally to the CCA problem where the constraint is \( U^\top B U = I \) rather than \( U^\top U = I \).
 
-
 To the best of our knowledge, the state-of-the-art in Stochastic PLS and CCA are the subspace Generalized Hebbian Algorithm (SGHA) \citep{chen2019constrained} and $\gamma$-EigenGame \citep{gemp20,gemp2021}.
-\paragraph{SGHA} uses a Lagrange multiplier heuristic along with saddle-point analysis, albeit with limited convergence guarantees.
-Specifically, they form the constrained optimization problem for the top-k subspace as
 
+\subsubsection{SGHA}
+SGHA uses a Lagrange multiplier heuristic along with saddle-point analysis, albeit with limited convergence guarantees.
+Specifically, they form the constrained optimization problem for the top-k subspace as:
 \begin{align}
-    \min_{U} -\Tr U^T A U \quad \text{subject to} \quad U^T B U = I
+\min_{U} -\Tr \left(U^T A U\right) \quad \text{subject to} \quad U^T B U = I
 \end{align}
-
 Transforming this into an unconstrained problem using Lagrange multipliers:
-
 \begin{align}
-    \min_{U} -\Tr\left(U^T A U \right) + \lambda \left(U^T B U - I\right)
+\min_{U} -\Tr\left(U^T A U \right) + \lambda \left(U^T B U - I\right)
 \end{align}
-
 Finally, they combine the primal and dual updates into a single update rule:
-
 \begin{align}
-    U_{t+1} = \left(1 - \eta_t\right) U_t + \eta_t \left(A U_t + \lambda_t B U_t\right)
+U_{t+1} = \left(1 - \eta_t\right) U_t + \eta_t \left(A U_t + \lambda_t B U_t\right)
 \end{align}
-
 This algorithm is very simple to implement but because it is based on a heuristic primal-dual update rule rather than gradient descent, it is hard to use with more sophisticated optimizers such as Adam \citep{kingma2014adam}.
 
-\paragraph{$\gamma$-EigenGame} is a stochastic algorithm for CCA which is based on the $\gamma$-Eigengame for PCA \citep{gemp20}.
-The EigenGame series of algorithms are based on the idea of eigenvectors competing to explain the data.
-They each maximize a utility function with reward and penalty terms:
-
+\subsubsection{$\gamma$-EigenGame}
+The $\gamma$-EigenGame is a stochastic algorithm for CCA inspired by the $\gamma$-EigenGame algorithm for PCA. The key idea behind the EigenGame algorithms is to view the eigenvectors as competing players trying to explain the data. In this game-theoretic perspective, each eigenvector (player) $u_i$ aims to maximize its own utility function:
 \begin{align}
-    \max_{u_i} \overbrace{\frac{u_i^TAu_i}{u_i^TBu_i}}^{rewards} - \overbrace{\sum_{j < i} \frac{(u_j^TAu_j)(u_i^TBu_j)^2}{(u_j^TBu_j)^2(u_i^TBu_i)}}^{penalties}
+\max_{u_i} \overbrace{\frac{u_i^TAu_i}{u_i^TBu_i}}^{\text{rewards}} - \overbrace{\sum_{j < i} \frac{(u_j^TAu_j)(u_i^TBu_j)^2}{(u_j^TBu_j)^2(u_i^TBu_i)}}^{\text{penalties}}
 \end{align}
+The utility function consists of a reward term, $\frac{u_i^TAu_i}{u_i^TBu_i}$, which encourages the eigenvector to align with the direction of maximum variance in the data, and a penalty term, $\sum_{j < i} \frac{(u_j^TAu_j)(u_i^TBu_j)^2}{(u_j^TBu_j)^2(u_i^TBu_i)}$, which discourages the eigenvector from aligning with the directions already captured by the previous eigenvectors.
 
-Where player $i$ only needs to maintain orthogonalization with respect to players $j < i$.
-By a few heuristic arguments, this can be moulded to an update rule in the full batch case:
+A key advantage of the $\gamma$-EigenGame formulation is that each player $i$ only needs to maintain orthogonalization with respect to the previous players $j < i$. This allows for a more efficient and decentralized computation of the eigenvectors.
 
+By applying a few heuristic arguments, the $\gamma$-EigenGame algorithm derives an update rule for each eigenvector in the full batch case:
 \begin{align}
-    u_i \leftarrow (u_i^T B u_i)A u_i - (u_i^T A u_i)B u_i - \sum_{j < i} (u_i^T A y_j)[(u_i^T B u_i)B y_j - (u_i^T B y_j)B u_i]
+u_i \leftarrow (u_i^T B u_i)A u_i - (u_i^T A u_i)B u_i - \sum_{j < i} (u_i^T A y_j)[(u_i^T B u_i)B y_j - (u_i^T B y_j)B u_i]
 \end{align}
+where $y_j = \frac{u_j}{\sqrt{u_j^TBu_j}}$. This update rule adjusts the eigenvector $u_i$ to maximize its utility, considering the rewards and penalties.
 
-Where $y_i = \frac{u_i}{\sqrt{u_i^TBu_i}}$.
-Finally, the stochastic version of this algorithm is obtained by replacing $B y_j$ with a rolling average of $B u_j$, necessitating an additional hyperparameter $\gamma$ which must be tuned.
-As with SGHA, this algorithm is also hard to combine with more sophisticated optimizers.
+In the stochastic version of the $\gamma$-EigenGame algorithm, the update rule is modified to use a rolling average of the matrix $B$, introducing an additional hyperparameter $\gamma$ that needs to be tuned. This stochastic update helps to reduce the computational complexity and memory requirements of the algorithm, making it more suitable for large-scale problems.
 
-\paragraph{Further Benefits of Stochastic Algorithms}
-Stochastic algorithms also introduce a form of implicit regularisation \citep{smith2021origin} which can be very helpful in these high-dimensional settings.
+\subsubsection{Further Benefits of Stochastic Algorithms}
+Stochastic algorithms not only offer computational advantages but also introduce a form of implicit regularization \citep{smith2021origin}, which can be particularly beneficial in high-dimensional settings. Regularization techniques are commonly used to prevent overfitting and improve the generalization performance of models, especially when dealing with limited data or complex models.
 
+As we have seen, in batch learning algorithms, regularization is often explicit, such as adding L1 or L2 penalty terms to the objective function. These penalty terms constrain the model's parameters and discourage overfitting. However, stochastic algorithms inherently introduce regularization through the noise in the stochastic updates, without the need for explicit penalty terms.
+
+The intuition behind the regularizing effect of stochastic algorithms can be understood as follows:
+
+\begin{itemize}
+    \item \textbf{Stochastic updates introduce noise}: In each iteration of a stochastic algorithm, the update is based on a random subset of the data (a mini-batch) rather than the entire dataset. This introduces noise in the updates, causing the model's parameters to fluctuate around their true values. The noise can be seen as a form of random perturbation that helps the algorithm explore the parameter space and escape from shallow local minima.
+    \item \textbf{Noisy updates prevent overfitting}: The noise in the stochastic updates acts as a form of regularization that prevents the model from fitting too closely to the training data. By introducing this randomness, stochastic algorithms reduce the risk of overfitting, especially when the model has a large number of parameters relative to the size of the training data. The noisy updates effectively smooth out the loss function, making it harder for the model to memorize individual training examples.
+
+    \item \textbf{Averaging effect}: As the stochastic algorithm progresses, the noisy updates tend to cancel out each other over time, leading to an averaging effect. This averaging helps the model converge towards a solution that generalizes well to unseen data, rather than getting stuck in a suboptimal solution that overfits the training data. Intuitively, the averaging effect can be seen as a form of ensembling, where multiple noisy models are combined to produce a more robust and generalizable solution.
+    
+    \item \textbf{Implicit bias towards simpler models}: The noise in the stochastic updates implicitly biases the algorithm towards simpler models that are less prone to overfitting. This is because simpler models are more stable under random perturbations, while complex models that overfit the data are more sensitive to noise. As a result, stochastic algorithms tend to favor models with smoother decision boundaries and better generalization performance, even without explicit regularization terms in the objective function.
+\end{itemize}
+
+The regularizing effect of stochastic algorithms has been studied in various contexts, including stochastic gradient descent (SGD) for deep learning \citep{zhang2021understanding,chaudhari2018stochastic} and stochastic optimization for matrix factorization \citep{chen2019stochastic}. These studies have shown that the implicit regularization introduced by stochastic updates can lead to improved generalization performance and robustness to noise, especially in high-dimensional settings where the number of parameters is large compared to the number of training examples.
+
+\subsection{Limitations of Existing Stochastic CCA Algorithms}
+While stochastic algorithms like SGHA and $\gamma$-EigenGame have made significant progress in addressing the computational challenges of CCA in high-dimensional settings, they still have some limitations that motivate the development of novel objectives and algorithms.
+
+One limitation of SGHA is that it relies on a heuristic primal-dual update rule rather than a principled optimization framework. This makes it difficult to integrate with more sophisticated optimizers like Adam \citep{kingma2014adam}, which have been shown to improve convergence speed and stability in many machine learning applications.
+
+On the other hand, $\gamma$-EigenGame requires the tuning of a hyperparameter $\gamma$ in the stochastic setting. This hyperparameter controls the trade-off between the computational efficiency and the accuracy of the stochastic updates, and its optimal value may vary depending on the problem and the data.
+
+To address the limitations of existing stochastic CCA algorithms and provide a more principled and robust approach, we propose a novel formulation of the CCA problem based on the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990}. Our formulation leads to a new objective function that characterizes the top-$K$ subspace of Generalized Eigenvalue Problems (GEPs), including CCA as a special case.
 
 \section{Methods: Novel Objectives and Algorithms}\label{sec:contributions}
 
-First, we present proposition \ref{prop:EY-charac}, a formulation of the top-$K$ subspace of GEP problems, which follows by applying the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. However, making this rigorous requires some technical care which we defer to the proof in supplement \ref{supp:proofs}.
+First, we present proposition \ref{prop:EY-charac}, a formulation of the top-$K$ subspace of GEP problems, which follows by applying the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. However, making this rigorous requires some technical care which we defer to the proof in supplement \ref{supp:proofs}.   
 
 \begin{restatable}[Eckhart--Young inspired objective for GEPs]{proposition}{EYcharac}
 \label{prop:EY-charac}
@@ -171,6 +207,8 @@ First, we present proposition \ref{prop:EY-charac}, a formulation of the top-$K$
     \end{align}
     Moreover, the minimum value is precisely $- \sum_{k=1}^K \lambda_k^2$, where $(\lambda_k)$ are the generalized eigenvalues.
 \end{restatable}
+
+The objective in Equation \eqref{eq:EY-charac} has an intuitive interpretation. The first term, $-2 \tr(U^\top A U)$, acts as a reward for high covariance between the views, encouraging the learned subspace to capture the directions of maximum correlation. The second term, $\tr((U^\top B U)(U^\top B U))$, serves as a penalty for high variance within each view and promotes orthogonality between the learned components. By minimizing this objective, we aim to find a subspace that maximizes the correlation between views while ensuring the learned components are distinct and informative.
 
 This objective also has appealing geometrical properties. 
 It is closely related to a wide class of unconstrained objectives for PCA and matrix completion which have no spurious local optima \citep{ge_no_2017}, i.e. all local optima are in fact global optima. 
@@ -182,7 +220,7 @@ This implies that certain local search algorithms, such as stochastic gradient d
     %of the form described in \cref{prop:EY-charac}
 \end{restatable}
 
-It is also possible to make this argument quantitative by proving a version of the strict saddle property from \cite{ge_no_2017,ge2015escaping}; we state an informal version here and give full details in \cref{supp:tractable-optimization}.
+It is also possible to make this argument quantitative by proving a version of the strict saddle property from \citet{ge_no_2017,ge2015escaping}; we state an informal version here and give full details in \cref{supp:tractable-optimization}.
 
 \begin{corollary}[Informal: Polynomial-time Optimization]
     Under certain conditions on the eigenvalues and generalized eigenvalues of $(A,B)$, one can make quantitative the claim that:
@@ -194,13 +232,15 @@ It is also possible to make this argument quantitative by proving a version of t
 
 \subsection{Corresponding Objectives for the CCA family}
 For the case of linear CCA we have $U^\top A U = \sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j}),\,  U^\top B U = \sum_{i} \Var(Z\sps{i})$. 
-To extend this to the general case of nonlinear transformations, \cref{eq:general-form-of-representations}, we define the analogous matrices of total between-view covariance and total within-view variance 
+
+To generalize this to multiview CCA, we define the analogous matrices of total between-view covariance and total within-view variance 
 \begin{align}\label{eq:def-C-V-matrices}
     \vphantom{\bigl(\bigr)} % increase vertical space
     C(\theta) = \sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j}), \quad 
     V(\theta) = \sum_{i} \Var(Z\sps{i})
 \end{align}
-For linear transformations, \cref{eq:cca-linear-function-def}, it makes sense to add a ridge penalty so we can define
+
+While for ridge CCA we can add a ridge penalty to the within-view variances:
 \begin{align}\label{eq:v-alpha-ridge-definition}
     V_\alpha(\theta) = \sum_i \alpha_i {U\spsT{i}} U\sps{i} +  (1 - \alpha_i) \Var(Z\sps{i})
 \end{align}
@@ -227,7 +267,7 @@ gives an unbiased estimate of $\LEY(\theta)$.%\footnote{Where again $\alpha > 0$
 This loss is a differentiable function of $\Z, \Z'$ and so also of $\theta$.
 
 \textbf{Simple algorithms:}
-We first define a general algorithm using these estimates in Algorithm \ref{alg:general}. In the next section we apply this algorithm to multiview stochastic CCA (\textbf{CCA-EY}) and PLS (\textbf{PLS-EY}), Deep CCA (\textbf{DCCA-EY}), and SSL (\textbf{SSL-EY}).
+We first define a general algorithm using these estimates in Algorithm \ref{alg:general}. In the next section we apply this algorithm to multiview stochastic CCA (\textbf{CCA-EY}) and PLS (\textbf{PLS-EY}).
 
 \begin{algorithm}
    \caption{\textbf{GEP-EY}: General algorithm for learning correlated representations}
@@ -245,9 +285,9 @@ We first define a general algorithm using these estimates in Algorithm \ref{alg:
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Applications to multiview stochastic CCA and PLS, and Deep CCA}
+\subsection{Applications to multiview stochastic CCA and PLS}
 \begin{lemma}[Objective recovers GEP formulation of linear multiview CCA]
-    When the $f\sps{i}$ are linear, as in \cref{eq:cca-linear-function-def}, the population loss from \cref{eq:EY-loss-def-C-V} recovers MCCA as defined in \cref{sec:CCA-family}. %Moreover, the minimal loss value is precisely $-\norm{\MCCA_K(X)}$
+    When the $f\sps{i}$ are linear, the population loss from \cref{eq:EY-loss-def-C-V} recovers MCCA.
 \end{lemma}
 \begin{proof}
     By construction, for linear MCCA we have $C = U^\top A U,\, V_\alpha=U^\top B_\alpha U$, where $(A, B_\alpha)$ define the GEP for MCCA introduced in \cref{eq:gep-most-general-formulation}. 
@@ -266,7 +306,7 @@ We use a sample size of 10,000 and vary the number of features in each view from
 We solve for the top-5 CCA subspace and repeat each experiment 5 times.
 We compare the time taken to solve the GEP using \texttt{eigh} to the time taken to train our method until the frobenius norm of the change in successive weights is less than $10^{-5}$.
 
-\paragraph{Observations}
+\subsubsection{Observations}
 Figure \ref{fig:cca-comparison} shows the results of this experiment.
 Up until 1,000 features, our method is slower than \texttt{eigh} but after this point, our method is significantly faster.
 Beyond this point, the time taken to solve the GEP using \texttt{eigh} scales quadratically with the number of features, while our method scales linearly.
@@ -298,7 +338,7 @@ In other words, using our earlier notation, $\rho_k = \MCCA_K(\hat{Z}\sps{1}, \h
 Despite $\rho_k^*$ not being the `true` correlations, their computation from a large sample size renders them a reliable benchmark.
 PCC is an efficient metric for tracking algorithmic performance over time, minimizing computational overhead\citep{meng2021online, gemp2022generalized, ma2015finding, ge2016efficient}.
 
-\paragraph{Data}
+\subsubsection{Data}
 The MediaMill dataset \citep{gemert2008visual} comprises paired features of videos and corresponding commentary, with the objective of learning joint representations that capture their correlation.
 This representation could potentially enable prediction of commentary from video, or vice versa.
 The dataset includes 25,800 test images, with 120 and 101 features respectively.
@@ -307,7 +347,7 @@ The Split-CIFAR dataset \citep{meng2021online} consists of 50,000 training and 1
 The aim is to learn joint representations of the two halves that reveal correlations, expected to be high within the same class and low across different classes.
 These datasets are chosen for their diverse nature and complexity, providing a comprehensive test bed for our method.
 
-\paragraph{Parameters} For each method, we searched over the hyperparameter grid in table \ref{tab:hyperparameters} using \citet{wandb}.
+\subsubsection{Parameters} For each method, we searched over the hyperparameter (see Table \ref{tab:hyperparameters}) using \citet{wandb}.
 
 \begin{table}[h!]
     \centering
@@ -321,10 +361,12 @@ These datasets are chosen for their diverse nature and complexity, providing a c
         \hline $\gamma$\footnotemark & 0.01,0.1,1,10       \\
         \hline
     \end{tabular}
-    \footnotetext{gamma is only used for $\gamma$-EigenGame}\label{tab:hyperparameters}
+    \footnotetext{gamma is only used for $\gamma$-EigenGame}
+    \caption{Hyperparameter ranges explored for CCA methods.} 
+    \label{tab:hyperparameters}
 \end{table}
 
-\paragraph{Observations}
+\subsubsection{Observations}
 In machine learning, a learning curve represents a graph showing the model's learning progress over time in terms of experience or iterations.
 For the MediaMill dataset, Figure \ref{fig:corr_mediamill} compares the algorithms' learning curves for various mini-batch sizes, showing CCA-EY's consistent outperformance. Figure \ref{fig:learningcurve_mediamill} further examines the learning curves for batch sizes 5 and 100, illustrating CCA-EY's superior performance over time.
 
@@ -373,7 +415,7 @@ We run PLS-EY with a mini-batch size of 500 and train the GEP-EY PLS analysis fo
 This approach allows us to not only manage the high-dimensional nature of the data but also to preserve the integrity and interpretability of the analysis.
 To our knowledge, this represents the largest-scale PLS analysis of biomedical data to-date, showcasing the potential of our method to facilitate discoveries in extremely large datasets.
 
-\paragraph{Data} The UK BioBank data consisted of real-valued continuous brain volumes and ordinal, integer genetic variants.
+\subsubsection{Data} The UK BioBank data consisted of real-valued continuous brain volumes and ordinal, integer genetic variants.
 We used pre-processed (using FreeSurfer \citep{Fischl2012}) grey-matter volumes for 66 cortical (Desikan-Killiany atlas) and 16 subcortical brain regions and 582,565 autosomal genetic variants.
 The affects of age, age squared, intracranial volume, sex, and the first 20 genetic principal components for population structure were removed from the brain features using linear regression to account for any confounding effects.
 Each brain ROI was normalized by removing the mean and dividing the standard deviation.
@@ -382,7 +424,7 @@ We used mean imputation to fill in missing values and centered each variant.
 To generate measures of genetic disease risk, we calculated polygenic risk scores using PRSice \citep{PRSice2014}.
 We calculated scores, with a p-value threshold of 0.05, using GWAS summary statistics for the following diseases; Alzheimer's \citep{Lambert2013}, Schizophrenia \citep{Trubetskoy2022}, Bipolar \citep{Mullins2021}, ADHD \citep{Demontis2023}, ALS \citep{Van_Rheenen2021}, Parkinson's \citep{Nalls2019}, and Epilepsy \citep{International_League_Against_Epilepsy_Consortium_on_Complex_Epilepsies2018}, using the referenced GWAS studies.
 
-\paragraph{Observations}
+\subsubsection{Observations}
 We observed strong validation correlations between all 10 corresponding pairs of representations \( Z^{(1)}_k \) and \( Z^{(2)}_k \) in the PLS model, with weak cross-correlations between \( Z^{(1)}_k \) and \( Z^{(2)}_i \) for \( i \neq k \).
 This indicates that our model learned a coherent and orthogonal subspace, as shown in Figure \ref{fig:UKBB_corr}.
 Furthermore, the PLS representations \( Z \) were significantly associated with genetic risk measures for several disorders, suggesting that the learned PLS subspace encodes relevant information for genetic disease risk, a critical insight for biomedical research (Figure \ref{fig:genetic_risk}). These results demonstrate the scalability of our method to extremely high-dimensional data, and its ability to learn interpretable representations.
@@ -396,7 +438,7 @@ Furthermore, the PLS representations \( Z \) were significantly associated with 
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\textwidth,trim={0.5cm 0cm 0.7cm 0cm}]{figures/UKBB/prs_correlations.png}
+    \includegraphics[width=0.99\textwidth,trim={0.5cm 0cm 0.7cm 0cm}]{figures/UKBB/prs_correlations.png}
     \caption{Correlation between PLS brain representations \( Z \) and genetic risk scores for various disorders. AD=Alzheimer's disease, SCZ=Schizophrenia, BP=Bipolar, ADHD=Attention deficit hyperactivity disorder, ALS=Amyotrophic lateral sclerosis, PD=Parkinson's disease, EPI=Epilepsy. $\text{ns}: 0.05< p \leq 1, \ast: 0.01< p \leq 0.05, \ast\ast: 0.001< p \leq 0.01, \ast\ast\ast: 0.0001< p \leq 0.001$.}
     \label{fig:genetic_risk}
 \end{figure}
@@ -424,7 +466,7 @@ The significant associations between the PLS representations and genetic risk me
 
 Our future initiatives will enhance CCA, PCA and PLS by incorporating proximal gradient descent for efficient handling of complex regularization terms. This methodology is ideally suited for scenarios where the loss function comprises a smooth, differentiable component plus a non-smooth regularization term. The proximal gradient technique utilizes a gradient step followed by a proximal step, enabling effective management of non-smooth penalties such as L1-norm or Total Variation (TV), which are instrumental in enforcing sparsity and structural constraints.
 
-\subsection{Objective Formulation with Regularization}
+\subsubsection{Objective Formulation with Regularization}
 
 We aim to modify the CCA framework by integrating specific regularization terms directly into the loss function of the Generalized Eigenvalue Problem (GEP). The revised loss function, denoted as $\mathcal{L}^{\text{Proximal CCA-EY}}(W_1, W_2)$, will incorporate the regularization terms $R_1(W_1)$ and $R_2(W_2)$, enabling the optimization of CCA with additional constraints. The objective function for Proximal CCA-EY will be defined as:
 
@@ -435,14 +477,14 @@ We aim to modify the CCA framework by integrating specific regularization terms 
 
 where $\mathcal{L}^{\text{Proximal CCA-EY}}$ represents the Proximal CCA-EY loss function, $\lambda_1$ and $\lambda_2$ are regularization parameters, and $R_1(W_1)$ and $R_2(W_2)$ are the regularization terms for the left and right views, respectively.
 
-\subsection{Proximal Gradient Descent Mechanism}
+\subsubsection{Proximal Gradient Descent Mechanism}
 
 The proximal gradient updates for this augmented CCA formulation are specified as:
 
-\begin{align*}
-W_1^{(t+1)} &= \text{prox}{\alpha \lambda_1 R_1}(W_1^{(t)} - \alpha \nabla{W_1} \mathcal{L}^{\text{EY}}(W_1^{(t)}, W_2^{(t)})), \
+\begin{align}
+W_1^{(t+1)} &= \text{prox}{\alpha \lambda_1 R_1}(W_1^{(t)} - \alpha \nabla{W_1} \mathcal{L}^{\text{EY}}(W_1^{(t)}, W_2^{(t)})), \\
 W_2^{(t+1)} &= \text{prox}{\alpha \lambda_2 R_2}(W_2^{(t)} - \alpha \nabla{W_2} \mathcal{L}^{\text{EY}}(W_1^{(t)}, W_2^{(t)})),
-\end{align*}
+\end{align}
 
 where $\text{prox}_{\alpha \lambda_i R_i}(v)$ denotes the proximal operator for the regularization term $R_i$ with parameter $\lambda_i$, and $\alpha$ represents the learning rate.
 
@@ -454,7 +496,7 @@ This operator is defined as solving:
 
 This update effectively balances the influence of the gradient of the smooth loss function and the geometry imposed by the regularization, making the approach robust to the inclusion of complex constraints in the optimization of CCA.
 
-\subsection{Efficiency and Applicability}
+\subsubsection{Efficiency and Applicability}
 
 The proximal gradient descent method excels in large-scale optimization challenges where traditional techniques struggle due to the presence of non-smooth terms. By separating the optimization of the smooth component from the non-smooth regularization, proximal steps can be efficiently computed, particularly when $R_i$ allows a straightforward proximal formulation. This advantage is crucial in high-dimensional contexts such as neuroimaging and genomics, where the regularization can impose significant priors (e.g., sparsity, smoothness) on the model solutions.
 

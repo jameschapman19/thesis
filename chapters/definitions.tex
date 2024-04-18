@@ -1,34 +1,69 @@
 \newglossaryentry{weights} {
-    name={weights},
-    description={
-        The weights of a latent variable or representation are the coefficients in the linear combination of observed variables that constitute the factor.
-    },
+name={weights},
+description={
+When the functions $f$ are linear, the weights $u_k$ are used to compute the representations or latent variables as $Z_k = X_k u_k$. The weights define the linear transformation from the input variables to the latent space
+},
 }
 
 \newglossaryentry{loadings} {
-    name={loadings},
-    description={
-        The loadings of a latent variable or representation refer to the correlations between this latent variable or representation and the observed variables.
-    },
-}
-
-\newglossaryentry{views} {
-    name={views},
-    description={
-        Views are the observed variables in a multiview dataset, which can be of the same or different data types. The core assumption in multiview learning is that these views are interconnected. For instance, in a dataset comprising images and text describing the same object, or images of the same object from various angles, the different modalities are related as they depict the same subject.
-    },
-}
-
-\newglossaryentry{latent variables} {
-    name={latent variables},
-    description={
-        Latent variables, also known as hidden variables, are unobserved variables used to model the relationships between observed variables.
-    },
+name={loadings},
+description={The Pearson correlation between a feature and a latent variable, given by $\Corr(X\sps{i}_j, Z_k)$. It measures the strength of the linear relationship between a feature and a latent variable, with higher absolute values indicating a stronger relationship. Loadings are invariant to certain transformations of the data matrix, such as scaling, duplication, and linear combinations of columns.},
 }
 
 \newglossaryentry{representations} {
-    name={representations},
-    description={
-        In a multiview dataset, representations are functions of the observed variables that can be used as features in downstream tasks. Analogous to views, these representations are presumed to be interconnected within the context of multiview learning.
-    },
+name={representations},
+description={
+The representations or latent variables $Z_k$ are computed as linear transformations of the input variables using the weights, i.e., $Z_k = X_k u_k$. They aim to capture meaningful low-dimensional structures in the data. In the CCA literature, they are sometimes referred to as canonical variables
+},
+}
+
+\newglossaryentry{latent variables} {
+name={latent variables},
+description={
+Latent variables, also referred to as representations, are the low-dimensional variables $Z_k$ computed as linear transformations of the input variables using the weights, i.e., $Z_k = X_k u_k$. They aim to capture meaningful structures in the data that are not directly observed
+},
+}
+
+\newglossaryentry{views} {
+name={views},
+description={
+Views refer to the different sets of variables or modalities that describe the same underlying phenomena or objects. In the context of multiview learning, methods like PLS and CCA aim to find common latent structures that explain the relationships between these views. The term "view" is used to emphasize the distinct nature of these variable sets, which can come from different data sources or represent different aspects of the data
+},
+}
+
+\newglossaryentry{generalized eigenvalue problem} {
+name={generalized eigenvalue problem},
+description={
+A Generalized Eigenvalue Problem (GEP) is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ and is characterized by the set of solutions to the equation $Au=\lambda Bu$, where $\lambda \in \R$ and $u \in \R^D$ are called generalized eigenvalue and generalized eigenvector, respectively. Many classical subspace learning algorithms, including CCA and PLS, can be formulated as GEPs constructed from covariance matrices
+},
+}
+
+\newglossaryentry{canonical correlations} {
+name={canonical correlations},
+description={
+In the context of CCA, the generalized eigenvalues $\lambda$ are referred to as canonical correlations. They represent the strength of the linear relationship between the learned representations of the two views. The goal of CCA is to find the weights that maximize these canonical correlations
+},
+}
+
+\newglossaryentry{covariance matrix} {
+name={covariance matrix},
+description={
+A covariance matrix captures the relationships between variables in a dataset. The notation $\Sigma_{ij}$ represents the population covariance matrix between the variables in view $i$ and view $j$. Each element of this matrix, $\Sigma_{ij}(a,b)$, measures how much the $a$-th variable in view $i$ and the $b$-th variable in view $j$ change together. A positive covariance indicates that the variables tend to increase or decrease together, while a negative covariance indicates that they tend to move in opposite directions. $\Sigma_{ii}$ represents the covariance matrix within view $i$, capturing the relationships between variables in the same view. These matrices are essential for understanding the structure of the data and are used in subspace learning algorithms like CCA and PLS to find common patterns across views
+},
+plural={covariance matrices}
+}
+
+\newglossaryentry{sample covariance matrix} {
+name={sample covariance matrix},
+description={
+In practice, we often don't have access to the true population covariance matrices, which would require knowing the data distribution. Instead, we estimate these matrices from the available data samples. The sample covariance matrix, denoted as $\hat{\Sigma}^{(ij)}$, is calculated by averaging the products of the centered data points (i.e., data points with the mean subtracted) across all samples. These sample covariance matrices serve as approximations of the true population covariance matrices and are used in place of them when applying subspace learning algorithms like CCA and PLS to real-world datasets
+},
+plural={sample covariance matrices}
+}
+
+\newglossaryentry{norm}{
+name={norm},
+description={
+A norm is a function that assigns a non-negative length or size to a vector in a vector space. Common norms include the L1 norm (sum of absolute values) and the L2 norm (Euclidean norm).
+},
 }

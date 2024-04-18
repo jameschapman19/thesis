@@ -1,181 +1,134 @@
 % ------------------ DOCUMENT SETUP ------------------ 
-% The document class defines the document type (report) and sets the font size (10pt)
-\documentclass{report}
-% Optional math commands from https://github.com/goodfeli/dlbook_notation.
-\input{math_commands}
+\documentclass{report} % Document class and options
+\input{_Packages} % Include packages
+\input{math_commands} % Optional math commands
+
+% Document metadata
 \author{James Chapman}
 
-% Inputs the Document Packages
-\input{_Packages}
+% Glossary and symbols
+\newglossary*{symbols}{Symbol List}
 \makeglossaries
 
-% Mute tabular warnings
-% chktex-file 44 
-
-% Include Bibliography
-
-
-% Controls how many subsections the document can take
-%  and how many of those will get put into the contents pages.
+% ------------------ DOCUMENT CONFIGURATIONS ------------------
+% Counter settings
 \setcounter{secnumdepth}{3}
-\setcounter{tocdepth}{2}
+\setcounter{tocdepth}{1}
 
-% Places a dot after Chapter/Section/Subsection number in Table of Contents
+% TOC formatting
 \renewcommand{\cftchapaftersnum}{.}
 \renewcommand{\cftsecaftersnum}{.}
 \renewcommand{\cftsubsecaftersnum}{.}
-
-%  Customize Dot spacing in Table of Contents/List of Figures/Tables
 \renewcommand{\cftdotsep}{0.3}
 
-% Numeration Type for Chapters and Sections (Roman I, II, II / Arabic 1, 2, 3)
+% Chapter and section numbering
 \renewcommand\thechapter{\Roman{chapter}}
 \renewcommand\thesection{\arabic{section}}
 
-% Formatting Table of Contents/Lists titles
+% Document title settings
 \renewcommand{\contentsname}{\normalfont\bfseries\LARGE{CONTENTS}}
 \renewcommand{\listfigurename}{\normalfont\bfseries\LARGE{LIST OF FIGURES}}
 \renewcommand{\listtablename}{\normalfont\bfseries\LARGE{LIST OF TABLES}}
 
-% HEADER AND FOOTER
-\pagestyle{fancy}  % Set Page Style (Header and Footer Style)
-\fancyhf{}  % Clears the header and footer (from the default info)
+% ------------------ HEADER AND FOOTER SETUP ------------------
+\pagestyle{fancy} % Header and Footer Style
+\fancyhf{} % Clear header/footer
+\fancyhead[L]{James Chapman} % Left header
+\fancyhead[R]{December 2023} % Right header
+\fancyfoot[C]{\thepage} % Center footer
+\renewcommand{\headrulewidth}{0pt} % No horizontal line in header
 
-% Header
-\renewcommand{\headrulewidth}{0pt}  % Removes the default Horizontal Line in Header
-\fancyhead[L]{James Chapman}
-\fancyhead[R]{December 2023}
-
-% Footer
-\fancyfoot[C]{\thepage} % Page Number
-
-% Change figure numbering per section
+% Figure and table numbering within chapter/section
 \numberwithin{figure}{chapter}
 \numberwithin{table}{section}
 
-
-%  -------------------------------------------------
-%  --------- The document starts from here --------- 
-%  -------------------------------------------------
+% ------------------ PRE-CONTENT FILES ------------------
 \input{chapters/acronyms}
 \input{chapters/symbols}
 \input{chapters/definitions}
+
+% ------------------ MAIN DOCUMENT START ------------------
 \begin{document}
 
-
-% ------------------  TITLE PAGE -------------------
+% ------------------ TITLE PAGE -------------------
 \begin{titlepage}
-    \begin{center}
-        
-        % Title
-        {\LARGE\textbf{Towards Scalable, Flexible, and Interpretable Self-Supervised Learning for Multiview Biomedical Data}
-            \author{James Chapman\\
-                % Subtitle
-                \\}}
-
-        \vspace{0.8cm}
-        by\\
-        \vspace{0.8cm}
-
-        % Author
-        {\LARGE\textbf{James Chapman\\}}
-        % Date
-        \vspace{1.5cm}
-        {\LARGE\textbf{December 2023}}
-
-        \vfill
-
-        \textbf{\setstretch{2.0}
-            PhD Thesis\\
-            \vspace{1cm}
-            i4health CDT\\
-            University College London\\}
-
-        \vspace{2cm}
-    \end{center}
+    \centering
+    {\LARGE\textbf{Towards Scalable, Flexible, and Interpretable Self-Supervised Learning for Multiview Biomedical Data}}
+    \vspace{0.8cm}
+    by
+    \vspace{0.8cm}
+    {\LARGE\textbf{James Chapman}}
+    \vspace{1.5cm}
+    {\LARGE\textbf{December 2023}}
+    \vfill
+    \textbf{\setstretch{2.0}
+        PhD Thesis\\
+        \vspace{1cm}
+        i4health CDT\\
+        University College London}
+    \vspace{2cm}
 \end{titlepage}
 
 \onehalfspacing
 
-% -------------------  DECLARATION ---------------------
+% ------------------ PRELIMINARY SECTIONS ------------------
 \newpage
-\include{chapters/declaration}
+\include{chapters/declaration}  % Declaration
+\include{chapters/abstract}  % Abstract
+\include{chapters/impact}  % Impact Statement
+\include{chapters/publications}  % Publications
 
-% ----------------------  ABSTRACT -----------------------
+% ------------------ RESEARCH PAPER DECLARATIONS ------------------
 \newpage
-\include{chapters/abstract}
+\include{chapters/Research_Paper_Declaration/neurips}  % NeurIPS Declaration
+\include{chapters/Research_Paper_Declaration/iclr}  % ICLR Declaration
 
-% ----------------------  IMPACT STATEMENT -----------------------
+% ------------------ TABLE OF CONTENTS ------------------
 \newpage
-\include{chapters/impact}
+\dominitoc  % Initialization for mini-TOC
+\tableofcontents  % Main Table of Contents
+\setcounter{tocdepth}{2}
 
-% ----------------------  PUBLICATIONS -----------------------
+% ------------------ LIST OF FIGURES AND TABLES ------------------
 \newpage
-\include{chapters/publications}
-
-% -----------------  ACKNOWLEDGEMENTS  -------------------
-% \newpage
-% \include{chapters/acknowledgements}
-
-% -------------------  LIST OF FIGURES --------------------
+\listoffigures  % List of Figures
 \newpage
-\listoffigures
+\listoftables  % List of Tables
 
-% % -------------------  LIST OF TABLES ---------------------
+% ------------------ GLOSSARIES ------------------
 \newpage
-\listoftables
-
-% -------------------  ACRONYMS ---------------------
+\printglossary[type=\acronymtype, title=Acronyms]  % Acronyms
 \newpage
-\printglossary[type=\acronymtype, title=Acronyms]
-
-% -------------------  NOTATION ---------------------
-% \newpage
-% \printglossary[type=symbols, title=Symbols]
-
-% ------------------- DEFINITIONS ---------------------
+\printglossary[type=symbols, title=Symbols List]  % Symbols List
+\glsaddallunused[symbols]
 \newpage
-\printglossary
+\printglossary[type=main, title=Definitions]  % Definitions
+\glsaddallunused[main]
 
-% ------------------  TABLE OF CONTENTS --------------------
-\newpage
-\dominitoc% Initialization
-\tableofcontents
+% ------------------ ACKNOWLEDGEMENTS ------------------
+\include{chapters/acknowledgements}  % Acknowledgements
 
-% ------------------  CHAPTER START  --------------------
+% ------------------ MAIN CONTENT SECTIONS ------------------
 \include{chapters/introduction}
-%
 \include{chapters/background/background}
-
 \include{chapters/regularisation/regularisation}
-
- \include{chapters/loadings/loadings}
-
+\include{chapters/loadings/loadings}
 \include{chapters/gradient_descent/gradient_descent}
-
 \include{chapters/deep_learning/deep_learning}
-
 \include{chapters/software/software}
-
 \include{chapters/discussion/discussion}
 
+
+% ------------------ APPENDICES ------------------
 \begin{appendices}
-
-\include{chapters/loadings/appendix}
-
-\include{chapters/gradient_descent/appendix}
-
-\include{chapters/deep_learning/appendix}
-
+    \include{chapters/loadings/appendix}
+    \include{chapters/gradient_descent/appendix}
+    \include{chapters/deep_learning/appendix}
 \end{appendices}
 
-% -------------------  BIBLIOGRAPHY ---------------------
+% ------------------ BIBLIOGRAPHY ------------------
 \newpage
-% \nocite{*}
-% \mtcaddchapte[References] % Adds References Section to Table of 
-\printbibliography[title = {References}]
+\printbibliography[title={References}]
 
 \end{document}
-%  -------------------------------------------------
-%  --------- The document ends from here ----------- 
-%  -------------------------------------------------
+% ------------------ DOCUMENT END ------------------

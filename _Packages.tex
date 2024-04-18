@@ -1,129 +1,157 @@
 % ------------------ PACKAGES ------------------ 
-% Packages add extra commands and features to your LaTeX document. 
-% In here, some of the most common packages for a thesis document have been added 
 
-% LaTeX's float package
+% Packages add extra commands and features to your LaTeX document. 
+% Here are some of the most common packages for a thesis document.
+
+% Floating environments for figures and tables
 \usepackage{float}
-% LaTeX's color package
+
+% Color support
 \usepackage{color}
+
+% Epigraphs
 \usepackage{epigraph}
-% Add color to Tables
+
+% Color support for tables
 \usepackage[table,xcdraw]{xcolor}
 
-% LaTeX's main math package
+% Mathematical typesetting
 \usepackage{amsthm}
-% theorem environment definitions
+
+% Theorem environments
 \newtheorem{corollary}{Corollary}[section]
 \newtheorem{definition}{Definition}[section]
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}{Lemma}[section]
 \newtheorem{proposition}{Proposition}[section]
 \newtheorem{example}{Example}[section]
+
+% Remark environment
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}
-% then restatable ones
+
+% Restatable theorems
 \usepackage{thmtools}
 \usepackage{thm-restate}
 \declaretheorem[name=Proposition,numberwithin=section]{proprep}
 \newtheorem{thm}{Theorem}
+
+% Algorithms
 \usepackage[ruled,vlined]{algorithm2e}
-\usepackage{esvect}
-\usepackage{tikz}
-\usetikzlibrary{patterns}
-\usetikzlibrary{bayesnet}
-\usetikzlibrary{arrows}
-\usetikzlibrary{backgrounds}
 \usepackage{algorithmic}
+
+% Vector arrows
+\usepackage{esvect}
+
+% TikZ for diagrams
+\usepackage{tikz}
+\usetikzlibrary{patterns, bayesnet, arrows, backgrounds}
+
+% Hyperlinks
 \usepackage{hyperref}
 \hypersetup{
-citecolor = blue}
-\usepackage[capitalize,noabbrev]{cleveref}
+    citecolor = blue
+}
 
+% Multi-row tables
 \usepackage{multirow}
+
+% Appendices
 \usepackage[toc,page]{appendix}
-% LaTeX's Caption and subcaption packages
+
+% Captioning figures and tables
 \usepackage[format=hang,font=normalsize,labelfont=bf,labelsep=colon,singlelinecheck=off, justification=centering]{caption}
 \usepackage{subcaption}
 
-% Longtable allows you to write tables that continue to the next page.
+% Long tables
 \usepackage{longtable}
 
-\usepackage[acronym, symbols]{glossaries}
+% Glossaries and acronyms
+\usepackage[acronym]{glossaries}
 
-% Font encoding
+% Font settings
 \usepackage[scaled]{helvet}
 \usepackage[T1]{fontenc}
 \renewcommand\familydefault{\sfdefault}
 
-% This package allows the user to specify the input encoding
+% Input encoding
 \usepackage[utf8]{inputenc}
 
-% This package allows you to add empty pages
+% Empty pages
 \usepackage{emptypage}
 
-% Allows inputs to be imported from a directory
+% Importing files
 \usepackage{import}
 
-% Provides control over the typography of the Table of Contents, List of Figures and List of Tables
+% Table of Contents customization
 \usepackage{tocloft}
 
-% Allows the customization of Latex's title styles
+% Title customization
 \usepackage{titlesec}
 
-% Allows the customization of Latex's table of contents title styles
+% Table of Contents title customization
 \usepackage{titletoc}
 
-% The package provides functions that offer alternative ways of implementing some LATEX kernel commands
+% Alternative implementations for LaTeX commands
 \usepackage{etoolbox}
 
-% Provides extensive facilities for constructing and controlling headers and footers
+% Header and footer control
 \usepackage{fancyhdr} 
 
-% Typographical extensions, namely character protrusion, font expansion, adjustment 
-%of interword spacing and additional kerning
+% Typography enhancements
 \usepackage{microtype}
 
-% Generates PDF bookmarks
+% PDF bookmarks
 \usepackage{bookmark}
 
-% Use these two packages together -- they define symbols
-%  for e.g. units that you can use in both text and math mode.
+% Units and symbols
 \usepackage{gensymb}
 \usepackage{textcomp}
 
-% Bibliography package
-% \usepackage[backend=biber,style=nature]{biblatex}
+% Bibliography
 \usepackage[natbib,style=authoryear,natbib=true]{biblatex}
 \addbibresource{publications.bib} % Add the .bib file that contains the references
 \addbibresource{References.bib} % Add the .bib file that contains the references
 
-% This package provides an easy way to input latin sample text (for the template only)
+% Sample text
 \usepackage{blindtext}
-\usepackage{booktabs}
-\usepackage{listings}
 
+% Tables
+\usepackage{booktabs}
+
+% Code listings
+\usepackage{listings}
 \usepackage{minted}
+
+% Math symbols
+\usepackage{amsmath,amsfonts,bm}
 \usepackage{amssymb}
-% for svg
+
+% Clever referencing
+\usepackage[capitalize,noabbrev]{cleveref}
+
+% Graphics
 \usepackage{graphicx}
 \usepackage{svg}
-% for restating theorem
-\usepackage{thmtools}
+
+% Restating theorems
 \usepackage{thm-restate}
 
+% Line spacing control
 \usepackage{setspace}
 
-\usepackage{minitoc} %for creating TOC at beginning of each chapter
+% Mini table of contents
+\usepackage{minitoc} 
+
+% Mini TOC font settings
 \renewcommand{\mtifont}{\large\sffamily}
 \renewcommand{\mtcfont}{\small\sffamily}
 \renewcommand{\mtcSfont}{\small\sffamily}
 \renewcommand{\mtcSSfont}{\small\sffamily}
 \renewcommand{\mtcSSSfont}{\small\sffamily}
 
+% Add to table of contents
 \newcommand\addtotoc[1]{
-
   \refstepcounter{dummy}
-
-  \addcontentsline{toc}{chapter}{#1}}
-
- 
+  \addcontentsline{toc}{chapter}{#1}
+}

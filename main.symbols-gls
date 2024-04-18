@@ -1,0 +1,30 @@
+\glossarysection[\glossarytoctitle]{\glossarytitle}\glossarypreamble
+\begin{theglossary}\glossaryheader
+\glsgroupheading{glssymbols}\relax \glsresetentrylist %
+\glossentry{W_i}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\glossentry{X_i}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\glossentry{Z_i}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\glossentry{CCA_K}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\glossentry{MCCA_K}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\glossentry{PLS_K}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\glossentry{Sigma_ii}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\glossentry{Sigma_ij}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\glossentry{lambda}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\glossentry{rho_k}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\glossentry{theta_i}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\glossentry{u_ij}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\glossentry{w_ij}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsignore{22}}}%
+\end{theglossary}\glossarypostamble

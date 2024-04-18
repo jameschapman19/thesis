@@ -2,6 +2,8 @@
 
 This chapter provides a summary of the findings of this thesis, discusses their implications, and outlines potential directions for future work. 
 
+
+\section{Summary of Contributions}
 \subsection{Regularisation of CCA Models:
 A Flexible Framework based on
 Alternating Least Squares}
@@ -40,9 +42,9 @@ Moreover, the integration of non-imaging modalities, such as Electronic Health R
 
 \subsection{Methods}
 
-Proximal gradient descent
+\subsubsection{Proximal Gradient Descent for CCA}
 
-Better theory for Self Supervised Learning.
+Preliminary experiments suggest that the proximal gradient descent approach is much faster than existing methods, making it a promising direction for future research. We anticipate that this methodology will significantly enhance the scalability and applicability of CCA, PCA, and PLS in the era of big data and complex regularization schemes.
 
 \section{Closing Remarks}
 
@@ -50,9 +52,11 @@ As I reflect on my journey from struggling with the concepts of eigenvalues and 
 
 One of the most exciting aspects of this journey has been witnessing the rapid growth and evolution of multiview and self-supervised learning during my PhD. The convergence of these fields with CCA has been truly remarkable, and I am thrilled to have been a part of this exciting development. The methods and insights gained from this thesis have the potential to contribute to the continued growth and impact of these areas.
 
-Although we have been limited by access to data, I am confident that the work presented in this thesis has made a meaningful impact on the field of multiview learning. The software tools we have developed, such as CCA-Zoo, have already been adopted by researchers across various domains, enabling them to push the boundaries of what is possible with CCA and related methods.
+I initially thought that my work would primarily focus on deep learning for brain-behavior associations. However, I quickly realized that existing methods for Deep CCA were not computationally feasible with existing methods for high-dimensional neuroimaging data. Additionally, I discovered that the complexity of the brain's relationship with observed mental health cannot be fully captured by even moderately sized datasets. This initially led me to instead look at efficient ways to regularize CCA models. However, I soon realized that the scalability of CCA was a significant bottleneck. This led me to develop efficient algorithms for CCA and PLS, which in turn led me to explore the connections between CCA and self-supervised learning. This journey has been both challenging and rewarding, and I am grateful for the opportunity to have worked on such exciting and impactful research.
 
-With its rich history dating back to the 1930s, CCA has been a powerful tool for discovering new associations across various domains. The work presented in this thesis aims to contribute to the continued relevance and applicability of CCA in the era of big data and deep learning. By developing interpretable, regularized, and scalable methods, we have sought to unlock the full potential of CCA and multiview learning.
+Although we have been limited by access to data, particularly the UK Biobank with its tens of thousands of subjects, I am confident that the work presented in this thesis has made a meaningful impact on the field of multiview learning. As study sizes continue to increase and data collection costs decrease, I believe that machine learning methods, such as those developed in this thesis, will play a crucial role in understanding the intricate relationships between the brain and mental health.
+
+The software tools we have developed, such as CCA-Zoo, have already been adopted by researchers across various domains, enabling them to push the boundaries of what is possible with CCA and related methods. With its rich history dating back to the 1930s, CCA has been a powerful tool for discovering new associations across various domains. The work presented in this thesis aims to contribute to the continued relevance and applicability of CCA in the era of big data and deep learning.
 
 As we look to the future, I am excited by the prospects of further advancements in this field. The integration of deep learning with CCA, the application of these methods to ever-larger and more diverse datasets, and the potential for uncovering groundbreaking insights all point to a bright future for multiview learning. I hope that this thesis has not only made valuable contributions to the field but also inspired others to explore the fascinating world of CCA and its applications.
 

@@ -14,11 +14,11 @@ This chapter provides the foundational knowledge needed to understand the thesis
 Machine learning encompasses methods that enable models to learn patterns and make decisions from data. Machine learning methods are typically categorized by a training set of data, which is used to learn a model, and a test set of data, which is used to evaluate the model.
 
 Arguably the most common machine learning paradigm is supervised learning, where the training data consists of pairs of inputs and outputs, and the model learns to predict a function that maps the inputs to the outputs. This function is then used to predict the outputs for new inputs. The goal of supervised learning is to learn a function that generalizes well to new data, i.e., to make accurate predictions on unseen data.
-At the heart of many machine learning algorithms lies the concept of representation learning - the process of automatically discovering and extracting meaningful features or representations from raw data. Representation learning aims to transform high-dimensional, complex data into a lower-dimensional space that captures the most salient aspects of the original data. This process not only reduces computational complexity but also uncovers hidden structures and relationships within the data, which can then be leveraged for various tasks such as classification, regression, or clustering.
+At the heart of many machine learning algorithms lies the concept of representation learning - the process of automatically discovering and extracting meaningful features or \gls{representations} from raw data. Representation learning aims to transform high-dimensional, complex data into a lower-dimensional space that captures the most salient aspects of the original data. This process not only reduces computational complexity but also uncovers hidden structures and relationships within the data, which can then be leveraged for various tasks such as classification, regression, or clustering.
 
-Unsupervised and self-supervised learning are common machine learning paradigms that often involve learning low-dimensional `latent' representations of the input data. In these paradigms, the training data consists of inputs only, and the model learns to find patterns or structure in the data without explicit output labels. `Downstream' models can use these learned representations as their inputs rather than the original data.
+Unsupervised and self-supervised learning are common machine learning paradigms that often involve learning low-dimensional \textit{latent} \gls{representations} of the input data. In these paradigms, the training data consists of inputs only, and the model learns to find patterns or structure in the data without explicit output labels. \textit{Downstream} models can use these learned \gls{representations} as their inputs rather than the original data.
 
-While the distinction between unsupervised and self-supervised learning is sometimes blurred, unsupervised learning has typically been used to describe dimensionality reduction, clustering, and generative modeling algorithms. Self-supervised learning (SSL) describes a special case of unsupervised learning where the system derives `labels' from the data itself \citep{balestriero2023cookbook}. The cornerstone of SSL is the concept of a `pretext task', a learning task created from the data that trains the model to capture useful features or representations. Most famously, SSL is the backbone to the success of Large Language Models \citep{vaswani2017attention} and in particular ChatGPT \citep{chatgpt}, a language model trained on a pretext task of predicting masked words in a sentence. SSL methods have also recently been shown to outperform supervised methods for certain computer vision tasks for large datasets \citep{goyal2019scaling}.
+While the distinction between unsupervised and self-supervised learning is sometimes blurred, unsupervised learning has typically been used to describe dimensionality reduction, clustering, and generative modeling algorithms. Self-supervised learning (SSL) describes a special case of unsupervised learning where the system derives \textit{labels} from the data itself \citep{balestriero2023cookbook}. The cornerstone of SSL is the concept of a \textit{pretext task}, a learning task created from the data that trains the model to capture useful features or representations. Most famously, SSL is the backbone to the success of Large Language Models \citep{vaswani2017attention} and in particular ChatGPT \citep{chatgpt}, a language model trained on a pretext task of predicting masked words in a sentence. SSL methods have also recently been shown to outperform supervised methods for certain computer vision tasks for large datasets \citep{goyal2019scaling}.
 
 
 \subsection{Multiview Machine Learning}
@@ -29,9 +29,9 @@ These techniques broadly fall into categories of supervised and self-supervised 
 
 \subsubsection{Supervised Multiview Learning}
 
-In supervised multiview learning, the goal is to fuse information from multiple distinct views or feature sets to improve the predictive performance of a model. This approach involves integrating the various views, often using one view as the target variable and the others as predictors. The model learns to combine the information from the different views to make more accurate predictions than would be possible using any single view alone.
+In supervised multiview learning, the goal is to fuse information from multiple distinct \gls{views} or feature sets to improve the predictive performance of a model. This approach involves integrating the various views, often using one view as the target variable and the others as predictors. The model learns to combine the information from the different \gls{views} to make more accurate predictions than would be possible using any single view alone.
 
-For instance, in the context of mental health, we can consider behavioral data as a dependent variable influenced by multiple independent variables like brain activity and demographics. Figure \ref{fig:mentalhealthsupervised} illustrates this concept, where behavioral patterns ($y_1$) are predicted based on features from brain activity ($x_1$) and demographic information ($x_2$). The model learns to fuse the information from the brain and demographic views to form a more comprehensive understanding of the factors influencing behavior.
+For instance, in the context of mental health, we can consider behavioral data as a dependent variable influenced by multiple independent variables like brain activity and demographics. Figure \ref{fig:mentalhealthsupervised} illustrates this concept, where behavioral patterns ($y_1$) are predicted based on features from brain activity ($x_1$) and demographic information ($x_2$). The model learns to fuse the information from the brain and demographic \gls{views} to form a more comprehensive understanding of the factors influencing behavior.
 
 \begin{figure}
     \centering
@@ -42,20 +42,20 @@ For instance, in the context of mental health, we can consider behavioral data a
         \node[obs, below=of x1, minimum size=3cm, align=center] (x2) {Demographics\\$x_2$};
         \edge{x1} {y1}
         \edge{x2} {y1}}
-        \caption[Supervised multiview learning in mental health]{\textit{\textbf{Supervised multiview learning in mental health:}} An example of how different views (brain activity and demographics) can be fused to predict a target variable (behavior) in a supervised learning setting.}\label{fig:mentalhealthsupervised}
+        \caption[Supervised multiview learning in mental health]{\textit{\textbf{Supervised multiview learning in mental health:}} An example of how different \gls{views} (brain activity and demographics) can be fused to predict a target variable (behavior) in a supervised learning setting.}\label{fig:mentalhealthsupervised}
 \end{figure}
 
-Multiple Kernel Learning (MKL) \citep{gonen2011multiple} is a prominent example of supervised multiview learning, where the algorithm learns to combine kernel representations of the different views. By fusing the information from the various kernels, MKL enhances the model's predictive capabilities compared to using a single kernel.
+Multiple Kernel Learning (MKL) \citep{gonen2011multiple} is a prominent example of supervised multiview learning, where the algorithm learns to combine kernel \gls{representations} of the different views. By fusing the information from the various kernels, MKL enhances the model's predictive capabilities compared to using a single kernel.
 
-With the advent of deep learning, the underlying concept of MKL has been extended to deep learning architectures. These architectures enable the model to learn and fuse representations from various views more effectively \citep{guo2019deep}. The deep learning models can automatically learn the most informative features from each view and combine them in non-linear ways to make predictions.
+With the advent of deep learning, the underlying concept of MKL has been extended to deep learning architectures. These architectures enable the model to learn and fuse \gls{representations} from various \gls{views} more effectively \citep{guo2019deep}. The deep learning models can automatically learn the most informative features from each view and combine them in non-linear ways to make predictions.
 
 I contributed to this line of research through the software package Fusili \citep{florence_townend_2023_10228564}, which implements a number of deep-learning based multi-modal data fusion methods for supervised learning. Fusili provides a flexible framework for building models that can fuse information from various data modalities, such as images, text, and structured data, to make more accurate predictions.
 
-In summary, supervised multiview learning involves fusing information from multiple views to improve predictive performance. By combining the unique perspectives offered by each view, these methods can form a more comprehensive understanding of the problem and make more accurate predictions than would be possible using any single view alone.
+In summary, supervised multiview learning involves fusing information from multiple \gls{views} to improve predictive performance. By combining the unique perspectives offered by each view, these methods can form a more comprehensive understanding of the problem and make more accurate predictions than would be possible using any single view alone.
 
 \subsubsection{Self-Supervised Multiview Learning}
 
-In contrast to supervised multiview learning, where explicit labels guide the learning process, self-supervised multiview learning operates under the hypothesis that different views are manifestations of a shared, yet hidden, latent variable \citep{zong2023self}.
+In contrast to supervised multiview learning, where explicit labels guide the learning process, self-supervised multiview learning operates under the hypothesis that different \gls{views} are manifestations of a shared, yet hidden, latent variable \citep{zong2023self}.
 This approach, as evidenced in the latent variable model of mental health illustrated in Figure \ref{fig:mentalhealthselfsupervised}, suggests that both neuroimaging and behavioural data are influenced by an underlying factor, such as the severity of a mental health condition, which remains unobserved.
 
 \begin{figure}
@@ -75,13 +75,13 @@ This approach, as evidenced in the latent variable model of mental health illust
 A key challenge in self-supervised learning is designing pretext tasks to estimate this latent source from the available views.
 A common approach is to estimate a common low-dimensional representation of the variance in the data from both \gls{views}.
 In most objectives of this form, this ammounts to identifying the mutual information between the \gls{views}.
-These representations may be informative for their own sake, identifying common factors between the \gls{views}, or they may be used as inputs to a downstream task, such as classification or regression.
+These \gls{representations} may be informative for their own sake, identifying common factors between the \gls{views}, or they may be used as inputs to a downstream task, such as classification or regression.
 
 \subsection{Conditional Independence, Causality, and Multiview Learning}
 
 The graphical model in Figure \ref{fig:mentalhealthsupervised} represents the assumption that the brain and demographics are independent variables, and that the behaviour is a conditional variable, dependent on both the brain and demographics.
 
-On the other hand, the graphical model in Figure \ref{fig:mentalhealthselfsupervised} represents the assumption that the brain and behaviour are conditionally independent given the severity of an unobserved `latent' mental health condition.
+On the other hand, the graphical model in Figure \ref{fig:mentalhealthselfsupervised} represents the assumption that the brain and behaviour are conditionally independent given the severity of an unobserved latent mental health condition.
 
 \citet{reichenbach1956direction} introduced the epoynmous Reichenbach's principle, which states that if two variables are correlated, then either one causes the other, or both are caused by a third variable.
 While the relationship between conditional independence and causality is nuanced \citep{pearl2009causality}, it is clear that our assumptions about the causal structure of the data can inform our choice of multiview learning algorithm.
@@ -99,9 +99,9 @@ In the second case, we might be more inclined to use a self-supervised multiview
 \subsubsection{Complementary and Redundant Information}
 The nature of the information provided by different \gls{views} (such as neuroimaging and behavioral data) is important for understanding multiview learning models.
 A particularly useful distinction is between complementary and redundant information \citep{nguyen2020multiview,lyu2021understanding, chen2022representation}.
-The complementary information in views offers unique insights into different aspects of the same subject. For instance, in mental health studies, neuroimaging might reveal structural changes in the brain that are not (yet) present in presented behavioural phenotypes, while behavioral data could be influenced by demographic factors that do not present as structural differences in the brain. Both these views together provide a more holistic understanding of a mental health condition.
-Conversely, redundant information in different views refers to overlapping or similar data presented from various angles. For instance, a specific mental health condition may manifest in both observable behavioral changes and detectable neuroimaging markers. While each view alone could suggest the presence of the condition, their combination, due to redundancy, can enhance the reliability of the diagnosis. This redundancy is not merely repetitive; it plays a crucial role in denoising and validating findings. In essence, if both neuroimaging and behavioral data independently point to the same diagnosis, the confidence in this diagnosis increases.
-The `Wisdom of Crowds' phenomenon, where the collective average of multiple estimates tends to be more accurate than individual estimates, exemplifies the strength of redundant information \citep{galton1907vox}, as illustrated in Figure \ref{fig:wisdomofcrowds}. This principle is akin to the redundancy in multiview data, where multiple views converge to a more accurate or robust conclusion than any single view alone.
+The complementary information in \gls{views} offers unique insights into different aspects of the same subject. For instance, in mental health studies, neuroimaging might reveal structural changes in the brain that are not (yet) present in presented behavioural phenotypes, while behavioral data could be influenced by demographic factors that do not present as structural differences in the brain. Both these \gls{views} together provide a more holistic understanding of a mental health condition.
+Conversely, redundant information in different \gls{views} refers to overlapping or similar data presented from various angles. For instance, a specific mental health condition may manifest in both observable behavioral changes and detectable neuroimaging markers. While each view alone could suggest the presence of the condition, their combination, due to redundancy, can enhance the reliability of the diagnosis. This redundancy is not merely repetitive; it plays a crucial role in denoising and validating findings. In essence, if both neuroimaging and behavioral data independently point to the same diagnosis, the confidence in this diagnosis increases.
+The \textit{Wisdom of Crowds} phenomenon, where the collective average of multiple estimates tends to be more accurate than individual estimates, exemplifies the strength of redundant information \citep{galton1907vox}, as illustrated in Figure \ref{fig:wisdomofcrowds}. This principle is akin to the redundancy in multiview data, where multiple \gls{views} converge to a more accurate or robust conclusion than any single view alone.
 
 \begin{figure}
     \centering
@@ -114,26 +114,42 @@ In this thesis, we will explore Canonical Correlation Analysis, a multiview lear
 \section{Learning Representations: Definitions and Notation}
 
 Suppose we have a sequence of vector-valued random variables $X\sps{i} \in \R^{D_i}$ for $i \in \{1, \dots, I \}$
-We want to learn meaningful $K$-dimensional representations
+We want to learn meaningful $K$-dimensional \gls{representations}
 \begin{equation}
     \label{eq:general-form-of-representations}
     Z\sps{i} = f\sps{i}( X\sps{i}; \theta\sps{i}).
 \end{equation}
 For convenience, define $D = \sum_{i=1}^I D_i$ and $\theta = \left(\theta\sps{i}\right)_{i=1}^I$.
 Without loss of generality take $D_1 \geq D_2 \geq \cdots \geq D_I$.
-We will consistently use the subscripts $i,j \in [I]$ for \gls{views};
+We will consistently use We will consistently use the superscript $(i)$ to denote the $i$-th view and not as an exponentiation operation.
 $d \in [D_i]$ for dimensions of input variables;
-and $l,k \in [K]$ for dimensions of representations - i.e. to subscript dimensions of $Z\sps{i}, f\sps{i}$.
+and $l,k \in [K]$ for dimensions of \gls{representations} - i.e. to subscript dimensions of $Z\sps{i}, f\sps{i}$.
 Later on we will introduce total number of samples $N$.
+
+We denote the inner product between two vectors $a$ and $b$ as $\langle a, b \rangle$, which is defined as:
+\begin{align}
+\label{eq:inner-product}
+\langle a, b \rangle = a^\top b = \sum_{i=1}^n a_i b_i
+\end{align}
+where $a_i$ and $b_i$ are the $i$-th elements of vectors $a$ and $b$, respectively, and $n$ is the dimension of the vectors.
+
+The inner product is a measure of similarity between two vectors, with larger values indicating higher similarity. It is also related to the angle $\theta$ between the vectors, as shown in the following equation:
+\begin{align}
+\label{eq:inner-product-angle}
+\langle a, b \rangle = |a| |b| \cos(\theta)
+\end{align}
+where $|a|$ and $|b|$ are the Euclidean norms (lengths) of vectors $a$ and $b$, respectively.
 
 In this report, when the functions $f$ are linear, we will typically refer to $u_k$ as \gls{weights}, $Z_k = X_k u_k$ as \gls{representations} or \gls{latent variables} (noting that in the CCA literature they are sometimes referred to as canonical variables \citep{borga_learning_1998}), depending on the context.
 We will sometimes consider a matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of \gls{weights}, and a matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations.
 We will refer to the Pearson correlation between features and their respective latent variable $\Corr(X\sps{i}_j, Z_k)$ as the \gls{loadings} of $X\sps{i}_j$ on $Z_k$ \citep{rosipal2005overview, alpert1972interpretation, borga_learning_1998}, noting that the same concept has also been referred to as structure correlations \citep{meredith1964canonical}.
 
 %Covariance matrices
-We will use the notation $\Sigma_{ij}=\Cov(X\sps{i}, X\sps{j})$ for the population covariance matrix between the random variables associated with view $i$ and $j$. We will also use $\Sigma_{ii}= \Cov(X\sps{i})$ for the population covariance matrix of the random variables associated with view $i$ with each other.
+We will use the notation $\Sigma_{ij}=\Cov(X\sps{i}, X\sps{j})$ for the population \gls{covariance matrix} between the random variables associated with view $i$ and $j$. This \gls{covariance matrix} captures the relationships between variables from different views. Each element of this matrix, $\Sigma_{ij}(a,b)$, measures how much the $a$-th variable in view $i$ and the $b$-th variable in view $j$ change together, even though they belong to different views. A positive covariance indicates that the variables from different views tend to increase or decrease together, while a negative covariance indicates that they tend to move in opposite directions. These \glspl{covariance matrix} play a crucial role in multiview learning algorithms as they capture the inter-view relationships that the algorithms aim to leverage.
 
-Many classical subspace learning algorithms can be formulated as Generalized Eigenvalue Problems (GEPs) constructed from covariance matrices. In the following subsection, we introduce the concept of GEPs and discuss their properties, which will be useful for understanding the optimization problems and solutions of these algorithms.
+We will also use $\Sigma_{ii}= \Cov(X\sps{i})$ for the population \gls{covariance matrix} of the random variables associated with view $i$ with each other. This \gls{covariance matrix} captures the relationships between variables within the same view. Each element of this matrix, $\Sigma_{ii}(a,b)$, measures how much the $a$-th and $b$-th variables in view $i$ change together. A positive covariance indicates that the variables within the same view tend to increase or decrease together, while a negative covariance indicates that they tend to move in opposite directions. These within-view \glspl{covariance matrix} are essential for understanding the structure of the data in each view and are used in conjunction with the inter-view \glspl{covariance matrix} in multiview learning algorithms.
+
+Many classical subspace learning algorithms can be formulated as Generalized Eigenvalue Problems (GEPs) constructed from \glspl{covariance matrix}. In the following subsection, we introduce the concept of GEPs and discuss their properties, which will be useful for understanding the optimization problems and solutions of these algorithms.
 
 \subsection{Generalized Eigenvalue Problems in linear algebra}
 A Generalized Eigenvalue Problem (GEP) is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}.
@@ -159,7 +175,7 @@ Principal Components Analysis \citep{hotelling1933analysis} (\acrshort{pca}) is 
 It is widely used for dimensionality reduction and feature extraction.
 The primary goal of \acrshort{pca} is to transform the original high-dimensional data into a new coordinate system defined by orthogonal axes, capturing the most relevant aspects of the data.
 
-In \acrshort{pca}, the representations are constrained to be linear transformations of the form:
+In \acrshort{pca}, the \gls{representations} are constrained to be linear transformations of the form:
 \begin{equation}
     \label{eq:pca-linear-function-def}
     Z_k = X u_k,
@@ -171,20 +187,20 @@ where $u_k$ are orthonormal basis vectors such that:
     u_k^\top u_l = 0 \text{ for } k \neq l.
 \end{equation}
 
-The primary goal of \acrshort{pca} is to maximize the variance of the representations \(Z_k\), finding the directions of maximal variance in the data.
+The primary goal of \acrshort{pca} is to maximize the variance of the \gls{representations} \(Z_k\), finding the directions of maximal variance in the data.
 
 \subsubsection{Optimization and Solution}
 Mathematically, for the first principal component, this can be formulated as:
 
 \begin{align}
-    u_{\text{opt}} & = \underset{u}{\text{argmax}} \left( u^\top \Sigma u \right) \
-    \text{subject to:} \notag                                                     \
-    u^\top u       & = 1 \notag
+    u_{\text{opt}} & = \underset{u}{\text{argmax}} \left( u^\top \Sigma u \right) \\
+    \text{subject to:} \notag                                                     \\
+    u^\top u& = 1 \notag
 \end{align}
 
-Where \(\Sigma = \mathbb{E}[X^\top X]\) is the population covariance matrix of the single view data $X$.
+Where \(\Sigma = \mathbb{E}[X^\top X]\) is the population \gls{covariance matrix} of the single view data $X$.
 
-To solve this constrained optimization problem, we can use the method of Lagrange multipliers. The key idea behind Lagrange multipliers is to transform a constrained optimization problem into an unconstrained one by incorporating the constraints into the objective function. The Lagrange multiplier, denoted by $\lambda$, can be thought of as a `price' or `penalty' for violating the constraint. By setting the Lagrange multiplier to a large enough value, we ensure that the optimal solution satisfies the constraint.
+To solve this constrained optimization problem, we can use the method of Lagrange multipliers. The key idea behind Lagrange multipliers is to transform a constrained optimization problem into an unconstrained one by incorporating the constraints into the objective function. The Lagrange multiplier, denoted by $\lambda$, can be thought of as a penalty for violating the constraint. By setting the Lagrange multiplier to a large enough value, we ensure that the optimal solution satisfies the constraint.
 
 The Lagrangian function for the PCA optimization problem is constructed by adding the constraint multiplied by the Lagrange multiplier to the original objective function:
 
@@ -197,13 +213,13 @@ Intuitively, the first term in the Lagrangian represents the objective function 
 
 Differentiating the Lagrangian with respect to $u$ and setting it to zero yields the first-order conditions (which are necessary for optimality for the optimal $u$):
 \begin{align}
-\Sigma u & = \lambda u, \
+\Sigma u & = \lambda u, \\
 u^\top u & = 1.
 \end{align}
 
 \paragraph{Eigenvalue Problem}
 
-This transforms the problem into an eigenvalue equation for the covariance matrix \(\Sigma\), which can be efficiently solved using standard libraries such as scikit-learn \citep{pedregosa2011scikit}.
+This transforms the problem into an eigenvalue equation for the \gls{covariance matrix} \(\Sigma\), which can be efficiently solved using standard libraries such as scikit-learn \citep{pedregosa2011scikit}.
 
 The first principal component therefore corresponds to the eigenvector associated with the largest eigenvalue \(\lambda\).
 Subsequent components are the remaining eigenvectors ordered by their corresponding eigenvalues.
@@ -216,26 +232,26 @@ There are three major limitations of \acrshort{pca} that are relevant to this th
 
     \item \textbf{Sparsity and Interpretability}: Although \acrshort{pca} reduces dimensionality by projecting the data onto new axes, the resulting principal components are linear combinations of \textit{all} the original features. This complex aggregation can make it difficult to interpret the components, especially when each component is influenced by many original variables. For this reason, sparse variants of \acrshort{pca} have been developed \citep{zou2006sparse,zou2018selective}, which aim to find sparse linear combinations of the original features; interpretable as a subset of the original features contributing to a significant proportion of the variance in the data.
 
-    \item \textbf{Multiview Data Utilization}: \acrshort{pca} is primarily designed for analyzing a single dataset and does not naturally accommodate multiview data, where multiple independent sets of variables (views) describe the data. While it is possible to concatenate these views into a single dataset prior to analysis, this approach does not take advantage of the potential interactions and complementary information across the views, which can be critical for more insightful analysis in applications such as image processing, bioinformatics, and social sciences.
+    \item \textbf{Multiview Data Utilization}: \acrshort{pca} is primarily designed for analyzing a single dataset and does not naturally accommodate multiview data, where multiple independent sets of variables (views) describe the data. While it is possible to concatenate these \gls{views} into a single dataset prior to analysis, this approach does not take advantage of the potential interactions and complementary information across the views, which can be critical for more insightful analysis in applications such as image processing, bioinformatics, and social sciences.
 \end{enumerate}
 
 Nevertheless, \acrshort{pca} remains a popular tool in practice \citep{greenacre2022principal} and is a useful baseline for multiview learning methods, and we will use it as a point of comparison throughout this thesis.
 
 \subsection{Partial Least Squares}
 
-Given the inherent limitations of \acrshort{pca}, especially in handling multiview datasets where capturing interactive and complementary information between different data sources is crucial, Partial Least Squares (PLS) emerges as a potent alternative. PLS extends the principles of PCA to analyze two correlated datasets simultaneously, optimizing for the shared covariance rather than variance within a single dataset. This approach makes PLS particularly valuable in multiview settings where the goal is to uncover the latent structures that explain the relationships between datasets.
+Given the inherent limitations of \acrshort{pca}, especially in handling multiview datasets where capturing interactive and complementary information between different data sources is crucial, Partial Least Squares (PLS) emerges as a potent alternative. PLS extends the principles of PCA to analyze two correlated \gls{views} simultaneously, optimizing for the shared covariance rather than variance within a single dataset. This approach makes PLS particularly valuable in multiview settings where the goal is to uncover the latent structures that explain the relationships between views.
 
 Partial Least Squares (PLS) \citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as \gls{views}. \acrshort{pls} can be seen as a generalization of \acrshort{pca}, where \acrshort{pca} becomes a special case when the two \gls{views} are identical.
 
-\acrshort{pls} optimises for the dot product between the representations of two views, a measure of similarity.
+\acrshort{pls} optimizes for the dot product between the \gls{representations} of two views, a measure of similarity.
 
 \begin{align}
     \label{eq:dot-product}
-    \langle X\sps{1}u^{(1)}, X\sps{2}u^{(2)}\rangle =\sqrt{u\spsT{1}\Sigma_{11}u\sps{1}} \sqrt{u\spsT{2}\Sigma_{22}u\sps{2}} \cos(\theta)
+    \langle X\sps{1}u^{(1)}, X\sps{2}u^{(2)}\rangle = |X\sps{1}u^{(1)}| |X\sps{2}u^{(2)}| \cos(\theta) = u\spsT{1} \Sigma_{12} u\sps{2}
 \end{align}
 
 Where $\theta$ is the angle between the two representations.
-Much like for PCA, the representations are constrained to be linear transformations of the form:
+Much like for PCA, the \gls{representations} are constrained to be linear transformations of the form:
 
 \begin{align}
     Z\sps{i} = X\sps{i} u\sps{i}
@@ -309,7 +325,7 @@ We can also represent the system of equations in matrix form as follows:
 
 Which is of the form $A v = \lambda B v$. \acrshort{pls} is therefore also defined by the solution to a single generalized eigenvalue problem.
 
-Given the notions of uniqueness in GEPs, the weights $u$ are not in general unique but we can write the vector of generalized eigenvalues $(\lambda_1, \dots, \lambda_K)$ representing covariances as:
+Given the notions of uniqueness in GEPs, the \gls{weights} $u$ are not in general unique but we can write the vector of generalized eigenvalues $(\lambda_1, \dots, \lambda_K)$ representing covariances as:
 
 \begin{align}
     \label{eq:pls-vector-of-correlations-def}
@@ -320,25 +336,25 @@ Given the notions of uniqueness in GEPs, the weights $u$ are not in general uniq
 
 Despite the advantages of \acrshort{pls} over \acrshort{pca} in handling multiview datasets, PLS has its own limitations that can impact its effectiveness in certain applications:
 \begin{enumerate}
-    \item \textbf{Scale Invariance}: Similar to \acrshort{pca}, \acrshort{pls} is not scale invariant. This means that the model's outcomes are affected by the scale of the features, potentially leading to biased weights towards features with larger scale unless data is normalized.
+    \item \textbf{Scale Invariance}: Similar to \acrshort{pca}, \acrshort{pls} is not scale invariant. This means that the model's outcomes are affected by the scale of the features, potentially leading to biased \gls{weights} towards features with larger scale unless data is normalized.
     \item \textbf{Sparsity and Interpretability}: \acrshort{pls} does not inherently produce sparse models. The components derived from PLS are linear combinations of all input features, which can make the model difficult to interpret, particularly in high-dimensional contexts such as genomics or text processing. Sparse \acrshort{pls} has also been an active area of research \citep{chun2010sparse, witten2009penalized}.
 \end{enumerate}
 
 \subsection{Canonical Correlation Analysis}\label{sec:cca}
 
-Canonical Correlation Analysis (\acrshort{cca}) is introduced as an advancement over \acrshort{pls}, designed to maximize the correlation instead of covariance between representations. This focus on correlation allows for a more nuanced understanding of the relationships between datasets, making \acrshort{cca} particularly useful in scenarios where the goal is to explore how datasets relate on a normalized scale.
+Canonical Correlation Analysis (\acrshort{cca}) is introduced as an advancement over \acrshort{pls}, designed to maximize the correlation instead of covariance between representations. This focus on correlation allows for a more nuanced understanding of the relationships between views, making \acrshort{cca} particularly useful in scenarios where the goal is to explore how \gls{views} relate on a normalized scale.
 
 \acrshort{cca} achieves this by optimizing the cosine of the angle between the representations, thus normalizing the effect of the scale of the data:
 
 \begin{align}
     \label{eq:cosine-similarity}
-    \cos(\theta) = \frac{\langle X\sps{1}u^{(1)}, X\sps{2}u^{(2)}\rangle}{\sqrt{\langle X\sps{1}u^{(1)}, X\sps{1}u^{(1)}\rangle}\cdot \sqrt{\langle X\sps{2}u^{(2)}, X\sps{2}u^{(2)}\rangle}}= \frac{u\spsT{1}\Sigma_{12}u\sps{2}}{\sqrt{u\spsT{1}\Sigma_{11}u\sps{1}} \sqrt{u\spsT{2}\Sigma_{22}u\sps{2}}}
+    \cos(\theta) = \frac{\langle X\sps{1}u^{(1)}, X\sps{2}u^{(2)}\rangle}{|X\sps{1}u^{(1)}| |X\sps{2}u^{(2)}|}= \frac{u\spsT{1}\Sigma_{12}u\sps{2}}{|X\sps{1}u^{(1)}| |X\sps{2}u^{(2)}|}
 \end{align}
-
 By focusing on correlation, \acrshort{cca} normalizes the contributions of each variable, ensuring that the analysis is not unduly influenced by the magnitude of the data. This normalization is particularly valuable in multiview settings where the scales of the data sources may differ significantly.
 
 \subsubsection{Optimization and Solution}
-The optimization problem for \acrshort{cca} can be expressed as:
+
+If we constrain the norms of the representations to be equal to 1, i.e., $|X\sps{1}u^{(1)}|=|X\sps{2}u^{(2)}|=1$, then maximizing the cosine similarity is equivalent to maximizing the numerator $u\spsT{1}\Sigma_{12}u\sps{2}$. This leads to the following constrained optimization problem:
 
 \begin{align}
     & u_{\text{opt}}=\underset{u}{\mathrm{argmax}}\{ u\spsT{1}X\spsT{1}X\sps{2}u\sps{2} \} \\
@@ -346,6 +362,8 @@ The optimization problem for \acrshort{cca} can be expressed as:
     & u\spsT{1}\Sigma_{11}u\sps{1}=1 \notag                                                  \\
     & u\spsT{2}\Sigma_{22}u\sps{2}=1 \notag
 \end{align}
+
+By focusing on correlation and imposing unit norm constraints on the representations, \acrshort{cca} normalizes the contributions of each variable, ensuring that the analysis is not unduly influenced by the magnitude of the data. This normalization is particularly valuable in multiview settings where the scales of the data sources may differ significantly.
 
 Although non-convex, numerous methods exist for solving the \acrshort{cca} problem, including eigendecomposition and generalized eigendecomposition solvers \citep{uurtio2017tutorial} and block coordinate descent via alternating least squares regressions \citep{golub1995canonical,sun2008least}.
 
@@ -378,8 +396,8 @@ An alternative form of the \acrshort{cca} problem can be developed by reparamete
 \end{align}
 
 This reparameterized form will later underpin Deep Canonical Correlation Analysis (\acrshort{dcca}) through the matrix $T=\Sigma_{11}^{-\frac{1}{2}}\Sigma_{12}\Sigma_{22}^{-\frac{1}{2}}$.
-This form also shows that \acrshort{pls} and \acrshort{cca} can be made equivalent by whitening the data matrices before constructing the covariance matrix.
-When the number of features exceeds the number of samples (\(p>n\)), \acrshort{cca} becomes degenerate because the within-view covariance matrices cannot be inverted—contrasting with \acrshort{pls}, which is always computable.
+This form also shows that \acrshort{pls} and \acrshort{cca} can be made equivalent by whitening the data matrices before constructing the \glspl{covariance matrix}.
+When the number of features exceeds the number of samples (\(p>n\)), \acrshort{cca} becomes degenerate because the within-view \glspl{covariance matrix} cannot be inverted—contrasting with \acrshort{pls}, which is always computable.
 
 \paragraph{Generalized Eigenvalue Problem}
 
@@ -410,7 +428,7 @@ Which is once again of the form $A u = \lambda B u$. \acrshort{cca}, like \acrsh
 
 \paragraph{Canonical Correlations}
 In the case of \acrshort{cca}, the generalized eigenvalues $\lambda$ are generally called canonical correlations \citep{hotelling1935canonical, hotelling1992relations}.
-Given the notions of uniqueness in GEPs, the weights $u$ are not in general unique but we can write the vector of generalized eigenvalues or canonical correlations as:
+Given the notions of uniqueness in GEPs, the \gls{weights} $u$ are not in general unique but we can write the vector of generalized eigenvalues or canonical correlations as:
 \begin{align}
     \label{eq:cca-vector-of-correlations-def}\small
     \CCA_K(X^{(1)},X^{(2)}) \defeq (\rho_k)_{k=1}^K
@@ -418,70 +436,72 @@ Given the notions of uniqueness in GEPs, the weights $u$ are not in general uniq
 
 \subsubsection{Limitations}
 
-A major limitation of \acrshort{cca} is revealed by the forms in equations \ref{eq:cca-eigenvalue-problems} and equation~\ref{eq:cca-reparameterized}; \acrshort{cca} in general requires the inversion of covariance matrices, which is computationally expensive, potentially numerically unstable, and impossible when the number of features exceeds the number of samples such that the covariance matrices are not full rank.
+A major limitation of \acrshort{cca} is revealed by the forms in equations \ref{eq:cca-eigenvalue-problems} and equation~\ref{eq:cca-reparameterized}; \acrshort{cca} in general requires the inversion of  \glspl{covariance matrix}, which is computationally expensive, potentially numerically unstable, and impossible when the number of features exceeds the number of samples such that the  \glspl{covariance matrix} are not full rank.
 
 \subsection{Multiview \acrshort{cca}}
 
-Multiview \acrshort{cca} or \acrshort{mcca} is a straightforward extension of \acrshort{cca} to the case of 3-or more datasets.
-The goal is to find a set of directions \(u\sps{i}\) such that the pairwise correlations between the views are maximized.
-
+Multiview \acrshort{cca} (\acrshort{mcca}) is an extension of \acrshort{cca} that handles more than two \gls{views} simultaneously. Given $I$ \gls{views} $X\sps{1}, \dots, X\sps{i}$, the goal of MCCA is to find a set of directions $u\sps{1}, \dots, u\sps{i}$ that maximize the sum of pairwise correlations between the projections of the \gls{views} onto these directions.
 \subsubsection{Optimization and Solution}
 
-The optimization problem for \acrshort{mcca} can be stated as:
+The optimization problem for \acrshort{mcca} can be formulated as follows:
 \begin{align}
-    & u_{\text{opt}} = \underset{u}{\mathrm{argmax}} \sum_{i=1}^{m} \sum_{j=1, j \neq i}^{m} u\spsT{i} \Sigma_{ij} u\sps{j} \\
+    & u_{\text{opt}} = \underset{u}{\mathrm{argmax}} \sum_{i=1}^{I} \sum_{j=1, j \neq i}^{I} u\spsT{i} \Sigma_{ij} u\sps{j} \\
     & \text{subject to:} \notag                                                                                               \\
-    & \sum_{i=1}^{m} u\spsT{i} \Sigma_{ii} u\sps{i} = 1 \notag
+    & \sum_{i=1}^{I} u\spsT{i} \Sigma_{ii} u\sps{i} = 1 \notag
 \end{align}
 
 \paragraph{Generalized Eigenvalue Problem}
 
-The generalized eigenvalue problem (GEP) for MCCA can be written in matrix form as follows:
+The MCCA optimization problem can be solved by formulating it as a generalized eigenvalue problem (GEP). The GEP for MCCA can be written in matrix form as follows:
 
 \begin{align}
     \small
-    \begin{pmatrix}
-        0           & \Sigma_{12} & \cdots & \Sigma_{1m} \\
-        \Sigma_{21} & 0           & \cdots & \Sigma_{2m} \\
+    \underbrace{\begin{pmatrix}
+        0           & \Sigma_{12} & \cdots & \Sigma_{1I} \\
+        \Sigma_{21} & 0           & \cdots & \Sigma_{2I} \\
         \vdots      & \vdots      & \ddots & \vdots      \\
-        \Sigma_{m1} & \Sigma_{m2} & \cdots & 0
-    \end{pmatrix}
+        \Sigma_{I1} & \Sigma_{I2} & \cdots & 0
+    \end{pmatrix}}_{A}
     \begin{pmatrix}
         u\sps{1} \\
         u\sps{2} \\
         \vdots   \\
-        u\sps{m}
-    \end{pmatrix}.
+        u\sps{I}
+    \end{pmatrix}
     =
     \lambda
-    \begin{pmatrix}
+    \underbrace{\begin{pmatrix}
         \Sigma_{11} & 0           & \cdots & 0           \\
         0           & \Sigma_{22} & \cdots & 0           \\
         \vdots      & \vdots      & \ddots & \vdots      \\
-        0           & 0           & \cdots & \Sigma_{mm}
-    \end{pmatrix}
+        0           & 0           & \cdots & \Sigma_{II}
+    \end{pmatrix}}_{B}
     \begin{pmatrix}
         u\sps{1} \\
         u\sps{2} \\
         \vdots   \\
-        u\sps{m}
+        u\sps{I}
     \end{pmatrix}.
 \end{align}
 
-This GEP formulation of MCCA can be presented in a unified framework generalizing CCA and ridge-regularized extensions. Indeed, we now take $A,B_\alpha \in \R^{D \times D}$ to be block matrices $A = (A\sps{ij})_{i,j=1}^I, B_\alpha = (B_\alpha\sps{ij})_{i,j=1}^I$ where the diagonal blocks of $A$ are zero, the off-diagonal blocks of $B_\alpha$ are zero, and the remaining blocks are defined by:
-\begin{align}
-    \label{eq:gep-most-general-formulation}%\small
-    A^{(ij)} &= \Cov(X\sps{i}, X\sps{j}) \text{ for } i \neq j, \quad % \text{ for } i,j \in [I], ; \:\:
-    B_\alpha^{(ii)} = \alpha_i I_{D\sps{i}} + (1-\alpha_i) \Var(X\sps{i})  %\text{ for } i \in [I]
-\end{align}
-Where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters: taking $\alpha_i = 0 \: \forall i$ recovers CCA and $\alpha = 1 \: \forall i$ recovers PLS.
-We may omit the subscript $\alpha$ when $\alpha=0$ and we recover the `pure CCA' setting; in this case, following \ref{eq:cca-vector-of-correlations-def} we can define
+The matrix $A$ contains the cross-covariance matrices between the views, while the matrix $B$ is a block diagonal matrix containing the within-view covariance matrices. The solution to the GEP gives the optimal directions $u\sps{1}, \dots, u\sps{I}$ and the corresponding generalized eigenvalues $\lambda$.
 
-\begin{align}
-    \MCCA_K(X\sps{1},\dots,X\sps{I})
-\end{align}
+\paragraph{Unified Framework}
 
-to be the vector of the top-$K$ generalized eigenvalues which are the average of the top-$K$ correlations between each pair of views.
+The GEP formulation of MCCA can be further generalized to include ridge regularization, which helps stabilize the solution when the  \glspl{covariance matrix} are ill-conditioned. This leads to a unified framework that encompasses both CCA and its ridge-regularized extensions.
+
+Let $A,B_\alpha \in \R^{D \times D}$ be block matrices defined as follows:
+\begin{align}
+    A_{ij} &= \Cov(X\sps{i}, X\sps{j}) \text{ for } i \neq j, \\
+    B_{\alpha,ii} &= \alpha_i I_{D\sps{i}} + (1-\alpha_i) \Var(X\sps{i}),
+\end{align}
+where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters. Setting $\alpha_i = 0 \: \forall i$ recovers the standard CCA, while $\alpha_i = 1 \: \forall i$ yields the PLS solution.
+
+In the case of standard CCA (i.e., $\alpha=0$), we can define the MCCA correlation vector as:
+\begin{align}\label{eq:MCCA}
+    \MCCA_K(X\sps{1},\dots,X\sps{I}) = (\lambda_1, \dots, \lambda_K),
+\end{align}
+where $\lambda_1, \dots, \lambda_K$ are the top-$K$ generalized eigenvalues. These eigenvalues represent the average of the top-$K$ correlations between each pair of views.
 
 \subsection{Linear Discriminant Analysis LDA}
 
@@ -509,7 +529,7 @@ Thus, LDA can be thought of as a constrained form of \acrshort{cca}, tailored to
 This perspective unifies the two algorithms and shows that the core objective—finding meaningful relationships or directions in the data—is shared between both \acrshort{cca} and LDA.
 
 \subsection{Sample Covariance and Population Covariance}
-In the previous sections, the methods were described in terms of population covariance matrices such as \(\Sigma_{11}=\mathbb{E}[X\spsT{1} X\sps{1}]\), \(\Sigma_{22}=\mathbb{E}[X\spsT{2} X\sps{2}]\), and \(\Sigma_{12}=\mathbb{E}[X\spsT{1} X\sps{2}]\).
+In the previous sections, the methods were described in terms of population  \glspl{covariance matrix} such as \(\Sigma_{11}=\mathbb{E}[X\spsT{1} X\sps{1}]\), \(\Sigma_{22}=\mathbb{E}[X\spsT{2} X\sps{2}]\), and \(\Sigma_{12}=\mathbb{E}[X\spsT{1} X\sps{2}]\).
 These population covariances assume an underlying probability distribution from which the data are drawn.
 
 \textbf{Sample Covariance:} In practical settings, we often do not have access to the entire population but only to a sample. Hence, we can use the Sample Average Approximation to estimate these covariances:
@@ -518,13 +538,13 @@ These population covariances assume an underlying probability distribution from 
     \hat{\Sigma}\sps{12} = \frac{1}{b-1} \bar{\mathbf{X}\sps{1}} \bar{\mathbf{X}\sps{2}}\top
 \]
 
-Here, \(b\) denotes the size of the minibatch, and \(\mathbf{X}\sps{1} \in \mathbb{R}^{p \times b}\) and \(\mathbf{X}\sps{2} \in \mathbb{R}^{q \times b}\) are the data matrices for the samples from \(X\sps{1}\) and \(X\sps{2}\), respectively. The bar over \(\mathbf{X}\sps{1}\) and \(\mathbf{X}\sps{2}\) signifies that these are centered versions of the matrices, i.e., the mean has been subtracted from each column.
-For the ease of both reader and writer, we will drop the bars for the remainder of the thesis and assume that the data are always centered without loss of generality.
+Here, \(b\) denotes the size of the minibatch, and \(\mathbf{X}\sps{1} \in \mathbb{R}^{D_1 \times b}\) and \(\mathbf{X}\sps{2} \in \mathbb{R}^{D_2 \times b}\) are the data matrices for the samples from \(X\sps{1}\) and \(X\sps{2}\), respectively. The bar over \(\mathbf{X}\sps{1}\) and \(\mathbf{X}\sps{2}\) signifies that these are centered versions of the matrices, i.e., the mean has been subtracted from each column.
+For the ease of both reader and writer, we will drop the bars for the remainder of the thesis and assume that all data matrices are centered without loss of generality.
 
-\textbf{Practical Implications:} Using sample covariance matrices introduces some estimation error but allows us to apply the methods in real-world scenarios where population-level data are unattainable.
+\textbf{Practical Implications:} Using \glspl{sample covariance matrix} introduces some estimation error but allows us to apply the methods in real-world scenarios where population-level data are unattainable.
 Additionally, the use of minibatches (chunks of data) in later chapters provides a computationally efficient way to estimate these covariances in large-scale problems, at the cost of some additional statistical noise.
 
-\textbf{Connection to Previous Methods:} The use of sample covariance matrices is directly applicable to algorithms like \acrshort{cca} and LDA. When replacing the population covariances \(\Sigma\sps{ij}\) with sample estimates, the optimization problems remain structurally similar but are solved using the sample data.
+\textbf{Connection to Previous Methods:} The use of \glspl{sample covariance matrix} is directly applicable to algorithms like \acrshort{cca} and LDA. When replacing the population covariances \(\Sigma\sps{ij}\) with sample estimates, the optimization problems remain structurally similar but are solved using the sample data.
 
 This dual perspective—considering both population and sample covariance matrices—enables a more robust and flexible approach to the methods discussed, bridging the gap between theoretical analysis and practical application.
 It will be particularly useful in the context of chapter \ref{ch:loadings} where we will use population variables as ground truth while estimating the models using sample data.
@@ -547,7 +567,7 @@ These two approaches are not mutually exclusive, and statistical learning theory
 \end{figure}
 
 Permutation testing offers a robust way to evaluate the significance of the results obtained by multiview learning methods and, for a single component, is a relatively simple process \citep{winkler2020permutation}.
-As illustrated in Figure~\ref{fig:statistical-inference}, the views are randomly and separately shuffled, and the model is then trained and tested on this permuted data.
+As illustrated in Figure~\ref{fig:statistical-inference}, the \gls{views} are randomly and separately shuffled, and the model is then trained and tested on this permuted data.
 This process is repeated multiple times, generating a distribution of performance metrics under the null hypothesis, where there is no relationship between the views.
 The actual performance of the model on the unshuffled data is then compared to this distribution.
 If the actual performance is significantly better than the permuted performance, it suggests that the model is capturing meaningful relationships in the data.

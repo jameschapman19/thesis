@@ -1,112 +1,102 @@
-\newglossaryentry{u_k}{
-    name={\ensuremath{u_{k}}},
-    description={
-        The weights of the $k$th latent variable or score are the coefficients of the linear combination of the observed variables that make up the latent variable.
-},
-type=symbols
-}
 
-\newglossaryentry{w_k}{
-name={\ensuremath{w_{k}}},
+\newglossaryentry{X_i}{
+name={\ensuremath{X^{(i)}}},
 description={
-The loadings of the $k$th latent variable or score on the $i$th observed variable are the correlations between the latent variable and the observed variable.
+The $i$th view of the data, represented as a matrix of random variables. $X^{(i)} \in \R^{D_i}$ where $D_i$ is the dimensionality of the $i$th view.
 },
 type=symbols
 }
 
-\newglossaryentry{z_k}{
-name={\ensuremath{z_{k}}},
+\newglossaryentry{Z_i}{
+name={\ensuremath{Z^{(i)}}},
 description={
-The $k$th latent variable or score is a linear combination of the observed variables.
+The learned $K$-dimensional representation for the $i$th view of the data. $Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})$ where $f^{(i)}$ is a function parameterized by $\theta^{(i)}$.
 },
 type=symbols
 }
-\newglossaryentry{Corr}{
-name={\ensuremath{\Corr}},
+
+\newglossaryentry{theta_i}{
+name={\ensuremath{\theta^{(i)}}},
 description={
-The correlation operator used to denote the correlation between two variables or sets of variables.
-},
+The parameters of the function $f^{(i)}$ used to learn the representation $Z^{(i)}$ from the $i$th view $X^{(i)}$.},
 type=symbols
 }
 
-\newglossaryentry{norm}{
-name={\ensuremath{\norm{\cdot}}},
+\newglossaryentry{u_ij}{
+name={\ensuremath{u\sps{i}_{j}}},
+description={The weight of the $j$-th feature in the $i$-th view for a latent variable.},
+type=symbols
+}
+
+\newglossaryentry{U_i}{
+name={\ensuremath{U\sps{i}}},
+description={The matrix of weights for the $i$-th view. The $jk$-th element of this matrix is given by $u\sps{i}_{jk}$.}
+}
+
+\newglossaryentry{w_ij}{
+name={\ensuremath{w\sps{i}_{j}}},
+description={The loading of the $j$-th feature in the $i$-th view on the $k$-th latent variable.},
+type=symbols
+}
+
+\newglossaryentry{W_i}{
+name={\ensuremath{W\sps{i}}},
+description={The matrix of loadings for the $i$-th view. The $jk$-th element of this matrix is given by $w\sps{i}_{jk}$.},
+type=symbols
+}
+
+\newglossaryentry{Sigma_ij}{
+name={\ensuremath{\Sigma_{ij}}},
 description={
-Represents the norm of a vector, which is a measure of the vector's length or magnitude.
+The population cross-covariance matrix between the random variables associated with view $i$ and view $j$. $\Sigma_{ij} = \Cov(X^{(i)}, X^{(j)})$.
 },
 type=symbols
 }
 
-\newglossaryentry{Sigxx}{
-name={\ensuremath{\Sigxx}},
+\newglossaryentry{Sigma_ii}{
+name={\ensuremath{\Sigma_{ii}}},
 description={
-Covariance matrix of variable $x$ with itself, representing the variance within $x$.
+The population covariance matrix of the random variables associated with view $i$. $\Sigma_{ii} = \Cov(X^{(i)})$.
 },
 type=symbols
 }
 
-\newglossaryentry{Sigxy}{
-name={\ensuremath{\Sigxy}},
+\newglossaryentry{lambda}{
+name={\ensuremath{\lambda}},
 description={
-Covariance matrix between variables $x$ and $y$, representing the variance shared between $x$ and $y$.
+The generalized eigenvalues obtained when solving the generalized eigenvalue problems that arise in PLS and CCA. In CCA, these are known as the canonical correlations.
 },
 type=symbols
 }
 
-\newglossaryentry{Sigyx}{
-name={\ensuremath{\Sigyx}},
+\newglossaryentry{rho_k}{
+name={\ensuremath{\rho_k}},
 description={
-Covariance matrix between variables $y$ and $x$, typically equivalent to $\Sigxy$ in a symmetric context.
+The $k$th canonical correlation obtained from CCA. $\rho_k$ is the $k$th element of the vector $\CCA_K(X^{(1)},X^{(2)})$.
 },
 type=symbols
 }
 
-\newglossaryentry{Sigyy}{
-name={\ensuremath{\Sigyy}},
+\newglossaryentry{CCA_K}{
+name={\ensuremath{\CCA_K(X^{(1)},X^{(2)})}},
 description={
-Covariance matrix of variable $y$ with itself, representing the variance within $y$.
+The vector of the top $K$ canonical correlations obtained from Canonical Correlation Analysis (CCA) applied to views $X^{(1)}$ and $X^{(2)}$. It is defined as $\CCA_K(X^{(1)},X^{(2)}) \defeq (\rho_k)_{k=1}^K$, where $\rho_k$ is the $k$th canonical correlation.
 },
 type=symbols
 }
 
-\newglossaryentry{tilU}{
-name={\ensuremath{\tilU}},
+\newglossaryentry{MCCA_K}{
+name={\ensuremath{\MCCA_K(X^{(1)},\dots,X^{(I)})}},
 description={
-Represents a transformed or modified version of the matrix or vector $U$.
+The vector of the top $K$ generalized eigenvalues obtained from Multiview Canonical Correlation Analysis (MCCA) applied to views $X^{(1)},\dots,X^{(I)}$. It is defined as $\MCCA_K(X^{(1)},\dots,X^{(I)}) = (\lambda_1, \dots, \lambda_K)$, where $\lambda_k$ is the $k$th generalized eigenvalue.
 },
 type=symbols
 }
 
-\newglossaryentry{tilV}{
-name={\ensuremath{\tilV}},
+\newglossaryentry{PLS_K}{
+name={\ensuremath{\PLS_K(X^{(1)},X^{(2)})}},
 description={
-Represents a transformed or modified version of the matrix or vector $V$.
+The vector of the top $K$ singular values obtained from Partial Least Squares (PLS) applied to views $X^{(1)}$ and $X^{(2)}$. It represents the covariances between the learned latent variables.
 },
 type=symbols
 }
-
-\newglossaryentry{tilW}{
-name={\ensuremath{\tilW}},
-description={
-Represents a transformed or modified version of the matrix or vector $W$.
-},
-type=symbols
-}
-
-\newglossaryentry{LBT}{
-name={\ensuremath{\LBT}},
-description={
-A specific loss function or mathematical formulation denoted as $\mathcal{L}_\text{BT}$.
-},
-type=symbols
-}
-
-\newglossaryentry{LVR}{
-name={\ensuremath{\LVR}},
-description={
-A specific loss function or mathematical formulation denoted as $\mathcal{L}_\text{VR}$.
-},
-type=symbols
-}
-
-
