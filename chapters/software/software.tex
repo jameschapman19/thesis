@@ -100,22 +100,21 @@ from cca_zoo.linear import rCCA
 from cca_zoo.model_selection import GridSearchCV
 from cca_zoo.visualisation import SeparateRepresentationScatterDisplay
 
-Generate synthetic multi-view data
+#Generate synthetic multi-view data
 data = LatentVariableData(view_features=[10, 10], latent_dims=2)
 X, Y = data.sample(n_samples=200, seed=42)
 
-Define hyperparameter grid
+#Define hyperparameter grid
 param_grid = {
 'c': ([0.1, 0.3, 0.7, 0.9], [0.1, 0.3, 0.7, 0.9]),
 }
 
-Perform cross-validated grid search
+#Perform cross-validated grid search
 model = GridSearchCV(rCCA(latent_dimensions=2),
 param_grid=param_grid,
-cv=5,
-scoring='mean_squared_error').fit(X, Y)
+cv=5).fit(X, Y)
 
-Visualize latent space
+#Visualize latent space
 SeparateRepresentationScatterDisplay.from_estimator(model.best_estimator_)
 \end{minted}
 \caption{A complete example of training and evaluating a regularized CCA model with \texttt{CCA-Zoo}.}
@@ -193,7 +192,7 @@ The benchmarking experiments were performed using the following software version
 \item \texttt{Scikit-learn} (version: 1.3.0)
 \end{itemize}
 
-All experiments were run on a machine with an Intel Core i7-9700K CPU (3.60GHz) and 64GB of RAM, running Ubuntu 20.04.
+All experiments were run on a machine with an Intel Core i7-9700K CPU (3.60GHz) and 32GB of RAM, running Ubuntu 20.04.
 
 \subsection{Canonical Correlation Analysis}
 

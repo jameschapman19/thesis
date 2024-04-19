@@ -16,7 +16,7 @@ There have since been proposals to scale-up Deep CCA in the stochastic case with
 
 Self-Supervised Learning (SSL) methods have reached the state-of-the-art in tasks such as image classification \citep{balestriero2023cookbook}, learning representations without labels that can be used to classify images using a linear probe in the zero-shot setting.
 A family of SSL methods that are closely aligned with Canonical Correlation Analysis (CCA) has garnered particular interest.
-This family notably includes Barlow Twins \citep{zbontar2021barlow}, VICReg \citep{bardes2021vicreg}, and W-MSE \citep{ermolov2021whitening} and they aim to transform a pair of data views into similar representations, similar to the objective of CCA. Similarly, some generative approaches to SSL\citep{sansone2022gedi} bear a striking resemblance to Probabilistic CCA\citealp*[postnote]{bibid}{bach2005probabilistic}.
+This family notably includes Barlow Twins \citep{zbontar2021barlow}, VICReg \citep{bardes2021vicreg}, and W-MSE \citep{ermolov2021whitening} and they aim to transform a pair of data views into similar representations, similar to the objective of CCA. Similarly, some generative approaches to SSL\citep{sansone2022gedi} bear a striking resemblance to Probabilistic CCA\citep{bach2005probabilistic}.
 These connections have started to be explored in \citet{balestriero2022contrastive}.
 
 In this chapter, we propose a novel formulation of Deep CCA that is unbiased in the stochastic setting and scales to large datasets.
@@ -38,7 +38,7 @@ Owing to the size of the models and datasets, neural networks are usually traine
 
 \subsection{DCCA and Deep Multiview CCA}
 
-Thus far, our focus in this thesis has been on linear Canonical Correlation Analysis (CCA). However, in dealing with high-dimensional and complex data structures commonly found in modern applications, nonlinear extensions of CCA become essential.
+Thus far, our focus in this thesis has been on linear CCA. However, in dealing with high-dimensional and complex data structures commonly found in modern applications, nonlinear extensions of CCA become essential.
 The objective of DCCA and DMCCA is to learn nonlinear representations of data that are linearly correlated across different views. Recall the definition of $\MCCA_K$ in Equation \eqref{eq:MCCA}. We define the goal of DCCA and DMCCA using this notation:
 
 \begin{align}
@@ -410,7 +410,9 @@ CIFAR-10 contains 10 classes, while CIFAR-100 contains 100 classes.
         Method          & CIFAR-10 Top-1 & CIFAR-10 Top-5 & CIFAR-100 Top-1 & CIFAR-100 Top-5 \\
         \hline
         Barlow Twins    & \textbf{92.1}  & 99.73          & \textbf{71.38}  & \textbf{92.32}  \\
+        \hline
         VICReg          & 91.68          & 99.66          & 68.56           & 90.76           \\
+        \hline
         \textbf{SSL-EY} & 91.43          & \textbf{99.75} & 67.52           & 90.17           \\
         \hline
     \end{tabular}

@@ -123,7 +123,48 @@ However, a significant drawback of KCCA is the need for access to all training d
 Furthermore, when the number of samples is large, the kernel matrix can itself be too large to fit in memory.
 
 \subsection{Stochastic Algorithms for CCA}
+
+\subsubsection{Classical Iterative Algorithms for PCA}
+In order to gain the intuition behind a number of stochastic algorithms for CCA, it's essential to understand the classical iterative algorithms for generalized eigenvalue problems, such as Sanger's rule \cite{sanger1989optimal} (the generalized Hebbian algorithm (GHA)) and Oja's rule.
+
+The power method is a simple iterative algorithm for finding the dominant eigenvector of a matrix $A$. The update rule for the power method is:
+\begin{align}
+u \leftarrow \frac{A u}{\|A u\|}
+\end{align}
+where $u$ is the current estimate of the dominant eigenvector. The power method converges to the dominant eigenvector of $A$ under mild conditions.
+
+Sanger's rule \citep{sanger1989optimal}, also known as the GHA, is an iterative learning rule for finding the principal components of a data set. It can be written as:
+\begin{align}
+U \leftarrow U + \eta \left( A U - U \text{tril}(U^T A U) \right)
+\end{align}
+where \( \text{tril}(\cdot) \) denotes the lower triangular part of a matrix.
+
+Oja's rule \citep{oja1982simplified}, a simplified version of Sanger's rule, can be written as:
+\begin{align}
+U \leftarrow U + \eta \left( A U - U (U^T A U) \right)
+\end{align}
+
+In order to maintain orthogonality of the eigenvectors during the iterative updates, Oja's rule can be combined with a QR decomposition step:
+\begin{align}
+U \leftarrow U + \eta \left( A U - U (U^T A U) \right) \\
+U \leftarrow \text{qr}(U)
+\end{align}
+where \( \text{qr}(\cdot) \) denotes the QR decomposition, which factorizes a matrix into an orthogonal matrix $Q$ and an upper triangular matrix $R$. By using only the orthogonal matrix $Q$, we ensure that the eigenvectors remain orthogonal throughout the iterative process. Alternatively, other orthogonalization techniques such as Gram-Schmidt process \citep{schmidt1907theorie,wong1935application} can be employed.
+
+Both Sanger's rule and Oja's rule aim to find the principal subspace of a matrix \( A \), which is equivalent to solving the eigenvalue problem \( A U = U \Lambda \) where \( \Lambda \) is a diagonal matrix of eigenvalues. These algorithms can be seen as iterative methods for solving the optimization problem:
+\begin{align}
+\max_{U} \Tr \left(U^T A U\right) \quad \text{subject to} \quad U^T U = I
+\end{align}
+
+GHA can also be extended to solve the generalized eigenvalue problem $A U = B U \Lambda$, where $B$ is a positive definite matrix\citep{chen2019constrained}. The update rule for this problem is:
+\begin{align}
+U \leftarrow U + \eta \left( A U - B U \text{tril}(U^T A U) \right)
+\end{align}
+which subsumes the original GHA as a special case when $B=I$.
+
 A number of algorithms have been proposed to approximate GEPs including PCA and PLS \citep{arora2012stochastic}, and CCA specifically \citep{bhatia2018gen}, in the `stochastic' or `data-streaming' setting; these can have big computational savings.
+
+\subsection{Stochastic Power Method}
 \citet{arora2016stochastic} demonstrate that PLS can be approximated by applying a stochastic Power Method. For PLS, the iterations are computed by:
 \begin{align*}
 U^{(1)}t &= \mathcal{P}{\text{orth}} \left( U^{(1)}{t-1} + \eta_t X_t Y_t^\top U^{(2)}{t-1} \right), \\
@@ -135,10 +176,8 @@ However, there are two main drawbacks to this approach.
 First, convergence is not guaranteed.
 Second, the orthogonal projection step does not extend naturally to the CCA problem where the constraint is \( U^\top B U = I \) rather than \( U^\top U = I \).
 
-To the best of our knowledge, the state-of-the-art in Stochastic PLS and CCA are the subspace Generalized Hebbian Algorithm (SGHA) \citep{chen2019constrained} and $\gamma$-EigenGame \citep{gemp20,gemp2021}.
-
 \subsubsection{SGHA}
-SGHA uses a Lagrange multiplier heuristic along with saddle-point analysis, albeit with limited convergence guarantees.
+SGHA is an algorithm for finding the top-k generalized eigenvectors of a matrix pair ( (A, B) ), where \( A \) is symmetric and \( B \) is symmetric positive definite. It builds upon the generalized Hebbian algorithm (GHA).
 Specifically, they form the constrained optimization problem for the top-k subspace as:
 \begin{align}
 \min_{U} -\Tr \left(U^T A U\right) \quad \text{subject to} \quad U^T B U = I
@@ -147,10 +186,24 @@ Transforming this into an unconstrained problem using Lagrange multipliers:
 \begin{align}
 \min_{U} -\Tr\left(U^T A U \right) + \lambda \left(U^T B U - I\right)
 \end{align}
-Finally, they combine the primal and dual updates into a single update rule:
+Differentiating with respect to \( U \) and \( \lambda \) gives the stationary points:
 \begin{align}
-U_{t+1} = \left(1 - \eta_t\right) U_t + \eta_t \left(A U_t + \lambda_t B U_t\right)
+2 A U - 2 B U \lambda = 0 \quad \text{and} \quad U^T B U - I = 0\\
+\implies \lambda = U^T A U
 \end{align}
+
+Given this, the authors propose a primal dual update rule:
+\begin{align}
+U \leftarrow U - \eta \left( A U - B U \lambda \right)
+\lambda \leftarrow \left( U^T A U \right)
+\end{align}
+where \( \eta \) is a learning rate.
+
+These updates can also be combined into a single update rule:
+\begin{align}
+U \leftarrow U - \eta \left( A U - B U \left( U^T A U \right) \right)
+\end{align}
+
 This algorithm is very simple to implement but because it is based on a heuristic primal-dual update rule rather than gradient descent, it is hard to use with more sophisticated optimizers such as Adam \citep{kingma2014adam}.
 
 \subsubsection{$\gamma$-EigenGame}
@@ -169,6 +222,8 @@ u_i \leftarrow (u_i^T B u_i)A u_i - (u_i^T A u_i)B u_i - \sum_{j < i} (u_i^T A y
 where $y_j = \frac{u_j}{\sqrt{u_j^TBu_j}}$. This update rule adjusts the eigenvector $u_i$ to maximize its utility, considering the rewards and penalties.
 
 In the stochastic version of the $\gamma$-EigenGame algorithm, the update rule is modified to use a rolling average of the matrix $B$, introducing an additional hyperparameter $\gamma$ that needs to be tuned. This stochastic update helps to reduce the computational complexity and memory requirements of the algorithm, making it more suitable for large-scale problems.
+
+To the best of our knowledge, the state-of-the-art in Stochastic PLS and CCA are the subspace Generalized Hebbian Algorithm (SGHA) \citep{chen2019constrained} and $\gamma$-EigenGame \citep{gemp20,gemp2021}.
 
 \subsubsection{Further Benefits of Stochastic Algorithms}
 Stochastic algorithms not only offer computational advantages but also introduce a form of implicit regularization \citep{smith2021origin}, which can be particularly beneficial in high-dimensional settings. Regularization techniques are commonly used to prevent overfitting and improve the generalization performance of models, especially when dealing with limited data or complex models.
@@ -222,7 +277,7 @@ This implies that certain local search algorithms, such as stochastic gradient d
     %of the form described in \cref{prop:EY-charac}
 \end{restatable}
 
-It is also possible to make this argument quantitative by proving a version of the strict saddle property from \citet{ge_no_2017,ge2015escaping}; we state an informal version here and give full details in \cref{supp:tractable-optimization}.
+It is also possible to make this argument quantitative by proving a version of the strict saddle property from \citet{ge_no_2017,ge2015escaping}; we state an informal version here and give full details in \ref{app:gradient_descent}\ref{supp:tractable-optimization}.
 
 \begin{corollary}[Informal: Polynomial-time Optimization]
     Under certain conditions on the eigenvalues and generalized eigenvalues of $(A,B)$, one can make quantitative the claim that:
@@ -360,10 +415,9 @@ These datasets are chosen for their diverse nature and complexity, providing a c
         \hline epochs                & 1                   \\
         \hline seed                  & 1, 2, 3, 4, 5       \\
         \hline lr                    & 0.01, 0.001, 0.0001 \\
-        \hline $\gamma$\footnotemark & 0.01,0.1,1,10       \\
+        \hline $\gamma$\footnote{gamma is only used for $\gamma$-EigenGame} & 0.01,0.1,1,10       \\
         \hline
     \end{tabular}
-    \footnotetext{gamma is only used for $\gamma$-EigenGame}
     \caption{Hyperparameter ranges explored for CCA methods.} 
     \label{tab:hyperparameters}
 \end{table}
@@ -408,7 +462,7 @@ We employ imaging genetics data from the UK Biobank \citep{sudlow2015uk} as our 
 The UK Biobank dataset presents a unique challenge due to the sheer scale of its genetic data, requiring sophisticated regularization strategies.
 
 PLS is particularly suited for imaging-genetics studies due to its capability to handle high dimensionality and reveal novel phenotypes as well as genetic mechanisms underlying diseases and brain morphometry.
-Historically, imaging genetics analyses have been constrained to smaller datasets due to computational limitations \citep{Lorenzi2018,Taquet2021,Lefloch2012}.
+Historically, imaging genetics analyses have been constrained to smaller datasets due to computational limitations \citep{lorenzi2018,Taquet2021,Lefloch2012}.
 Moreover, the few studies that have attempted to analyze data of comparable scale to the UK Biobank have typically resorted to partitioning the data into smaller clusters, thereby limiting the scope of their analysis \citep{lorenzi2017secure, altmann2023tackling}.
 
 Our experiment with PLS-EY, conducted on a subset of the UK Biobank dataset consisting of brain imaging data (82 regional volumes) and genetic data (582,565 variants) for 33,333 subjects, is designed to overcome these limitations.
@@ -470,37 +524,37 @@ Our future initiatives will enhance CCA, PCA and PLS by incorporating proximal g
 
 \subsubsection{Objective Formulation with Regularization}
 
-We aim to modify the CCA framework by integrating specific regularization terms directly into the loss function of the Generalized Eigenvalue Problem (GEP). The revised loss function, denoted as $\mathcal{L}^{\text{Proximal CCA-EY}}(W_1, W_2)$, will incorporate the regularization terms $R_1(W_1)$ and $R_2(W_2)$, enabling the optimization of CCA with additional constraints. The objective function for Proximal CCA-EY will be defined as:
+We aim to modify the CCA framework by integrating specific regularization terms directly into the loss function of the Generalized Eigenvalue Problem (GEP). The revised loss function, denoted as $\mathcal{L}_{\text{Proximal CCA-EY}}(\mathbf{U}_1, \mathbf{U}_2)$, will incorporate the regularization terms $R_1(\mathbf{U}_1)$ and $R_2(\mathbf{U}_2)$, enabling the optimization of CCA with additional constraints. The objective function for Proximal CCA-EY will be defined as:
 
 \begin{align*}
-    \mathcal{L}^{\text{Proximal CCA-EY}}(W_1, W_2) &= \mathcal{L}^{\text{EY}}(W_1, W_2)
-    + \lambda_1 R_1(W_1) + \lambda_2 R_2(W_2),
-    \end{align*}
+    \mathcal{L}_{\text{Proximal CCA-EY}}(\mathbf{U}_1, \mathbf{U}_2) &= \mathcal{L}_{\text{EY}}(\mathbf{U}_1, \mathbf{U}_2)
+    + \lambda_1 R_1(\mathbf{U}_1) + \lambda_2 R_2(\mathbf{U}_2),
+\end{align*}
 
-where $\mathcal{L}^{\text{Proximal CCA-EY}}$ represents the Proximal CCA-EY loss function, $\lambda_1$ and $\lambda_2$ are regularization parameters, and $R_1(W_1)$ and $R_2(W_2)$ are the regularization terms for the left and right views, respectively.
+where $\mathcal{L}^{\text{Proximal CCA-EY}}$ represents the Proximal CCA-EY loss function, $\lambda_1$ and $\lambda_2$ are regularization parameters, and $R_1(\mathbf{U}_1)$ and $R_2(\mathbf{U}_2)$ are the regularization terms for each view.
 
 \subsubsection{Proximal Gradient Descent Mechanism}
 
 The proximal gradient updates for this augmented CCA formulation are specified as:
 
 \begin{align}
-W_1^{(t+1)} &= \text{prox}{\alpha \lambda_1 R_1}(W_1^{(t)} - \alpha \nabla{W_1} \mathcal{L}^{\text{EY}}(W_1^{(t)}, W_2^{(t)})), \\
-W_2^{(t+1)} &= \text{prox}{\alpha \lambda_2 R_2}(W_2^{(t)} - \alpha \nabla{W_2} \mathcal{L}^{\text{EY}}(W_1^{(t)}, W_2^{(t)})),
+\mathbf{U}1^{(t+1)} &= \text{prox}{\alpha \lambda_1 R_1}(\mathbf{U}_1^{(t)} - \alpha \nabla{\mathbf{U}_1} \mathcal{L}^{\text{EY}}(\mathbf{U}_1^{(t)}, \mathbf{U}_2^{(t)})), \
+\mathbf{U}2^{(t+1)} &= \text{prox}{\alpha \lambda_2 R_2}(\mathbf{U}_2^{(t)} - \alpha \nabla{\mathbf{U}_2} \mathcal{L}^{\text{EY}}(\mathbf{U}_1^{(t)}, \mathbf{U}_2^{(t)})),
 \end{align}
 
-where $\text{prox}_{\alpha \lambda_i R_i}(v)$ denotes the proximal operator for the regularization term $R_i$ with parameter $\lambda_i$, and $\alpha$ represents the learning rate.
+where $\text{prox}_{\alpha \lambda_i R_i}(\mathbf{v})$ denotes the proximal operator for the regularization term $R_i$ with parameter $\lambda_i$, and $\alpha$ represents the learning rate. Note that the gradients $\nabla{\mathbf{U}_1} \mathcal{L}^{\text{EY}}(\mathbf{U}_1^{(t)}, \mathbf{U}_2^{(t)})$ and $\nabla{\mathbf{U}_2} \mathcal{L}^{\text{EY}}(\mathbf{U}_1^{(t)}, \mathbf{U}_2^{(t)})$ are computed only for the smooth part of the loss function, i.e., $\mathcal{L}^{\text{EY}}(\mathbf{U}_1, \mathbf{U}_2)$, and do not include the regularization terms.
 
-This operator is defined as solving:
+The proximal operator is defined as solving:
 
 \begin{align*}
-\text{prox}_{\alpha \lambda_i R_i}(v) = \arg \min_x \left( R_i(x) + \frac{1}{2\alpha} |x - v|^2 \right).
+\text{prox}{\alpha \lambda_i R_i}(\mathbf{v}) = \arg \min\mathbf{u} \left( R_i(\mathbf{u}) + \frac{1}{2\alpha} |\mathbf{u} - \mathbf{v}|_2^2 \right).
 \end{align*}
 
 This update effectively balances the influence of the gradient of the smooth loss function and the geometry imposed by the regularization, making the approach robust to the inclusion of complex constraints in the optimization of CCA.
 
 \subsubsection{Efficiency and Applicability}
 
-The proximal gradient descent method excels in large-scale optimization challenges where traditional techniques struggle due to the presence of non-smooth terms. By separating the optimization of the smooth component from the non-smooth regularization, proximal steps can be efficiently computed, particularly when $R_i$ allows a straightforward proximal formulation. This advantage is crucial in high-dimensional contexts such as neuroimaging and genomics, where the regularization can impose significant priors (e.g., sparsity, smoothness) on the model solutions.
+The proximal gradient descent method excels in large-scale optimization challenges where traditional techniques struggle due to the presence of non-smooth terms. By separating the optimization of the smooth component from the non-smooth regularization, proximal steps can be efficiently computed, particularly when $R_i$ allows a straightforward proximal formulation.
 
 \subsection{Conclusion}
 
