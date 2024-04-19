@@ -402,11 +402,11 @@ As before, the weights $\tilde{u}\sps{i}$ change in the transformed space, but s
 
 \subsection{Practical Implications}
 The invariance of loadings to data transformations has significant practical implications, especially in fields like biomedical research, psychometrics, and social sciences where questionnaire and survey data are common:
-
-\textbf{Interpretability}: Loadings provide a consistent interpretation of the relationships between the original features and the canonical variables, even if the data is rescaled or transformed. This is particularly valuable in interdisciplinary research, where different data normalization practices may be employed.
-\textbf{Feature Selection}: Decisions about including, excluding, or combining features can be made based on the loadings without worrying about their impact on the CCA solution. This is especially relevant when dealing with summary measures that effectively sum other variables, a common scenario in questionnaire and biomedical data. The invariance of loadings to such alterations in the data structure makes them a more robust choice for interpreting relationships between variables in these contexts.
-\textbf{Robustness}: CCA models can be trained on transformed data (e.g., normalized or standardized) while still allowing for meaningful interpretation in the original feature space. While the identifiability of weights can be partially solved by the standardization of data, and while this is a common practice, it is not always necessary or desirable and always introduces assumptions.
-For instance, in a survey data analysis, researchers may decide to standardize the data or use composite scores based on theoretical considerations. The invariance of loadings ensures that the interpretation of the relationships between variables remains consistent, regardless of these data preprocessing choices.
+\begin{itemize}
+    \item \textbf{Interpretability}: Loadings provide a consistent interpretation of the relationships between the original features and the canonical variables, even if the data is rescaled or transformed. This is particularly valuable in interdisciplinary research, where different data normalization practices may be employed.
+    \item \textbf{Feature Selection}: Decisions about including, excluding, or combining features can be made based on the loadings without worrying about their impact on the CCA solution. This is especially relevant when dealing with summary measures that effectively sum other variables, a common scenario in questionnaire and biomedical data. The invariance of loadings to such alterations in the data structure makes them a more robust choice for interpreting relationships between variables in these contexts.
+    \item \textbf{Robustness}: CCA models can be trained on transformed data (e.g., normalized or standardized) while still allowing for meaningful interpretation in the original feature space. While the identifiability of weights can be partially solved by the standardization of data, and while this is a common practice, it is not always necessary or desirable and always introduces assumptions.
+\end{itemize}
 
 In conclusion, this section provides a strong mathematical foundation for the preference of loadings over weights in the interpretation of CCA models. The invariance of loadings to columnwise transformations, including scaling and linear combinations, ensures a more robust and consistent interpretation of variable relationships. This property is especially valuable in fields dealing with heterogeneous or transformed data, where data preprocessing choices may vary. By focusing on loadings, researchers can obtain more reliable insights into the underlying structure of their data, facilitating cross-disciplinary collaborations and the advancement of knowledge.
 
@@ -428,7 +428,7 @@ The explicit latent variable model offers more efficient approaches for sampling
 An efficient approach to sampling from a multivariate normal distribution is to use the Singular Value Decomposition (SVD) or Cholesky decomposition of the covariance matrix. This involves decomposing the covariance matrix and using the resulting components to transform samples from a standard multivariate normal distribution:
 
 \begin{align}
-Z~\sim \mathcal{N}(0, I) \
+Z~\sim \mathcal{N}(0, I) \\
 X = \Sigma^{1/2}Z
 \end{align}
 

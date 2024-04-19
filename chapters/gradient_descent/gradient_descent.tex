@@ -28,46 +28,48 @@ We apply this method to CCA and Partial Least Squares (PLS), and show that it ca
 
 The GEP is often represented as \( Au = \lambda Bu \), where \( A \) and \( B \) are matrices. To generalize the dimensions of these matrices, let's denote them as \( m \times m \). This dimension \( m \) can vary based on the specific method in use. For instance, in Principal Component Analysis (PCA), represented as \acrshort{pca}, \( m \) would be equal to \( p \) since \( A \) and \( B \) are \( p \times p \) matrices. In methods like Partial Least Squares (PLS) and Canonical Correlation Analysis (CCA), represented as \acrshort{pls} and \acrshort{cca} respectively, \( m \) would be \( p_1+p_2 \), as \( A \) and \( B \) in these cases are \( (p_1+p_2) \times (p_1+p_2) \).
 
-Table \ref{tab:subspace} provides a comprehensive overview of the definitions and dimensions of \( A \) and \( B \) for various subspace learning methods. 
-
-\begin{table}[h]
-    \centering
-    \tiny
-    \begin{tabular}{|c|c|c|c|c|}
-        \hline
-        Method         & \( A \)           & \( B \)   & \( u \)        & Dimensions       \\
-        \hline
-        PCA & \( \Sigma_{11} \) & \( I \)   & \( u\sps{1} \) & \( p \times p \) \\
-        \hline
-        CCA & \( \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} \Sigma_{11} & 0 \\ 0 & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
-        \hline
-        PLS & \( \begin{pmatrix} 0 & \Sigma_{12} \\ \Sigma_{21} & 0 \end{pmatrix} \) & \( I \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
-        \hline
-        Ridge CCA   & \( \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} \alpha_1 I + (1-\alpha_1)\Sigma_{11} & 0 \\ 0 & \alpha_2 I + (1-\alpha_2)\Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
-        \hline
-        MCCA &   \( \begin{pmatrix} 0 & \Sigma_{12} & \cdots & \Sigma_{1m} \\ \Sigma_{21} & 0 & \cdots & \Sigma_{2m} \\ \vdots & \vdots & \ddots & \vdots  \\ \Sigma_{m1} & \Sigma_{m2} & \cdots & 0 \end{pmatrix} \) &  \(    \begin{pmatrix} \Sigma_{11} & 0 & \cdots & 0  \\ 0 & \Sigma_{22} & \cdots & 0  \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \cdots & \Sigma_{mm} \end{pmatrix} \) & \( \begin{pmatrix}  u\sps{1} \\ u\sps{2} \\ \vdots \\ u\sps{m} \end{pmatrix} \) & \( \sum_{i=1}^I p_i \times \sum_{i=1}^I p_i \)    \\
-        \hline
-    \end{tabular}
-    \caption{Definitions and dimensions of \( A \) and \( B \) for different subspace learning methods.}
-    \label{tab:subspace}
-\end{table}
 
 \subsection{Unified GEP formulation for CCA, Ridge CCA, PLS, and PCA} 
-We break down these barriers by introducing a remarkably elegant Generalized Eigenvalue Problem (GEP) formulation that seamlessly encompasses all of them.
+As discussed in \ref{ch:background}\ref{sec:classical-subspace-learning-algorithms}, we can formulate a unified framework for CCA, ridge-regularized CCA, and PLS using a generalized eigenvalue problem (GEP). This framework involves block matrices $A,B_\alpha \in \R^{D \times D}$, where the diagonal blocks of $A$ are zero, the off-diagonal blocks of $B_\alpha$ are zero, and the remaining blocks are defined as:
 
-In this framework, we now take $A,B_\alpha \in \R^{D \times D}$ to be block matrices $A = (A\sps{ij})_{i,j=1}^I, B_\alpha = (B_\alpha\sps{ij})_{i,j=1}^I$ where the diagonal blocks of $A$ are zero, the off-diagonal blocks of $B_\alpha$ are zero, and the remaining blocks are defined by:
-\begin{align}\label{eq:gep-most-general-formulation}%\small
-    A^{(ij)} &= \Cov(X\sps{i}, X\sps{j}) \text{ for } i \neq j, \quad % \text{ for } i,j \in [I], ; \:\:
-    B_\alpha^{(ii)} = \alpha_i I_{D\sps{i}} + (1-\alpha_i) \Var(X\sps{i})  %\text{ for } i \in [I]
+\begin{align}
+A^{(ij)} &= \Cov(X\sps{i}, X\sps{j}) \text{ for } i \neq j, \\
+B_\alpha^{(ii)} &= \alpha_i I_{D\sps{i}} + (1-\alpha_i) \Var(X\sps{i}),
 \end{align}
-Where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters. By manipulating its elements, we control ridge regularization:
+
+where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters. By adjusting the values of $\alpha$, we can recover various subspace learning methods:
+
 \begin{itemize}
-    \item Pure CCA: Setting $\alpha_i = 0 \: \forall i$ recovers the classic CCA problem. Here, $\MCCA_K(X\sps{1},\dots,X\sps{I})$ denotes the vector containing the top-K generalized eigenvalues.
-    \item Ridge Extensions: Smoothly transition to ridge-regularized CCA or PLS by selectively adjusting values within \(\alpha\).
-    \item PCA Subsumption: Even PCA emerges as a special case – a single-view form of ridge-regularized PLS.
+\item Pure CCA: Setting $\alpha_i = 0 : \forall i$ recovers the classic CCA problem.
+\item Ridge Extensions: Smoothly transition to ridge-regularized CCA or PLS by selectively adjusting values within \(\alpha\).
+\item PCA Subsumption: Even PCA emerges as a special case – a single-view form of ridge-regularized PLS.
 \end{itemize}
 
 Crucially, this unification allows us to focus on solving the core CCA problem for the remainder of the chapter. The insights and solutions we develop will naturally generalize to the entire family of CCA, PLS, ridge-regularized extensions, and even PCA.
+
+% Table \ref{tab:subspace} provides a comprehensive overview of the definitions and dimensions of \( A \) and \( B \) for various subspace learning methods. 
+
+% \begin{table}[h]
+%     \centering
+%     \tiny
+%     \begin{tabular}{|c|c|c|c|c|}
+%         \hline
+%         Method         & \( A \)           & \( B \)   & \( u \)        & Dimensions       \\
+%         \hline
+%         PCA & \( \Sigma_{11} \) & \( I \)   & \( u\sps{1} \) & \( p \times p \) \\
+%         \hline
+%         CCA & \( \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} \Sigma_{11} & 0 \\ 0 & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
+%         \hline
+%         PLS & \( \begin{pmatrix} 0 & \Sigma_{12} \\ \Sigma_{21} & 0 \end{pmatrix} \) & \( I \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
+%         \hline
+%         Ridge CCA   & \( \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} \alpha_1 I + (1-\alpha_1)\Sigma_{11} & 0 \\ 0 & \alpha_2 I + (1-\alpha_2)\Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
+%         \hline
+%         MCCA &   \( \begin{pmatrix} 0 & \Sigma_{12} & \cdots & \Sigma_{1m} \\ \Sigma_{21} & 0 & \cdots & \Sigma_{2m} \\ \vdots & \vdots & \ddots & \vdots  \\ \Sigma_{m1} & \Sigma_{m2} & \cdots & 0 \end{pmatrix} \) &  \(    \begin{pmatrix} \Sigma_{11} & 0 & \cdots & 0  \\ 0 & \Sigma_{22} & \cdots & 0  \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \cdots & \Sigma_{mm} \end{pmatrix} \) & \( \begin{pmatrix}  u\sps{1} \\ u\sps{2} \\ \vdots \\ u\sps{m} \end{pmatrix} \) & \( \sum_{i=1}^I p_i \times \sum_{i=1}^I p_i \)    \\
+%         \hline
+%     \end{tabular}
+%     \caption{Definitions and dimensions of \( A \) and \( B \) for different subspace learning methods.}
+%     \label{tab:subspace}
+% \end{table}
 
 \subsection{Classical Methods for Solving CCA}
 
@@ -124,7 +126,7 @@ Furthermore, when the number of samples is large, the kernel matrix can itself b
 A number of algorithms have been proposed to approximate GEPs including PCA and PLS \citep{arora2012stochastic}, and CCA specifically \citep{bhatia2018gen}, in the `stochastic' or `data-streaming' setting; these can have big computational savings.
 \citet{arora2016stochastic} demonstrate that PLS can be approximated by applying a stochastic Power Method. For PLS, the iterations are computed by:
 \begin{align*}
-U^{(1)}t &= \mathcal{P}{\text{orth}} \left( U^{(1)}{t-1} + \eta_t X_t Y_t^\top U^{(2)}{t-1} \right), \
+U^{(1)}t &= \mathcal{P}{\text{orth}} \left( U^{(1)}{t-1} + \eta_t X_t Y_t^\top U^{(2)}{t-1} \right), \\
 U^{(2)}t &= \mathcal{P}{\text{orth}} \left( U^{(2)}{t-1} + \eta_t Y_t X_t^\top U^{(1)}{t-1} \right),
 \end{align*}
 where \( \mathcal{P}_{\text{orth}}(\cdot) \) represents an orthogonal projection operator that projects a vector or matrix onto the space orthogonal to the current subspace. \( \hat{U}^{(1)}_t \) and \( \hat{U}^{(2)}_t \) are the current estimates of the left and right singular vectors for the two views, \( X_t \) and \( Y_t \) are the new data points at time \( t \), and \( \eta_t \) is the learning rate at time \( t \).
@@ -184,7 +186,7 @@ The intuition behind the regularizing effect of stochastic algorithms can be und
     \item \textbf{Implicit bias towards simpler models}: The noise in the stochastic updates implicitly biases the algorithm towards simpler models that are less prone to overfitting. This is because simpler models are more stable under random perturbations, while complex models that overfit the data are more sensitive to noise. As a result, stochastic algorithms tend to favor models with smoother decision boundaries and better generalization performance, even without explicit regularization terms in the objective function.
 \end{itemize}
 
-The regularizing effect of stochastic algorithms has been studied in various contexts, including stochastic gradient descent (SGD) for deep learning \citep{zhang2021understanding,chaudhari2018stochastic} and stochastic optimization for matrix factorization \citep{chen2019stochastic}. These studies have shown that the implicit regularization introduced by stochastic updates can lead to improved generalization performance and robustness to noise, especially in high-dimensional settings where the number of parameters is large compared to the number of training examples.
+The regularizing effect of stochastic algorithms has been extensively studied in the context of deep learning \citep{zhang2021understanding,chaudhari2018stochastic}. These studies have shown that the implicit regularization introduced by stochastic updates can lead to improved generalization performance and robustness to noise, especially in high-dimensional settings where the number of parameters is large compared to the number of training examples.
 
 \subsection{Limitations of Existing Stochastic CCA Algorithms}
 While stochastic algorithms like SGHA and $\gamma$-EigenGame have made significant progress in addressing the computational challenges of CCA in high-dimensional settings, they still have some limitations that motivate the development of novel objectives and algorithms.
@@ -197,7 +199,7 @@ To address the limitations of existing stochastic CCA algorithms and provide a m
 
 \section{Methods: Novel Objectives and Algorithms}\label{sec:contributions}
 
-First, we present proposition \ref{prop:EY-charac}, a formulation of the top-$K$ subspace of GEP problems, which follows by applying the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. However, making this rigorous requires some technical care which we defer to the proof in supplement \ref{supp:proofs}.   
+First, we present proposition \ref{prop:EY-charac}, a formulation of the top-$K$ subspace of GEP problems, which follows by applying the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. However, making this rigorous requires some technical care which we defer to the proof in supplement \ref{app:gradient_descent}\ref{supp:proofs}.   
 
 \begin{restatable}[Eckhart--Young inspired objective for GEPs]{proposition}{EYcharac}
 \label{prop:EY-charac}
@@ -245,7 +247,7 @@ While for ridge CCA we can add a ridge penalty to the within-view variances:
     V_\alpha(\theta) = \sum_i \alpha_i {U\spsT{i}} U\sps{i} +  (1 - \alpha_i) \Var(Z\sps{i})
 \end{align}
 This leads to the following unconstrained objective for the CCA-family of problems.
-\begin{definition}[Family of EY Objectives]
+\begin{definition}[Family of EY Objectives]\ref{def:EY-objectives}
     Learn representations $Z\sps{i} = f\sps{i}( X\sps{i}; \theta\sps{i})$ minimizing
     \begin{align}\label{eq:EY-loss-def-C-V}
         \LEY(\theta) = - 2 \tr C(\theta) + \norm{V_\alpha(\theta)}_F^2

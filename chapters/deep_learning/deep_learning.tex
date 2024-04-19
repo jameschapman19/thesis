@@ -39,21 +39,16 @@ Owing to the size of the models and datasets, neural networks are usually traine
 \subsection{DCCA and Deep Multiview CCA}
 
 Thus far, our focus in this thesis has been on linear Canonical Correlation Analysis (CCA). However, in dealing with high-dimensional and complex data structures commonly found in modern applications, nonlinear extensions of CCA become essential.
-Deep CCA (DCCA) and Deep Multiview CCA (DMCCA) represent such nonlinear extensions, aiming to capture more intricate relationships between data views.
+The objective of DCCA and DMCCA is to learn nonlinear representations of data that are linearly correlated across different views. Recall the definition of $\MCCA_K$ in Equation \eqref{eq:MCCA}. We define the goal of DCCA and DMCCA using this notation:
 
-\subsection{DCCA and Deep Multiview CCA}
-
-In essence, the objective of DCCA and DMCCA is to learn nonlinear representations of data that are linearly correlated across different views.
-Recall the definition of $\MCCA_K$ in Equation \eqref{eq:MCCA}. We define the goal of DCCA and DMCCA using this notation:
 \begin{align}
 \label{eq:DMCCA-def}
 \norm{\MCCA_K\left(Z^{(1)}, \ldots, Z^{(I)}\right)}_2
 \end{align}
-where $Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})$ are representations learned by neural networks for each view $i \in [I]$.
 
-The key difference between MCCA and its deep learning counterparts, DCCA and DMCCA, lies in the nature of the input data. In MCCA, we work with fixed, pre-defined feature representations $X^{(i)}$ for each view. The goal is to find linear transformations that maximize the correlation between these fixed representations.
+which is the norm of the vector of the top $K$ canonical correlations between the representations $Z^{(i)}$ of the different views.
 
-In contrast, DCCA and DMCCA aim to learn new, nonlinear representations $Z^{(i)}$ from the raw input data $X^{(i)}$ using neural networks $f^{(i)}$ parameterized by $\theta^{(i)}$. The objective is to learn representations that have high MCCA, i.e., representations that are maximally correlated across views in a linear sense.
+The key difference between MCCA and its deep learning counterparts, DCCA and DMCCA, lies in the nature of the input data. In MCCA, we work with fixed, pre-defined feature representations $X^{(i)}$ for each view and aim to find linear transformations that maximize the correlation between these fixed representations. In contrast, DCCA and DMCCA learn new, nonlinear representations $Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})$ using neural networks $f^{(i)}$ parameterized by $\theta^{(i)}$ for each view $i \in [I]$. The objective is to learn representations that have high MCCA, i.e., representations that are maximally correlated across views in a linear sense.
 
 The power of DCCA and DMCCA lies in their ability to learn flexible, nonlinear transformations of the input data that are tailored to the task of maximizing cross-view correlation. By learning these representations end-to-end, DCCA and DMCCA can potentially capture more complex and subtle relationships between views that may be difficult or impossible to capture with fixed, linear transformations.
 
@@ -79,9 +74,10 @@ This necessitates batch sizes larger than the representation size, limiting its 
 
 Extensions such as DMCCA \citep{somandepalli2019multimodal} and DGCCA \citep{benton2017deep} are multiview extensions of DCCA that work by directly differentiating the sum of the top $K$ generalized eigenvalues of the mini-batch covariance matrices. Specifically, their loss function is given by:
 \begin{align}
-    \LMCCA &= -\sum_{k=1}^K \lambda_k\left(\hat{V}(\theta)^{-\frac{1}{2}} \hat{C}(\theta)\hat{V}(\theta)^{-\frac{1}{2}}\right),
+    T &= \left(\hat{V}(\theta)^{-\frac{1}{2}} \hat{C}(\theta)\hat{V}(\theta)^{-\frac{1}{2}}\right)\\
+    \LMCCA &= -\Tr(T)
 \end{align}
-    where $\hat{C}(\theta)$ and $\hat{V}(\theta)$ are the mini-batch estimates of the between-view and within-view covariance matrices, respectively, as defined in Equation \eqref{eq:def-C-V-matrices}, and $\lambda_k(\cdot)$ denotes the $k$-th largest eigenvalue.
+    where $\hat{C}(\theta)$ and $\hat{V}(\theta)$ are the mini-batch estimates of the between-view and within-view covariance matrices, respectively, as defined in Equation \eqref{eq:def-C-V-matrices}.
 
 However, these methods suffer from the same fundamental issue as DCCA-STOL, namely the biased gradients resulting from the eigendecomposition of small mini-batch covariance matrices. As a result, DMCCA and DGCCA do not effectively mitigate the scalability issues of DCCA and still require large batch sizes to work well in practice.
 
@@ -90,7 +86,7 @@ However, as noted in DCCA-NOI \citep{wang2015unsupervised}, these methods introd
 \begin{align}
 \LNOI &= |{\tilde{\Sigma}_{11}}^{-\frac{1}{2}} Z\sps{1}-{\tilde{\Sigma}_{22}}^{-\frac{1}{2}} Z\sps{2}|^2_F
 \end{align}
-where $\tilde{\Sigma}{11}$ and $\tilde{\Sigma}{22}$ are estimates of the covariance matrices of $Z\sps{1}$ and $Z\sps{2}$, respectively.
+where $\tilde{\Sigma}_{11}$ and $\tilde{\Sigma}_{22}$ are estimates of the covariance matrices of $Z\sps{1}$ and $Z\sps{2}$, respectively.
 
 These limitations highlight the need for more scalable and efficient nonlinear CCA methods that can handle large datasets without compromising on representation quality or requiring extensive hyperparameter tuning.
 
@@ -149,7 +145,8 @@ These approaches, grounded in canonical correlation principles, offer foundation
 
 \section{Methods: Novel Objectives and Algorithms}
 
-TODO basically Z are non linear representations now.
+Recall the definition of our family of objectives from definition \ref{def:EY-objectives}.
+We will now consider non-linear transformations of the data $Z\sps{i} = f\sps{i}( X\sps{i}; \theta\sps{i})$, and show that our objectives are well-suited to this setting.
 
 \subsection{Applications to (multi-view) Deep CCA}
 
@@ -159,9 +156,9 @@ We first show that our objective recovers Deep Multi-view CCA at any local optim
 Assume that there is a final linear layer in each neural network $f\sps{i}$.
 Then at any local optimum, $\hat{\theta}$, of the population problem, we have
 \begin{align*}
-\LEY(\hat{\theta}) = - \norm{\MCCA_K(\hat{Z})}2^2
+\LEY(\hat{\theta}) = - \norm{\MCCA_K(\hat{Z})}_2^2
 \end{align*}
-where $\hat{Z} = f{\hat{\theta}}(X)$.
+where $\hat{Z} = f_{\hat{\theta}}(X)$.
 Therefore, $\hat{\theta}$ is also a local optimum of objectives from \citet{andrew2013deep, somandepalli2019multimodal} as defined in \cref{eq:DMCCA-def}.
 \end{restatable}
 
@@ -171,17 +168,104 @@ This is precisely equivalent to optimising the Eckhart-Young loss for linear CCA
 So by \cref{prop:no-spurious}, a local optimum is also a global optimum, and by \cref{prop:EY-charac} the optimal value is the negative sum of squared generalised eigenvalues.
 \end{proof}
 
-This result shows that our objective is a valid generalization of Deep CCA and can be used to learn correlated non-linear representations.
+This result shows that our objective, which we call \textbf{DCCA-EY}, is a valid generalization of Deep CCA and can be used to learn correlated non-linear representations.
 
 \subsection{Application to Self-Supervised Learning (SSL)}
 
-We can directly apply Algorithm~\ref{alg:general} to the SSL setting. In SSL, the goal is to learn meaningful representations from unlabeled data by solving a pretext task. A common pretext task is to maximize the similarity between representations of different augmented views of the same input.
+We can directly apply Algorithm~\ref{alg:general} to the SSL setting by treating the two augmented views as different data views. We will refer to this method as \textbf{SSL-EY}.
 
 If we wish to have the same neural network transforming each view, we can simply tie the weights $\theta\sps{1} = \theta\sps{2}$. When the paired data are generated from applying independent, identically distributed (i.i.d.) augmentations to the same original input, it is intuitive that tying the weights is a sensible procedure and may act as a regularizer\footnote{Given the distributions of both views are identical, there is no reason we would expect assymetric functions to be optimal out of sample}.
 
-By applying our algorithm to the SSL setting, we can learn non-linear representations that are correlated across different augmented views of the input. This is similar to the objective of methods like Barlow Twins \citep{zbontar2021barlow} and VICReg \citep{bardes2021vicreg}, which aim to align representations of different views while preventing collapse to trivial solutions.
+Moreover, our loss function bears some resemblance to those of Barlow Twins and VICReg. Recall that our objective is:
+
+\begin{align*}
+\LEY(\theta) = - 2 \tr C(\theta) + \norm{V_\alpha(\theta)}_F^2
+\end{align*}
+
+where $C(\theta)$ is the cross-covariance matrix between the representations of the two views, and $V_\alpha(\theta)$ is a matrix involving the individual covariance matrices of each view.
+
+This objective has two terms: the first term, $- 2 \tr C(\theta)$, encourages the representations to be correlated across views, similar to the invariance term in Barlow Twins and VICReg. The second term, $\norm{V_\alpha(\theta)}_F^2$, involves the individual covariance matrices, which is analogous to the variance and covariance terms in VICReg. The main difference is that our method is based on canonical correlation principles, which may offer additional benefits in terms of representation quality and interpretability.
 
 In the next section, we will present experiments demonstrating the effectiveness of our method in both the Deep CCA and SSL settings.
+
+subsection{PyTorch Implementation}
+
+We provide PyTorch implementations of DCCA-EY and SSL-EY in Listings \ref{lst:pytorch-dcca} and \ref{lst:pytorch-ssl}, respectively.
+
+The DCCA-EY implementation defines a class that takes a list of encoders as input and computes the loss function as described in Section 3.2. The forward method computes the representations of the input data using the encoders, while the loss method computes the loss function based on the representations. This implementation can be used to train DCCA-EY models on multi-view data.
+
+The SSL-EY implementation defines a class that takes a single encoder as input, which is used to transform both augmented views of the data. The forward method computes the representations of the input data using the shared encoder, while the loss method computes the loss function based on the representations and the ridge penalty hyperparameters. This implementation can be used to train SSL-EY models on augmented data.
+
+In the next section, we will present experiments demonstrating the effectiveness of our DCCA-EY and SSL-EY methods in their respective settings.
+
+\begin{listing}[ht]
+    \begin{minted}{python}
+    import torch
+    import torch.nn as nn
+    
+    class DCCA_EY(nn.Module):
+    def init(self, encoders):
+    super(DCCA_EY, self).init()
+    self.encoders = nn.ModuleList(encoders)
+    def forward(self, Xs):
+    Zs = [encoder(X) for encoder, X in zip(self.encoders, Xs)]
+    return Zs
+
+    def loss(self, Zs):
+    # Compute total between-view covariance matrix
+    C = torch.zeros(Zs[0].shape[1], Zs[0].shape[1])
+    for i in range(len(Zs)):
+        for j in range(i + 1, len(Zs)):
+            C += torch.matmul(Zs[i].T, Zs[j]) / Zs[i].shape[0]
+    
+    # Compute total within-view variance matrix
+    V = torch.zeros(Zs[0].shape[1], Zs[0].shape[1])
+    for i in range(len(Zs)):
+        V += torch.matmul(Zs[i].T, Zs[i]) / Zs[i].shape[0]
+    
+    # Compute loss
+    loss = -2 * torch.trace(C) + torch.norm(V, p='fro') ** 2
+    
+    return loss
+    \end{minted}
+    \caption{PyTorch implementation of DCCA-EY.}    
+    \label{lst:pytorch-dcca}
+\end{listing}
+
+We provide a PyTorch implementation of DCCA-EY in Listing \ref{lst:pytorch-dcca}. This implementation defines a DCCA-EY class that takes a list of encoders as input and computes the loss function as described in Section 3.2. The forward method computes the representations of the input data using the encoders, while the loss method computes the loss function based on the representations. This implementation can be used to train DCCA-EY models on multi-view data.
+
+\begin{listing}[ht]
+    \begin{minted}{python}
+    import torch
+    import torch.nn as nn
+class SSL_EY(nn.Module):
+def init(self, encoder):
+super(SSL_EY, self).init()
+self.encoder = encoder
+def forward(self, Xs):
+    Zs = [self.encoder(X) for X in Xs]
+    return Zs
+
+def loss(self, Zs, alphas=[0, 0]):
+    # Compute cross-covariance matrix
+    C = torch.matmul(Zs[0].T, Zs[1]) / Zs[0].shape[0]
+    
+    # Compute individual covariance matrices
+    V1 = torch.matmul(Zs[0].T, Zs[0]) / Zs[0].shape[0]
+    V2 = torch.matmul(Zs[1].T, Zs[1]) / Zs[1].shape[0]
+    
+    # Compute loss
+    V_alpha = alphas[0] * torch.eye(V1.shape[0]) + (1 - alphas[0]) * V1 + \
+              alphas[1] * torch.eye(V2.shape[0]) + (1 - alphas[1]) * V2
+    loss = -2 * torch.trace(C) + torch.norm(V_alpha, p='fro') ** 2
+    
+    return loss
+    \end{minted}
+    \caption{PyTorch implementation of SSL-EY.}
+    \label{lst:pytorch-ssl}
+\end{listing}
+
+
 
 \section{Experiments and Results}
 
