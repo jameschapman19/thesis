@@ -12,273 +12,234 @@ I am grateful to my co-authors Lennie Wells and Ana Lawry Aguila for their contr
 In particular, Lennie's mathematical expertise improved the theoretical grounding of the idea greatly and Ana's access to the UK Biobank dataset enabled the application of our methods to a real-world biomedical dataset.
 In this thesis I include much of the work from these papers, but I exclude many of Lennie's extensive proofs where I can make no claim to have contributed beyond proofreading.
 
+Here's an improved introduction that addresses the points you mentioned:
 \section{Introduction}
-
-Classical algorithms for linear CCA methods require computing full covariance matrices and so scale quadratically with dimension, becoming intractable for many large-scale datasets of practical interest.
-There is therefore great interest in approximating solutions for CCA in stochastic or data-streaming settings \citep{arora2012stochastic}.
-
-In this chapter, we propose a novel approach to solving the Generalized Eigenvalue Problem (GEP) for CCA and related methods.
-Our method is based on a novel objective function inspired by the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990}.
-We show that this objective has no spurious local minima and can be optimized efficiently using stochastic gradient descent.
-We apply this method to CCA and Partial Least Squares (PLS), and show that it can outperform existing methods in terms of convergence speed and robustness to hyperparameter settings.
-
-\section{Background: Solutions to CCA}\label{sec:background-unified}
-
-\subsection{Solving High-Dimensional Generalized Eigenvalue Problems}
-
-The GEP is often represented as \( Au = \lambda Bu \), where \( A \) and \( B \) are matrices. To generalize the dimensions of these matrices, let's denote them as \( m \times m \). This dimension \( m \) can vary based on the specific method in use. For instance, in Principal Component Analysis (PCA), represented as \acrshort{pca}, \( m \) would be equal to \( p \) since \( A \) and \( B \) are \( p \times p \) matrices. In methods like Partial Least Squares (PLS) and Canonical Correlation Analysis (CCA), represented as \acrshort{pls} and \acrshort{cca} respectively, \( m \) would be \( p_1+p_2 \), as \( A \) and \( B \) in these cases are \( (p_1+p_2) \times (p_1+p_2) \).
-
-
-\subsection{Unified GEP formulation for CCA, Ridge CCA, PLS, and PCA} 
-As discussed in \ref{ch:background}\ref{sec:classical-subspace-learning-algorithms}, we can formulate a unified framework for CCA, ridge-regularized CCA, and PLS using a generalized eigenvalue problem (GEP). This framework involves block matrices $A,B_\alpha \in \R^{D \times D}$, where the diagonal blocks of $A$ are zero, the off-diagonal blocks of $B_\alpha$ are zero, and the remaining blocks are defined as:
-
-\begin{align}
-A^{(ij)} &= \Cov(X\sps{i}, X\sps{j}) \text{ for } i \neq j, \\
-B_\alpha^{(ii)} &= \alpha_i I_{D\sps{i}} + (1-\alpha_i) \Var(X\sps{i}),
-\end{align}
-
-where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters. By adjusting the values of $\alpha$, we can recover various subspace learning methods:
-
+Generalized Eigenvalue Problems (GEPs) are fundamental to a wide range of machine learning algorithms, including Canonical Correlation Analysis (CCA), Partial Least Squares (PLS), Principal Component Analysis (PCA), Independent Component Analysis (ICA), and Linear Discriminant Analysis (LDA). Solving high-dimensional GEPs is a critical challenge in many applications, as classical algorithms often struggle with the computational complexity and numerical instability that arise when dealing with large-scale datasets. This has motivated the development of stochastic algorithms that aim to approximate the solutions of GEPs in a more efficient and scalable manner.
+Stochastic algorithms for simple Eigenvalue Problems (EPs), where the matrix $B$ in the GEP is the identity matrix, have been extensively studied and have shown promising results \citep{arora2012stochastic,arora2016stochastic}. These algorithms not only offer computational advantages but also introduce a form of implicit regularization through the noise in the stochastic updates, which can be particularly beneficial in high-dimensional settings. The regularizing effect of stochastic algorithms has been shown to improve generalization performance and robustness to noise, making them an attractive alternative to batch learning algorithms.
+However, when it comes to solving more complex GEPs, such as those arising in CCA and PLS, the existing stochastic algorithms have some limitations that hinder their practical applicability. For instance, the $\gamma$-EigenGame algorithm \citep{gemp20,gemp2021} requires the tuning of a hyperparameter $\gamma$ that controls the trade-off between computational efficiency and the accuracy of the stochastic updates. Finding the optimal value of this hyperparameter can be challenging and may vary depending on the problem and the data, making the algorithm less convenient to use in practice.
+Another limitation is that some stochastic algorithms, like the Stochastic Generalized Hebbian Algorithm (SGHA) \citep{chen2019constrained}, rely on heuristic primal-dual update rules rather than a principled optimization framework. This makes it difficult to integrate these algorithms with more sophisticated optimizers like Adam \citep{kingma2014adam}, which have been shown to improve convergence speed and stability in many machine learning applications.
+To address these limitations and provide a more principled and robust approach to solving GEPs in the stochastic setting, we propose a novel formulation of the CCA problem based on the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990}. Our formulation leads to a new objective function that characterizes the top-$K$ subspace of GEPs, including CCA as a special case. Importantly, this objective function is unconstrained and can be optimized using standard stochastic gradient descent or batch gradient descent methods, making it compatible with modern optimization techniques.
+The key advantages of our proposed approach are:
 \begin{itemize}
-\item Pure CCA: Setting $\alpha_i = 0 : \forall i$ recovers the classic CCA problem.
-\item Ridge Extensions: Smoothly transition to ridge-regularized CCA or PLS by selectively adjusting values within \(\alpha\).
-\item PCA Subsumption: Even PCA emerges as a special case – a single-view form of ridge-regularized PLS.
+    \item It provides a unified framework for solving a wide range of GEPs using a single unconstrained objective function, making it applicable to CCA, PLS, PCA, ICA, LDA, and other problems that can be formulated as GEPs.
+    \item The objective function can be efficiently optimized using stochastic gradient descent or batch gradient descent, allowing for seamless integration with state-of-the-art optimizers like Adam.
+    \item The stochastic nature of the optimization introduces implicit regularization, which can improve the generalization performance and robustness of the learned subspaces.
+    \item The approach is more principled and theoretically grounded compared to heuristic primal-dual update rules used in some existing stochastic algorithms.
 \end{itemize}
 
-Crucially, this unification allows us to focus on solving the core CCA problem for the remainder of the chapter. The insights and solutions we develop will naturally generalize to the entire family of CCA, PLS, ridge-regularized extensions, and even PCA.
+In the following sections, we will provide a detailed background on GEPs and their applications in subspace learning, discuss the limitations of existing stochastic algorithms, and present our novel formulation and optimization approach. We will also demonstrate the effectiveness of our method through extensive empirical evaluations on various datasets and compare its performance with state-of-the-art stochastic CCA and PLS algorithms.
 
-% Table \ref{tab:subspace} provides a comprehensive overview of the definitions and dimensions of \( A \) and \( B \) for various subspace learning methods. 
+\section{Background: Efficient Solutions to GEPs}\label{sec:background-unified}
+\subsection{Solving High-Dimensional Generalized Eigenvalue Problems}
+Generalized Eigenvalue Problems (GEPs) play a crucial role in many machine learning algorithms, including Canonical Correlation Analysis (CCA), Partial Least Squares (PLS), Principal Component Analysis (PCA), Independent Component Analysis (ICA), and Linear Discriminant Analysis (LDA). A GEP is defined by two matrices $A$ and $B$, where the goal is to find a vector $u$ and a scalar $\lambda$ that satisfy the equation:
+\begin{equation}
+Au = \lambda Bu
+\end{equation}
+The vector $u$ is called the generalized eigenvector, and the scalar $\lambda$ is called the generalized eigenvalue. In the special case where $B$ is the identity matrix, the GEP reduces to a standard Eigenvalue Problem (EP).
+Solving GEPs becomes challenging when dealing with high-dimensional data, where the matrices $A$ and $B$ can be very large. The computational complexity of classical algorithms for solving GEPs, such as the power method, scales cubically with the size of the matrices, making them infeasible for large-scale problems. Moreover, when the matrices are ill-conditioned or nearly singular, these algorithms can suffer from numerical instability, leading to inaccurate or unreliable solutions.
 
-% \begin{table}[h]
-%     \centering
-%     \tiny
-%     \begin{tabular}{|c|c|c|c|c|}
-%         \hline
-%         Method         & \( A \)           & \( B \)   & \( u \)        & Dimensions       \\
-%         \hline
-%         PCA & \( \Sigma_{11} \) & \( I \)   & \( u\sps{1} \) & \( p \times p \) \\
-%         \hline
-%         CCA & \( \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} \Sigma_{11} & 0 \\ 0 & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
-%         \hline
-%         PLS & \( \begin{pmatrix} 0 & \Sigma_{12} \\ \Sigma_{21} & 0 \end{pmatrix} \) & \( I \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
-%         \hline
-%         Ridge CCA   & \( \begin{pmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} \alpha_1 I + (1-\alpha_1)\Sigma_{11} & 0 \\ 0 & \alpha_2 I + (1-\alpha_2)\Sigma_{22} \end{pmatrix} \) & \( \begin{pmatrix} u\sps{1} \\ u\sps{2} \end{pmatrix} \) & \( (p_1+p_2) \times (p_1+p_2) \) \\
-%         \hline
-%         MCCA &   \( \begin{pmatrix} 0 & \Sigma_{12} & \cdots & \Sigma_{1m} \\ \Sigma_{21} & 0 & \cdots & \Sigma_{2m} \\ \vdots & \vdots & \ddots & \vdots  \\ \Sigma_{m1} & \Sigma_{m2} & \cdots & 0 \end{pmatrix} \) &  \(    \begin{pmatrix} \Sigma_{11} & 0 & \cdots & 0  \\ 0 & \Sigma_{22} & \cdots & 0  \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \cdots & \Sigma_{mm} \end{pmatrix} \) & \( \begin{pmatrix}  u\sps{1} \\ u\sps{2} \\ \vdots \\ u\sps{m} \end{pmatrix} \) & \( \sum_{i=1}^I p_i \times \sum_{i=1}^I p_i \)    \\
-%         \hline
-%     \end{tabular}
-%     \caption{Definitions and dimensions of \( A \) and \( B \) for different subspace learning methods.}
-%     \label{tab:subspace}
-% \end{table}
+\subsection{Unified GEP formulation for CCA, Ridge CCA, PLS, and PCA}
+As discussed in \ref{ch:background}\ref{sec:classical-subspace-learning-algorithms}, CCA, ridge-regularized CCA, PLS, and even PCA can be formulated as GEPs with specific structures. This unified formulation involves block matrices $A$ and $B_\alpha$ defined as:
+\begin{align}
+A^{(ij)} &= \Cov(X\sps{i}, X\sps{j}) \text{ for } i \neq j, \
+B_\alpha^{(ii)} &= \alpha_i I_{D\sps{i}} + (1-\alpha_i) \Var(X\sps{i}),
+\end{align}
+where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters, $X\sps{i}$ represents the $i$-th view of the data, and $D\sps{i}$ is the dimensionality of the $i$-th view.
+By adjusting the values of $\alpha$, we can recover various subspace learning methods:
+
+Pure CCA: Setting $\alpha_i = 0 : \forall i$ recovers the classic CCA problem.
+Ridge Extensions: Smoothly transitioning to ridge-regularized CCA or PLS by selectively adjusting values within $\alpha$.
+PCA Subsumption: PCA emerges as a single-view form of ridge-regularized PLS.
+
+This unified formulation allows us to focus on solving the core CCA problem, with the understanding that the insights and solutions developed will naturally generalize to the entire family of methods and GEPs more generally.
 
 \subsection{Classical Methods for Solving CCA}
+\subsubsection{Eigendecomposition-based Solution}
+One common technique to solve the GEP for CCA is to transform it into a standard eigenvalue problem:
+\begin{equation}
+B^{-\frac{1}{2}} A B^{-\frac{1}{2}} y = \lambda y
+\end{equation}
+followed by eigendecomposition. This approach is based on the observation that if $(u, \lambda)$ is a generalized eigenpair of $(A, B)$, then $(B^{-\frac{1}{2}}u, \lambda)$ is an eigenpair of $B^{-\frac{1}{2}} A B^{-\frac{1}{2}}$.
+An alternative approach is to solve the eigenvalue problem:
+\begin{equation}
+B^{-1} A v = \lambda v
+\end{equation}
+However, this approach requires computing the inverse of $B$, which can be numerically unstable and computationally expensive, especially when $B$ is ill-conditioned or nearly singular. In contrast, the $B^{-\frac{1}{2}} A B^{-\frac{1}{2}}$ formulation only requires computing the square root of $B$, which can be done more efficiently and stably using techniques like the Cholesky decomposition.
+Nonetheless, both approaches have a computational complexity of $\mathcal{O}((p_1+p_2)^3)$ and may suffer from numerical instability, especially when $B$ is ill-conditioned or nearly singular.
 
-\subsubsection{Direct Solution}
-
-To solve the GEP, one common technique is to transform it into a standard eigenvalue problem \( B^{-\frac{1}{2}} A B^{-\frac{1}{2}} y = \lambda y \), followed by eigendecomposition.
-However, this approach has computational complexity \( \mathcal{O}((p_1+p_2)^3) \) and may suffer from numerical instability.
-
-\subsubsection{\acrshort{pca}-CCA}
-
-One way to reduce the complexity of solving GEPs is to use the \acrshort{pca}-CCA method, which first applies \acrshort{pca} to the data and then solves the GEP in the reduced space.
-An important advantage of using \acrshort{pca}-CCA is computational efficiency, especially for high-dimensional data.
-The overall complexity of \acrshort{pca}-CCA involves two main steps.
-First, applying PCA has a complexity of \( \mathcal{O}(p_1^3+ p_2^3) \), dominated by the larger of the two matrices.
-Second, solving the generalized eigenvalue problem in the reduced space with \( K \) components in each view leads to a complexity of \( \mathcal{O}((2K)^3) \).
-Thus, the overall complexity of \acrshort{pca}-CCA is \( \mathcal{O}(p_1^3+ p_2^3) + (2K)^3) \), which is significantly lower than the complexity of solving the GEP directly.
-Since CCA, ridge CCA, and PLS can all be solved in the principal component space, \acrshort{pca}-CCA can be used to compute solutions efficiently \textit{even if we keep all the principal components}.
-Most obviously, this is the case when the number of samples \( n \) is smaller than either of the number of features \( p_1 \) or \( p_2 \), i.e. \( n < p_1 \) or \( n < p_2 \).
-In this case the maximum number of principal components is \( K=n \), and the complexity of PCA is \( \mathcal{O}(n^3+ n^3) \) so that the overall complexity of \acrshort{pca}-CCA is thus \( \mathcal{O}(2n^3+(2n^3)^3) \) = \( \mathcal{O}(10n^3) \).
-For fat data where \( p_1 \) and \( p_2 \) are larger than \( n \), we can reasonably expect $10n^3<p_1^3+ p_2^3$ and thus \acrshort{pca}-CCA is still more efficient than solving the original GEP.
-
-We illustrate this in a simple simulation study in Figure \ref{fig:pca-cca-complexity}\footnote{This simulation was used to justify our pull request to \texttt{scikit-learn}\citep{pedregosa2011scikit} implementing a PCA-PLS and PCA-CCA backend}.
-
- \begin{figure}
-     \centering
-     \includegraphics[width=0.7\textwidth]{figures/benchmarks/ccapca_comparison_log}
-     \caption{Comparison of the complexity of PCA-CCA and CCA for varying numbers of samples and features.}
-     \label{fig:pca-cca-complexity}
- \end{figure}
-
-This approach has been employed to great effect in neuroimaging but suprisingly is not used even in the scikit-learn implementation of \acrshort{cca} \citep{pedregosa2011scikit}.
-Nonetheless, for the large sample sizes (desirable for machine learning frameworks as well as statistical power), the complexity of even \acrshort{pca}-CCA can render the problems nearly intractable.
-
-\subsubsection{Kernel CCA}
-
-Kernel \acrshort{cca} (\acrshort{kcca}) also offers computational efficiency for high-dimensional data (\(p_i>n\)) as its complexity scales with the number of samples \(n\), not the number of features \(p_i\)\citep{akaho2006kernel}.
-It casts the CCA optimisation as a dual problem:
-
-\begin{align}
-    & \alpha_{\text{opt}}=\underset{\alpha}{\mathrm{argmax}}\{ \alpha\sps{1}K\spsT{1}K\sps{2}\alpha\sps{2}  \} \\
-    & \text{subject to:} \notag                                                                                            \\
-    & \alpha\sps{1}K\spsT{1}K\sps{1}\alpha\sps{1}=1 \notag                                                                  \\
-    & \alpha\sps{2}K\spsT{2}K\sps{2}\alpha\sps{2}=1 \notag
-\end{align}
-
-Where \(\alpha\sps{i}=\) are dual variables, \(K\sps{i}\) are kernel matrices, and \(K\spsT{i}\) are their transposes.
-The kernel matrices are defined as \(K\sps{i}=\phi(X\sps{i})\phi(X\sps{i})^T\), where \(\phi(\cdot)\) is a nonlinear mapping function.
-The kernel trick is used to avoid the explicit computation of the nonlinear mapping function \(\phi(\cdot)\).
-The complexity of \acrshort{kcca} is \(\mathcal{O}(n^3)\), which can be much lower than the complexity of solving the original GEP directly when \(p_i>n\).
-However, a significant drawback of KCCA is the need for access to all training data at test time, which raises concerns about efficiency and scalability.
-Furthermore, when the number of samples is large, the kernel matrix can itself be too large to fit in memory.
-
-\subsection{Stochastic Algorithms for CCA}
-
-\subsubsection{Classical Iterative Algorithms for PCA}
-In order to gain the intuition behind a number of stochastic algorithms for CCA, it's essential to understand the classical iterative algorithms for generalized eigenvalue problems, such as Sanger's rule \cite{sanger1989optimal} (the generalized Hebbian algorithm (GHA)) and Oja's rule.
-
+\subsubsection{Classical Iterative Algorithms}
+Classical iterative algorithms, such as the power method, Sanger's rule (Generalized Hebbian Algorithm), and Oja's rule, can be used to solve the GEP for CCA. These algorithms are based on the idea of iteratively updating the eigenvector estimates using matrix-vector multiplications.
 The power method is a simple iterative algorithm for finding the dominant eigenvector of a matrix $A$. The update rule for the power method is:
 \begin{align}
-u \leftarrow \frac{A u}{\|A u\|}
+u \leftarrow \frac{A u}{|A u|}
 \end{align}
 where $u$ is the current estimate of the dominant eigenvector. The power method converges to the dominant eigenvector of $A$ under mild conditions.
-
-Sanger's rule \citep{sanger1989optimal}, also known as the GHA, is an iterative learning rule for finding the principal components of a data set. It can be written as:
+Sanger's rule, also known as the Generalized Hebbian Algorithm (GHA), is an iterative learning rule for finding the principal components of a data set. It can be written as:
 \begin{align}
 U \leftarrow U + \eta \left( A U - U \text{tril}(U^T A U) \right)
 \end{align}
-where \( \text{tril}(\cdot) \) denotes the lower triangular part of a matrix.
-
-Oja's rule \citep{oja1982simplified}, a simplified version of Sanger's rule, can be written as:
+where $\text{tril}(\cdot)$ denotes the lower triangular part of a matrix.
+Oja's rule, a simplified version of Sanger's rule, can be written as:
 \begin{align}
 U \leftarrow U + \eta \left( A U - U (U^T A U) \right)
 \end{align}
-
-In order to maintain orthogonality of the eigenvectors during the iterative updates, Oja's rule can be combined with a QR decomposition step:
+To maintain orthogonality of the eigenvectors during the iterative updates, Oja's rule can be combined with a QR decomposition step:
 \begin{align}
-U \leftarrow U + \eta \left( A U - U (U^T A U) \right) \\
+U \leftarrow U + \eta \left( A U - U (U^T A U) \right) \
 U \leftarrow \text{qr}(U)
 \end{align}
-where \( \text{qr}(\cdot) \) denotes the QR decomposition, which factorizes a matrix into an orthogonal matrix $Q$ and an upper triangular matrix $R$. By using only the orthogonal matrix $Q$, we ensure that the eigenvectors remain orthogonal throughout the iterative process. Alternatively, other orthogonalization techniques such as Gram-Schmidt process \citep{schmidt1907theorie,wong1935application} can be employed.
-
-Both Sanger's rule and Oja's rule aim to find the principal subspace of a matrix \( A \), which is equivalent to solving the eigenvalue problem \( A U = U \Lambda \) where \( \Lambda \) is a diagonal matrix of eigenvalues. These algorithms can be seen as iterative methods for solving the optimization problem:
-\begin{align}
-\max_{U} \Tr \left(U^T A U\right) \quad \text{subject to} \quad U^T U = I
-\end{align}
-
-GHA can also be extended to solve the generalized eigenvalue problem $A U = B U \Lambda$, where $B$ is a positive definite matrix\citep{chen2019constrained}. The update rule for this problem is:
+where $\text{qr}(\cdot)$ denotes the QR decomposition, which factorizes a matrix into an orthogonal matrix $Q$ and an upper triangular matrix $R$. By using only the orthogonal matrix $Q$, we ensure that the eigenvectors remain orthogonal throughout the iterative process. Alternatively, other orthogonalization techniques such as the Gram-Schmidt process can be employed.
+These iterative algorithms can be extended to solve the generalized eigenvalue problem $A U = B U \Lambda$, where $B$ is a positive definite matrix. The update rule for this problem is:
 \begin{align}
 U \leftarrow U + \eta \left( A U - B U \text{tril}(U^T A U) \right)
 \end{align}
 which subsumes the original GHA as a special case when $B=I$.
+While these classical iterative algorithms can be computationally efficient, especially for sparse or structured matrices, they may suffer from slow convergence and sensitivity to initialization.
 
-A number of algorithms have been proposed to approximate GEPs including PCA and PLS \citep{arora2012stochastic}, and CCA specifically \citep{bhatia2018gen}, in the `stochastic' or `data-streaming' setting; these can have big computational savings.
+\subsubsection{PCA-CCA}
+To reduce the computational complexity of solving the GEP for CCA, the PCA-CCA method first applies PCA to each view of the data separately and then solves the GEP in the reduced space. This approach has two main steps:
 
-\subsection{Stochastic Power Method}
-\citet{arora2016stochastic} demonstrate that PLS can be approximated by applying a stochastic Power Method. For PLS, the iterations are computed by:
+\begin{itemize}
+    \item Apply PCA to each view: Compute the top $K_1$ and $K_2$ principal components for each view, with complexity $\mathcal{O}(p_1^3 + p_2^3)$.
+    \item Solve the GEP in the reduced space: Solve the GEP in the reduced space of size $(K_1 + K_2) \times (K_1 + K_2)$, with complexity $\mathcal{O}((K_1 + K_2)^3)$.
+\end{itemize}
+
+The overall complexity of PCA-CCA is thus $\mathcal{O}(p_1^3 + p_2^3 + (K_1 + K_2)^3)$, which can be significantly lower than the direct solution when $K_1 \ll p_1$ and $K_2 \ll p_2$.
+However, it's important to note that even the PCA step can be computationally expensive for high-dimensional data. In the case where the number of samples $n$ is smaller than the dimensionalities $p_1$ and $p_2$, the maximum number of principal components is $K_1 = K_2 = n$. The complexity of PCA in this case is $\mathcal{O}(n^3 + n^3)$, and the overall complexity of PCA-CCA becomes $\mathcal{O}(2n^3 + (2n)^3) = \mathcal{O}(10n^3)$. While this is lower than the direct solution, it can still be prohibitive for large sample sizes.
+\subsubsection{Kernel CCA}
+Kernel CCA (KCCA) is another approach that offers computational advantages for high-dimensional data. KCCA maps the original data to a high-dimensional feature space using a kernel function and then performs CCA in that space. The main advantage of KCCA is that its complexity scales with the number of samples $n$ rather than the dimensionalities $p_1$ and $p_2$.
+The optimization problem for KCCA can be written as:
+\begin{align}
+& \alpha_{\text{opt}} = \underset{\alpha}{\mathrm{argmax}} { \alpha\sps{1} K\spsT{1} K\sps{2} \alpha\sps{2} } \
+& \text{subject to:} \notag \
+& \alpha\sps{1} K\spsT{1} K\sps{1} \alpha\sps{1} = 1 \notag \\
+& \alpha\sps{2} K\spsT{2} K\sps{2} \alpha\sps{2} = 1 \notag
+\end{align}
+where $\alpha\sps{i}$ are dual variables, $K\sps{i}$ are kernel matrices defined as $K\sps{i} = \phi(X\sps{i})\phi(X\sps{i})^T$, and $\phi(\cdot)$ is a nonlinear mapping function.
+The complexity of KCCA is $\mathcal{O}(n^3)$, which can be much lower than the direct solution when $p_i > n$. However, KCCA has some significant drawbacks:
+\begin{itemize}
+    \item The need to store and manipulate the kernel matrices, which have size $n \times n$. This can be memory-intensive for large sample sizes.
+    \item The requirement to access all training data at test time, which raises concerns about efficiency and scalability.
+    \item The difficulty in interpreting the results in the original feature space, as the learned projections are in the high-dimensional kernel space.
+\end{itemize}
+
+In summary, classical methods for solving CCA, such as eigendecomposition-based solutions, iterative algorithms, PCA-CCA, and KCCA, offer various trade-offs between computational complexity, numerical stability, and interpretability. However, these methods may still be prohibitively expensive for high-dimensional data, motivating the development of stochastic algorithms that can efficiently approximate the solution of the CCA problem.
+
+\subsection{Stochastic Algorithms for CCA}
+Stochastic algorithms have gained popularity as an alternative approach to solving large-scale CCA problems. These algorithms aim to approximate the solution of the CCA problem by processing the data in small batches or even one sample at a time, making them more efficient and scalable than batch methods.
+The key idea behind stochastic algorithms is to update the estimates of the canonical variables incrementally as new data arrives, rather than waiting for the entire dataset to be available. This incremental update scheme allows stochastic algorithms to scale to large datasets and handle data that may not fit into memory.
+However, a major challenge in stochastic GEPs and stochastic CCA is the data-dependent constraint $U^\top B U = I$, where the matrix $B$ is unknown and is an expectation of random estimates. In the population setting, $B$ is defined as:
+\begin{equation}
+B = \begin{pmatrix}
+\Sigma_{11} & 0 \\
+0 & \Sigma_{22}
+\end{pmatrix}
+\end{equation}
+where $\Sigma_{11} = \mathbb{E}[X^{(1)^\top} X^{(1)}]$ and $\Sigma_{22} = \mathbb{E}[X^{(2)^\top} X^{(2)}]$ are the population covariance matrices of the two views.
+In practice, we only have access to sample estimates of these covariance matrices, which introduces additional noise and estimation error. Stochastic algorithms must account for this uncertainty and adapt their update rules accordingly.
+
+\subsubsection{Stochastic Power Method for PLS}
+\citet{arora2016stochastic} demonstrate that PLS can be approximated by applying a stochastic power method. The stochastic power method is a simple iterative algorithm that updates the estimates of the left and right singular vectors $U^{(1)}$ and $U^{(2)}$ using the following rules:
 \begin{align*}
-U^{(1)}t &= \mathcal{P}{\text{orth}} \left( U^{(1)}{t-1} + \eta_t X_t Y_t^\top U^{(2)}{t-1} \right), \\
-U^{(2)}t &= \mathcal{P}{\text{orth}} \left( U^{(2)}{t-1} + \eta_t Y_t X_t^\top U^{(1)}{t-1} \right),
+U^{(1)}_t &= \mathcal{P}_{\text{orth}} \left( U^{(1)}_{t-1} + \eta_t X_t^{(1)} (X_t^{(2)})^\top U^{(2)}_{t-1} \right), \\
+U^{(2)}_t &= \mathcal{P}_{\text{orth}} \left( U^{(2)}_{t-1} + \eta_t X_t^{(2)} (X_t^{(1)})^\top U^{(1)}_{t-1} \right),
 \end{align*}
-where \( \mathcal{P}_{\text{orth}}(\cdot) \) represents an orthogonal projection operator that projects a vector or matrix onto the space orthogonal to the current subspace. \( \hat{U}^{(1)}_t \) and \( \hat{U}^{(2)}_t \) are the current estimates of the left and right singular vectors for the two views, \( X_t \) and \( Y_t \) are the new data points at time \( t \), and \( \eta_t \) is the learning rate at time \( t \).
-The approach has low computational complexity, $\mathcal{O}(k(p_1+ p_2))$.
-However, there are two main drawbacks to this approach.
-First, convergence is not guaranteed.
-Second, the orthogonal projection step does not extend naturally to the CCA problem where the constraint is \( U^\top B U = I \) rather than \( U^\top U = I \).
+where $\mathcal{P}_{\text{orth}}(\cdot)$ represents an orthogonal projection operator that projects a vector or matrix onto the space orthogonal to the current subspace, $X_t^{(1)}$ and $X_t^{(2)}$ are the new data points at time $t$, and $\eta_t$ is the learning rate.
+Intuitively, the update rule for $U^{(1)}_t$ can be understood as follows:
 
-\subsubsection{SGHA}
-SGHA is an algorithm for finding the top-k generalized eigenvectors of a matrix pair ( (A, B) ), where \( A \) is symmetric and \( B \) is symmetric positive definite. It builds upon the generalized Hebbian algorithm (GHA).
-Specifically, they form the constrained optimization problem for the top-k subspace as:
+The term $X_t^{(1)} (X_t^{(2)})^\top U^{(2)}_{t-1}$ computes the correlation between the new data point $X_t^{(1)}$ and the current estimate of the right singular vector $U^{(2)}_{t-1}$, weighted by the corresponding $X_t^{(2)}$.
+This correlation term is then added to the current estimate of the left singular vector $U^{(1)}_{t-1}$, effectively updating it in the direction that maximizes the covariance between the views.
+The orthogonal projection operator $\mathcal{P}_{\text{orth}}(\cdot)$ ensures that the updated estimate remains orthogonal to the previous estimates, preventing the algorithm from converging to a suboptimal solution.
+
+The update rule for $U^{(2)}_t$ follows a similar logic, with the roles of $X_t^{(1)}$ and $X_t^{(2)}$ reversed.
+
+The stochastic power method has a low computational complexity of $\mathcal{O}(k(p_1+ p_2))$ per iteration, where $k$ is the number of components being estimated. However, it has some limitations:
+
+Convergence is not guaranteed, as the algorithm may oscillate or diverge in some cases.
+The orthogonal projection step does not extend naturally to the CCA problem, where the constraints involve the matrix $B$ (i.e., $U^\top B U = I$) rather than the identity matrix (i.e., $U^\top U = I$).
+
+Despite these limitations, the stochastic power method provides valuable insights into the design of stochastic algorithms for CCA and serves as a foundation for more advanced methods.
+\subsubsection{Stochastic Generalized Hebbian Algorithm (SGHA)}
+The Stochastic Generalized Hebbian Algorithm (SGHA), proposed by \citet{chen2019constrained}, is an extension of the Generalized Hebbian Algorithm (GHA) to the stochastic setting. SGHA aims to find the top-$k$ generalized eigenvectors of a matrix pair $(A, B)$, where $A$ is symmetric and $B$ is symmetric positive definite.
+SGHA formulates the constrained optimization problem for the top-$k$ subspace as:
 \begin{align}
 \min_{U} -\Tr \left(U^T A U\right) \quad \text{subject to} \quad U^T B U = I
 \end{align}
-Transforming this into an unconstrained problem using Lagrange multipliers:
+Using Lagrange multipliers, this constrained problem can be transformed into an unconstrained one:
 \begin{align}
 \min_{U} -\Tr\left(U^T A U \right) + \lambda \left(U^T B U - I\right)
 \end{align}
-Differentiating with respect to \( U \) and \( \lambda \) gives the stationary points:
+Differentiating with respect to $U$ and $\lambda$ and setting the derivatives to zero yields the stationary points:
 \begin{align}
-2 A U - 2 B U \lambda = 0 \quad \text{and} \quad U^T B U - I = 0\\
+2 A U - 2 B U \lambda = 0 \quad \text{and} \quad U^T B U - I = 0 \
 \implies \lambda = U^T A U
 \end{align}
-
-Given this, the authors propose a primal dual update rule:
+Based on these stationary points, SGHA proposes a primal-dual update rule:
 \begin{align}
-U \leftarrow U - \eta \left( A U - B U \lambda \right)
+U \leftarrow U - \eta \left( A U - B U \lambda \right) \
 \lambda \leftarrow \left( U^T A U \right)
 \end{align}
-where \( \eta \) is a learning rate.
-
-These updates can also be combined into a single update rule:
+where $\eta$ is a learning rate.
+These updates can be combined into a single update rule:
 \begin{align}
 U \leftarrow U - \eta \left( A U - B U \left( U^T A U \right) \right)
 \end{align}
+Intuitively, the SGHA update rule can be understood as follows:
 
-This algorithm is very simple to implement but because it is based on a heuristic primal-dual update rule rather than gradient descent, it is hard to use with more sophisticated optimizers such as Adam \citep{kingma2014adam}.
+The term $A U$ computes the correlation between the current estimate of the generalized eigenvectors $U$ and the data matrix $A$.
+The term $B U \left( U^T A U \right)$ serves as a correction term that ensures the orthogonality of the eigenvectors with respect to the matrix $B$. The matrix $\left( U^T A U \right)$ can be interpreted as an estimate of the generalized eigenvalues.
+The difference between these two terms is then used to update the current estimate of the eigenvectors $U$ in the direction that maximizes the objective function.
 
-\subsubsection{$\gamma$-EigenGame}
-The $\gamma$-EigenGame is a stochastic algorithm for CCA inspired by the $\gamma$-EigenGame algorithm for PCA. The key idea behind the EigenGame algorithms is to view the eigenvectors as competing players trying to explain the data. In this game-theoretic perspective, each eigenvector (player) $u_i$ aims to maximize its own utility function:
+SGHA has a computational complexity of $\mathcal{O}(k^2(p_1+ p_2))$ per iteration, which is higher than that of the stochastic power method but still much lower than the batch methods.
+While SGHA is simple to implement, it relies on a heuristic primal-dual update rule rather than a principled optimization framework. This makes it difficult to integrate with more sophisticated optimizers like Adam \citep{kingma2014adam}, which have been shown to improve convergence speed and stability in many machine learning applications.
+\subsubsection{$\gamma$-EigenGame for CCA}
+The $\gamma$-EigenGame, proposed by \citet{gemp20,gemp2021}, is a stochastic algorithm for CCA inspired by the EigenGame algorithm for PCA. The key idea behind the $\gamma$-EigenGame is to view the generalized eigenvectors as competing players in a game, where each player tries to maximize its own utility function.
+In this game-theoretic formulation, the utility function of each player (eigenvector) $u_i$ consists of a reward term and a penalty term:
 \begin{align}
-\max_{u_i} \overbrace{\frac{u_i^TAu_i}{u_i^TBu_i}}^{\text{rewards}} - \overbrace{\sum_{j < i} \frac{(u_j^TAu_j)(u_i^TBu_j)^2}{(u_j^TBu_j)^2(u_i^TBu_i)}}^{\text{penalties}}
+\max_{u_i} \overbrace{\frac{u_i^TAu_i}{u_i^TBu_i}}^{\text{reward}} - \overbrace{\sum_{j < i} \frac{(u_j^TAu_j)(u_i^TBu_j)^2}{(u_j^TBu_j)^2(u_i^TBu_i)}}^{\text{penalty}}
 \end{align}
-The utility function consists of a reward term, $\frac{u_i^TAu_i}{u_i^TBu_i}$, which encourages the eigenvector to align with the direction of maximum variance in the data, and a penalty term, $\sum_{j < i} \frac{(u_j^TAu_j)(u_i^TBu_j)^2}{(u_j^TBu_j)^2(u_i^TBu_i)}$, which discourages the eigenvector from aligning with the directions already captured by the previous eigenvectors.
+The reward term $\frac{u_i^TAu_i}{u_i^TBu_i}$ encourages the eigenvector $u_i$ to align with the direction of maximum correlation between the views, while the penalty term $\sum_{j < i} \frac{(u_j^TAu_j)(u_i^TBu_j)^2}{(u_j^TBu_j)^2(u_i^TBu_i)}$ discourages $u_i$ from aligning with the directions already captured by the previous eigenvectors $u_j$ for $j < i$.
+The $\gamma$-EigenGame proposes an update rule for each eigenvector $u_i$ based on this utility function. In the stochastic setting, the algorithm introduces an additional hyperparameter $\gamma$ that controls the trade-off between computational efficiency and the accuracy of the stochastic updates. The update rule is modified to use a rolling average of the matrix $B$, which helps to reduce the computational complexity and memory requirements of the algorithm.
+While the $\gamma$-EigenGame has shown promising results in practice, it still requires the tuning of both the hyperparameter $\gamma$ and a learning rate, which can be challenging and may depend on the specific problem and data at hand.
+Moreover, the use of a rolling average of the matrix $B$ introduces additional approximation error and may not fully capture the uncertainty in the stochastic orthogonality constraint $U^\top B U = I$.
 
-A key advantage of the $\gamma$-EigenGame formulation is that each player $i$ only needs to maintain orthogonalization with respect to the previous players $j < i$. This allows for a more efficient and decentralized computation of the eigenvectors.
+\subsubsection{Benefits and Limitations of Stochastic Algorithms}
+Stochastic algorithms offer several benefits over batch methods for solving CCA problems, such as computational efficiency, implicit regularization, and online learning capabilities. However, they also have some limitations, particularly in the context of stochastic GEPs and stochastic CCA:
 
-By applying a few heuristic arguments, the $\gamma$-EigenGame algorithm derives an update rule for each eigenvector in the full batch case:
-\begin{align}
-u_i \leftarrow (u_i^T B u_i)A u_i - (u_i^T A u_i)B u_i - \sum_{j < i} (u_i^T A y_j)[(u_i^T B u_i)B y_j - (u_i^T B y_j)B u_i]
-\end{align}
-where $y_j = \frac{u_j}{\sqrt{u_j^TBu_j}}$. This update rule adjusts the eigenvector $u_i$ to maximize its utility, considering the rewards and penalties.
+Convergence: The convergence of stochastic algorithms can be slower than batch methods, especially in the presence of noise or when the data is highly correlated. The choice of learning rate and mini-batch size can have a significant impact on the convergence speed and stability.
+Hyperparameter tuning: Most stochastic algorithms require the tuning of several hyperparameters, such as the learning rate, mini-batch size, and regularization parameters. The optimal values of these hyperparameters can vary depending on the problem and the data, making it challenging to achieve consistent performance across different datasets.
+Stochastic orthogonality constraint: The data-dependent constraint $U^\top B U = I$ becomes stochastic when $B$ is replaced by a sample estimate, introducing additional uncertainty and approximation error. Existing stochastic algorithms may not fully account for this uncertainty, leading to suboptimal solutions or slower convergence.
+Theoretical guarantees: The theoretical guarantees for stochastic algorithms are often weaker than those for batch methods, particularly in terms of the rate of convergence and the quality of the solution. The analysis of their convergence properties can be complex and may depend on strong assumptions about the data distribution and the noise.
 
-In the stochastic version of the $\gamma$-EigenGame algorithm, the update rule is modified to use a rolling average of the matrix $B$, introducing an additional hyperparameter $\gamma$ that needs to be tuned. This stochastic update helps to reduce the computational complexity and memory requirements of the algorithm, making it more suitable for large-scale problems.
-
-To the best of our knowledge, the state-of-the-art in Stochastic PLS and CCA are the subspace Generalized Hebbian Algorithm (SGHA) \citep{chen2019constrained} and $\gamma$-EigenGame \citep{gemp20,gemp2021}.
-
-\subsubsection{Further Benefits of Stochastic Algorithms}
-Stochastic algorithms not only offer computational advantages but also introduce a form of implicit regularization \citep{smith2021origin}, which can be particularly beneficial in high-dimensional settings. Regularization techniques are commonly used to prevent overfitting and improve the generalization performance of models, especially when dealing with limited data or complex models.
-
-As we have seen, in batch learning algorithms, regularization is often explicit, such as adding L1 or L2 penalty terms to the objective function. These penalty terms constrain the model's parameters and discourage overfitting. However, stochastic algorithms inherently introduce regularization through the noise in the stochastic updates, without the need for explicit penalty terms.
-
-The intuition behind the regularizing effect of stochastic algorithms can be understood as follows:
-
-\begin{itemize}
-    \item \textbf{Stochastic updates introduce noise}: In each iteration of a stochastic algorithm, the update is based on a random subset of the data (a mini-batch) rather than the entire dataset. This introduces noise in the updates, causing the model's parameters to fluctuate around their true values. The noise can be seen as a form of random perturbation that helps the algorithm explore the parameter space and escape from shallow local minima.
-    \item \textbf{Noisy updates prevent overfitting}: The noise in the stochastic updates acts as a form of regularization that prevents the model from fitting too closely to the training data. By introducing this randomness, stochastic algorithms reduce the risk of overfitting, especially when the model has a large number of parameters relative to the size of the training data. The noisy updates effectively smooth out the loss function, making it harder for the model to memorize individual training examples.
-
-    \item \textbf{Averaging effect}: As the stochastic algorithm progresses, the noisy updates tend to cancel out each other over time, leading to an averaging effect. This averaging helps the model converge towards a solution that generalizes well to unseen data, rather than getting stuck in a suboptimal solution that overfits the training data. Intuitively, the averaging effect can be seen as a form of ensembling, where multiple noisy models are combined to produce a more robust and generalizable solution.
-    
-    \item \textbf{Implicit bias towards simpler models}: The noise in the stochastic updates implicitly biases the algorithm towards simpler models that are less prone to overfitting. This is because simpler models are more stable under random perturbations, while complex models that overfit the data are more sensitive to noise. As a result, stochastic algorithms tend to favor models with smoother decision boundaries and better generalization performance, even without explicit regularization terms in the objective function.
-\end{itemize}
-
-The regularizing effect of stochastic algorithms has been extensively studied in the context of deep learning \citep{zhang2021understanding,chaudhari2018stochastic}. These studies have shown that the implicit regularization introduced by stochastic updates can lead to improved generalization performance and robustness to noise, especially in high-dimensional settings where the number of parameters is large compared to the number of training examples.
-
-\subsection{Limitations of Existing Stochastic CCA Algorithms}
-While stochastic algorithms like SGHA and $\gamma$-EigenGame have made significant progress in addressing the computational challenges of CCA in high-dimensional settings, they still have some limitations that motivate the development of novel objectives and algorithms.
-
-One limitation of SGHA is that it relies on a heuristic primal-dual update rule rather than a principled optimization framework. This makes it difficult to integrate with more sophisticated optimizers like Adam \citep{kingma2014adam}, which have been shown to improve convergence speed and stability in many machine learning applications.
-
-On the other hand, $\gamma$-EigenGame requires the tuning of a hyperparameter $\gamma$ in the stochastic setting. This hyperparameter controls the trade-off between the computational efficiency and the accuracy of the stochastic updates, and its optimal value may vary depending on the problem and the data.
-
-To address the limitations of existing stochastic CCA algorithms and provide a more principled and robust approach, we propose a novel formulation of the CCA problem based on the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990}. Our formulation leads to a new objective function that characterizes the top-$K$ subspace of Generalized Eigenvalue Problems (GEPs), including CCA as a special case.
+Despite these limitations, stochastic algorithms have shown promising results in practice and have become increasingly popular for solving large-scale CCA problems. The development of more principled and theoretically grounded stochastic algorithms that can handle the stochastic orthogonality constraint remains an active area of research.
+In the next section, we will introduce a novel stochastic algorithm for CCA based on the Eckart-Young-Mirsky theorem, which aims to address some of the limitations of existing methods and provide a more principled and robust approach to solving high-dimensional CCA problems in the presence of stochastic constraints.
 
 \section{Methods: Novel Objectives and Algorithms}\label{sec:contributions}
+In this section, we introduce a novel approach to solving Generalized Eigenvalue Problems (GEPs) efficiently, with a focus on Canonical Correlation Analysis (CCA) and its related methods. Our approach is based on a new formulation of the GEP as an unconstrained optimization problem, inspired by the Eckhart-Young-Mirsky theorem \citep{stewart_matrix_1990}. This formulation leads to a simple and efficient algorithm that can be applied to a wide range of GEP problems, including CCA, Partial Least Squares (PLS), and their variants.
 
-First, we present proposition \ref{prop:EY-charac}, a formulation of the top-$K$ subspace of GEP problems, which follows by applying the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990} to the eigen-decomposition of $B^\mhalf A B^\mhalf$. However, making this rigorous requires some technical care which we defer to the proof in supplement \ref{app:gradient_descent}\ref{supp:proofs}.   
-
-\begin{restatable}[Eckhart--Young inspired objective for GEPs]{proposition}{EYcharac}
+\subsection{Eckhart-Young Inspired Objective for GEPs}
+The key idea behind our approach is to reformulate the GEP as an unconstrained optimization problem. We achieve this by applying the Eckhart-Young-Mirsky theorem, which characterizes the best low-rank approximation of a matrix in terms of its singular value decomposition, to the eigen-decomposition of $B^{-\frac{1}{2}} A B^{-\frac{1}{2}}$, where $A$ and $B$ are the matrices defining the GEP.
+This leads to the following objective function for the top-$K$ subspace of the GEP:
+\begin{restatable}[Eckhart-Young inspired objective for GEPs]{proposition}{EYcharac}
 \label{prop:EY-charac}
-    The top-$K$ subspace of the GEP $(A,B)$ can be characterized by minimizing the following objective over $U \in \R^{D \times K}$:
-    \begin{align}\label{eq:EY-charac}
-        \LEYGEP(U) \defeq \tr \left( - 2\,U^\top A U + \left(U^\top B U\right) \left(U^\top B U\right) \right)
-    \end{align}
-    Moreover, the minimum value is precisely $- \sum_{k=1}^K \lambda_k^2$, where $(\lambda_k)$ are the generalized eigenvalues.
+The top-$K$ subspace of the GEP $(A,B)$ can be characterized by minimizing the following objective over $U \in \R^{D \times K}$:
+\begin{align}\label{eq:EY-charac}
+\LEYGEP(U) \defeq \tr \left( - 2U^\top A U + \left(U^\top B U\right) \left(U^\top B U\right) \right)
+\end{align}
+Moreover, the minimum value is precisely $- \sum_{k=1}^K \lambda_k^2$, where $(\lambda_k)$ are the generalized eigenvalues.
 \end{restatable}
+The objective in Equation \eqref{eq:EY-charac} has an intuitive interpretation. The first term, $-2 \tr(U^\top A U)$, acts as a reward for high covariance between the views, encouraging the learned subspace to capture the directions of maximum correlation.
+The second term, $\tr((U^\top B U)(U^\top B U))$, serves as a penalty for high variance within each view and promotes orthogonality between the learned components.
 
-The objective in Equation \eqref{eq:EY-charac} has an intuitive interpretation. The first term, $-2 \tr(U^\top A U)$, acts as a reward for high covariance between the views, encouraging the learned subspace to capture the directions of maximum correlation. The second term, $\tr((U^\top B U)(U^\top B U))$, serves as a penalty for high variance within each view and promotes orthogonality between the learned components. By minimizing this objective, we aim to find a subspace that maximizes the correlation between views while ensuring the learned components are distinct and informative.
+By minimizing this objective, we aim to find a subspace that maximizes the correlation between views while ensuring the learned components are distinct and informative.
 
-This objective also has appealing geometrical properties. 
-It is closely related to a wide class of unconstrained objectives for PCA and matrix completion which have no spurious local optima \citep{ge_no_2017}, i.e. all local optima are in fact global optima. 
-This implies that certain local search algorithms, such as stochastic gradient descent, should indeed converge to a global optimum.
-
+\subsubsection{Geometrical Properties and Optimization}
+One of the appealing properties of the proposed objective is that it has no spurious local minima, as stated in the following proposition:
 \begin{restatable}{proposition}{NoSpuriousLocalMinima}\label{prop:no-spurious}
-    The objective $\LEYGEP$ has no spurious local minima.
-    That is, any matrix $\bar{U}$ that is a local minimum of $\LEYGEP$ must in fact be a global minimum.
-    %of the form described in \cref{prop:EY-charac}
+The objective $\LEYGEP$ has no spurious local minima.
+That is, any matrix $\bar{U}$ that is a local minimum of $\LEYGEP$ must in fact be a global minimum.
 \end{restatable}
-
-It is also possible to make this argument quantitative by proving a version of the strict saddle property from \citet{ge_no_2017,ge2015escaping}; we state an informal version here and give full details in \ref{app:gradient_descent}\ref{supp:tractable-optimization}.
-
+This property implies that simple local search algorithms, such as stochastic gradient descent (SGD), should converge to a global optimum. Moreover, under certain conditions on the eigenvalues and generalized eigenvalues of $(A,B)$, it is possible to prove a stronger result:
 \begin{corollary}[Informal: Polynomial-time Optimization]
     Under certain conditions on the eigenvalues and generalized eigenvalues of $(A,B)$, one can make quantitative the claim that:
     any $U_K \in \R^{D \times K}$ is either close to a global optimum, has a large gradient $\nabla \LEYGEP$, or has Hessian $\nabla^2 \LEYGEP$ with a large negative eigenvalue.
@@ -287,87 +248,183 @@ It is also possible to make this argument quantitative by proving a version of t
     % still need to sort out - polynomial in what exactly!
 \end{corollary}
 
-\subsection{Corresponding Objectives for the CCA family}
-For the case of linear CCA we have $U^\top A U = \sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j}),\,  U^\top B U = \sum_{i} \Var(Z\sps{i})$. 
+\subsection{Low-Rank Optimization for the CCA Family}
 
-To generalize this to multiview CCA, we define the analogous matrices of total between-view covariance and total within-view variance 
+In the context of the CCA family, we can exploit the nature of the matrices \(A\) and \(B\) to significantly simplify computations. Instead of working directly with these high-dimensional matrices, we focus on constructing and working with the smaller matrices \(C(\theta)\) and \(V(\theta)\). This approach not only reduces computational complexity but also allows for more efficient optimization.
+
+Let \(Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})\) be the learned representations for each view \(i\), where \(f^{(i)}\) are functions parametrized by \(\theta^{(i)}\), and \(X^{(i)}\) are the input views.
+
+To construct the matrices \(C(\theta)\) and \(V(\theta)\), we define them as follows:
+
 \begin{align}\label{eq:def-C-V-matrices}
-    \vphantom{\bigl(\bigr)} % increase vertical space
-    C(\theta) = \sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j}), \quad 
-    V(\theta) = \sum_{i} \Var(Z\sps{i})
+\vphantom{\bigl(\bigr)} % increase vertical space
+C(\theta) = \sum_{i \neq j} \Cov(Z^{(i)}, Z^{(j)}), \quad
+V(\theta) = \sum_{i} \Var(Z^{(i)}).
 \end{align}
 
-While for ridge CCA we can add a ridge penalty to the within-view variances:
+For ridge CCA, we introduce a ridge penalty to the within-view variances:
+
 \begin{align}\label{eq:v-alpha-ridge-definition}
-    V_\alpha(\theta) = \sum_i \alpha_i {U\spsT{i}} U\sps{i} +  (1 - \alpha_i) \Var(Z\sps{i})
+V_\alpha(\theta) = \sum_i \alpha_i U^{(i)\top} U^{(i)} + (1 - \alpha_i) \Var(Z^{(i)}),
 \end{align}
-This leads to the following unconstrained objective for the CCA-family of problems.
-\begin{definition}[Family of EY Objectives]\ref{def:EY-objectives}
-    Learn representations $Z\sps{i} = f\sps{i}( X\sps{i}; \theta\sps{i})$ minimizing
-    \begin{align}\label{eq:EY-loss-def-C-V}
-        \LEY(\theta) = - 2 \tr C(\theta) + \norm{V_\alpha(\theta)}_F^2
-    \end{align}
+
+where \(\alpha_i\) are the ridge penalty parameters for each view.
+
+Using these matrices, we define the following Eckhart-Young inspired objective for the CCA family:
+
+\begin{definition}[CCA Family of EY Objectives]\label{def:EY-objectives}
+Learn representations \(Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})\) by minimizing
+\begin{align}\label{eq:EY-loss-def-C-V}
+\LEY(\theta) = -2 \tr C(\theta) + \|V_\alpha(\theta)\|_F^2.
+\end{align}
 \end{definition}
 
-\textbf{Unbiased estimates:}
-since empirical covariance matrices are unbiased, we can construct unbiased estimates to $C, V$ from a batch of transformed variables $\Z$.
-\begin{align}\label{eq:def-C-V-matrices-empirical}
-    \hat{C}(\theta)[\Z] = \sum_{i \neq j} \empCov(\Z\sps{i}, \Z\sps{j}), \quad 
-    \hat{V}(\theta)[\Z] = \sum_{i} \empVar(\Z\sps{i})
-\end{align}
-In the linear case we can construct $\hat{V}_\alpha(\theta)[\Z]$ analogously by plugging sample covariances into \cref{eq:v-alpha-ridge-definition}.
-Then if $\Z, \Z'$ are two independent batches of transformed variables, the batch loss
-\begin{align}\label{eq:empirical-EY-loss-estimate-def}
-    \empLEY[\Z, \Z'] \defeq - 2 \tr \hat{C}[\Z] + \langle \hat{V}_\alpha[\Z], \hat{V}_\alpha[\Z'] \rangle_F
-\end{align}
-gives an unbiased estimate of $\LEY(\theta)$.%\footnote{Where again $\alpha > 0$ only makes sense in the linear case, and otherwise we may omit the $\alpha$s}
-This loss is a differentiable function of $\Z, \Z'$ and so also of $\theta$.
+This objective function has an intuitive interpretation:
+- The first term, \(-2 \tr C(\theta)\), rewards high covariance between the learned representations of different views, encouraging the model to capture common information shared across views.
+- The second term, \(\|V_\alpha(\theta)\|_F^2\), penalizes high within-view variance of the learned representations, promoting compact and informative representations for each view.
 
-\textbf{Simple algorithms:}
-We first define a general algorithm using these estimates in Algorithm \ref{alg:general}. In the next section we apply this algorithm to multiview stochastic CCA (\textbf{CCA-EY}) and PLS (\textbf{PLS-EY}).
+By minimizing this objective, we aim to learn representations that maximize the correlation between views while ensuring that the representations are meaningful and non-redundant.
+
+The specific loss functions for different methods in the CCA family can be obtained by substituting the appropriate definitions of the matrices \(C(\theta)\) and \(V(\theta)\) into Equation \eqref{eq:EY-loss-def-C-V}. For example:
+
+- \textbf{CCA}: \(\LEY(\theta) = -2 \sum_{i \neq j} \tr \Cov(Z^{(i)}, Z^{(j)}) + \left\|\sum_{i} \Var(Z^{(i)})\right\|_F^2\)
+- \textbf{MCCA}: \(\LEY(\theta) = -2 \sum_{i \neq j} \tr \Cov(Z^{(i)}, Z^{(j)}) + \left\|\sum_{i} \Var(Z^{(i)})\right\|_F^2\)
+- \textbf{PLS}: \(\LEY(\theta) = -2 \sum_{i \neq j} \tr \Cov(Z^{(i)}, Z^{(j)}) + \sum_{i} \|U^{(i)}\|_F^2\)
+- \textbf{MPLS}: \(\LEY(\theta) = -2 \sum_{i \neq j} \tr \Cov(Z^{(i)}, Z^{(j)}) + \sum_{i} \|U^{(i)}\|_F^2\)
+- \textbf{Ridge CCA}: \(\LEY(\theta) = -2 \sum_{i \neq j} \tr \Cov(Z^{(i)}, Z^{(j)}) + \sum_i \alpha_i \|U^{(i)}\|_F^2 + (1 - \alpha_i) \|\Var(Z^{(i)})\|_F^2\)
+- \textbf{PCA}: \(\LEY(\theta) = \|U\|_F^2\)
+
+This formulation provides a unified framework for learning correlated representations across various methods, leveraging the efficiency and simplicity of working with the smaller matrices \(C(\theta)\) and \(V(\theta)\) instead of the larger input covariance matrices \(A\) and \(B\).
+
+Table \ref{tab:covariance-matrices} summarizes the definitions of the matrices $A$, $B$, $C$, and $V$ for different methods in the CCA family.
+
+\begin{table}[h]
+    \centering
+    \small % Reduce the font size for the table
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    Method & $A$ & $B$ & $C$ & $V$ \\
+    \hline
+    CCA & $\begin{pmatrix} 
+    0 & \Sigma_{12} \\
+    \Sigma_{21} & 0
+    \end{pmatrix}$ & $\begin{pmatrix}
+    \Sigma_{11} & 0 \\
+    0 & \Sigma_{22}
+    \end{pmatrix}$ & $\sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j})$ & $\sum_{i} \Var(Z\sps{i})$ \\
+    \hline
+    MCCA & $\begin{pmatrix}
+    0 & \Sigma_{12} & \cdots & \Sigma_{1I} \\
+    \Sigma_{21} & 0 & \cdots & \Sigma_{2I} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \Sigma_{I1} & \Sigma_{I2} & \cdots & 0
+    \end{pmatrix}$ & $\begin{pmatrix}
+    \Sigma_{11} & 0 & \cdots & 0 \\
+    0 & \Sigma_{22} & \cdots & 0 \\
+    \vdots & \vdots & \ddots & \vdots \\
+    0 & 0 & \cdots & \Sigma_{II}
+    \end{pmatrix}$ & $\sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j})$ & $\sum_{i} \Var(Z\sps{i})$ \\
+    \hline
+    PLS & $\begin{pmatrix}
+    0 & \Sigma_{12} \\
+    \Sigma_{21} & 0
+    \end{pmatrix}$ & $I$ & $\sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j})$ & $\sum_{i} \|U\sps{i}\|_F^2$ \\
+    \hline
+    MPLS & $\begin{pmatrix}
+    0 & \Sigma_{12} & \cdots & \Sigma_{1I} \\
+    \Sigma_{21} & 0 & \cdots & \Sigma_{2I} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \Sigma_{I1} & \Sigma_{I2} & \cdots & 0
+    \end{pmatrix}$ & $I$ & $\sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j})$ & $\sum_{i} \|U\sps{i}\|_F^2$ \\
+    \hline
+    Ridge CCA & $\begin{pmatrix} 
+    0 & \Sigma_{12} \\
+    \Sigma_{21} & 0
+    \end{pmatrix}$ & $\begin{pmatrix}
+    \Sigma_{11} + \alpha_1 I & 0 \\
+    0 & \Sigma_{22} + \alpha_2 I
+    \end{pmatrix}$ & $\sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j})$ & $\sum_i \alpha_i {U\spsT{i}} U\sps{i} +  (1 - \alpha_i) \Var(Z\sps{i})$ \\
+    \hline
+    PCA & $\Sigma$ & $I$ & - & $\Var(Z) + \|U\|_F^2$ \\
+    \hline
+    \end{tabular}
+    \caption{Covariance matrices $A$, $B$, $C$, and $V$ for different methods in the CCA family.}
+    \label{tab:covariance-matrices}
+    \end{table}
+
+\subsubsection{Unbiased Estimates and Stochastic Optimization}
+
+In practice, we often do not have access to the true population covariance matrices and must rely on sample estimates. Since empirical covariance matrices are unbiased estimators of their population counterparts, we can construct unbiased estimates of $C(\theta)$ and $V(\theta)$ from a batch of transformed variables $\Z$:
+
+\begin{align}\label{eq:def-C-V-matrices-empirical}
+\hat{C}(\theta)[\Z] = \sum_{i \neq j} \empCov(\Z\sps{i}, \Z\sps{j}), \quad
+\hat{V}(\theta)[\Z] = \sum_{i} \empVar(\Z\sps{i}).
+\end{align}
+
+In the linear case, we can construct $\hat{V}_\alpha(\theta)[\Z]$ analogously by plugging sample covariances into Equation \eqref{eq:v-alpha-ridge-definition}.
+
+Given two independent batches of transformed variables $\Z$ and $\Z'$, we can define the following batch loss:
+
+\begin{align}\label{eq:empirical-EY-loss-estimate-def}
+\empLEY[\Z, \Z'] \defeq - 2 \tr \hat{C}[\Z] + \langle \hat{V}_\alpha[\Z], \hat{V}_\alpha[\Z'] \rangle_F,
+\end{align}
+
+which provides an unbiased estimate of $\LEY(\theta)$. This loss is a differentiable function of $\Z$, $\Z'$, and $\theta$, making it suitable for stochastic optimization.
+
+By using these unbiased estimates, we can efficiently optimize the Eckhart-Young inspired objectives for the CCA family of problems using stochastic gradient-based methods, even when the true population covariance matrices are unknown or the datasets are too large to fit in memory.
+
+\subsection{A Simple Algorithm: GEP-EY}
+
+Based on the unbiased estimates and the stochastic optimization framework, we propose a simple and general algorithm for learning correlated representations, called \textbf{GEP-EY} (Algorithm \ref{alg:general}).
 
 \begin{algorithm}
-   \caption{\textbf{GEP-EY}: General algorithm for learning correlated representations}
-   \label{alg:general}
+\caption{\textbf{GEP-EY}: General algorithm for learning correlated representations}
+\label{alg:general}
 \begin{algorithmic}
-   \STATE {\bfseries Input:} data stream of mini-batches $(\X(b))_{b=1}^\infty$ where each consists of $M$ samples from the original dataset. Learning rate $(\eta_t)_t$. Number of time steps $T$. Class of functions $f(\cdot; \theta)$ whose outputs are differentiable with respect to $\theta$.
-   \STATE {\bfseries Initialize:} $\hat{\theta}$ with suitably random entries
-   \FOR{$t=1$ {\bfseries to} $T$}
-       \STATE Obtain two independent mini-batches \( \X(b), \X(b') \) by sampling \( b, b' \) independently
-       \STATE Compute batches of transformed variables $\Z(b) = f(\X(b); \theta), \Z(b') = f(\X(b'); \theta)$
-       %\STATE Construct unbiased estimates $C(\theta)[\Z], \hat{V}(\theta)[\Z], \hat{V}(\theta)[\Z']$ \COMMENT{As defined in \cref{eq:def-C-V-matrices-empirical}}
-       \STATE Estimate loss $\empLEY(\theta)$ using \cref{eq:empirical-EY-loss-estimate-def}
-       \STATE Obtain gradients by back-propagation and step with your favourite optimizer.
-   \ENDFOR
+\STATE {\bfseries Input:} data stream of mini-batches $(\X(b))_{b=1}^\infty$ where each consists of $M$ samples from the original dataset. Learning rate $(\eta_t)_t$. Number of time steps $T$. Class of functions $f(\cdot; \theta)$ whose outputs are differentiable with respect to $\theta$.
+\STATE {\bfseries Initialize:} $\hat{\theta}$ with suitably random entries
+\FOR{$t=1$ {\bfseries to} $T$}
+\STATE Obtain two independent mini-batches $( \X(b), \X(b') )$ by sampling $( b, b' )$ independently
+\STATE Compute batches of transformed variables $\Z(b) = f(\X(b); \theta), \Z(b') = f(\X(b'); \theta)$
+\STATE Estimate loss $\empLEY(\theta)$ using \cref{eq:empirical-EY-loss-estimate-def}
+\STATE Obtain gradients by back-propagation and step with your favourite optimizer.
+\ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Applications to multiview stochastic CCA and PLS}
-\begin{lemma}[Objective recovers GEP formulation of linear multiview CCA]
-    When the $f\sps{i}$ are linear, the population loss from \cref{eq:EY-loss-def-C-V} recovers MCCA.
-\end{lemma}
-\begin{proof}
-    By construction, for linear MCCA we have $C = U^\top A U,\, V_\alpha=U^\top B_\alpha U$, where $(A, B_\alpha)$ define the GEP for MCCA introduced in \cref{eq:gep-most-general-formulation}. 
-    So $\LEY(U) = \LEYGEP(U)$ and by \cref{prop:EY-charac} the optimal set of weights define a top-$K$ subspace of the GEP, and so is a MCCA solution.
-    %; by definition, $\MCCA_K$ is the vector of top-$K$ generalised eigenvalues, so the optimal value is as claimed.
-\end{proof}
+The GEP-EY algorithm can be applied to various methods in the CCA family by defining the appropriate covariance matrices $C(\theta)$ and $V(\theta)$, as shown in Table \ref{tab:covariance-matrices}.
 
-Moreover, by following through the chain of back-propagation, we obtain gradient estimates in $\mathcal{O}(MKD)$ time.
-Indeed, we can obtain gradients for the transformed variables in $\mathcal{O}(M K^2)$ time so the dominant cost is then updating $U$; we flesh this out with full details in \cref{supp:fast-updates}.
+The key steps of the GEP-EY algorithm are:
+1. Initialize the parameters $\theta$ randomly.
+2. For each iteration $t$:
+   - Sample two independent mini-batches of data $\X(b)$ and $\X(b')$.
+   - Compute the transformed variables $\Z(b)$ and $\Z(b')$ using the current parameters $\theta$.
+   - Estimate the loss $\empLEY(\theta)$ using the unbiased estimates of the relevant covariance matrices $\hat{C}$ and $\hat{V}_\alpha$.
+   - Compute the gradients of the loss with respect to $\theta$ using back-propagation.
+   - Update the parameters $\theta$ using a gradient-based optimizer (e.g., SGD, Adam).
+3. Repeat step 2 for a fixed number of iterations $T$.
 
-\section{Experiments and Results}
+By following this simple algorithm, we can efficiently learn correlated representations for various methods in the CCA family, even when dealing with high-dimensional data or large-scale datasets.
 
-\subsection{Comparison to Scipy}
-In a first simple experiment, we compare our method to solving the CCA Generalized Eigenvalue Problem using the \texttt{scipy} implementation of \texttt{eigh} \citep{virtanen2020scipy}.
-We use a sample size of 10,000 and vary the number of features in each view from 10 to 5,000.
-We solve for the top-5 CCA subspace and repeat each experiment 5 times.
-We compare the time taken to solve the GEP using \texttt{eigh} to the time taken to train our method until the frobenius norm of the change in successive weights is less than $10^{-5}$.
+The GEP-EY algorithm provides a unified framework for solving a wide range of problems in the CCA family, including CCA, MCCA, PLS, MPLS, Ridge CCA, and PCA. By leveraging the Eckhart-Young inspired objectives and the stochastic optimization framework, GEP-EY offers a principled and efficient approach to learning meaningful and correlated representations from multi-view data.
 
-\subsubsection{Observations}
-Figure \ref{fig:cca-comparison} shows the results of this experiment.
-Up until 1,000 features, our method is slower than \texttt{eigh} but after this point, our method is significantly faster.
-Beyond this point, the time taken to solve the GEP using \texttt{eigh} scales quadratically with the number of features, while our method scales linearly.
-This is because our method scales linearly with both the number of samples and the number of features, while \texttt{eigh} scales quadratically with the number of features\footnote{When the number of features is greater than the number of samples as in ridge CCA and PLS, we can use the PCA or Kernel trikcs to scale CCA quadratically with the minimum of the number of features and samples, though this still requires a somewhat expensive PCA}.
+\subsection{Advantages}
+The proposed Eckhart-Young inspired objective and the corresponding GEP-EY algorithm offer several advantages over existing methods for solving GEPs and CCA problems:
+
+Simplicity: The GEP-EY algorithm is based on a simple and intuitive objective function that can be easily optimized using standard gradient-based methods. The algorithm does not require complex initialization strategies or custom optimization techniques, making it easy to implement and use in practice.
+Efficiency: The stochastic nature of the GEP-EY algorithm allows it to scale to large datasets by processing the data in mini-batches. The computational complexity per iteration depends on the mini-batch size and the number of components, rather than the full dimensionality of the data, making it efficient for high-dimensional problems.
+Flexibility: The GEP-EY algorithm can be easily adapted to solve various problems in the CCA family, such as CCA, PLS, and their regularized variants, by specifying the appropriate covariance matrices and function classes. This provides a unified framework for solving a wide range of GEP problems.
+Theoretical guarantees: The proposed objective function has appealing geometrical properties, such as the absence of spurious local minima, which provide theoretical guarantees for the convergence of the GEP-EY algorithm to a global optimum. Moreover, under certain conditions, it is possible to prove stronger results, such as polynomial-time convergence with high probability.
+
+\section{Experiments}
+\subsection{Comparison with Standard Batch Solvers}
+In this experiment, we compare our CCA-EY method to solving the CCA Generalized Eigenvalue Problem using the \texttt{scipy.linalg.eigh} function \citep{virtanen2020scipy}, which is a widely used implementation for computing eigenvalues and eigenvectors of Hermitian or symmetric matrices.
+\subsubsection{Data and Experimental Setup}
+We simulate data with varying numbers of features, ranging from 10 to 5,000, while keeping the sample size fixed at 10,000. The data is generated from a multivariate Gaussian distribution with a prescribed covariance structure that ensures the existence of a true CCA solution.
+For each combination of feature sizes, we solve for the top-5 CCA subspace and repeat the experiment 5 times. We compare the time taken to solve the GEP using \texttt{scipy.linalg.eigh} to the time taken to train our CCA-EY method until the Frobenius norm of the change in successive weight matrices falls below a threshold of $10^{-5}$.
+\subsubsection{Results and Observations}
+Figure \ref{fig:cca-comparison} shows the results of this experiment. For feature sizes up to 1,000, our CCA-EY method is slower than \texttt{scipy.linalg.eigh}. However, beyond this point, CCA-EY significantly outperforms the baseline in terms of computation time.
+As the number of features increases, the time taken to solve the GEP using \texttt{scipy.linalg.eigh} scales quadratically, while our CCA-EY method exhibits a linear scaling. This is because CCA-EY scales linearly with both the number of samples and the number of features, whereas \texttt{scipy.linalg.eigh} has a quadratic dependence on the feature size.\footnote{When the number of features is greater than the number of samples as in ridge CCA and PLS, we can use the PCA or Kernel trikcs to scale CCA quadratically with the minimum of the number of features and samples, though this still requires a somewhat expensive PCA}.
 
 \begin{figure}
     \centering
@@ -376,36 +433,25 @@ This is because our method scales linearly with both the number of samples and t
     \label{fig:cca-comparison}
 \end{figure}
 
-\subsection{Stochastic CCA}
-In our second experiment, we aim to demonstrate that our proposed CCA-EY method not only matches but potentially surpasses the performance of established baselines $\gamma$-EigenGame and SGHA in terms of convergence speed and robustness to hyperparameter settings.
-Our experimental setup largely follows the framework established by \citet{meng2021online, gemp2022generalized}.
-A key distinction in our approach, however, is the decision to not perform PCA on the data prior to applying CCA methods.
-This choice retains the full complexity of the datasets, providing a more rigorous evaluation of each algorithm's ability to handle high-dimensional data efficiently and accurately.
-
-One of the central goals of this comparison is to illustrate that CCA-EY can achieve faster convergence with less hyperparameter tuning, an essential attribute for practical applications.
-To facilitate a fair and direct comparison with the baseline methods, we employ Stochastic Gradient Descent (SGD) as the optimization technique for all algorithms.
-It is worth noting that while SGD provides a baseline for performance assessment, the potential of our CCA-EY method could be further unleashed by utilizing more advanced optimization techniques such as momentum-based optimizers like Adam or Nesterov acceleration.
-These advanced methods are known for their ability to accelerate convergence and navigate the optimization landscape more effectively, suggesting that our method might yield even better performance under such enhanced optimization schemes.
-
-We train models to optimize CCA on the MediaMill and Split-CIFAR-10 datasets for a single epoch, using mini-batch sizes ranging from 5 to 100.
-These sizes were selected to test the scalability and efficiency of our method under varied computational loads. The Proportion of Correlation Captured (PCC) metric, defined as \( \text{PCC} = (\sum_{i=k}^K \rho_k)/ ({\sum_{k=1}^K \rho_k^*}) \), serves as our evaluation criterion.
-Here, $\rho_k$ represents the correlations of the estimated representations $Z\sps{i}=X^{(i)}\hat{U}^{(i)}$ with one another on the test set, while $\rho_k^*$ denotes the canonical correlations computed from the full batch covariance matrices.
-In other words, using our earlier notation, $\rho_k = \MCCA_K(\hat{Z}\sps{1}, \hat{Z}\sps{2})$ and $\rho_k^* = \MCCA_K(X\sps{1}, X\sps{2})$.
-
-Despite $\rho_k^*$ not being the `true` correlations, their computation from a large sample size renders them a reliable benchmark.
-PCC is an efficient metric for tracking algorithmic performance over time, minimizing computational overhead\citep{meng2021online, gemp2022generalized, ma2015finding, ge2016efficient}.
-
+\subsection{Stochastic CCA on Real-World Datasets}
+In this experiment, we evaluate the performance of our proposed CCA-EY method against two established baselines, $\gamma$-EigenGame \citep{gemp2022generalized} and SGHA \citep{chen2019constrained}, on real-world datasets. Our experimental setup follows the framework introduced by \citet{meng2021online} and \citet{gemp2022generalized}, with a key difference: we do not perform PCA on the data prior to applying the CCA methods. This choice allows us to assess the algorithms' ability to handle high-dimensional data efficiently and accurately, without the aid of dimensionality reduction.
 \subsubsection{Data}
-The MediaMill dataset \citep{gemert2008visual} comprises paired features of videos and corresponding commentary, with the objective of learning joint representations that capture their correlation.
-This representation could potentially enable prediction of commentary from video, or vice versa.
-The dataset includes 25,800 test images, with 120 and 101 features respectively.
+We use two datasets for this experiment:
 
-The Split-CIFAR dataset \citep{meng2021online} consists of 50,000 training and 10,000 test RGB images, each split in half with 32x16x3 features.
-The aim is to learn joint representations of the two halves that reveal correlations, expected to be high within the same class and low across different classes.
-These datasets are chosen for their diverse nature and complexity, providing a comprehensive test bed for our method.
+MediaMill \citep{gemert2008visual}: This dataset consists of paired features extracted from videos and their corresponding textual commentary. The goal is to learn joint representations that capture the correlation between the visual and textual modalities. The dataset includes 25,800 test instances, with 120 and 101 features for the video and commentary views, respectively.
+Split-CIFAR \citep{meng2021online}: This dataset is derived from the CIFAR-10 image classification dataset. Each RGB image is split in half, resulting in two views with 32x16x3 features each. The objective is to learn joint representations of the two halves that reveal correlations, which are expected to be high within the same class and low across different classes. The dataset contains 50,000 training and 10,000 test instances.
 
-\subsubsection{Parameters} For each method, we searched over the hyperparameter (see Table \ref{tab:hyperparameters}) using \citet{wandb}.
-
+These datasets were chosen for their diverse nature and complexity, providing a comprehensive test bed for evaluating the performance of stochastic CCA methods.
+\subsubsection{Experimental Setup and Evaluation Metric}
+We train the CCA models on the MediaMill and Split-CIFAR datasets for a single epoch, using mini-batch sizes ranging from 5 to 100. These batch sizes were selected to assess the scalability and efficiency of the methods under varying computational loads.
+To evaluate the performance of the algorithms, we use the Proportion of Correlation Captured (PCC) metric, defined as:
+\begin{equation}
+\text{PCC} = \frac{\sum_{k=1}^K \rho_k}{\sum_{k=1}^K \rho_k^*},
+\end{equation}
+where $K$ is the number of canonical components, $\rho_k$ represents the correlations of the estimated representations $Z\sps{i}=X^{(i)}\hat{U}^{(i)}$ with one another on the test set, while $\rho_k^*$ denotes the canonical correlations computed from the full batch covariance matrices.
+In other words, using our earlier notation, $\rho_k = \MCCA_K(\hat{Z}\sps{1}, \hat{Z}\sps{2})$ and $\rho_k^* = \MCCA_K(X\sps{1}, X\sps{2})$.
+Although $\rho_k^*$ are not strictly the ground-truth correlations, they serve as a reliable benchmark when computed from a large sample size. The PCC metric provides an efficient way to track the performance of the algorithms over time while minimizing computational overhead \citep{meng2021online, gemp2022generalized, ma2015finding, ge2016efficient}.
+For each method, we perform a grid search over the hyperparameters listed in Table \ref{tab:hyperparameters} using the Weights and Biases platform \citep{wandb}.
 \begin{table}[h!]
     \centering
     \begin{tabular}{|l|l|}
@@ -421,83 +467,61 @@ These datasets are chosen for their diverse nature and complexity, providing a c
     \caption{Hyperparameter ranges explored for CCA methods.} 
     \label{tab:hyperparameters}
 \end{table}
-
-\subsubsection{Observations}
-In machine learning, a learning curve represents a graph showing the model's learning progress over time in terms of experience or iterations.
-For the MediaMill dataset, Figure \ref{fig:corr_mediamill} compares the algorithms' learning curves for various mini-batch sizes, showing CCA-EY's consistent outperformance. Figure \ref{fig:learningcurve_mediamill} further examines the learning curves for batch sizes 5 and 100, illustrating CCA-EY's superior performance over time.
-
+\subsubsection{Results and Observations}
+Figure \ref{fig:corr_mediamill} compares the learning curves of the algorithms on the MediaMill dataset for various mini-batch sizes. CCA-EY consistently outperforms the baselines across all batch sizes. Figure \ref{fig:learningcurve_mediamill} provides a more detailed view of the learning curves for batch sizes 5 and 100, highlighting the superior performance of CCA-EY over time.
 \begin{figure}
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/CCA/mediamill_models_different_batch_sizes}
-    \caption{Stochastic CCA on MediaMill using PCC: Performance across varying mini-batch sizes. Shaded regions signify \(\pm\) one standard deviation around the mean of 5 runs.}
-    \label{fig:corr_mediamill}
+\centering
+\includegraphics[width=0.8\textwidth]{figures/CCA/mediamill_models_different_batch_sizes}
+\caption{Stochastic CCA on MediaMill using PCC: Performance across varying mini-batch sizes. Shaded regions represent $\pm$ one standard deviation around the mean of 5 runs.}
+\label{fig:corr_mediamill}
 \end{figure}
-
 \begin{figure}
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/CCA/mediamill_allbatchsizes_pcc}
-    \caption{Stochastic CCA on MediaMill: Training progress over a single epoch for mini-batch sizes 5, 100.}
-    \label{fig:learningcurve_mediamill}
+\centering
+\includegraphics[width=0.8\textwidth]{figures/CCA/mediamill_allbatchsizes_pcc}
+\caption{Stochastic CCA on MediaMill: Training progress over a single epoch for mini-batch sizes 5 and 100.}
+\label{fig:learningcurve_mediamill}
 \end{figure}
-
-For the CIFAR dataset, Figure \ref{fig:corr_cifar} shows the performance comparison across batch sizes, while Figure \ref{fig:learningcurve_cifar} details the learning curves, highlighting the underperformance of $\gamma$-EigenGame, especially for smaller batch sizes.
-
+For the Split-CIFAR dataset, Figure \ref{fig:corr_cifar} shows the performance comparison across batch sizes, while Figure \ref{fig:learningcurve_cifar} presents the learning curves. The results reveal that $\gamma$-EigenGame underperforms compared to CCA-EY and SGHA, particularly for smaller batch sizes.
 \begin{figure}
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/CCA/cifar_models_different_batch_sizes}
-    \caption{Stochastic CCA on CIFAR using PCC: Performance across varying mini-batch sizes. Shaded regions signify \(\pm\) one standard deviation around the mean of 5 runs.}
-    \label{fig:corr_cifar}
+\centering
+\includegraphics[width=0.8\textwidth]{figures/CCA/cifar_models_different_batch_sizes}
+\caption{Stochastic CCA on Split-CIFAR using PCC: Performance across varying mini-batch sizes. Shaded regions represent $\pm$ one standard deviation around the mean of 5 runs.}
+\label{fig:corr_cifar}
 \end{figure}
-
 \begin{figure}
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/CCA/cifar_allbatchsizes_pcc}
-    \caption{Stochastic CCA on CIFAR: Training progress over a single epoch for mini-batch sizes 5, 100.}
-    \label{fig:learningcurve_cifar}
+\centering
+\includegraphics[width=0.8\textwidth]{figures/CCA/cifar_allbatchsizes_pcc}
+\caption{Stochastic CCA on Split-CIFAR: Training progress over a single epoch for mini-batch sizes 5 and 100.}
+\label{fig:learningcurve_cifar}
 \end{figure}
+These experiments demonstrate that our proposed CCA-EY method can achieve faster convergence with less hyperparameter tuning compared to the established baselines, making it a promising approach for practical applications involving high-dimensional data.
 
-\subsection{Stochastic PLS UK Biobank}
-In this section, we aim to demonstrate the exceptional scalability and efficiency of our Stochastic PLS method, PLS-EY, in handling extremely high-dimensional imaging genetics data.
-We employ imaging genetics data from the UK Biobank \citep{sudlow2015uk} as our test bed, given its comprehensive and complex nature.
-The UK Biobank dataset presents a unique challenge due to the sheer scale of its genetic data, requiring sophisticated regularization strategies.
-
-PLS is particularly suited for imaging-genetics studies due to its capability to handle high dimensionality and reveal novel phenotypes as well as genetic mechanisms underlying diseases and brain morphometry.
-Historically, imaging genetics analyses have been constrained to smaller datasets due to computational limitations \citep{lorenzi2018,Taquet2021,Lefloch2012}.
-Moreover, the few studies that have attempted to analyze data of comparable scale to the UK Biobank have typically resorted to partitioning the data into smaller clusters, thereby limiting the scope of their analysis \citep{lorenzi2017secure, altmann2023tackling}.
-
-Our experiment with PLS-EY, conducted on a subset of the UK Biobank dataset consisting of brain imaging data (82 regional volumes) and genetic data (582,565 variants) for 33,333 subjects, is designed to overcome these limitations.
-A particular computational challenge we address is maintaining orthogonality between the weight vectors \( u_k \) in the PLS model, which is crucial for the method's effectiveness.
-We run PLS-EY with a mini-batch size of 500 and train the GEP-EY PLS analysis for 100 epochs using a learning rate of 0.0001.
-This approach allows us to not only manage the high-dimensional nature of the data but also to preserve the integrity and interpretability of the analysis.
-To our knowledge, this represents the largest-scale PLS analysis of biomedical data to-date, showcasing the potential of our method to facilitate discoveries in extremely large datasets.
-
-\subsubsection{Data} The UK BioBank data consisted of real-valued continuous brain volumes and ordinal, integer genetic variants.
-We used pre-processed (using FreeSurfer \citep{Fischl2012}) grey-matter volumes for 66 cortical (Desikan-Killiany atlas) and 16 subcortical brain regions and 582,565 autosomal genetic variants.
-The affects of age, age squared, intracranial volume, sex, and the first 20 genetic principal components for population structure were removed from the brain features using linear regression to account for any confounding effects.
-Each brain ROI was normalized by removing the mean and dividing the standard deviation.
-We processed the genetics data using PLINK \citep{Purcell2007} keeping genetic variants with a minor allele frequency of at least 1\%  and a maximum missingness rate of 2\%.
-We used mean imputation to fill in missing values and centered each variant.
-To generate measures of genetic disease risk, we calculated polygenic risk scores using PRSice \citep{PRSice2014}.
-We calculated scores, with a p-value threshold of 0.05, using GWAS summary statistics for the following diseases; Alzheimer's \citep{Lambert2013}, Schizophrenia \citep{Trubetskoy2022}, Bipolar \citep{Mullins2021}, ADHD \citep{Demontis2023}, ALS \citep{Van_Rheenen2021}, Parkinson's \citep{Nalls2019}, and Epilepsy \citep{International_League_Against_Epilepsy_Consortium_on_Complex_Epilepsies2018}, using the referenced GWAS studies.
-
-\subsubsection{Observations}
-We observed strong validation correlations between all 10 corresponding pairs of representations \( Z^{(1)}_k \) and \( Z^{(2)}_k \) in the PLS model, with weak cross-correlations between \( Z^{(1)}_k \) and \( Z^{(2)}_i \) for \( i \neq k \).
-This indicates that our model learned a coherent and orthogonal subspace, as shown in Figure \ref{fig:UKBB_corr}.
-Furthermore, the PLS representations \( Z \) were significantly associated with genetic risk measures for several disorders, suggesting that the learned PLS subspace encodes relevant information for genetic disease risk, a critical insight for biomedical research (Figure \ref{fig:genetic_risk}). These results demonstrate the scalability of our method to extremely high-dimensional data, and its ability to learn interpretable representations.
-
+\subsection{Stochastic PLS on UK Biobank Data}
+In this experiment, we showcase the scalability and efficiency of our Stochastic PLS method, PLS-EY, on an extremely high-dimensional imaging genetics dataset from the UK Biobank \citep{sudlow2015uk}.
+\subsubsection{Data}
+The UK Biobank is a large-scale biomedical database containing genetic and phenotypic data from over 500,000 participants. For this experiment, we use a subset of the data consisting of brain imaging features (82 regional volumes) and genetic variants (582,565 SNPs) for 33,333 subjects.
+The brain imaging data was preprocessed using FreeSurfer \citep{Fischl2012} to extract gray-matter volumes for 66 cortical regions (based on the Desikan-Killiany atlas) and 16 subcortical regions. The effects of age, age squared, intracranial volume, sex, and the first 20 genetic principal components (to account for population structure) were regressed out from the brain features. Each brain region of interest (ROI) was then normalized by removing the mean and dividing by the standard deviation.
+The genetic data was processed using PLINK \citep{Purcell2007}, retaining genetic variants with a minor allele frequency of at least 1% and a maximum missingness rate of 2%. Mean imputation was used to fill in missing values, and each variant was centered.
+To generate measures of genetic disease risk, we calculated polygenic risk scores using PRSice \citep{PRSice2014}. Scores were computed with a p-value threshold of 0.05 using GWAS summary statistics for the following diseases: Alzheimer's \citep{Lambert2013}, Schizophrenia \citep{Trubetskoy2022}, Bipolar disorder \citep{Mullins2021}, ADHD \citep{Demontis2023}, ALS \citep{Van_Rheenen2021}, Parkinson's disease \citep{Nalls2019}, and Epilepsy \citep{International_League_Against_Epilepsy_Consortium_on_Complex_Epilepsies2018}.
+\subsubsection{Experimental Setup}
+We apply our PLS-EY method to the UK Biobank dataset, using a mini-batch size of 500 and training for 100 epochs with a learning rate of 0.0001. A key computational challenge in this experiment is maintaining orthogonality between the weight vectors $u_k$ in the PLS model, which is crucial for the method's effectiveness.
+This approach allows us to handle the high-dimensional nature of the data while preserving the interpretability of the learned representations. To the best of our knowledge, this experiment represents the largest-scale PLS analysis of biomedical data to date, demonstrating the potential of our method to facilitate discoveries in extremely large datasets.
+\subsubsection{Results and Observations}
+Figure \ref{fig:UKBB_corr} shows the Pearson correlations among the PLS latent variables $Z_k$ derived from the UK Biobank data. We observe strong correlations between corresponding pairs of representations $Z^{(1)}_k$ and $Z^{(2)}_k$, and weak cross-correlations between $Z^{(1)}_k$ and $Z^{(2)}_i$ for $i \neq k$. This indicates that our PLS-EY model learns a coherent and orthogonal subspace.
 \begin{figure}
-    \centering
-    \includegraphics[width=0.6\textwidth,trim={0.8cm 0cm 0.3cm 0cm}]{figures/UKBB/cross_corr.png}
-    \caption{Pearson correlations among PLS latent variables \( Z_k \) derived from UK Biobank data.}
-    \label{fig:UKBB_corr}
+\centering
+\includegraphics[width=0.6\textwidth,trim={0.8cm 0cm 0.3cm 0cm}]{figures/UKBB/cross_corr.png}
+\caption{Pearson correlations among PLS latent variables $Z_k$ derived from UK Biobank data.}
+\label{fig:UKBB_corr}
 \end{figure}
-
+Furthermore, we investigate the associations between the PLS brain representations $Z$ and the polygenic risk scores for various disorders, as shown in Figure \ref{fig:genetic_risk}. The results reveal significant correlations between the learned representations and genetic risk measures for several disorders, suggesting that the PLS subspace captures relevant information for genetic disease risk. This finding has important implications for biomedical research, as it demonstrates the ability of our method to uncover meaningful relationships in high-dimensional data.
 \begin{figure}
-    \centering
-    \includegraphics[width=0.99\textwidth,trim={0.5cm 0cm 0.7cm 0cm}]{figures/UKBB/prs_correlations.png}
-    \caption{Correlation between PLS brain representations \( Z \) and genetic risk scores for various disorders. AD=Alzheimer's disease, SCZ=Schizophrenia, BP=Bipolar, ADHD=Attention deficit hyperactivity disorder, ALS=Amyotrophic lateral sclerosis, PD=Parkinson's disease, EPI=Epilepsy. $\text{ns}: 0.05< p \leq 1, \ast: 0.01< p \leq 0.05, \ast\ast: 0.001< p \leq 0.01, \ast\ast\ast: 0.0001< p \leq 0.001$.}
-    \label{fig:genetic_risk}
+\centering
+\includegraphics[width=0.99\textwidth,trim={0.5cm 0cm 0.7cm 0cm}]{figures/UKBB/prs_correlations.png}
+\caption{Correlation between PLS brain representations $Z$ and genetic risk scores for various disorders. AD=Alzheimer's disease, SCZ=Schizophrenia, BP=Bipolar disorder, ADHD=Attention deficit hyperactivity disorder, ALS=Amyotrophic lateral sclerosis, PD=Parkinson's disease, EPI=Epilepsy. $\text{ns}: 0.05 < p \leq 1, \ast: 0.01 < p \leq 0.05, \ast\ast: 0.001 < p \leq 0.01, \ast\ast\ast: 0.0001 < p \leq 0.001$.}
+\label{fig:genetic_risk}
 \end{figure}
+These results demonstrate the scalability of our PLS-EY method to extremely high-dimensional data and its ability to learn interpretable representations that capture biologically relevant information. The successful application of our method to the UK Biobank dataset highlights its potential to facilitate discoveries in large-scale biomedical studies.
 
 \section{Discussion}
 
@@ -520,7 +544,7 @@ The significant associations between the PLS representations and genetic risk me
 
 \subsection{Proximal Gradient Descent for Regularized GEPs}
 
-Our future initiatives will enhance CCA, PCA and PLS by incorporating proximal gradient descent for efficient handling of complex regularization terms. This methodology is ideally suited for scenarios where the loss function comprises a smooth, differentiable component plus a non-smooth regularization term. The proximal gradient technique utilizes a gradient step followed by a proximal step, enabling effective management of non-smooth penalties such as L1-norm or Total Variation (TV), which are instrumental in enforcing sparsity and structural constraints.
+Our future initiatives will enhance CCA, PCA and PLS by incorporating proximal gradient descent for efficient handling of complex regularization terms. This methodology is ideally suited for scenarios where the loss function comprises a smooth, differentiable component plus a non-smooth regularization term. The proximal gradient technique uses a gradient step followed by a proximal step, enabling effective management of non-smooth penalties such as L1-norm or Total Variation (TV), which are instrumental in enforcing sparsity and structural constraints.
 
 \subsubsection{Objective Formulation with Regularization}
 

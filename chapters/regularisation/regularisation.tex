@@ -14,10 +14,12 @@ In this chapter, I build upon work presented at the OHBM conference \citep{chapm
 
 This chapter introduces a novel approach for analyzing large-scale neuroimaging datasets, such as the Human Connectome Project (\acrshort{hcp} \citep{van2013wu}) and Alzheimer's Disease Neuroimaging Initiative (\acrshort{adni}), to understand the relationship between brain structure, function, and behavior \citep{SMITH2018263,BZDOK2017549,wang2020finding}.
 These datasets are characterized by a disproportion between the number of subjects and the volume of features, posing a challenge for Canonical Correlation Analysis (CCA) models due to the risk of overfitting and spurious correlations \citep{wang2018finding}.
-For example, the \acrshort{hcp} dataset used in this chapter contains 1003 subjects and 300 features in the functional MRI (fMRI) view while the \acrshort{adni} dataset contains 592 subjects and  168,130 features in the structural MRI (sMRI) view alone.
+For example, the \acrshort{hcp} dataset used in this chapter contains 1003 subjects and 300 features derived from resting-state functional MRI (rs-fMRI), while the \acrshort{adni} dataset contains 592 subjects and 168,130 features in the structural MRI (sMRI) view alone.
 
 In response to the reproducibility crisis in neuroscience \citep{button2013power}, this chapter focuses on enhancing the generalizability of CCA models through regularization, a technique that introduces a bias towards more interpretable and generalizable models \citep{engl1996regularisation,bzdok2019towards}.
 Existing regularization methods in CCA, such as `sparse CCA' with Partial Least Squares (PLS) objectives \citep{le2008sparse,witten2009penalized,lindenbaum2021l0}, are limited by their inherent bias towards the largest principal components \citep{mihalik_canonical_2022}.
+
+Sparse CCA methods, particularly the one proposed by \citet{witten2009penalized}, often referred to as sCCA, are commonly applied in neuroimaging studies. However, these methods face significant challenges when applied to very high-dimensional data, such as structural MRI (sMRI) data. The primary constraint of sCCA is the assumption of identity covariance, which may not hold in practice and limits its applicability to complex neuroimaging data.
 
 To overcome these limitations, we propose the Flexible Regularised Alternating Least Squares (FRALS) framework for CCA based on the Alternating Least Squares form of CCA \citep{golub1995canonical}.
 FRALS allows for the integration of various regularized least squares solvers, particularly emphasizing the elastic net penalty, which combines L2 and L1 penalties.
@@ -56,7 +58,7 @@ Implicit regularisation is achieved by changing the optimisation algorithm and c
 Shrinkage regularisation is a form of regularisation that penalises the magnitude of the model parameters.
 This technique is particularly effective in enhancing the performance of linear models in situations characterised by high dimensionality, multicollinearity, or low signal-to-noise ratios.
 
-In high-dimensional situations where the number of features exceeds the number of observations in either view, Like Linear Regression, Canonical Correlation Analysis is non-identifiable, meaning there is no unique solution.
+In high-dimensional situations where the number of features exceeds the number of observations in either view, like Linear Regression, Canonical Correlation Analysis is non-identifiable, meaning there is no unique solution.
 This is because we can find perfectly correlated latent variables using a linear combination of the features, but there are many different linear combinations that will achieve this.
 Some of these linear combinations will generalize better than others, but there is no way to distinguish between them using the training data alone.
 
@@ -133,38 +135,47 @@ By tuning these parameters, we can control the degree of regularisation applied 
 If we set $c_1$ and $c_2$ to zero, we recover the standard CCA objective while if we set $c_1$ and $c_2$ to one, we recover the PLS objective.
 This allows us to interpolate between the two extremes, allowing us to control the level of shrinkage and therefore the level of bias towards the largest principal components. Ridge CCA has been shown to be effective for neuroimaging data for both CCA \citep{tenenhaus2011regularized, tuzhilina2023canonical, hardoon2004canonical} and Kernel CCA \citep{hardoon2007unsupervised}.
 
-\subsubsection{PCA-CCA} 
-PCA be can be used as an implicit regularisation method for CCA. Most obviously, by using only the first \( k \) principal components of each view as the input to CCA, we can reduce the dimensionality of the data and therefore reduce the number of parameters in the model.
+\subsubsection{Principal Component Regularisation for CCA} 
+Principal Component Analysis (PCA) can be used as an implicit regularisation method for CCA. Most obviously, by using only the first \( k \) principal components of each view as the input to CCA, we can reduce the dimensionality of the data and therefore reduce the number of parameters in the model.
 Moreover, by working with the principal components, we remove the correlation between the features, which can improve the conditioning of the problem.
 While PCA and Independent Component Analysis (ICA) are often used as preprocessing steps for CCA, they can also be used as regularisation methods in their own right.
 Of particular note in neuroimaging are studies with a data-driven approach to the PCA step, where the number of principal components is chosen based on the data \citep{liu2022improved, mihalik_canonical_2022}.
 
-\subsubsection{A Visual Comparison of Shrinkage Techniques}
+\subsubsection{The Impact of Eigenvalue Spectra on Linear Model Solutions}
 
-The distinct effects of Ridge and PCA on the eigenvalues of the effective covariance matrices can be clearly visualised with a simple visualisation.
-We plot the eigenvalues of covariance matrices as perceived by models with different regularisation techniques \footnote{e.g. the eigenvalues of $(1 - c_i) \hat{\Sigma_{ii}} + c_i I$ for ridge and $\hat{\Sigma_{ii}}$ truncated to include only the largest $k$ principal components for PCA}.
-As shown in Figure~\ref{fig:shrinkage}, Ridge regularisation reduces the magnitude of the largest eigenvalues in the effective covariance matrix towards 1, and increases the magnitude of the smallest eigenvalues towards 1.
-On the other hand, PCA-CCA, leaves the largest eigenvalues unchanged, and ignores the smallest eigenvalues (we could have represented this by setting them to infinity).
+The solutions of linear models, such as linear regression and Canonical Correlation Analysis (CCA), are sensitive to the eigenvalue spectrum of the input data's covariance matrix.
+This sensitivity arises from the matrix inversion step in the solution process, where the inverted covariance matrix directly influences the model's weights.
+
+In the context of linear models, the eigenvalues of the covariance matrix represent the variances of the input features in the directions of the corresponding eigenvectors.
+Large eigenvalues indicate high variances and suggest the presence of strong patterns or associations, while small eigenvalues indicate low variances and suggest the presence of noise or weak patterns.
+
+When the covariance matrix is inverted, the reciprocals of the eigenvalues are used.
+This inversion process amplifies the influence of small eigenvalues and attenuates the influence of large eigenvalues on the model's solution.
+Consequently, the model's weights become highly sensitive to noise and weak patterns associated with small eigenvalues, potentially leading to overfitting and unstable solutions.
+
+Regularization techniques, such as Ridge regularization and Principal Component regularization (PCR), aim to mitigate this sensitivity by altering the eigenvalue spectrum of the covariance matrix.
+Figure~\ref{fig:shrinkage} illustrates these effects by plotting the eigenvalues of covariance matrices as perceived by models with different regularization techniques\footnote{For Ridge, we plot the eigenvalues of $(1 - c_i) \hat{\Sigma_{ii}} + c_i I$, while for PCA, we plot the eigenvalues of $\hat{\Sigma_{ii}}$ truncated to include only the largest $k$ principal components.}.
+
+Ridge regularization compresses the spectrum, reducing the influence of the largest eigenvalues and increasing the influence of the smallest eigenvalues.
+PCA truncates the spectrum, preserving the influence of the largest eigenvalues while eliminating the influence of the smallest eigenvalues.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/shrinkage/shrinkage}
-    \caption{Comparison of the effect of OLS, Ridge, and PCA regularisation on the eigenvalues of the covariance matrix.}\label{fig:shrinkage}
+    \caption{Comparison of the effect of Ridge and Principal Components regularization on the eigenvalues of the covariance matrix.}\label{fig:shrinkage}
 \end{figure}
 
-When these effective covariance matrices are inverted to form the CCA objective, these effects are reversed.
-Ridge regularisation increases the magnitude of the weights associated with the largest eigenvalues and decreases the magnitude of the smallest eigenvalues.
-PCA maintains the weights associated with the largest eigenvalues and sets the weights associated with the smallest eigenvalues to zero.
-The visualisation underscores the intrinsic nature of each regularisation method:
+By modifying the eigenvalue spectrum, regularization techniques control the sensitivity of linear model solutions to different patterns in the data.
+However, while these techniques can improve model performance and stability, they do not inherently enhance the interpretability of the results, as the weights are shrunk towards zero but not eliminated, and the models still utilize all features.
+
 \begin{itemize}
-    \item \textbf{Unregularised}: Presents the unaltered spectrum, making it susceptible to noise but preserving potential subtle patterns.
-    \item \textbf{Ridge}: Warps the spectrum, shrinking the largest eigenvalues and expanding the smallest eigenvalues, potentially missing subtle patterns but offering a cleaner representation of stronger associations.
-    \item \textbf{PCA}: Truncates the spectrum, ignoring the smallest eigenvalues and preserving the largest eigenvalues, potentially missing subtle patterns but offering a cleaner representation of stronger associations.
+    \item \textbf{Unregularized}: Utilizes the unaltered spectrum, retaining potential subtle patterns but susceptible to noise.
+    \item \textbf{Ridge}: Warps the spectrum, attenuating the influence of the largest eigenvalues and amplifying the influence of the smallest eigenvalues, potentially emphasizing stronger associations at the expense of subtle patterns.
+    \item \textbf{PCA}: Truncates the spectrum, focusing solely on the largest eigenvalues and discarding the smallest eigenvalues, potentially emphasizing stronger associations at the expense of subtle patterns.
 \end{itemize}
 
-However, while these shrinkage techniques can improve the performance of CCA, they do not obviously improve the interpretability of the results.
-Weights are shrunk towards zero, but they are not set to zero.
-This means that the model still uses all the features, and the results are not sparse.
+While these regularization techniques can improve CCA performance, they do not inherently enhance the interpretability of the results.
+Weights are shrunk towards zero but not eliminated, meaning the model still utilizes all features, and the results remain dense.
 
 \subsection{Sparse Regularisation}
 
@@ -194,7 +205,7 @@ The optimisation problem for PMD is then given by:
 \end{align}
 
 This Sparse PLS (SPLS) approximation has been highly influential as a form of Sparse CCA because it is extremely computationally efficient method \footnote{it can be solved by a variant of the power method; iteratively multiplying $u\sps{1}$ by $\hat{\Sigma_{12}}$ and soft-thresholding}.
-Like the relationship between PLS and CCA, PMD and a form of CCA with constrained L1 norm are equivalent only when the covariance matrices are identity matrices.
+While PMD is often referred to as a form of Sparse CCA, it is essential to note that PMD is equivalent to a sparse CCA formulation with L1 norm constraints only when the covariance matrices are identity matrices. In practice, however, real-world covariance matrices are rarely identity matrices. As a result, PMD effectively becomes a Sparse PLS method, as the constraints in the PMD formulation ($u\spsT{i} u\sps{i} = 1$) correspond to the PLS constraints rather than the CCA constraints ($u\spsT{1}\Sigma_{ii} u\sps{1} = 1$) when the covariance matrices are not identity matrices.
 There are a number of other sparse CCA methods that employ the PLS approximation \citep{parkhomenko2009sparse, waaijenborg2008quantifying, lindenbaum2021l0}.
 However, while the PLS approximation is efficient, it means these methods inherit a bias towards the largest principal components from PLS.
 
@@ -261,7 +272,7 @@ This led us to propose the Flexible Regularised Alternating Least Squares (FRALS
 The primary goal of our Flexible Regularised Alternating Least Squares framework is to provide a versatile and user-friendly interface for Canonical Correlation Analysis (CCA). This is achieved by designing the framework to be compatible with any scikit-learn compatible regularised least squares solver.
 This compatibility is pivotal as it allows researchers and practitioners to leverage the extensive range of solvers available in scikit-learn, a popular machine learning library in Python.
 
-This approach marks a significant departure from traditional methodologies in CCA, which often focused on developing or utilizing specific solvers tailored for particular types of data or computational constraints.
+This approach marks a significant departure from traditional methodologies in CCA, which often focused on developing or using specific solvers tailored for particular types of data or computational constraints.
 By contrast, \acrshort{frals} democratises access to advanced CCA techniques, allowing users to select solvers that best fit their specific data characteristics, computational needs, or familiarity.
 Such flexibility is particularly advantageous in interdisciplinary fields like neuroimaging, where diverse datasets and varying levels of technical expertise are common.
 
@@ -316,7 +327,7 @@ Our evaluation of CCA models used a standard predictive framework, dividing the 
 \subsubsection{Model Comparisons}
 
 The experiment aims to demonstrate the effectiveness of tunable shrinkage and sparsity in CCA models, enabled by the FRALS framework.
-We compare the performance of Elastic Net FRALS with other CCA variants such as PCA, PLS, Ridge CCA, SPLS, and Elastic Net CCA, particularly in the context of high-dimensional datasets like HCP and ADNI\@.
+We compare the performance of Elastic Net FRALS with other CCA variants such as PLS, Ridge CCA, and SPLS particularly in the context of high-dimensional datasets like HCP and ADNI\@.Additionally, we compare these CCA models to a baseline approach of applying separate Principal Component Analysis (PCA) to each view. While PCA captures high-variance directions within each view, it does not explicitly capture the correlation between the views, unlike CCA models.
 
 \begin{table}[h]
     \centering
@@ -348,16 +359,16 @@ The optimization goal was to achieve the highest average out-of-sample correlati
 
 The \acrshort{hcp} offers publicly available resting-state functional MRI (rs-fMRI) and non-imaging measures like demographics, psychometrics, and other behavioral measures.
 Specifically, we sourced data from 1003 subjects out of the 1200-subject data release of the \acrshort{hcp}.
-The rs-fMRI data provided brain connectivity matrices. These were derived from pairwise partial correlations between subject components obtained through group independent component analysis (ICA), utilizing 25 components. This resulted in 300 brain variables, corresponding to the lower triangle of the connectivity matrix. In our analysis, 145 non-imaging subject measures were incorporated, similar to prior studies, with the exception of 13 measures (ASR\_Aggr\_Pct, ASR\_Attn\_Pct, ASR\_Intr\_Pct, ASR\_Rule\_Pct, ASR\_Soma\_Pct, ASR\_Thot\_Pct, ASR\_Witd\_Pct, DSM\_Adh\_Pct, DSM\_Antis\_Pct, DSM\_Anxi\_Pct, DSM\_Avoid\_Pct, DSM\_Depr\_Pct, DSM\_Somp\_Pct) that were unavailable in the 1200-subject data release. Furthermore, nine confounding variables, including the acquisition reconstruction software version, a summary statistic of head motion during rs-fMRI acquisition, weight, height, systolic and diastolic blood pressure, hemoglobin A1C level, and cube-root of total brain and intracranial volumes as estimated by FreeSurfer, were regressed out from both data types.
+The rs-fMRI data provided brain connectivity matrices. These were derived from pairwise partial correlations between subject components obtained through group independent component analysis (ICA), using 25 components. This resulted in 300 brain variables, corresponding to the lower triangle of the connectivity matrix. In our analysis, 145 non-imaging subject measures were incorporated, similar to prior studies, with the exception of 13 measures that were unavailable in the 1200-subject data release. Furthermore, nine confounding variables, including the acquisition reconstruction software version, a summary statistic of head motion during rs-fMRI acquisition, weight, height, systolic and diastolic blood pressure, hemoglobin A1C level, and cube-root of total brain and intracranial volumes as estimated by FreeSurfer, were regressed out from both data types.
 More details can be found in \citet{smith2015positive, mihalik2022canonical}.
-We summarize the parameters of the \acrshort{hcp} data in table~\ref{tab:hcp-parameters}.
+We summarize the characteristics of the \acrshort{hcp} data in table~\ref{tab:hcp-parameters}.
 
 \begin{table}
     \centering
-    \caption{HCP Data Parameters}
+    \caption{HCP Data Characteristics}
     \begin{tabular}{| l | l |}
         \hline
-        \textbf{Parameter}                        & \textbf{Value} \\
+        \textbf{Characteristic}                        & \textbf{Value} \\
         \hline
         Number of samples (\textit{n})            & 1003           \\
         Number of features in View 1 (\textit{p}) & 300          \\
@@ -370,19 +381,19 @@ We summarize the parameters of the \acrshort{hcp} data in table~\ref{tab:hcp-par
 
 Accessible at \url{adni.loni.usc.edu}, the \acrshort{adni} database was initiated in 2003. 
 Its primary aim is the examination of how well serial MRI, PET (Positron Emission Tomography), biological markers, along with clinical and neuropsychological assessments, track the progression of Mild Cognitive Impairment (MCI) and the early stages of Alzheimer’s disease. 
-In our study, we utilised data from a subset of 592 unique individuals, comprising 309 males (average age 74.68 ± 7.36 SEM) and 283 females (average age 72.18 ± 7.50 SEM). This subset included 147 healthy controls, 335 individuals with Mild Cognitive Impairment (MCI), and 110 diagnosed with dementia. 
+In our study, we used data from a subset of 592 unique individuals, comprising 309 males (average age 74.68 ± 7.36 SEM) and 283 females (average age 72.18 ± 7.50 SEM). This subset included 147 healthy controls, 335 individuals with Mild Cognitive Impairment (MCI), and 110 diagnosed with dementia. 
 T1 weighted structural MRI (sMRI) scans were the source of whole-brain voxel-based grey matter volumes. The sMRI data underwent preprocessing with SPM12 \citep{ashburner2014spm12}, which involved segmentation, normalisation using DARTEL, reslicing to a resolution of \(2 \times 2 \times 2 \, \text{mm}^3\)
-, and spatial smoothing using a Gaussian kernel with 2 mm full width at half maximum (FWHM). A grey matter voxel selection mask, with a threshold of $\geq$10\%, was applied to all participants' scans, resulting in 168,130 brain variables. 
-The Mini-Mental State Examination (MMSE) is a widely recognised neurocognitive test comprising 30 questions across five cognitive domains\citep{folstein1975mini}: orientation (questions 1-10), registration (questions 11-13), attention and calculation (questions 14-18), recall (questions 19-21), and language (questions 22-30).
+, and spatial smoothing using a Gaussian kernel with 2 mm full width at half maximum (FWHM). A grey matter voxel selection mask was created by including voxels that had a probability of being grey matter greater than or equal to 10\% across all participants. This mask, with a threshold of $\geq$10\%, was then applied to all participants' scans, resulting in 168,130 brain variables.
+The Mini-Mental State Examination (MMSE) is a widely recognised neurocognitive test comprising 30 questions across five cognitive domains \citep{folstein1975mini}: orientation (questions 1-10), registration (questions 11-13), attention and calculation (questions 14-18), recall (questions 19-21), and language (questions 22-30).
 An additional item was included in our study to account for the number of attempts a subject needed to correctly respond to the registration domain questions, leading to a total of 31 variables. As in \citet{monteiro2016multiple}, no confounds were removed from these data.
-We summarize the parameters of the \acrshort{adni} data in table~\ref{tab:adni-parameters}.
+We summarize the characteristics of the \acrshort{adni} data in table~\ref{tab:adni-parameters}.
 
 \begin{table}
     \centering
-    \caption{ADNI Data Parameters}
+    \caption{ADNI Data Characteristics}
     \begin{tabular}{| l | l |}
         \hline
-        \textbf{Parameter}                        & \textbf{Value} \\
+        \textbf{Characteristic}                        & \textbf{Value} \\
         \hline
         Number of samples (\textit{n})            & 592            \\
         Number of features in View 1 (\textit{p}) & 168130         \\
@@ -391,44 +402,6 @@ We summarize the parameters of the \acrshort{adni} data in table~\ref{tab:adni-p
     \end{tabular}\label{tab:adni-parameters}
 \end{table}
 
-\subsection{The predictive framework for CCA}\label{subsec:the-predictive-framework-for-cca}
-
-To evaluate the performance of CCA models, we employ a standard predictive framework.
-We split the data into training and test sets using a 80:20 split, and use the training set to fit the model.
-We then use the test set to evaluate the model's performance.
-Where relevant, pre-processing is performed on the training set and the same pre-processing is applied to the test set.
-This is important to avoid data leakage, where information from the test set is used to fit the model.
-
-\subsubsection{Model Comparisons}
-In the experiments in this section, we are interested in illustrating the effects of tunable shrinkage and sparsity on the performance and interpretability of CCA models, enabled by the \acrshort{frals} framework.
-To this end, we compare the performance of Elastic Net \acrshort{frals} with other CCA variants, including PCA, PLS, Ridge CCA, Sparse PLS, and Elastic Net CCA\@.
-Since the \acrshort{hcp} and \acrshort{adni} data are high-dimensional, we drop CCA from the analysis since it would produce random results.
-
-\begin{table}[h]
-    \centering
-    \caption{Employed CCA Variants}
-    \begin{tabular}{|l|l|l|l|}
-        \hline
-        \textbf{Model}               & \textbf{Abbreviation} & \textbf{Hyperparameters}                         & \textbf{Hyperparameter Range}                                                                                             \\
-        \hline
-        Principal Component Analysis & PCA                   & -                                                & -                                                                                                                         \\
-        \hline
-        Regularised CCA              & RCCA                  & \(c_1, c_2\)                                     & 0-1 (log scaled)                                                                                                          \\
-        \hline
-        FRALS - Elastic              & Elastic               & \(\alpha_1, \alpha_2, \text{l1}_1, \text{l1}_2\) & (1e-5,1e-1), (0-1)                                                                                                        \\
-        \hline
-        Partial Least Squares        & PLS                   & -                                                & -                                                                                                                         \\
-        \hline
-        Sparse PLS                   & SPLS                  & \(\tau_1, \tau_2\)                               & 0-1\footnote{As in \citet{witten2013package}, these are converted to 0-$\sqrt {\text{number of features}}$)} (log scaled) \\
-        \hline
-    \end{tabular}\label{tab:cca-variants}
-\end{table}
-
-\subsubsection{Model Selection}
-
-For the models that require hyperparameter tuning, we use a grid search to find the best hyperparameters.
-Specifically, we use 5-fold cross-validation to evaluate the performance of a model with a given set of hyperparameters on 5 different splits of the training data with non-overlapping validation sets.
-We optimise for the hyperparameters that give the best average out of sample correlation.
 
 \section{Experiment Results}
 
@@ -440,7 +413,7 @@ Next, we consider the results of applying the various CCA variants to the \acrsh
 
 Both Ridge CCA and Elastic Net outperformed PLS and SPLS in terms of holdout correlation captured (Figure~\ref{fig:performance}).
 This suggests that tunable L2 regularisation is important, even for very high-dimensional data, and that resorting to PLS is suboptimal.
-On the other hand, while the additional sparsity improved SPLS over PLS (consistent with previous work \cite{monteiro2016multiple}), it did not improve the performance of the Elastic Net model over Ridge CCA\@.
+On the other hand, while the additional sparsity improved SPLS over PLS (consistent with previous work \citep{monteiro2016multiple}), it did not improve the performance of the Elastic Net model over Ridge CCA. This suggests that the associations in the HCP data are non-sparse, and the sparse regularization provided by the Elastic Net did not offer any advantage over the Ridge CCA's L2 regularization.
 
 \begin{figure}[h]
     \centering
@@ -449,8 +422,7 @@ On the other hand, while the additional sparsity improved SPLS over PLS (consist
     \label{fig:performance}
 \end{figure}
 
-Nonetheless, the Elastic Net model demonstrated a more sparse representation than the Ridge CCA model, with the Elastic Net model utilizing 241 and 96 non-zero weights for the brain and behaviour views, respectively (Table~\ref{tab:sparse-weights-hcp}). In contrast, the Ridge CCA model used 300 and 145 non-zero weights for the respective views.
-Moreover, the SPLS model achieved an even sparser solution with only 118 and 56 non-zero weights for the brain and behaviour views. Considering the comparable performance of the Elastic Net and Ridge CCA models, the former's sparsity may offer a preferable solution.
+Nonetheless, the Elastic Net model demonstrated a more sparse representation than the Ridge CCA model, with the Elastic Net model using 241 and 96 non-zero weights for the brain and behavior views, respectively (Table~\ref{tab:sparse-weights-hcp}). In contrast, the Ridge CCA model used 300 and 145 non-zero weights for the respective views. Moreover, the SPLS model achieved an even sparser solution with only 118 and 56 non-zero weights for the brain and behavior views. The choice between a sparse or dense representation depends on the specific aims of the analysis. If the goal is to uncover all potential associations, a dense representation involving all variables might be preferable. However, if the aim is to identify the most relevant variables driving the associations, a sparse representation like the one provided by the Elastic Net or SPLS models could be more suitable, as it highlights the key contributing variables while filtering out potentially irrelevant ones. Considering the comparable performance of the Elastic Net and Ridge CCA models, the former's sparsity may offer a more interpretable solution for identifying the most relevant variables, albeit at the cost of potentially missing some weaker associations.
 
 \begin{table}[h]
     \centering
@@ -470,7 +442,7 @@ Moreover, the SPLS model achieved an even sparser solution with only 118 and 56 
 
 \subsubsection{Behaviour Weights}
 
-Figure~\ref{fig:behaviour} presents the top eight positive and negative non-imaging weights for each model to visualize the behavioural data variations observed in the previous section. The PCA model emphasizes a mode of variation with positive correlations to psychiatric and life function tests, contrasting with negative correlations to certain emotion and personality tests. In comparison, the RCCA and Elastic Net models highlight a variation mode negatively correlated with the Line Orientation test and to a lesser extent, smoking, while showing positive correlations with other cognitive assessments. The PLS model's variation mode echoes the positive-negative pattern identified by \cite{smith2015positive}, showing positive correlations with agreeableness, vocabulary tests, and life satisfaction, juxtaposed with strong negative correlations with smoking and antisocial behaviors. SPLS selects a similar mode but prioritizes vocabulary tests and smoking over rule-breaking and antisocial personality traits, aligning with the preprocessing steps described in \cite{smith2015positive} which incorporated a top-100 PCA projection of both brain and behavioural data.
+Figure~\ref{fig:behaviour} presents the top eight positive and negative non-imaging weights for each model to visualize the behavioural data variations observed in the previous section. The PCA model emphasizes a mode of variation with positive correlations to psychiatric and life function tests, contrasting with negative correlations to certain emotion and personality tests. In comparison, the RCCA and Elastic Net models highlight a variation mode negatively correlated with the Line Orientation test and to a lesser extent, smoking, while showing positive correlations with other cognitive assessments. The PLS model's variation mode echoes the positive-negative pattern identified by \cite{smith2015positive}, showing positive correlations with agreeableness, vocabulary tests, and life satisfaction, juxtaposed with strong negative correlations with smoking and antisocial behaviors. SPLS selects a similar mode but prioritizes vocabulary tests and smoking over rule-breaking and antisocial personality traits.
 
 \begin{figure}[h]
     \centering
@@ -527,9 +499,7 @@ The RCCA and ElasticNet models might be detecting more integrative and possibly 
 
 \subsubsection{Model Similarity}
 
-In this section, we compare the models in terms of their similarity.
-We can measure the pairwise similarity between two models by comparing their \gls{weights} and their \gls{representations}.
-We can compare the \gls{weights} by computing the correlation between the \gls{weights} of the two models and we can compare the \gls{representations} by computing the correlation between the \gls{representations} of the two models.
+In this section, we compare the models in terms of their similarity. We can measure the pairwise similarity between two models by comparing their weights and their representations\footnote{Recall that in CCA models, what we call representations are sometimes referred to as scores or latent variables.}. We can compare the weights by computing the correlation between the weights of the two models, and we can compare the representations by computing the correlation between the representations of the two models.
 
 In Figure~\ref{fig:brain-behaviour-scores-sim}, we plot the correlation between the brain and behaviour \gls{representations} for each model. 
 We can see clearly that both PCA, PLS, and SPLS are all highly correlated in terms of their brain representations, revealing the bias of PLS towards the largest principal components.
@@ -652,13 +622,15 @@ This is particularly true for the brain \gls{weights} where PCA exhibits a very 
 
 \section{Discussion and Limitations}
 
+The Flexible Regularised Alternating Least Squares (FRALS) framework for CCA, introduced in this chapter, exhibits promising performance in terms of out-of-sample correlation. Our findings indicate that while Elastic Net CCA generally outperforms other CCA variants, much of the benefit is derived from using properly tuned Ridge regularization. 
 
-The Flexible Regularised Alternating Least Squares (FRALS) framework for CCA, introduced in this chapter, exhibits promising performance in terms of out-of-sample correlation.
-Our findings indicate that, while Elastic Net CCA generally outperforms other CCA variants, much of the benefit is derived from using properly tuned Ridge regularization.
-This is most obviously illustrated in the \acrshort{hcp} dataset where sparsity does not appear to be beneficial in terms of out-of-sample correlation and therefore casts doubt on whether the sparsity of the model is interpretable or spurious.
-It also questions whether the additional computational cost of Elastic Net CCA is justified.
-Our experiments reveal that Ridge CCA typically outperforms PLS across both datasets.
-This observation is akin to the dynamics of regularized regression, where maximal ridge regularization is seldom necessary, even in high-dimensional contexts.
+The relative importance of Ridge regularization and sparsity, however, appears to be dataset-dependent. In the HCP dataset, our results suggest that the associations between brain and behavioral measures are not sparse, as sparsity did not improve the out-of-sample correlation. This questions the interpretability of the sparse model and casts doubt on whether the additional computational cost of Elastic Net CCA is justified for this particular dataset.
+
+In contrast, for the ADNI dataset, the Elastic Net CCA model benefited from the sparsity regularization, indicating that the associations between brain and cognitive measures in this context are likely sparse. From a neuroscientific perspective, these results highlight that the effectiveness of Ridge regularization and sparsity can vary depending on the specific phenomenon under study.
+
+Our experiments also reveal that Ridge CCA typically outperforms PLS across both datasets. This observation is akin to the dynamics of regularized regression, where maximal ridge regularization is seldom necessary, even in high-dimensional contexts.
+
+In summary, while both Ridge regularization and sparsity can be helpful in CCA models, their relative trade-off and the associated computational cost should be evaluated in the context of the specific research question and the expected sparsity of the underlying associations.
 
 \subsection{FRALS Limitations}
 

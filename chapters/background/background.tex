@@ -121,7 +121,7 @@ We want to learn meaningful $K$-dimensional \gls{representations}
 \end{equation}
 For convenience, define $D = \sum_{i=1}^I D_i$ and $\theta = \left(\theta\sps{i}\right)_{i=1}^I$.
 Without loss of generality take $D_1 \geq D_2 \geq \cdots \geq D_I$.
-We will consistently use We will consistently use the superscript $(i)$ to denote the $i$-th view and not as an exponentiation operation.
+We will consistently use the superscript $(i)$ to denote the $i$-th view and not as an exponentiation operation.
 $d \in [D_i]$ for dimensions of input variables;
 and $l,k \in [K]$ for dimensions of \gls{representations} - i.e. to subscript dimensions of $Z\sps{i}, f\sps{i}$.
 Later on we will introduce total number of samples $N$.
@@ -140,7 +140,7 @@ The inner product is a measure of similarity between two vectors, with larger va
 \end{align}
 where $|a|$ and $|b|$ are the Euclidean norms (lengths) of vectors $a$ and $b$, respectively.
 
-In this report, when the functions $f$ are linear, we will typically refer to $u_k$ as \gls{weights}, $Z_k = X_k u_k$ as \gls{representations} or \gls{latent variables} (noting that in the CCA literature they are sometimes referred to as canonical variables \citep{borga_learning_1998}), depending on the context.
+In this report, when the functions $f$ are linear, we will typically refer to $u_k$ as \gls{weights}, $Z_k = X_k u_k$ as \gls{representations} or \gls{latent variables} (noting that in the CCA literature they are sometimes referred to as canonical variables \citep{borga_learning_1998} or scores \citep{mihalik2022canonical}), depending on the context.
 We will sometimes consider a matrix $U = \left(u_1, \dots, u_K\right) \in \R^{D \times K}$ of \gls{weights}, and a matrix $Z = \left(Z_1, \dots, Z_K\right) \in \R^{N \times K}$ of representations.
 We will refer to the Pearson correlation between features and their respective latent variable $\Corr(X\sps{i}_j, Z_k)$ as the \gls{loadings} of $X\sps{i}_j$ on $Z_k$ \citep{rosipal2005overview, alpert1972interpretation, borga_learning_1998}, noting that the same concept has also been referred to as structure correlations \citep{meredith1964canonical}.
 
@@ -149,23 +149,23 @@ We will use the notation $\Sigma_{ij}=\Cov(X\sps{i}, X\sps{j})$ for the populati
 
 We will also use $\Sigma_{ii}= \Cov(X\sps{i})$ for the population \gls{covariance matrix} of the random variables associated with view $i$ with each other. This \gls{covariance matrix} captures the relationships between variables within the same view. Each element of this matrix, $\Sigma_{ii}(a,b)$, measures how much the $a$-th and $b$-th variables in view $i$ change together. A positive covariance indicates that the variables within the same view tend to increase or decrease together, while a negative covariance indicates that they tend to move in opposite directions. These within-view \glspl{covariance matrix} are essential for understanding the structure of the data in each view and are used in conjunction with the inter-view \glspl{covariance matrix} in multiview learning algorithms.
 
-Many classical subspace learning algorithms can be formulated as Generalized Eigenvalue Problems (GEPs) constructed from \glspl{covariance matrix}. In the following subsection, we introduce the concept of GEPs and discuss their properties, which will be useful for understanding the optimization problems and solutions of these algorithms.
+Many classical subspace learning algorithms can be formulated as Generalized Eigenvalue Problems \acrshort{gep}s constructed from \glspl{covariance matrix}. In the following subsection, we introduce the concept of \acrshort{gep}s and discuss their properties, which will be useful for understanding the optimization problems and solutions of these algorithms.
 
 \subsection{Generalized Eigenvalue Problems in linear algebra}
-A Generalized Eigenvalue Problem (GEP) is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}.
+A Generalized Eigenvalue Problem is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}.
 They are usually characterized by the set of solutions to the equation:
 \begin{align}
     \label{eq:igep}
     Au=\lambda Bu
 \end{align}
 with $\lambda \in \R, u \in \R^D$, called (generalized) eigenvalue and (generalized) eigenvector respectively.
-When $B$ is positive definite, then the GEP becomes equivalent to an eigen-decomposition of the symmetric matrix $B^\mhalf A B^\mhalf$ \citep{ghojogh2019eigenvalue}.
+When $B$ is positive definite, then the \acrshort{gep} becomes equivalent to an eigen-decomposition of the symmetric matrix $B^\mhalf A B^\mhalf$ \citep{ghojogh2019eigenvalue}.
 In addition, one can find a basis of eigenvectors spanning $\R^D$.
 We define a top-$K$ subspace to be one spanned by some set of eigenvectors {$u_1,\dots,u_K$} with the top-$K$ associated eigenvalues $\lambda_1 \geq \dots \geq \lambda_K$.
 We say a matrix $U \in \R^{D \times K}$ defines a top-$K$ subspace if its columns span one.
 
 \paragraph{Uniqueness}
-In GEPs, the eigenvectors $u$ are not in general unique, but the generalized eigenvalues $1 \geq \lambda_1 \geq \lambda_2 \geq \dots \geq 0$ are unique \citep{mills1988calculation}.
+In \acrshort{gep}s, the eigenvectors $u$ are not in general unique, but the generalized eigenvalues $1 \geq \lambda_1 \geq \lambda_2 \geq \dots \geq 0$ are unique \citep{mills1988calculation}.
 
 \section{Classical Subspace Learning Algorithms}\label{sec:classical-subspace-learning-algorithms}
 
@@ -232,7 +232,7 @@ There are three major limitations of \acrshort{pca} that are relevant to this th
 
     \item \textbf{Sparsity and Interpretability}: Although \acrshort{pca} reduces dimensionality by projecting the data onto new axes, the resulting principal components are linear combinations of \textit{all} the original features. This complex aggregation can make it difficult to interpret the components, especially when each component is influenced by many original variables. For this reason, sparse variants of \acrshort{pca} have been developed \citep{zou2006sparse,zou2018selective}, which aim to find sparse linear combinations of the original features; interpretable as a subset of the original features contributing to a significant proportion of the variance in the data.
 
-    \item \textbf{Multiview Data Utilization}: \acrshort{pca} is primarily designed for analyzing a single dataset and does not naturally accommodate multiview data, where multiple independent sets of variables (views) describe the data. While it is possible to concatenate these \gls{views} into a single dataset prior to analysis, this approach does not take advantage of the potential interactions and complementary information across the views, which can be critical for more insightful analysis in applications such as image processing, bioinformatics, and social sciences.
+    \item \textbf{Multiview Data}: \acrshort{pca} is primarily designed for analyzing a single dataset and does not naturally accommodate multiview data, where multiple independent sets of variables (views) describe the data. While it is possible to concatenate these \gls{views} into a single dataset prior to analysis, this approach does not take advantage of the potential interactions and complementary information across the views, which can be critical for more insightful analysis in applications such as image processing, bioinformatics, and social sciences.
 \end{enumerate}
 
 Nevertheless, \acrshort{pca} remains a popular tool in practice \citep{greenacre2022principal} and is a useful baseline for multiview learning methods, and we will use it as a point of comparison throughout this thesis.
@@ -325,7 +325,7 @@ We can also represent the system of equations in matrix form as follows:
 
 Which is of the form $A v = \lambda B v$. \acrshort{pls} is therefore also defined by the solution to a single generalized eigenvalue problem.
 
-Given the notions of uniqueness in GEPs, the \gls{weights} $u$ are not in general unique but we can write the vector of generalized eigenvalues $(\lambda_1, \dots, \lambda_K)$ representing covariances as:
+Given the notions of uniqueness in \acrshort{gep}s, the \gls{weights} $u$ are not in general unique but we can write the vector of generalized eigenvalues $(\lambda_1, \dots, \lambda_K)$ representing covariances as:
 
 \begin{align}
     \label{eq:pls-vector-of-correlations-def}
@@ -428,7 +428,7 @@ Which is once again of the form $A u = \lambda B u$. \acrshort{cca}, like \acrsh
 
 \paragraph{Canonical Correlations}
 In the case of \acrshort{cca}, the generalized eigenvalues $\lambda$ are generally called canonical correlations \citep{hotelling1935canonical, hotelling1992relations}.
-Given the notions of uniqueness in GEPs, the \gls{weights} $u$ are not in general unique but we can write the vector of generalized eigenvalues or canonical correlations as:
+Given the notions of uniqueness in \acrshort{gep}s, the \gls{weights} $u$ are not in general unique but we can write the vector of generalized eigenvalues or canonical correlations as:
 \begin{align}
     \label{eq:cca-vector-of-correlations-def}\small
     \CCA_K(X^{(1)},X^{(2)}) \defeq (\rho_k)_{k=1}^K
@@ -452,7 +452,7 @@ The optimization problem for \acrshort{mcca} can be formulated as follows:
 
 \paragraph{Generalized Eigenvalue Problem}
 
-The MCCA optimization problem can be solved by formulating it as a generalized eigenvalue problem (GEP). The GEP for MCCA can be written in matrix form as follows:
+The MCCA optimization problem can be solved by formulating it as a generalized eigenvalue problem. The \acrshort{gep} for MCCA can be written in matrix form as follows:
 
 \begin{align}
     \small
@@ -484,11 +484,11 @@ The MCCA optimization problem can be solved by formulating it as a generalized e
     \end{pmatrix}.
 \end{align}
 
-The matrix $A$ contains the cross-covariance matrices between the views, while the matrix $B$ is a block diagonal matrix containing the within-view covariance matrices. The solution to the GEP gives the optimal directions $u\sps{1}, \dots, u\sps{I}$ and the corresponding generalized eigenvalues $\lambda$.
+The matrix $A$ contains the cross-covariance matrices between the views, while the matrix $B$ is a block diagonal matrix containing the within-view covariance matrices. The solution to the \acrshort{gep} gives the optimal directions $u\sps{1}, \dots, u\sps{I}$ and the corresponding generalized eigenvalues $\lambda$.
 
 \paragraph{Unified Framework}
 
-The GEP formulation of MCCA can be further generalized to include ridge regularization, which helps stabilize the solution when the  \glspl{covariance matrix} are ill-conditioned. This leads to a unified framework that encompasses both CCA and its ridge-regularized extensions.
+The \acrshort{gep} formulation of MCCA can be further generalized to include ridge regularization, which helps stabilize the solution when the  \glspl{covariance matrix} are ill-conditioned. This leads to a unified framework that encompasses both CCA and its ridge-regularized extensions.
 
 Let $A,B_\alpha \in \R^{D \times D}$ be block matrices defined as follows:
 \begin{align}
@@ -635,6 +635,9 @@ Both involve the integration of data from multiple sources, offering rich insigh
 
 Brain-behavior studies typically involve pairing neuroimaging data, such as that obtained from Structural MRI (sMRI) or Functional MRI (fMRI), with non-imaging data like responses from questionnaires, cognitive test results, and other behavioral assessments.
 sMRI provides detailed anatomical brain images, essential for understanding brain structure and neurological disorders \citep{kanai2011structural}, while fMRI focuses on brain function by mapping activity during cognitive tasks \citep{miranda2021systematic}.
+
+In addition to task-based fMRI, resting-state fMRI (rs-fMRI) is frequently used to extract functional connectivity, reflecting the brain's functional organization during rest. This approach has been widely applied in Canonical Correlation Analysis (CCA) and Partial Least Squares (PLS) studies. For instance, \citet{smith2015cca} applied CCA to rs-fMRI data alongside non-imaging features, demonstrating the utility of rs-fMRI in understanding intrinsic brain connectivity.
+
 The integration of these imaging techniques with behavioral data offers a comprehensive view of how brain structures and functions correlate with behavioral and cognitive patterns \citep{rypma2001age,genon2022linking}.
 
 Imaging-Genetics, another critical multiview approach, combines neuroimaging data with genetics and omics information \citep{le2008sparse}.

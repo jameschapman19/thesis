@@ -22,17 +22,22 @@ Furthermore, we rigorously prove that loadings are invariant to columnwise trans
 
 Our experimental design focuses on two main aspects. First, we evaluate the ability of CCA models to accurately recover the true model weights and loadings. Second, we examine the out-of-sample performance, which is often observed to be poor in practical datasets despite statistical significance, particularly for PLS-based models. This observation led us to question whether the issue lies in poor model fit or a lack of signal in the data with weak or biologically spurious correlations.
 
-One of our most striking findings, consistent with the previous chapter, is the efficacy of Ridge Regularized CCA models compared to PLS models in identifying high correlations under anisotropic noise conditions. This complements earlier work \citep{helmer2020stability} that found that the number of samples needed to find high correlations increases with dimensionality; our results suggest that the important variable is the dimensionality of the smaller view.
+One of our most striking findings, consistent with the previous chapter, is the efficacy of Ridge Regularized CCA models compared to PLS models in identifying high correlations under anisotropic noise conditions; where the noise covariance matrices ($\Psi$) are not scalar multiples of the identity matrix, leading to non-spherical noise distributions. This complements earlier work \citep{helmer2020stability} that found that the number of samples needed to find high correlations increases with dimensionality; our results suggest that the important variable is the dimensionality of the smaller view.
 
 Through this chapter, we aim to provide a comprehensive understanding of the relationship between weights and loadings in CCA models, the impact of regularization on model interpretation, and the performance of CCA models in high-dimensional settings. By unifying generative perspectives, proving mathematical properties, and conducting extensive simulations, we contribute to the ongoing debate in the CCA literature and provide valuable insights for researchers and practitioners applying CCA in various domains.
 
 \section{Background: Weights and Loadings in Canonical Correlation Analysis}
 
-As discussed in chapter \ref{ch:background}, Canonical Correlation Analysis (CCA) is a powerful multivariate statistical technique that explores the relationships between two sets of variables. It can be interpreted in two ways: either as a method that finds linear combinations of variables in two datasets that exhibit the highest correlation, or as a technique that estimates latent variables that are maximally correlated.
+CCA can be interpreted in two ways: either as a method that finds linear combinations of variables in two datasets that exhibit the highest correlation, or as a technique that estimates latent variables that are maximally correlated.
 
 The concept of latent variables is particularly important in biomedical applications, as it can help uncover underlying factors influencing observable data. For example, in brain-behavior studies, latent variables may represent hidden neurological or cognitive processes that drive the relationship between brain structure or function and behavioral outcomes. Similarly, in imaging-genetics, latent variables can capture the genetic factors that influence brain morphology or activity patterns. By introducing latent variables, CCA enables researchers to gain a deeper understanding of complex phenomena like gene expression, pathologies, and normative variations in health-related data \citep{lawry2023multi}.
 
-CCA's practical application revolves around two main approaches: the discriminative approach and the generative approach. The discriminative approach, represented as the `backward model' in Figure~\ref{fig:forward-backward-models}, uses weights to estimate highly correlated latent variables from observed data. It focuses on modeling the conditional distribution of the latent variables given the observed data, denoted as $P(Z|X\sps{1},X\sps{2})$. In contrast, the generative approach, known as the `forward model', emphasizes the data generation process and employs loadings to describe the relationship between latent variables and observed data. It models the joint distribution of the observed data conditioned on the latent variables, expressed as $P(X\sps{1},X\sps{2}|Z)$.
+\subsection{Generative and Discriminative Approaches in CCA}
+
+CCA's practical application revolves around two main approaches: the discriminative approach and the generative approach. 
+The generative approach, known as the `forward model', emphasizes the data generation process and employs loadings to describe the relationship between latent variables and observed data. It models the joint distribution of the observed data conditioned on the latent variables, expressed as $P(X\sps{1},X\sps{2}|Z)$. In this approach, the latent variables are assumed to be the underlying cause\footnote{Used here very loosely to give intuition} of the observed data, and the goal is to learn the parameters of the generative model that best explains the data.
+
+In contrast, the discriminative approach, represented as the `backward model' in Figure~\ref{fig:forward-backward-models}, uses weights to estimate highly correlated latent variables from observed data. It focuses on modeling the conditional distribution of the latent variables given the observed data, denoted as $P(Z|X\sps{1},X\sps{2})$. The discriminative approach aims to find the optimal linear combinations of the observed variables that maximize the correlation between the latent variables, without explicitly modeling the data generation process.
 
 \begin{figure}
     \centering
@@ -50,13 +55,19 @@ CCA's practical application revolves around two main approaches: the discriminat
     \caption[Forward and Backward Multiview Models]{\textit{\textbf{Forward and Backward Multiview Models:}} The \textcolor{blue}{generative/forward} and \textcolor{red}{discriminative/backward} approaches in \acrshort{cca}.}\label{fig:forward-backward-models}
 \end{figure}
 
+\subsection{Analogy Between CCA and PCA}
+
 The distinction between the generative and discriminative approaches in CCA is analogous to the different interpretations of Principal Component Analysis (PCA) \citep{park2023critical}. PCA can also be viewed from a generative perspective, where the observed data are assumed to be generated from latent variables \citep{tipping1999probabilistic}, or from a discriminative perspective, where the principal components are linear combinations of the observed variables that maximize the variance \citep{hotelling1933analysis}.
+
+In both CCA and PCA, the generative approach focuses on modeling the joint distribution of the observed data and the latent variables, while the discriminative approach emphasizes finding the optimal linear combinations of the observed variables to estimate the latent variables or principal components.
+
+\subsection{The Debate Regarding Weights and Loadings in CCA}
 
 In CCA research, there is an ongoing debate regarding the interpretation of models in terms of weights or loadings \citep{gu2018simultaneous}. Weights are often preferred for prediction tasks, as they directly relate the observed variables to the latent variables. On the other hand, loadings are favored for interpretation, as they provide insights into the structure and relationships within the data \citep{liu2022improved}. This discussion is particularly relevant to our work in chapter \ref{ch:als} and various studies involving sparse CCA and sparse Partial Least Squares (PLS), where understanding the meaning and implications of sparse loadings and weights is crucial.
 
 Given the importance of this topic, especially in the context of our work in chapter \ref{ch:als} and other studies employing variants of sparse CCA and sparse PLS, it is essential to delve deeper into the interpretation of sparse loadings and weights. In the following sections, we will explore the mathematical properties and practical implications of weights and loadings in CCA, with a focus on sparse and regularized models. By addressing this key aspect of CCA, we aim to contribute to the ongoing debate and provide insights that can guide the application and interpretation of CCA in various domains, including neuroimaging, genetics, and health-related research.
 
-\section{Unifying Generative Perspectives in CCA: Explicit and Implicit Latent Variable Models}
+\section{Unifying Generative Perspectives in CCA: Explicit and Implicit Latent Variable Models of Multiview Data}
 
 This section categorizes the generative models in CCA literature into explicit and implicit latent variable types, each offering distinct insights into the data generation process and the relationship between weights and loadings.
 
@@ -69,74 +80,57 @@ We will use $\sim$ to denote the sampling process, and $|$ to denote conditionin
 For example, \(x | z \sim \mathcal{N}(\mu, \Psi)\) represents a sample \(x\) from a Gaussian distribution with mean \(Wz\) and covariance \(\Psi\) conditioned on the latent variable \(z\).
 We also introduce the notation \(w\sps{i}_{j}\) to refer to the loading of the \(j\)-th feature in the \(i\)-th view on a latent variable, as well as \(W\sps{i}\) to refer to the matrix of loadings for the \(i\)-th view on all latent variables.
 
-\subsection{Explicit Latent Variable Models: Probabilistic CCA and GFA}
+\subsection{Explicit Latent Variable Models: Probabilistic CCA and Group Factor Analysis}
 
-In explicit latent variable models, we assume each view is generated from a linear model with added noise, conditional on the latent variable.
-The distributions for the two views are given by:
+Explicit latent variable models assume that the observed data in each view is generated from a shared latent space, with view-specific linear transformations and added noise. These models provide a probabilistic framework for understanding the relationship between multiple views of data and the underlying latent factors that give rise to them.
 
+\subsubsection{Probabilistic CCA}
+Probabilistic CCA (PCCA) is an explicit latent variable model that extends classical CCA to a probabilistic setting. In PCCA, the generative process for two views can be described as follows:
 \begin{align}
-    z &\sim \mathcal{N}(0, I)\\
-    x\sps{i} &\sim \mathcal{N}(W\sps{i} z + \mu\sps{i}, \Psi\sps{1})
+z &\sim \mathcal{N}(0, I)\
+x\sps{i} &\sim \mathcal{N}(W\sps{i} z + \mu\sps{i}, \Psi\sps{i})
 \end{align}
+where $z$ is a shared latent variable drawn from a standard normal distribution, $x\sps{i}$ represents a sample from the $i$-th view, $W\sps{i}$ are the view-specific loadings that map the latent space to the observed space, $\mu\sps{i}$ is the mean of the $i$-th view, and $\Psi\sps{i}$ is the view-specific noise covariance matrix.
 
-Where \(z\) represents a sample from the latent guassian distribution, \(x\sps{i}\) represents a sample from the \(i\)-th view, \(W\sps{i}\) represents the model loadings, \(\mu\sps{i}\) represents the mean, and \(\Psi_{i}\) represents the noise covariance matrix for the \(i\)-th view.
-
-\citet{bach2005probabilistic} established that the maximum likelihood solution of this model relates the \acrshort{cca} weights to the loadings by the within-view covariance \(\Sigma_{ii}\):
-
-\begin{align}\label{eq:weights-to-loadings}
-    W\sps{i} = \Sigma_{ii} U\sps{i} R
-\end{align}
-
-Where \(R\) is an arbitrary rotation matrix and \(U\sps{i}\) is the matrix of \acrshort{cca} weights for the \(i\)-th view.
-For invertible covariance matrices, we can access an estimate of the `true' \acrshort{cca} weights associated with the top-k subspace by multiplying the loadings by the inverse of the covariance matrix:
-
-\begin{align}\label{eq:loadings-to-weights}
-    \hat{U}\sps{i}R = \Sigma_{ii}^{-1} W\sps{i}
-\end{align}
-
-We estimate the covariance matrices \(\Sigma_{ii}\) from the data using sample covariance matrices \(\hat{\Sigma}_{ii}\).
-For Identity covariance matrices, the \acrshort{cca} weights are the same as the loadings.
-
-In the Group Factor Analysis (GFA) model, we assume diagonal covariance.
-This assumption enhances computational efficiency and supports extensions like sparsity on loadings:
-
+The key idea behind PCCA is that the shared latent variable $z$ captures the common structure across views, while the view-specific loadings $W\sps{i}$ allow for flexibility in how this structure is expressed in each view. The noise covariance matrices $\Psi\sps{i}$ account for view-specific variation not explained by the shared structure.
+\citet{bach2005probabilistic} showed that the maximum likelihood estimates of the loadings $W\sps{i}$ in PCCA are related to the classical CCA weights $U\sps{i}$ by the within-view covariance matrices $\Sigma_{ii}$:
 \begin{align}
-    z &\sim \mathcal{N}(0, I)\\
-    x\sps{i} &\sim \mathcal{N}(W\sps{i} z, {\sigma_{i}}^{2}I)
+W\sps{i} &= \Sigma_{ii} U\sps{i} R\
+U\sps{i} R &= \Sigma_{ii}^{-1} W\sps{i}
 \end{align}
-
-The joint distribution of the two views with an explicit latent variable model is given by \citep{bach2005probabilistic}:
-
+where $R$ is an arbitrary rotation matrix. This result provides a link between the probabilistic and non-probabilistic formulations of CCA, and suggests that the classical CCA weights can be interpreted as estimates of the true loadings, up to a rotation.
+\subsubsection{Group Factor Analysis}
+Group Factor Analysis (GFA) \citep{klami2014group} is another explicit latent variable model that extends PCCA by assuming isotropic (i.e., spherical) noise in each view:
 \begin{align}
-    \begin{bmatrix}
-        X\sps{1} \\ X\sps{2}
-    \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix}
-                                              \mu\sps{1} \\ \mu\sps{2}
-    \end{bmatrix}, \begin{bmatrix}
-                       W\sps{1}W\spsT{1} + \Psi\sps{1} & W\sps{1}W\spsT{2} \\ W\sps{2}W\spsT{1} & W\sps{2}W\spsT{2} + \Psi\sps{2}
-    \end{bmatrix} \right)
+z &\sim \mathcal{N}(0, I)\
+x\sps{i} &\sim \mathcal{N}(W\sps{i} z + \mu\sps{i}, \sigma_i^2 I)
 \end{align}
-
-Where \(\Psi\sps{i}\) is the noise covariance matrix for the \(i\)-th view.
-Importantly, this shows us that the true covariance in each view is a function of the loadings and the noise covariance matrix.
-Specifically, the covariance matrix of the \(i\)-th view is given by:
-
+where $\sigma_i^2$ is the noise variance in the $i$-th view. This assumption simplifies the model and can lead to computational benefits, as well as supporting extensions like sparsity on the loadings.
+The joint distribution of multiple views under the GFA model is a multivariate Gaussian distribution with a structured covariance matrix:
 \begin{align}
-    \Sigma_{ii} = W\sps{i}W\spsT{i} + \Psi\sps{i}
+\begin{bmatrix}
+X\sps{1} \ \vdots \ X\sps{m}
+\end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix}
+\mu\sps{1} \ \vdots \ \mu\sps{m}
+\end{bmatrix}, \begin{bmatrix}
+W\sps{1}W\spsT{1} + \sigma_1^2 I & \cdots & W\sps{1}W\spsT{m} \
+\vdots & \ddots & \vdots \
+W\sps{m}W\spsT{1} & \cdots & W\sps{m}W\spsT{m} + \sigma_m^2 I
+\end{bmatrix} \right)
 \end{align}
+This highlights the fact that the covariance structure in each view is determined by the view-specific loadings and noise variances. When the loadings $W\sps{i}$ have large singular values compared to the noise variances $\sigma_i^2$, the resulting covariance matrices $\Sigma_{ii} = W\sps{i}W\spsT{i} + \sigma_i^2 I$ are often referred to as "spiked covariance matrices" \citep{johnstone2001distribution}.
 
-When $W\sps{i}W\spsT{i}$ has large eigenvalues as compared to $\Psi\sps{i}$, $\Sigma_{ii}$ is often called a `spiked covariance matrix' \citep{johnstone2001distribution}.
-
-\subsubsection{Aligning Probabilistic PCA and GFA}
-
-Probabilistic PCA \citep{tipping1999probabilistic} is a generative model that assumes the data is generated from a linear model with added noise:
-
+\subsubsection{Connecting GFA and Probabilistic PCA}
+Probabilistic PCA (PPCA) \citep{tipping1999probabilistic} is a special case of GFA applied to a single view:
 \begin{align}
-    x \sim \mathcal{N}(Wz, {\sigma}^{2}I)
+z &\sim \mathcal{N}(0, I)\
+x &\sim \mathcal{N}(W z + \mu, \sigma^2 I)
 \end{align}
-
-GFA can thus be seen as a generalization of Probabilistic PCA, where the noise covariance matrix is diagonal and the latent variable is shared across multiple views.
-An interesting consequence of this is that it tells us that for low levels of isotropic noise, we ought to be able to recover latent variables with just one view. For this reason, in my opinion, PCA should always be used as a baseline in CCA studies.
+Like GFA, PPCA assumes isotropic noise and seeks to identify a lower-dimensional latent space that captures the structure in the observed data. The key difference is that PPCA does not model multiple views or the relationships between them.
+However, the connection between GFA and PPCA provides an important insight: when the noise in each view is low and isotropic, the shared latent structure dominates the view-specific noise. In this scenario, applying PPCA to a single view should recover latent variables that are very similar to those obtained by applying GFA to multiple views.
+This suggests that, in low-noise settings, it may be possible to uncover meaningful latent structure using just a single view of the data. Consequently, PPCA can serve as a useful baseline for evaluating the performance of multi-view models like GFA. Likewise in the discriminative setting, if a multi-view model does not significantly outperform PCA applied to a single view, it may indicate that the additional complexity of the multi-view approach is not justified for that particular dataset.
+For this reason, it is always my reccomendation to compare the performance of multi-view models to that of PCA applied to each individual view\footnote{In the growing Deep Multiview Learning literature this is analagous to comparing to separate autoencoders applied to each view}. This can help assess whether the multi-view approach is truly leveraging complementary information across views, or if the observed performance gains are due to other factors, such as noise reduction or increased model capacity.
+By understanding the relationships between these explicit latent variable models, researchers can make more informed decisions about when and how to apply them to real-world datasets, and can better interpret the results obtained from multi-view analyses.
 
 \subsection{Implicit Latent Variable Models: The Joint Covariance Matrix Perspective}
 
@@ -170,9 +164,16 @@ Here, \(\rho\) is the canonical correlation, and \(u\sps{i}_{1}\) is the first c
 
 This perspective simplifies the structure of covariance matrices, focusing on the relationship between views as controlled by the canonical correlation coefficient, \(\rho\), and the weights \(u\sps{i}\).
 
+\subsection{Noise Structures and Their Impact on Covariance Modeling}
+The noise covariance matrices $\Psi\sps{i}$ in the explicit latent variable models play a crucial role in determining the nature of the noise in each view. When the noise covariance matrix is a scalar multiple of the identity matrix, i.e., $\Psi\sps{i} = \sigma_i^2 I$, the noise is considered isotropic or spherical, with equal variance in all dimensions and no correlations. On the other hand, when the noise covariance matrix is not a scalar multiple of the identity matrix, the noise is considered anisotropic or non-spherical, with potentially different variances across dimensions and correlations between noise components.
+In real-world datasets, such as those involving brain and behavioral data, the assumption of isotropic noise may not always hold. The correlation between brain regions or behavioral measures refers to the structured relationships in the data, captured by the loadings $W\sps{i}$ in the explicit latent variable models. The noise, on the other hand, represents the unstructured variation or measurement error not explained by the latent factors. While brain regions and behavioral measures may be correlated due to shared underlying processes, this does not necessarily imply that the noise itself is correlated.
+When analyzing brain and behavioral data using explicit latent variable models or related methods, it is important to consider the potential for both correlated and uncorrelated noise structures. Ignoring the possibility of correlated noise and assuming an identity covariance matrix may oversimplify the noise characteristics, potentially leading to suboptimal results or misinterpretations. Conversely, assuming correlated noise when it is not present can lead to overparameterization and reduced interpretability.
+In addition to the noise covariance, the observed covariance structures are also important to consider. Discriminative methods, such as classical CCA, often make assumptions about the observed covariance matrices $\Sigma_{ii}$, taking them as given or estimating them from the data. In contrast, generative methods, such as Probabilistic CCA and GFA, model the observed covariance as a function of the loadings and the noise covariance, as shown in Table \ref{tab:covariance-structures}.
+Researchers should carefully examine the properties of the data and use prior knowledge about the measurement process to guide their assumptions about both the noise and observed covariance structures. Comparing models with different assumptions (e.g., isotropic vs. anisotropic noise, identity vs. non-identity observed covariance) and using model selection techniques can help determine the most appropriate choice when the covariance structures are uncertain. By considering the potential for different noise and observed covariance structures, researchers can make more informed decisions about the modeling assumptions and improve the accuracy and interpretability of their results.
+
 \subsection{Summary of Data Generation Methods}
 
-To summarize the key differences between the data generation methods discussed above, we present two tables. Table 1 compares the covariance structures of each method, highlighting how the within-view and between-view covariances are modeled. Table 2 illustrates the relationship between weights and loadings in both population and sample cases, emphasizing the implications for sparsity and identifiability.
+To summarize the key differences between the data generation methods discussed above, we present two tables. Table \ref{tab:covariance-structures} compares the covariance structures of each method, highlighting how the within-view and between-view covariances are modeled. Table \ref{tab:weights-loadings-population-sample} illustrates the relationship between weights and loadings in both population and sample cases, emphasizing the implications for sparsity and identifiability.
 
 \renewcommand{\arraystretch}{2.5} % Increase the row height
 \begin{table}[h]
@@ -193,6 +194,8 @@ To summarize the key differences between the data generation methods discussed a
     \end{tabular}
     \label{tab:covariance-structures}
 \end{table}
+
+As shown in Table \ref{tab:covariance-structures}, the explicit latent variable models (Probabilistic CCA and GFA) incorporate the noise covariance matrices $\Psi\sps{i}$ or $\sigma_i^2 I$ into the within-view covariance expressions. This allows for more flexible modeling of the noise structure, as the noise covariance can be either isotropic (in the case of GFA) or anisotropic (in the case of Probabilistic CCA). In contrast, the implicit latent variable models (Joint Covariance) assume a simpler noise structure, often taking the within-view covariance matrices $\Sigma_{ii}$ as given or assuming an identity covariance for tractability.
 
 Table \ref{tab:weights-loadings-population-sample} summarizes the relationship between the weights and loadings in each data generation method, distinguishing between population and sample cases.
 This distinction is crucial, especially in scenarios where the population covariance matrix \( \Sigma \) is identity, but the sample covariance matrix \( \hat{\Sigma} \) is only an approximation.
@@ -415,7 +418,7 @@ In conclusion, this section provides a strong mathematical foundation for the pr
 Efficient sampling is crucial for CCA because it allows researchers to work with larger datasets and explore more complex or more nuanced relationships between variables, ultimately expanding the scope of research and analysis. Traditional methods can be computationally intensive and storage-demanding, especially for large datasets.
 This has in practice limited the dimensionality of simulated data, restricting the scope of research and analysis.
 For example \citet{matkovic2023contribution} simulate data with 8,000 observations and 100 features while \citet{helmer2020stability} used at most 10,000 observations and 64 features.
-We were interested in the behavior of CCA in high-dimensional settings like voxel-wise MRI and connectivities, which can have hundreds of thousands of features \citep{jack2008alzheimer} and up to tens of thousands of observations \citep{sudlow2015uk}.
+We were interested in the behavior of CCA in high-dimensional settings like voxel-wise MRI and brain connectivities, which can have hundreds of thousands of features \citep{jack2008alzheimer} and up to tens of thousands of observations \citep{sudlow2015uk}.
 By leveraging the assumptions that biomedical data often exhibit low-rank and/or sparse covariance structures, we develop efficient sampling methods that overcome the computational and storage limitations associated with high-dimensional data.
 
 \subsection{Challenges with High-Dimensional Data}
@@ -469,18 +472,18 @@ The second set of experiments illustrates the ammount of information that can be
 
 Our first experiment is designed to illustrate the challenges of recovering the true weights and \gls{loadings} respectively in \acrshort{cca} models for explicit and implicit latent variable models with identity and non-identity covariance matrices.
 
-We compare the true weights derived from the data generation model with the estimated weights of CCA, Ridge CCA, Elastic Net, PLS, and PCA models.
+We compare the true weights derived from the data generation model with the estimated weights of CCA, Ridge CCA, Elastic Net CCA (implemented with FRALS-EN), PLS, and PCA models.
 We expect that when the covariance matrix is identity, the weights and \gls{loadings} will be identical.
 When the covariance matrix is non-identity, we expect that the weights and \gls{loadings} will be different.
 Moreover, we expect that the estimated loadings will be more stable than the estimated weights for CCA models because the weights are not always identifiable.
 Under the explicit latent variable model, we expect that the weights will only be (close to) sparse when the covariance matrix is close to identity.
-This means we do not expect the Elastic Net model to improve on the Ridge CCA model since the Lasso regularizes the weights but not the \gls{loadings}.
+This means we do not expect the Elastic Net CCA model to improve on the Ridge CCA model since the Lasso regularizes the weights but not the \gls{loadings}.
 Finally, we expect that when using the explicit latent variable model, for high signal-to-noise ratios, the PLS and even PCA models will recover the true weights and \gls{loadings} because the majority of the variance is explained by the latent variables.
 
 \subsubsection{Detailed Parameters of Simulated Data for Weights and Loadings Analysis in CCA} We generate data with 100 samples and 10 features in each view.
 We then generate data under two implicit latent variable models and two explicit latent variable models.
 The ridge penalty is coarsely tuned between 0.1 and 0.9 in order to illustrate the effect of regularization as we already show the corner cases of no regularization (CCA) and full regularization (PLS).
-For the Elastic Net model, we tune the l1 ratio between 0.1 and 0.9. This ensures that the Elastic Net has some sparsity as compared to the Ridge model, effectively avoiding the corner case of no sparsity where the Elastic Net is equivalent to the Ridge model.
+For the Elastic Net CCA model, we tune the l1 ratio between 0.1 and 0.9. This ensures that the Elastic Net CCA has some sparsity as compared to the Ridge model, effectively avoiding the corner case of no sparsity where the Elastic Net CCA is equivalent to the Ridge model.
 We summarize the parameters of these experiments in table \ref{tab:simulated-data-parameters}.
 
 \begin{table}
@@ -567,7 +570,7 @@ The absolute cosine similarity between two vectors is 1 if they are identical (u
 
 Figure \ref{fig:implicit-weights-loadings} shows the true and estimated weights and \gls{loadings} for data generated from the implicit latent variable models with sparse weights.
 The Elastic net model exhibits no false negatives (i.e. where the true weight is non-zero but the estimated weight is zero) in both cases.
-This shows that the Elastic Net model is able to recover the true weights and that the Lasso penalty is indeed inducing sparsity in the weights.
+This shows that the Elastic Net CCA model is able to recover the true weights and that the Lasso penalty is indeed inducing sparsity in the weights.
 The CCA model appears recover spectrum of the true weights much better for the identity covariance matrices than for the correlated covariance matrices.
 This is likely because the multicollinearity introduced makes the learnt weights substantially less stable with respect to a change in the data.
 
@@ -601,7 +604,7 @@ Only when the covariance matrices are identity, and when there is only one laten
 
 Figure \ref{fig:explicit-weights-loadings} shows the true and estimated weights and \gls{loadings} for data generated from the explicit latent variable models with sparse \gls{loadings}.
 The left column shows the results for the identity covariance matrices, while the right column shows the results for the correlated covariance matrices.
-Once again, the Elastic Net model exhibits no false negatives (i.e. where the true weight is non-zero but the estimated weight is zero) when the noise covariance matrix is identity such that both the weights and \gls{loadings} are sparse.
+Once again, the Elastic Net CCA model exhibits no false negatives (i.e. where the true weight is non-zero but the estimated weight is zero) when the noise covariance matrix is identity such that both the weights and \gls{loadings} are sparse.
 
 \begin{figure}
 \centering
@@ -613,7 +616,7 @@ Once again, the Elastic Net model exhibits no false negatives (i.e. where the tr
 \centering
 \includegraphics[width=\linewidth]{figures/simulated/explicit/Combined_Weights_Loadings_with_Error_Bars_Correlated}
 \end{subfigure}
-\caption{Bar plots of the true and estimated weights and \gls{loadings} for data generated from the implicit latent variable models with sparse weights. The left column shows the results for the identity covariance matrices, while the right column shows the results for the correlated covariance matrices.}\label{fig:explicit-weights-loadings}
+\caption{Bar plots of the true and estimated weights and \gls{loadings} for data generated from the explicit latent variable models with sparse loadings. The left column shows the results for the identity covariance matrices, while the right column shows the results for the correlated covariance matrices.}\label{fig:explicit-weights-loadings}
 \end{figure}
 
 Once again, we can quantify the similarity between the true and estimated weights and \gls{loadings} using the cosine similarity (Figure \ref{fig:explicit-weights-loadings-cosine}).
