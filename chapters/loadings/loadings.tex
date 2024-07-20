@@ -87,15 +87,15 @@ Explicit latent variable models assume that the observed data in each view is ge
 \subsubsection{Probabilistic CCA}
 Probabilistic CCA (PCCA) is an explicit latent variable model that extends classical CCA to a probabilistic setting. In PCCA, the generative process for two views can be described as follows:
 \begin{align}
-z &\sim \mathcal{N}(0, I)\
+z &\sim \mathcal{N}(0, I)\\
 x\sps{i} &\sim \mathcal{N}(W\sps{i} z + \mu\sps{i}, \Psi\sps{i})
 \end{align}
 where $z$ is a shared latent variable drawn from a standard normal distribution, $x\sps{i}$ represents a sample from the $i$-th view, $W\sps{i}$ are the view-specific loadings that map the latent space to the observed space, $\mu\sps{i}$ is the mean of the $i$-th view, and $\Psi\sps{i}$ is the view-specific noise covariance matrix.
 
 The key idea behind PCCA is that the shared latent variable $z$ captures the common structure across views, while the view-specific loadings $W\sps{i}$ allow for flexibility in how this structure is expressed in each view. The noise covariance matrices $\Psi\sps{i}$ account for view-specific variation not explained by the shared structure.
 \citet{bach2005probabilistic} showed that the maximum likelihood estimates of the loadings $W\sps{i}$ in PCCA are related to the classical CCA weights $U\sps{i}$ by the within-view covariance matrices $\Sigma_{ii}$:
-\begin{align}
-W\sps{i} &= \Sigma_{ii} U\sps{i} R\
+\begin{align}\label{eq:weights-to-loadings}
+W\sps{i} &= \Sigma_{ii} U\sps{i} R\\
 U\sps{i} R &= \Sigma_{ii}^{-1} W\sps{i}
 \end{align}
 where $R$ is an arbitrary rotation matrix. This result provides a link between the probabilistic and non-probabilistic formulations of CCA, and suggests that the classical CCA weights can be interpreted as estimates of the true loadings, up to a rotation.
@@ -113,8 +113,8 @@ X\sps{1} \ \vdots \ X\sps{m}
 \end{bmatrix} \sim \mathcal{N} \left( \begin{bmatrix}
 \mu\sps{1} \ \vdots \ \mu\sps{m}
 \end{bmatrix}, \begin{bmatrix}
-W\sps{1}W\spsT{1} + \sigma_1^2 I & \cdots & W\sps{1}W\spsT{m} \
-\vdots & \ddots & \vdots \
+W\sps{1}W\spsT{1} + \sigma_1^2 I & \cdots & W\sps{1}W\spsT{m} \\
+\vdots & \ddots & \vdots \\
 W\sps{m}W\spsT{1} & \cdots & W\sps{m}W\spsT{m} + \sigma_m^2 I
 \end{bmatrix} \right)
 \end{align}
@@ -123,7 +123,7 @@ This highlights the fact that the covariance structure in each view is determine
 \subsubsection{Connecting GFA and Probabilistic PCA}
 Probabilistic PCA (PPCA) \citep{tipping1999probabilistic} is a special case of GFA applied to a single view:
 \begin{align}
-z &\sim \mathcal{N}(0, I)\
+z &\sim \mathcal{N}(0, I)\\
 x &\sim \mathcal{N}(W z + \mu, \sigma^2 I)
 \end{align}
 Like GFA, PPCA assumes isotropic noise and seeks to identify a lower-dimensional latent space that captures the structure in the observed data. The key difference is that PPCA does not model multiple views or the relationships between them.
