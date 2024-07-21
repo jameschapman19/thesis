@@ -67,7 +67,7 @@ In CCA research, there is an ongoing debate regarding the interpretation of mode
 
 Given the importance of this topic, especially in the context of our work in chapter \ref{ch:als} and other studies employing variants of sparse CCA and sparse PLS, it is essential to delve deeper into the interpretation of sparse loadings and weights. In the following sections, we will explore the mathematical properties and practical implications of weights and loadings in CCA, with a focus on sparse and regularized models. By addressing this key aspect of CCA, we aim to contribute to the ongoing debate and provide insights that can guide the application and interpretation of CCA in various domains, including neuroimaging, genetics, and health-related research.
 
-\section{Unifying Generative Perspectives in CCA: Explicit and Implicit Latent Variable Models of Multiview Data}
+\section{Methods: Unifying Generative Perspectives in CCA: Explicit and Implicit Latent Variable Models of Multiview Data}
 
 This section categorizes the generative models in CCA literature into explicit and implicit latent variable types, each offering distinct insights into the data generation process and the relationship between weights and loadings.
 
@@ -413,7 +413,7 @@ The invariance of loadings to data transformations has significant practical imp
 
 In conclusion, this section provides a strong mathematical foundation for the preference of loadings over weights in the interpretation of CCA models. The invariance of loadings to columnwise transformations, including scaling and linear combinations, ensures a more robust and consistent interpretation of variable relationships. This property is especially valuable in fields dealing with heterogeneous or transformed data, where data preprocessing choices may vary. By focusing on loadings, researchers can obtain more reliable insights into the underlying structure of their data, facilitating cross-disciplinary collaborations and the advancement of knowledge.
 
-\section{Efficient Sampling of Simulated CCA Data}\label{sec:efficient}
+\section{Methods: Efficient Sampling of Simulated CCA Data}\label{sec:efficient}
 
 Efficient sampling is crucial for CCA because it allows researchers to work with larger datasets and explore more complex or more nuanced relationships between variables, ultimately expanding the scope of research and analysis. Traditional methods can be computationally intensive and storage-demanding, especially for large datasets.
 This has in practice limited the dimensionality of simulated data, restricting the scope of research and analysis.
@@ -660,7 +660,7 @@ It is interesting that performance of the Ridge CCA improves across the board wi
     \caption{Varying signal to noise ratio with correlated covariance matrices. We plot the performance of different levels of Regularized CCA from 0 (CCA) to 1 (PLS) for different sample sizes.}\label{fig:snr-scores-random}
 \end{figure}
 
-\section{Discussion}
+\section{Discussion and Limitations}
 
 \subsection{Revisiting the results from chapter \ref{ch:als}}
 

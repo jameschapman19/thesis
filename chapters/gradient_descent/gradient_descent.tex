@@ -211,7 +211,7 @@ Theoretical guarantees: The theoretical guarantees for stochastic algorithms are
 Despite these limitations, stochastic algorithms have shown promising results in practice and have become increasingly popular for solving large-scale CCA problems. The development of more principled and theoretically grounded stochastic algorithms that can handle the stochastic orthogonality constraint remains an active area of research.
 In the next section, we will introduce a novel stochastic algorithm for CCA based on the Eckart-Young-Mirsky theorem, which aims to address some of the limitations of existing methods and provide a more principled and robust approach to solving high-dimensional CCA problems in the presence of stochastic constraints.
 
-\section{GEP-EY: An Efficient Algorithm for Generalized Eigenvalue Problems}\label{sec:contributions}
+\section{Methods: GEP-EY, An Efficient Algorithm for Generalized Eigenvalue Problems}\label{sec:contributions}
 This section introduces GEP-EY, a novel algorithm for solving Generalized Eigenvalue Problems (GEPs), with a particular focus on Canonical Correlation Analysis (CCA) and Partial Least Squares (PLS). The algorithm stems from a new perspective on GEPs: optimizing an Eckart-Young inspired objective that characterizes the GEP solution.
 
 \subsection{A New Perspective: Eckhart-Young Inspired Objective for GEPs}
@@ -589,7 +589,7 @@ In summary, GEP-EY provides a novel, efficient, and theoretically grounded appro
 % Flexibility: The GEP-EY algorithm can be easily adapted to solve various problems in the CCA family, such as CCA, PLS, and their regularized variants, by specifying the appropriate covariance matrices and function classes. This provides a unified framework for solving a wide range of GEP problems.
 % Theoretical guarantees: The proposed objective function has appealing geometrical properties, such as the absence of spurious local minima, which provide theoretical guarantees for the convergence of the GEP-EY algorithm to a global optimum. Moreover, under certain conditions, it is possible to prove stronger results, such as polynomial-time convergence with high probability.
 
-\section{Experiments}\label{sec:experiments}
+\section{Experiments and Results}\label{sec:experiments}
 \subsection{Comparison with Standard Batch Solvers}
 In this experiment, we compare our CCA-EY method to solving the CCA Generalized Eigenvalue Problem using the \texttt{scipy.linalg.eigh} function \citep{virtanen2020scipy}, which is a widely used implementation for computing eigenvalues and eigenvectors of Hermitian or symmetric matrices.
 \subsubsection{Data and Experimental Setup}
@@ -696,7 +696,7 @@ Furthermore, we investigate the associations between the PLS brain representatio
 \end{figure}
 These results demonstrate the scalability of our PLS-EY method to extremely high-dimensional data and its ability to learn interpretable representations that capture biologically relevant information. The successful application of our method to the UK Biobank dataset highlights its potential to facilitate discoveries in large-scale biomedical studies.
 
-\section{Discussion}\label{sec:discussion}
+\section{Discussion and Limitations}\label{sec:discussion}
 
 \subsection{Limitations}
 
@@ -713,9 +713,7 @@ This advantage is particularly pronounced when comparing our method to establish
 Furthermore, our methods' ability to capture relevant information for genetic disease risk, as evidenced in the UK Biobank study, opens new avenues for biomedical research.
 The significant associations between the PLS representations and genetic risk measures for various disorders provide valuable insights into the genetic mechanisms underlying diseases and brain morphometry.
 
-\subsection{Future Work}
-
-\section{Future Directions: Proximal Gradient Descent for Regularized GEPs}
+\section{Future Work: Proximal Gradient Descent for Regularized GEPs}
 
 While our current work focuses on unregularized GEPs, future research will extend our approach to incorporate complex regularization terms efficiently. We propose using proximal gradient descent, a method well-suited for optimizing loss functions comprising a smooth, differentiable component and a non-smooth regularization term.
 
