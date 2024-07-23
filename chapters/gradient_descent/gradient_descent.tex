@@ -264,7 +264,6 @@ To provide some intuition, we sketch the key steps in the proof, with full detai
     \[
     \LEYGEP(U) \defeq \tr \left( - 2U^\top A U + \left(U^\top B U\right) \left(U^\top B U\right) \right),
     \]
-    where \(U = \tilde{W}\).
 
     This objective intuitively balances maximizing between-view correlations (captured by \(U^\top A U\)) and minimizing within-view variances (captured by \((U^\top B U)(U^\top B U)\)).
 \end{enumerate}
@@ -274,66 +273,82 @@ For the full proof and additional technical details, we refer the reader to the 
 
 This new perspective provides a more intuitive and computationally efficient way to approach GEPs, leveraging the well-established principles of the Eckhart-Young-Mirsky theorem.
 
-\subsubsection{Geometrical Properties and Optimization Guarantees}
-A crucial property of our objective is the absence of spurious local minima:
-
-\begin{restatable}{proposition}{NoSpuriousLocalMinima}\label{prop:no-spurious}
-The objective $\LEYGEP$ has no spurious local minima: any local minimum is a global minimum.
-\end{restatable}
-
-This property ensures that simple optimization methods like stochastic gradient descent (SGD) will converge to a global optimum. Moreover, under certain conditions on the eigenvalues and generalized eigenvalues of $(A,B)$, it is possible to prove a stronger result:
-\begin{corollary}[Informal: Polynomial-time Optimization]
-    Under certain conditions on the eigenvalues and generalized eigenvalues of $(A,B)$, one can make quantitative the claim that:
-    any $U_K \in \R^{D \times K}$ is either close to a global optimum, has a large gradient $\nabla \LEYGEP$, or has Hessian $\nabla^2 \LEYGEP$ with a large negative eigenvalue.
-    
-    Therefore, for appropriate step-size sequences, certain local search algorithms, such as sufficiently noisy SGD, will converge in polynomial time with high probability.
-\end{corollary}
-\subsection{GEP-EY: A Stochastic Algorithm for Generalized Eigenvalue Problems}
-
 We now introduce GEP-EY, a stochastic algorithm designed to solve Generalized Eigenvalue Problems (GEPs) efficiently. While applicable to a wide range of GEPs, we focus particularly on its application to CCA, PLS, and related methods.
 
 \subsection{GEP-EY: A Stochastic Algorithm for Generalized Eigenvalue Problems}
 
 We now introduce GEP-EY, a stochastic algorithm designed to solve Generalized Eigenvalue Problems (GEPs) efficiently. While applicable to a wide range of GEPs, we focus particularly on its application to Canonical Correlation Analysis (CCA), Partial Least Squares (PLS), and related methods.
 
-\subsubsection{General GEP-EY Algorithm}
+\subsubsection{Batch GEP-EY Algorithm}
 
-The GEP-EY algorithm optimizes the Eckart-Young inspired objective for GEPs using stochastic gradient descent. Here's a general formulation of the algorithm:
+We first present the batch version of the GEP-EY algorithm in Algorithm \ref{alg:batch_gep}. This algorithm optimizes the Eckart-Young inspired objective for GEPs using full-batch gradient descent. While it provides an unbiased estimate of the gradient, it may be computationally expensive for large datasets.
 
 \begin{algorithm}
-\caption{\textbf{GEP-EY}: Stochastic algorithm for General GEPs}
-\label{alg:general_gep}
+\caption{\textbf{GEP-EY}: Batch algorithm for General GEPs}
+\label{alg:batch-gep}
 \begin{algorithmic}
-\STATE {\bfseries Input:} Data stream $(\X(b))_{b=1}^\infty$, learning rate $(\eta_t)_t$, iterations $T$
+\STATE {\bfseries Input:} Data $\X$, learning rate $(\eta_t)_t$, iterations $T$
 \STATE {\bfseries Initialize:} $U \in \mathbb{R}^{D \times K}$ randomly
 \FOR{$t=1$ {\bfseries to} $T$}
-\STATE Sample mini-batch $\X(b)$
-\STATE Construct mini-batch estimates $\hat{A}(b), \hat{B}(b)$
-\STATE Compute loss $\mathcal{L}(U) = \tr(-2U^\top \hat{A}(b) U + (U^\top \hat{B}(b) U)(U^\top \hat{B}(b) U))$
+\STATE Construct $A, B$ from $\X$
+\STATE Compute loss $\mathcal{L}(U) = \tr(-2U^\top A U + (U^\top B U)(U^\top B U))$
 \STATE Update $U \leftarrow U - \eta_t \nabla_U \mathcal{L}(U)$
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
-This algorithm can be implemented efficiently using automatic differentiation frameworks like PyTorch. Here's a PyTorch-style pseudocode for the loss computation:
+Listing \ref{lst:batch-gep-ey} provides PyTorch-style pseudocode for implementing the batch GEP-EY algorithm. The \texttt{compute\_batch\_loss} function directly implements the loss computation from Algorithm \ref{alg:batch-gep}, while the \texttt{batch\_gep\_ey} function implements the main optimization loop.
 
 \begin{listing}[ht]
-    \begin{minted}{python}
-    def compute_loss(U, A_batch, B_batch):
-        UAU = torch.matmul(torch.matmul(U.T, A_batch), U)
-        UBU = torch.matmul(torch.matmul(U.T, B_batch), U)
-        loss = -2 * torch.trace(UAU) + torch.trace(torch.matmul(UBU, UBU))
-        return loss
-    \end{minted}
-    \caption{PyTorch-style pseudocode for computing the GEP-EY loss}
-    \label{lst:gep-ey-loss}
+\begin{minted}{python}
+def compute_batch_loss(U, A, B):
+    UAU = torch.matmul(torch.matmul(U.T, A), U)
+    UBU = torch.matmul(torch.matmul(U.T, B), U)
+    loss = -2 * torch.trace(UAU) + torch.trace(torch.matmul(UBU, UBU))
+    return loss
+
+def batch_gep_ey(X, lr, T):
+    U = torch.randn(X.shape[1], K)
+    A, B = compute_A_B(X)  # Compute A and B matrices from data
+    optimizer = torch.optim.SGD([U], lr=lr)
+    
+    for t in range(T):
+        optimizer.zero_grad()
+        loss = compute_batch_loss(U, A, B)
+        loss.backward()
+        optimizer.step()
+    
+    return U
+\end{minted}
+\caption{PyTorch-style pseudocode for the batch GEP-EY algorithm}
+\label{lst:batch-gep-ey}
 \end{listing}
 
-\subsubsection{Dimensionality Reduction for CCA and PLS}
-For CCA-type problems, we can significantly reduce the computational complexity by exploiting the structure of $A$ and $B$. Instead of working with the full $D \times D$ matrices, we introduce smaller matrices $C(\theta)$ and $V_\alpha(\theta)$:
+\subsubsection{Challenges in Stochastic Estimation}
+
+A naive approach to stochastic optimization of the GEP-EY objective would be to simply replace $A$ and $B$ with mini-batch estimates $\hat{A}$ and $\hat{B}$. However, this leads to biased gradient estimates due to the quadratic term $(U^\top B U)(U^\top B U)$. 
+
+The key issue lies in the fact that the expectation of the product of random variables is not equal to the product of their expectations unless the variables are independent. In our case:
+
+\begin{align}
+\mathbb{E}[(U^\top \hat{B} U)(U^\top \hat{B} U)] \neq \mathbb{E}[U^\top \hat{B} U] \mathbb{E}[U^\top \hat{B} U]
+\end{align}
+
+This inequality arises because both instances of $\hat{B}$ in the quadratic term are estimated from the same mini-batch, introducing correlation between the factors.
+
+To obtain unbiased gradients, we require independent samples for each instance of $U^\top B U$ in the quadratic term. Specifically, we need:
+
+\begin{align}
+\mathbb{E}[(U^\top \hat{B}_1 U)(U^\top \hat{B}_2 U)] = \mathbb{E}[U^\top \hat{B}_1 U] \mathbb{E}[U^\top \hat{B}_2 U] = (U^\top B U)^2
+\end{align}
+
+where $\hat{B}_1$ and $\hat{B}_2$ are independent estimates of $B$ from different mini-batches.
+
+\subsubsection{Dimensionality Reduction for CCA and PLS}\label{sec:dim-reduction}
+For CCA-type problems, owing  to the structure  of the covariance matrices, we can significantly reduce the computational complexity by exploiting the structure of $A$ and $B$. Instead of working with the full $D \times D$ matrices, we introduce smaller matrices $C(\theta)$ and $V_\alpha(\theta)$:
 \begin{align}\label{eq:def-C-V-matrices}
-C(\theta) &= \sum_{i \neq j} \Cov(Z^{(i)}, Z^{(j)}), \
-V_\alpha(\theta) &= \sum_i \alpha_i U^{(i)\top} U^{(i)} + (1 - \alpha_i) \Var(Z^{(i)}),
+C(\theta) &= \sum_{i \neq j} \Cov(Z^{(i)}, Z^{(j)}) = U^\top A U, \\
+V_\alpha(\theta) &= \sum_i \alpha_i U^{(i)\top} U^{(i)} + (1 - \alpha_i) \Var(Z^{(i)}) = U^\top B U,
 \end{align}
 where $Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})$ are learned \glspl{representations} of dimension $K \ll D_i$, and $\alpha_i$ are ridge penalty parameters that allow us to interpolate between different methods in the CCA family.
 This leads to our reduced Eckart-Young inspired objective:
@@ -343,7 +358,8 @@ This leads to our reduced Eckart-Young inspired objective:
 To illustrate how $C(\theta)$ and $V_\alpha(\theta)$ relate to $U^\top A U$ and $U^\top B U$ respectively for various methods in the CCA family, we present Table \ref{tab:covariance-matrices}.
 \begin{table}[h]
 \centering
-\small
+\caption{Covariance matrices $A$, $B$ and their low-rank equivalents $C(\theta)$, $V_\alpha(\theta)$ for different methods in the CCA family. The $\alpha_i$ values determine the ridge penalty for each method.}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
 Method & $A$ & $B$ & $C(\theta)$ & $V_\alpha(\theta)$ & $\alpha_i$ \\
@@ -379,10 +395,10 @@ Ridge CCA & $\begin{pmatrix}
 0 & \Sigma_{22} + \alpha_2 I
 \end{pmatrix}$ & $\sum_{i \neq j} \Cov(Z^{(i)}, Z^{(j)})$ & $\sum_i \alpha_i U^{(i)\top} U^{(i)} + (1 - \alpha_i) \Var(Z^{(i)})$ & $0 < \alpha_i < 1$ \\
 \hline
-PCA & $\Sigma$ & $I$ & - & $U^\top U$ & 1 \\
+PCA & $\Sigma$ & $I$ & $\Cov(Z, Z)$ & $U^\top U$ & 1 \\
 \hline
 \end{tabular}
-\caption{Covariance matrices $A$, $B$ and their low-rank equivalents $C(\theta)$, $V_\alpha(\theta)$ for different methods in the CCA family. The $\alpha_i$ values determine the ridge penalty for each method.}
+}
 \label{tab:covariance-matrices}
 \end{table}
 The key advantage here is that we only need to operate on and store $K \times K$ matrices, which is much more efficient when $K \ll D_i$ for all $i$. This dimensionality reduction is crucial for the efficiency of our algorithm, as demonstrated in Algorithm \ref{alg:cca_pls} and the corresponding PyTorch-style pseudocode in Listing \ref{lst:low-rank-loss}.
@@ -393,86 +409,98 @@ For PLS and PCA, $\alpha_i = 1$ for all $i$, focusing on the magnitude of the pr
 For Ridge CCA, $0 < \alpha_i < 1$, balancing between the variance of the representations and the magnitude of the projection vectors.
 
 This unified formulation allows our GEP-EY algorithm to efficiently handle a wide range of multi-view learning problems within a single framework.
+\subsubsection{Unbiased Stochastic Estimation for CCA}
 
-\subsubsection{Unbiased Stochastic Estimation}
-In practice, we of course work with sample estimates rather than true population covariances. We construct unbiased estimates of $C(\theta)$ and $V(\theta)$ from mini-batches:
+By combining our efficient low-dimensional approach with independent minibatch sampling, we can develop a highly efficient and unbiased method for optimizing stochastic CCA and related problems.
+
+Recall that we introduced the low-rank matrices $C(\theta)$ and $V_\alpha(\theta)$ to reduce computational complexity:
+
+\begin{align}\label{eq:def-C-V-matrices}
+C(\theta) &= \sum_{i \neq j} \Cov(Z^{(i)}, Z^{(j)}) = U^\top A U, \\
+V_\alpha(\theta) &= \sum_i \alpha_i U^{(i)\top} U^{(i)} + (1 - \alpha_i) \Var(Z^{(i)}) = U^\top B U,
+\end{align}
+
+In practice, we work with sample estimates rather than true population covariances. We construct unbiased estimates of $C(\theta)$ and $V_\alpha(\theta)$ from mini-batches:
 
 \begin{align}\label{eq:def-C-V-matrices-empirical}
 \hat{C}(\theta)[\Z] = \sum_{i \neq j} \empCov(\Z\sps{i}, \Z\sps{j}), \quad
-\hat{V}(\theta)[\Z] = \sum_{i} \empVar(\Z\sps{i}).
+\hat{V}_\alpha(\theta)[\Z] = \sum_{i} \alpha_i U^{(i)\top} U^{(i)} + (1 - \alpha_i) \empVar(\Z\sps{i}).
 \end{align}
 
-Given two independent mini-batches $\Z$ and $\Z'$, we define the following unbiased loss estimate:
+To address the bias issue in the quadratic term, we use two independent mini-batches $\Z$ and $\Z'$. This allows us to define the following unbiased loss estimate:
 
 \begin{align}\label{eq:empirical-EY-loss-estimate-def}
-\empLEY[\Z, \Z'] \defeq - 2 \tr \hat{C}[\Z] + \langle \hat{V}\alpha[\Z], \hat{V}\alpha[\Z'] \rangle_F,
+\empLEY[\Z, \Z'] \defeq - 2 \tr \hat{C}[\Z] + \langle \hat{V}_\alpha[\Z], \hat{V}_\alpha[\Z'] \rangle_F,
 \end{align}
 
-where $\langle \cdot, \cdot \rangle_F$ denotes the Frobenius inner product. This formulation allows us to optimize the population problem using only sample data, bridging the gap between theoretical analysis and practical application.
+where $\langle \cdot, \cdot \rangle_F$ denotes the Frobenius inner product. 
+
+This formulation combines the benefits of our low-rank approach (computational efficiency) with independent minibatch sampling (unbiased estimation). It allows us to optimize the population problem using only sample data, making it particularly well-suited for large-scale CCA and related problems. By using this approach, we can perform stochastic optimization of CCA that is both computationally efficient and statistically unbiased, bridging the gap between theoretical analysis and practical application in high-dimensional settings.
+
 \subsubsection{The GEP-EY Algorithm for CCA and PLS}
-Incorporating these dimensionality reduction and unbiased estimation techniques, we present the specialized GEP-EY algorithm for CCA, PLS, and related methods:
+Incorporating these dimensionality reduction and unbiased estimation techniques, we present the specialized GEP-EY algorithm for CCA, PLS, and related methods in Algorithm \ref{alg:cca_pls}.
 
 \begin{algorithm}
-\caption{\textbf{GEP-EY}: Stochastic algorithm for CCA and PLS}
-\label{alg:cca_pls}
-\begin{algorithmic}
-\STATE {\bfseries Input:} Data stream $(\X(b))_{b=1}^\infty$, learning rate $(\eta_t)_t$, iterations $T$, function class $f(\cdot; \theta)$
-\STATE {\bfseries Initialize:} $\hat{\theta}$ randomly
-\FOR{$t=1$ {\bfseries to} $T$}
-\STATE Sample mini-batches $\X(b), \X(b')$ independently
-\STATE Compute $\Z(b) = f(\X(b); \theta), \Z(b') = f(\X(b'); \theta)$
-\STATE Estimate loss $\empLEY(\theta)$ using Eq. \eqref{eq:empirical-EY-loss-estimate-def}
-\STATE Update $\theta$ using gradient descent
-\ENDFOR
-\end{algorithmic}
-\end{algorithm}
-
-The low-rank loss computation for CCA and PLS can be implemented efficiently using the following Python pseudocode:
-
-\begin{listing}[ht]
-    \begin{minted}{python}
-    def compute_low_rank_loss(Z, Z_prime, alpha=None):
-        # Compute C
-        C = 0
-        for i in range(len(Z)):
-            for j in range(i+1, len(Z)):
-                C += torch.cov(Z[i], Z[j])
-        
-        # Compute V
-        V = sum(torch.var(Z[i], dim=0) for i in range(len(Z)))
-        V_prime = sum(torch.var(Z_prime[i], dim=0) for i in range(len(Z_prime)))
-        
-        # Compute loss
-        loss = -2 * torch.trace(C)
-        
-        if alpha is not None:  # For Ridge CCA
-            V = sum(alpha[i] * torch.matmul(Z[i].T, Z[i]) + 
-                    (1 - alpha[i]) * torch.var(Z[i], dim=0) 
-                    for i in range(len(Z)))
-            V_prime = sum(alpha[i] * torch.matmul(Z_prime[i].T, Z_prime[i]) + 
-                        (1 - alpha[i]) * torch.var(Z_prime[i], dim=0) 
-                        for i in range(len(Z_prime)))
-        
-        loss += torch.sum(V * V_prime)
-        
-        return loss
-    \end{minted}
-    \caption{Python pseudocode for computing the low-rank loss in CCA and PLS}
-    \label{lst:low-rank-loss}
-\end{listing}
+    \caption{\textbf{GEP-EY}: Stochastic algorithm for CCA and PLS}
+    \label{alg:cca_pls}
+    \begin{algorithmic}
+    \STATE {\bfseries Input:} Data stream $(\X(b))_{b=1}^\infty$, learning rate $(\eta_t)_t$, iterations $T$, function class $f(\cdot; \theta)$
+    \STATE {\bfseries Initialize:} $\hat{\theta}$ randomly
+    \FOR{$t=1$ {\bfseries to} $T$}
+    \STATE Sample mini-batches $\X(b), \X(b')$ independently
+    \STATE Compute $\Z(b) = f(\X(b); \theta), \Z(b') = f(\X(b'); \theta)$
+    \STATE Estimate loss $\empLEY(\theta)$ using Eq. \eqref{eq:empirical-EY-loss-estimate-def}
+    \STATE Update $\theta$ using gradient descent
+    \ENDFOR
+    \end{algorithmic}
+    \end{algorithm}
 
 This algorithm efficiently solves GEPs for CCA, PLS, and related methods by leveraging the low-rank structure of the problem and unbiased stochastic estimation. The \glspl{weights} $U$ are implicitly learned through the optimization of $\theta$, and the resulting \glspl{representations} $Z$ can be used for downstream tasks or analysis.
 
-The pseudocode demonstrates how to compute the low-rank loss for both standard CCA/PLS and Ridge CCA. It calculates the covariance matrix $C$ and variance matrix $V$ using the low-dimensional representations $Z$ and $Z'$, significantly reducing the computational complexity compared to working with the full-dimensional data.
+The algorithm can be implemented efficiently using automatic differentiation frameworks like PyTorch. Listing \ref{lst:unbiased-stochastic-gep-ey} provides PyTorch-style pseudocode for the unbiased stochastic GEP-EY algorithm. The \texttt{compute\_unbiased\_stochastic\_loss} function implements the loss computation from Equation \eqref{eq:empirical-EY-loss-estimate-def}, while the \texttt{unbiased\_stochastic\_gep\_ey} function implements the main loop of Algorithm \ref{alg:cca_pls}.
 
-\subsection{Advantages of GEP-EY}
-GEP-EY offers several key benefits:
-\begin{itemize}
-\item Simplicity: Easy to implement and use with standard optimization techniques.
-\item Efficiency: Scales to large datasets through stochastic processing.
-\item Flexibility: Adaptable to various CCA-family problems.
-\item Theoretical guarantees: Convergence to global optima with potential for polynomial-time convergence.
-\end{itemize}
+\begin{listing}[ht]
+    \begin{minted}{python}
+    def compute_unbiased_stochastic_loss(Z, Z_prime, alpha=None):
+        # Compute C
+        C = sum(torch.cov(Z[i], Z[j]) for i in range(len(Z)) for j in range(i+1, len(Z)))
+        
+        # Compute V and V_prime
+        V = sum(alpha[i] * torch.matmul(Z[i].T, Z[i]) + 
+                (1 - alpha[i]) * torch.var(Z[i], dim=0) 
+                for i in range(len(Z)))
+        V_prime = sum(alpha[i] * torch.matmul(Z_prime[i].T, Z_prime[i]) + 
+                      (1 - alpha[i]) * torch.var(Z_prime[i], dim=0) 
+                      for i in range(len(Z_prime)))
+        
+        # Compute loss
+        loss = -2 * torch.trace(C) + torch.sum(V * V_prime)
+        return loss
+    
+    def unbiased_stochastic_gep_ey(data_stream, lr, T, f):
+        theta = initialize_parameters(f)
+        optimizer = torch.optim.SGD([theta], lr=lr)
+        
+        for t in range(T):
+            X_b, X_b_prime = next(data_stream), next(data_stream)
+            Z_b, Z_b_prime = f(X_b, theta), f(X_b_prime, theta)
+            
+            optimizer.zero_grad()
+            loss = compute_unbiased_stochastic_loss(Z_b, Z_b_prime)
+            loss.backward()
+            optimizer.step()
+        
+        return theta
+    \end{minted}
+    \caption{PyTorch-style pseudocode for the unbiased stochastic GEP-EY algorithm}
+    \label{lst:unbiased-stochastic-gep-ey}
+    \end{listing}
+
+This implementation ensures unbiased estimation even with small batch sizes, making it suitable for large-scale problems. By using two independent mini-batches for each iteration (as seen in the \texttt{unbiased\_stochastic\_gep\_ey} function), we avoid the bias issues discussed earlier while maintaining computational efficiency.
+
+This formulation ensures unbiased estimation even with small batch sizes, making it suitable for large-scale problems. The algorithm can be implemented efficiently using automatic differentiation frameworks like PyTorch:
+
+This algorithm efficiently solves GEPs for CCA, PLS, and related methods by leveraging the low-rank structure of the problem and unbiased stochastic estimation. The \glspl{weights} $U$ are implicitly learned through the optimization of $\theta$, and the resulting \glspl{representations} $Z$ can be used for downstream tasks or analysis.
 
 In summary, GEP-EY provides a novel, efficient, and theoretically grounded approach to solving GEPs, particularly for CCA and PLS problems, by leveraging a new Eckhart-Young inspired objective and stochastic optimization techniques.
 
@@ -537,7 +565,7 @@ We employ two diverse datasets:
 \begin{itemize}
     \item \textbf{Training Duration}: Single epoch
     \item \textbf{Batch Sizes}: 5, 20, 50, 100
-    \item \textbf{Hyperparameter Tuning}: Grid search using Weights and Biases \citep{wandb}
+    \item \textbf{Hyperparameter Tuning}: Grid search using Weights and Biases (WandB) \citep{wandb}
 \end{itemize}
 
 Table \ref{tab:hyperparameters} details the hyperparameter ranges explored for each method.
