@@ -25,150 +25,172 @@ We highlight the connections between our work and existing SSL methods, and show
 
 \section{Background: Deep Representation Learning}
 
-\subsection{Deep Learning}
+This section explores the evolution of deep representation learning techniques, from traditional autoencoders to more sophisticated approaches like Deep Canonical Correlation Analysis (Deep CCA) and Self-Supervised Learning (SSL).
 
-Deep learning is a subfield of machine learning that uses functions parameterised by neural networks.
-Deep learning has been applied to a wide range of domains, including computer vision, speech recognition, natural language processing, and bioinformatics, where they have produced state-of-the-art results on many tasks.
-Neural networks are usually composed of many linear layers followed by nonlinear activation functions such as the rectified linear unit (ReLU).
-The ReLU activation function is defined as $\ReLU(x) = \max(0, x)$.
-The ReLU activation function is piecewise linear, and so the composition of ReLU activations with linear functions is a piecewise linear function.
-It has been shown that neural networks with ReLU activations can approximate any continuous function on a compact set to arbitrary accuracy \citep{perekrestenko2018universal}, and so are universal function approximators.
-This flexibility, combined with increasingly large datasets, allows neural networks to learn complex functions from data.
-Owing to the size of the models and datasets, neural networks are usually trained using the backpropagation algorithm and stochastic gradient descent (SGD) \citep{amari1993backpropagation}.
+\subsection{Deep Learning and Neural Networks}
+Deep learning, a subfield of machine learning, utilizes neural networks to learn complex representations from data. Neural networks are composed of interconnected layers of artificial neurons, typically including an input layer, one or more hidden layers, and an output layer. Each neuron computes a weighted sum of its inputs, followed by a nonlinear activation function.
+A key component of modern neural networks is the rectified linear unit (ReLU) activation function, defined as:
+\begin{equation}
+\ReLU(x) = \max(0, x)
+\end{equation}
+ReLU and its variants have become popular due to their simplicity and effectiveness in mitigating the vanishing gradient problem during training.
+The power of neural networks lies in their ability to approximate complex functions. The Universal Approximation Theorem \citep{cybenko1989approximation,hornik1991approximation} states that a feedforward network with a single hidden layer containing a finite number of neurons can approximate any continuous function on compact subsets of $\mathbb{R}^n$, given certain mild assumptions about the activation function.
+Neural networks are typically trained using backpropagation and stochastic gradient descent (SGD) or its variants. The backpropagation algorithm efficiently computes gradients of the loss function with respect to the network parameters, while SGD allows for training on large datasets by updating parameters using small batches of data.
+\subsection{Autoencoders and Representation Learning}
+Autoencoders represent an early approach to unsupervised representation learning. These neural networks are designed to learn compact data representations by reconstructing input data through a bottleneck layer. The basic structure of an autoencoder consists of:
 
-\subsection{Autoencoders}
+An encoder function $f_{\theta}: \mathcal{X} \to \mathcal{Z}$ that maps input data to a latent representation.
+A decoder function $g_{\phi}: \mathcal{Z} \to \mathcal{X}$ that attempts to reconstruct the input from the latent representation.
 
-Autoencoders are a type of neural network that learns to encode data into a lower-dimensional representation and then decode it back to the original data.
-Autoencoders are trained to minimize the reconstruction error between the input and the output.
-The simplest form of an autoencoder is a feedforward neural network with a bottleneck layer that has fewer units than the input and output layers.
-The bottleneck layer is the latent representation of the data.
-Autoencoders can be used for dimensionality reduction, feature learning, and generative modeling.
-Variational autoencoders (VAEs) \citep{kingma2013auto} are a type of autoencoder that learns a probabilistic model of the data.
-VAEs are trained to maximize the evidence lower bound (ELBO) on the log-likelihood of the data.
-The ELBO is a lower bound on the log-likelihood of the data and is equal to the reconstruction error plus the KL divergence between the approximate posterior and the prior.
-VAEs are used for generative modeling and unsupervised learning.
+The autoencoder is trained to minimize a reconstruction loss:
+\begin{equation}
+\mathcal{L}(\theta, \phi) = \mathbb{E}{x \sim p{\text{data}}}[|x - g_{\phi}(f_{\theta}(x))|^2]
+\end{equation}
+Autoencoders can be viewed as a nonlinear generalization of Principal Component Analysis (PCA). In fact, a linear autoencoder with a single hidden layer and mean squared error loss is equivalent to PCA when the hidden layer dimension is less than the input dimension.
+While autoencoders have been successful in various applications, they face limitations. The focus on reconstruction may lead to learning fine-grained details that are not necessarily useful for downstream tasks, and there's no explicit encouragement for the learned representations to capture meaningful features or disentangled factors of variation.
 
-While autoencoders have been successful in learning representations of data, they are limited by the fact that they are trained to minimize the reconstruction error, which may not be the best objective for learning useful representations.
+These limitations have motivated the development of more sophisticated autoencoder variants and alternative representation learning approaches.
+\subsection{Variational Autoencoders}
+Variational Autoencoders (VAEs) \citep{kingma2013auto} extend the autoencoder framework to learn probabilistic generative models. VAEs model the latent space as a probability distribution, typically a multivariate Gaussian, and are trained to maximize the evidence lower bound (ELBO):
+\begin{equation}
+\mathcal{L}{ELBO}(\theta, \phi) = \mathbb{E}{q_{\phi}(z|x)}[\log p_{\theta}(x|z)] - D_{KL}(q_{\phi}(z|x) || p(z))
+\end{equation}
+where $q_{\phi}(z|x)$ is the encoder (or inference) network, $p_{\theta}(x|z)$ is the decoder (or generative) network, and $p(z)$ is a prior distribution over the latent space.
+VAEs provide a principled way to generate new samples and perform probabilistic inference, making them useful for both representation learning and generative modeling.
 
-The intuition is that fine grained details of the data are not always necessary for downstream tasks, and so the autoencoder may learn to encode these details in the latent representation rather than the salient features of the data.
+Given the connection between Autoencoders and PCA, it is natural to consider the extension of CCA to the deep learning setting. This leads to the development of Deep CCA, which aims to learn nonlinear representations that are maximally correlated across different views.
 
-Autoencoders can be seen as a form of self-supervised learning, where the task is to predict the input from the input itself.
+\subsection{From Autoencoders to Deep CCA}
 
-Autoencoders can be viewed as a deep learning extension of Principal Component Analysis (PCA). For example, a single-layer autoencoder with a linear activation function and mean squared error loss is equivalent to PCA.
-
-When working with multiview data, it is therefore natural to consider deep extensions of CCA, which is a multiview extension of PCA.
-
-\subsection{Deep CCA and Deep Multiview CCA}
-
-Thus far, our focus in this thesis has been on linear CCA. However, in dealing with high-dimensional and complex data structures commonly found in modern applications, nonlinear extensions of CCA become essential.
-The objective of Deep CCA (and Deep MCCA) is to learn nonlinear representations of data that are linearly correlated across different views. Recall the definition of $\MCCA_K$ in Equation \eqref{eq:MCCA}. We define the goal of Deep CCA and Deep MCCA using this notation:
-
+The objective of Deep CCA is to maximize the correlation between learned representations of different views:
 \begin{align}
-    \label{eq:DMCCA-def}
-    \norm{\MCCA_K\left(Z^{(1)}, \ldots, Z^{(I)}\right)}_2
+\label{eq:DMCCA-def}
+\norm{\MCCA_K\left(Z^{(1)}, \ldots, Z^{(I)}\right)}_2
 \end{align}
-
-which is the norm of the vector of the top $K$ canonical correlations between the representations $Z^{(i)}$ of the different views.
-
-The key difference between MCCA and its deep learning counterparts, Deep CCA and Deep MCCA, lies in the nature of the input data. In MCCA, we work with fixed, pre-defined feature representations $X^{(i)}$ for each view and aim to find linear transformations that maximize the correlation between these fixed representations. In contrast, Deep CCA and Deep MCCA learn new, nonlinear representations $Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})$ using neural networks $f^{(i)}$ parameterized by $\theta^{(i)}$ for each view $i \in [I]$. The objective is to learn representations that have high MCCA, i.e., representations that are maximally correlated across views in a linear sense.
-
-The power of Deep CCA and Deep MCCA lies in their ability to learn flexible, nonlinear transformations of the input data that are tailored to the task of maximizing cross-view correlation. By learning these representations end-to-end, Deep CCA and Deep MCCA can potentially capture more complex and subtle relationships between views that may be difficult or impossible to capture with fixed, linear transformations.
-
+where $Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})$ are the learned representations for each view.
 \begin{figure}
-    \centering
-    \includegraphics[width=0.5\textwidth]{figures/dcca_schematic}
-    \caption{Schematic of the Deep CCA approach highlighting the nonlinear transformation of data into correlated views.}
-    \label{fig:dcca_schematic}
+\centering
+\includegraphics[width=0.5\textwidth]{figures/dcca_schematic}
+\caption{Schematic of the Deep CCA approach highlighting the nonlinear transformation of data into correlated views.}
+\label{fig:dcca_schematic}
 \end{figure}
+Figure \ref{fig:dcca_schematic} illustrates how Deep CCA transforms data from different views through neural networks to achieve correlated representations. This approach allows for capturing complex, nonlinear relationships between views that linear methods might miss.
 
-Figure \ref{fig:dcca_schematic} illustrates the conceptual framework of Deep CCA, where data from different views are transformed through neural networks to achieve correlated representations.
+\subsubsection{Full-batch Deep CCA}
+The full-batch approach of Deep CCA, formulated by \citet{andrew2013deep}, maximizes correlation using the following loss function:
 
-The full-batch approach of Deep CCA, formulated by \citet{andrew2013deep}, seeks to maximize the correlation between these different views.
-We refer to this loss function as $\LRayleigh$ because it effectively maximizes the Generalized Rayleigh Quotient associated with the canonical correlation problem.
-The objective, operationalized as a loss function, is defined by the trace of matrix $T$:
 \begin{align}\label{eq:T_definition}
     T          & = \left(\text{cov}(Z^{(1)})\right)^{-\frac{1}{2}} Z^{(1)\top} Z^{(2)} \left(\text{cov}(Z^{(2)})\right)^{-\frac{1}{2}} \\
     \LRayleigh & = -\Tr(T)
 \end{align}
 
-This approach, while theoretically sound, faces scalability issues with large datasets.
-DCCA-STOL, proposed by \citet{wang2015unsupervised}, adapts this objective to large mini-batches but suffers from biased gradients due to the matrix inversions in Equation \eqref{eq:T_definition}.
-This necessitates batch sizes larger than the representation size, limiting its practical application.
+We refer to this as the Rayleigh loss because it effectively maximizes the Generalized Rayleigh Quotient associated with the canonical correlation problem. While theoretically sound, this approach faces significant scalability issues with large datasets.
 
-Extensions such as Deep MCCA \citep{somandepalli2019multimodal} and Deep GCCA \citep{benton2017deep} are multiview extensions of Deep CCA that work by directly differentiating the sum of the top $K$ generalized eigenvalues of the mini-batch covariance matrices. Specifically, their loss function is given by:
+The Rayleigh loss is only valid for full batch gradient descent, which becomes computationally infeasible for large datasets. This limitation has led to numerous issues reported on the GitHub implementation, with users experiencing problems with ill-conditioned matrices and exploding gradients. These problems arise because the covariance matrices can become singular or nearly singular when working with small batches or high-dimensional data, leading to instability in the matrix inversions required by the loss function.
+
+\subsubsection{DCCA-STOL}
+DCCA-STOL, proposed by \citet{wang2015unsupervised}, attempts to use the full-batch objective with large mini-batches but suffers from biased gradients due to the matrix inversions in Equation \eqref{eq:T_definition}. This bias is fundamentally a consequence of Jensen's inequality applied to the inverse of a random variable. 
+
+For a positive random variable $X$, Jensen's inequality states that:
+
+\begin{equation}
+\frac{1}{E[X]} \leq E[\frac{1}{X}]
+\end{equation}
+
+This inequality arises because $f(x) = \frac{1}{x}$ is a convex function for $x > 0$. 
+
+To illustrate this, consider a simple example: Let $X$ be a random variable that is 1 with probability 0.5 and 0.1 with probability 0.5. Then:
+
+\begin{align}
+    E[X] &= 0.5 \cdot 1 + 0.5 \cdot 0.1 = 0.55 \\
+    \frac{1}{E[X]} &= \frac{1}{0.55} \approx 1.82 \\
+    E[\frac{1}{X}] &= 0.5 \cdot \frac{1}{1} + 0.5 \cdot \frac{1}{0.1} = 0.5 + 5 = 5.5
+\end{align}
+
+As we can see, $\frac{1}{E[X]} < E[\frac{1}{X}]$, confirming the inequality. 
+
+In the context of DCCA-STOL, this inequality leads to biased estimates when inverting covariance matrices estimated from mini-batches. The expectation of the inverse of the sample covariance matrix is not equal to the inverse of the expected covariance matrix. This bias necessitates batch sizes larger than the representation size, limiting the method's practical application.
+
+The problem becomes even more severe when the batch size is smaller than the representation dimension. In this case, the sample covariance matrix is guaranteed to be singular. To understand why, consider that a batch of size $n$ in a $d$-dimensional space (where $n < d$) can only span an $n$-dimensional subspace. Consequently, the sample covariance matrix will have at most rank $n$, making it singular in the $d$-dimensional space.
+
+For singular matrices, the inverse is undefined, which is equivalent to division by zero in the scalar case. This causes Jensen's inequality to blow up to infinity, making the optimization problem ill-posed and impossible to solve.
+
+Even when the batch size is slightly larger than the representation dimension, the covariance matrix can be nearly singular, leading to numerical instability and unreliable results.
+
+A practical example illustrates the severity of this issue: Consider training deep neural networks on 3D MRI scans. Due to memory constraints of GPUs, it's often impossible to use large batch sizes for such high-dimensional data. If we attempt to use small batch sizes with the Rayleigh or STOL objective, we encounter singular (when batch size < representation dimension) or near-singular (when batch size $\approx$ representation dimension) matrices. The singularity effectively causes division by zero in Jensen's inequality, blowing up the expectation to infinity.
+
+This problem has caused confusion for many GitHub users (including myself!) who attempted to implement these methods. The nuanced nature of this issue is not immediately apparent, leading to unexpected behavior and optimization failures. It's crucial to understand that to even get the optimization to run, we require batch sizes substantially larger than the representation dimension, before even considering problems of bias. This requirement severely limits the applicability of the method to high-dimensional data or large models, as it demands enormous batch sizes that often exceed available computational resources.
+
+\subsubsection{Deep MCCA and Deep GCCA}
+Extensions such as Deep MCCA \citep{somandepalli2019multimodal} and Deep GCCA \citep{benton2017deep} are multiview extensions of Deep CCA. Their loss function is given by:
+
 \begin{align}
     T      & = \left(\hat{V}(\theta)^{-\frac{1}{2}} \hat{C}(\theta)\hat{V}(\theta)^{-\frac{1}{2}}\right) \\
     \LDMCCA & = -\Tr(T)
 \end{align}
-where $\hat{C}(\theta)$ and $\hat{V}(\theta)$ are the mini-batch estimates of the between-view and within-view covariance matrices, respectively, as defined in Equation \eqref{eq:def-C-V-matrices}.
 
-However, these methods suffer from the same fundamental issue as DCCA-STOL, namely the biased gradients resulting from the eigendecomposition of small mini-batch covariance matrices. As a result, Deep MCCA and Deep GCCA do not effectively mitigate the scalability issues of Deep CCA and still require large batch sizes to work well in practice.
+where $\hat{C}(\theta)$ and $\hat{V}(\theta)$ are the mini-batch estimates of the between-view and within-view covariance matrices. However, these methods still require large batch sizes due to biased gradients from small mini-batch covariance matrices. This issue stems from the same problem as DCCA-STOL: the matrix inversions in the loss function lead to biased estimates when using small mini-batches, again due to Jensen's inequality.
 
-Adaptive whitening methods \citep{wang2015stochastic, chang2018scalable} offer another solution to the scalability problem by whitening the representations before computing the correlation matrix.
-These methods work by whitening (or approximately whitening) the representations before computing the correlation matrix. This can be seen as a form of preconditioning that helps to mitigate the effects of the biased gradients that arise from the eigendecomposition of small mini-batch covariance matrices. 
-One such method is DCCA-NOI \citep{wang2015unsupervised}, which uses a form of adaptive whitening to improve the scalability of Deep CCA. NOI stands for Nonlinear Orthogonal Iteration, which is used to approximate the whitening transformation. The loss function of DCCA-NOI is given by:
+\subsubsection{Adaptive Whitening Methods}
+Adaptive whitening methods \citep{wang2015stochastic, chang2018scalable} offer another solution to the scalability problem. These methods aim to approximate the matrix inversion in the loss function without actually inverting the matrix, functioning similarly to a preconditioner in optimization. By doing so, they attempt to mitigate the bias introduced by direct matrix inversion on small mini-batches.
+
+One such method is DCCA-NOI \citep{wang2015unsupervised}, which uses Nonlinear Orthogonal Iteration to approximate the whitening transformation. The loss function of DCCA-NOI is:
+
 \begin{align}
     \LNOI & = |{\tilde{\Sigma}_{11}}^{-\frac{1}{2}} Z\sps{1}-{\tilde{\Sigma}_{22}}^{-\frac{1}{2}} Z\sps{2}|^2_F
 \end{align}
-where $\tilde{\Sigma}_{11}$ and $\tilde{\Sigma}_{22}$ are estimates of the covariance matrices of $Z\sps{1}$ and $Z\sps{2}$, respectively. This class of methods also includes similar work by \citet{chang2018scalable}.
-However, as noted by both sets of authors, these methods introduce a time constant that complicates analysis and requires extensive tuning.
-These limitations highlight the need for more scalable and efficient nonlinear CCA methods that can handle large datasets without compromising on representation quality or requiring extensive hyperparameter tuning.
+
+where $\tilde{\Sigma}_{11}$ and $\tilde{\Sigma}_{22}$ are estimates of the covariance matrices of $Z\sps{1}$ and $Z\sps{2}$. The adaptive whitening approach aims to iteratively refine these estimates over time, potentially allowing for smaller batch sizes. However, these methods introduce a time constant that complicates analysis and requires extensive tuning. This time constant represents the rate at which the whitening estimates are updated, and finding the right balance between stability and adaptivity can be challenging.
 
 \subsection{Self-Supervised Learning and Joint Embedding}
 
-Self-Supervised Learning (SSL) has emerged as a crucial approach in deep learning, especially for tasks with limited labeled data. A fundamental strategy in SSL, often referred to as non-contrastive SSL, involves creating joint embeddings of augmented images. This process entails generating two distinct views of the same image, denoted as \( X_1 \) and \( X_2 \), using various augmentation techniques. The primary aim is to align their representations, \( Z^{(1)} \) and \( Z^{(2)} \), in a shared embedding space. This alignment leverages the inherent patterns within the data to develop feature representations absent explicit labels. A significant challenge in this methodology is averting the collapse of representations, where models produce constant features irrespective of input variability.
+Self-Supervised Learning (SSL) has emerged as a powerful approach for learning representations from unlabeled data. A key strategy in SSL involves creating joint embeddings of augmented data, typically images.
 
-\begin{figure}[ht]
-    \centering
-    \tikz{ % nodes
-        \node[latent, align=center, minimum size=2cm] (x) {Original Image\\x};
-        \node[obs, below left=of x, minimum size=2cm, align=center] (x1) {Augmented Image \\$x^{(1')}$};
-        \node[obs, below right=of x, minimum size=2cm, align=center] (x2) {Augmented Image \\$x^{(2')}$};
-        % edges
-        \edge{x} {x1}
-        \edge{x} {x2}}
-    \caption[Joint Embedding Data Generation Process]{\textit{\textbf{Joint Embedding Data Generation Process:}} The original image \(x\) is augmented to produce two views \(x^{(1')}\) and \(x^{(2')}\).}
-    \label{fig:joint-embedding}
+\begin{figure}
+\centering
+\tikz{
+    \node[latent, align=center] (x) {Original Data\\$X$};
+    \node[obs, below left=of x, align=center] (x1) {Augmented Data\\$X^{(1)}$};
+    \node[obs, below right=of x, align=center] (x2) {Augmented Data\\$X^{(2)}$};
+    \edge{x} {x1}
+    \edge{x} {x2}
+}
+\caption{Joint Embedding Data Generation Process in SSL}
+\label{fig:joint_embedding}
 \end{figure}
 
-In SSL, augmented data generation serves to create multiple perspectives of the same underlying content, such as cropping or rotating an image. The objective is to learn representations that are invariant to these augmentations, thereby capturing the fundamental structure of the data. Canonical Correlation Analysis (CCA) emerges as a fitting tool for this task, especially given that augmentations represent redundant rather than complementary information, offering different perspectives of the same underlying data.
+SSL methods often employ an encoder-projector model:
 
-\subsubsection{Encoder-Projector Model in SSL}
-SSL methods like Barlow Twins and VICReg employ an encoder-projector model, as shown in Figure~\ref{fig:sslschematic}. In this model, input data is transformed by an encoder \( g \) into representations, which are further processed by a projector \( h \) into higher-dimensional embeddings. These embeddings are integral to training, with the representations being critical for downstream tasks. The encoder is typically a neural network suited to the domain, while the projector is often a simpler multi-layer perceptron.
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.99\textwidth]{figures/ssl_schematic}
-    \caption{Schematic of the encoder-projector setup in SSL.}
-    \label{fig:sslschematic}
+\begin{figure}
+\centering
+\includegraphics[width=0.9\textwidth]{figures/ssl_schematic}
+\caption{Encoder-Projector Model in SSL}
+\label{fig:sslschematic}
 \end{figure}
-
-The essence of joint embedding in SSL is that similar inputs, \( X \) and its augmented version \( X' \), should yield similar embeddings, \( Z \) and \( Z' \).
-The encoder and projector are optimized to minimize the distance between \( Z \) and \( Z' \), reflecting the similarity of the inputs.
 
 \subsubsection{CCA-based SSL Methods: Barlow Twins and VICReg}
-Barlow Twins and VICReg are two pivotal methods in SSL that build upon canonical correlation principles to generate robust representations from augmented views.
-Both methods aim to align representations of two augmented views while ensuring distinct yet correlated representations.
+Two prominent SSL methods, Barlow Twins and VICReg, use objectives similar to CCA principles:
 
-\textbf{Barlow Twins} employs a redundancy reduction objective to ensure similarity between representations of the same augmented views and to decorrelate representations within each view.
-Its loss function is expressed as:
-\begin{align}
-    \LBT = \overbrace{\gamma \mathbb{E} \norm{Z^{(1)} - Z^{(2)}}^2}^{\text{Invariance}} + \overbrace{\beta \sum_{\substack{k,l=1 \\ k \neq l}}^K \Cov(\hat{Z}^{(i)}_k, \hat{Z}^{(i)}_l)^2}^{\text{Redundancy Reduction}},
-\end{align}
-where \( \hat{Z}^{(i)} \) denotes the batch-normalized versions of the representations, with \( \gamma \) and \( \beta \) as hyperparameters controlling the similarity and decorrelation terms, respectively.
+\textbf{Barlow Twins Loss:}
+\begin{equation}
+\LBT = \underbrace{\gamma \mathbb{E} \norm{Z^{(1)} - Z^{(2)}}^2}_{\text{Invariance}} + \underbrace{\beta \sum_{\substack{k,l=1 \\ k \neq l}}^K \Cov(\hat{Z}^{(i)}_k, \hat{Z}^{(i)}_l)^2}_{\text{Redundancy Reduction}}
+\end{equation}
 
-\textbf{VICReg}, in contrast, introduces a variance term and omits batch normalization, focusing on variance-invariance-covariance regularization.
-The VICReg loss is defined as:
-\begin{align}
-    \LVR = \overbrace{\gamma \mathbb{E} \norm{Z^{(1)} - Z^{(2)}}^2}^{\text{Invariance}} + \left[\overbrace{\sum_{i \in \{1,2\}} \alpha \sum_{k=1}^K \left(1 - \sqrt{\Var(Z^{(i)}_k)}\right)_+}^{\text{Variance}} + \overbrace{\beta \sum_{\substack{k,l=1 \\ k \neq l}}^K \Cov(Z^{(i)}_k, Z^{(i)}_l)^2 }^{\text{Covariance}}\right],
-\end{align}
-with \( \alpha \), \( \beta \), and \( \gamma \) as tuning parameters balancing the influence of variance, invariance, and covariance regularization.
+\textbf{VICReg Loss:}
+\begin{equation}
+\begin{split}
+\LVR = &\underbrace{\gamma \mathbb{E} \norm{Z^{(1)} - Z^{(2)}}^2}_{\text{Invariance}} + \\
+&\underbrace{\sum_{i \in \{1,2\}} \alpha \sum_{k=1}^K \left(1 - \sqrt{\Var(Z^{(i)}_k)}\right)_+}_{\text{Variance}} + 
+\underbrace{\beta \sum_{\substack{k,l=1 \\ k \neq l}}^K \Cov(Z^{(i)}_k, Z^{(i)}_l)^2}_{\text{Covariance}}
+\end{split}
+\end{equation}
 
-These approaches, grounded in canonical correlation principles, offer foundational baselines for our experiments in SSL.
+These methods aim to learn representations that are invariant to data augmentations while maintaining informative and decorrelated features.
 
 \section{Methods: DCCA-EY and SSL-EY, extending GEP-EY to Deep Learning}
 
 Building upon the Eckart-Young inspired objective introduced in the previous chapter, we now extend our approach to non-linear transformations of the data. The key idea is to replace linear representations with non-linear ones, effectively optimizing the representation of the original data to maximize canonical correlations.
+
 Recall the objective function from the previous chapter:
 \begin{align}
 \LEY(\theta) = -2 \Tr C(\theta) + \norm{V_\alpha(\theta)}_F^2
@@ -193,7 +215,7 @@ We first show that our objective recovers Deep Multi-view CCA at any local optim
     Therefore, $\hat{\theta}$ is also a local optimum of objectives from \citet{andrew2013deep, somandepalli2019multimodal} as defined in \cref{eq:DMCCA-def}.
 \end{restatable}
 
-\begin{proof}[Proof sketch: see \cref{supp:EY-recover-Deep-CCA} for full details.]
+\begin{proof}[Proof sketch:]
     Consider treating the penultimate-layer representations as fixed, and optimising over the weights in the final layer.
     This is precisely equivalent to optimising the Eckhart-Young loss for linear CCA where the input variables are the penultimate-layer representations.
     So by \cref{prop:no-spurious}, a local optimum is also a global optimum, and by \cref{prop:EY-charac} the optimal value is the negative sum of squared generalised eigenvalues.
@@ -201,102 +223,84 @@ We first show that our objective recovers Deep Multi-view CCA at any local optim
 
 This result shows that our objective, which we call \textbf{DCCA-EY}, is a valid generalization of Deep CCA and can be used to learn correlated non-linear representations.
 
-\subsection{Application to Self-Supervised Learning (SSL)}
+\subsection{Application to Self-Supervised Learning (SSL-EY)}
 
-We can directly apply Algorithm~\ref{alg:general} to the SSL setting by treating the two augmented views as different data views. We will refer to this method as \textbf{SSL-EY}.
+We can directly apply the DCCA-EY approach to the self-supervised learning (SSL) setting, which we call \textbf{SSL-EY}. The key differences between DCCA-EY and SSL-EY are:
 
-If we wish to have the same neural network transforming each view, we can simply tie the weights $\theta\sps{1} = \theta\sps{2}$. When the paired data are generated from applying independent, identically distributed (i.i.d.) augmentations to the same original input, it is intuitive that tying the weights is a sensible procedure and may act as a regularizer\footnote{Given the distributions of both views are identical, there is no reason we would expect assymetric functions to be optimal out of sample}.
+\begin{enumerate}
+    \item Data source: In SSL-EY, the two views are augmented versions of a single sample, whereas in DCCA-EY, they are separate views of the data.
+    \item Encoder architecture: SSL-EY uses the same encoder for both views as a regularization strategy, while DCCA-EY uses separate encoders for each view.
+\end{enumerate}
 
-Moreover, our loss function bears some resemblance to those of Barlow Twins and VICReg. Recall that our objective is:
+The use of a shared encoder in SSL-EY is motivated by the fact that the paired data are generated from applying independent, identically distributed (i.i.d.) augmentations to the same original input. This approach acts as a regularizer and is intuitively sensible given that the distributions of both views are identical.
+
+Our loss function for both DCCA-EY and SSL-EY bears some resemblance to those of Barlow Twins and VICReg:
 
 \begin{align*}
     \LEY(\theta) = - 2 \tr C(\theta) + \norm{V_\alpha(\theta)}_F^2
 \end{align*}
 
-where $C(\theta)$ is the cross-covariance matrix between the representations of the two views, and $V_\alpha(\theta)$ is a matrix involving the individual covariance matrices of each view.
+where $C(\theta)$ is the cross-covariance matrix between the representations of the views, and $V_\alpha(\theta)$ is a matrix involving the individual covariance matrices of each view.
 
-This objective has two terms: the first term, $- 2 \tr C(\theta)$, encourages the representations to be correlated across views, similar to the invariance term in Barlow Twins and VICReg. The second term, $\norm{V_\alpha(\theta)}_F^2$, involves the individual covariance matrices, which is analogous to the variance and covariance terms in VICReg. The main difference is that our method is based on canonical correlation principles, which may offer additional benefits in terms of representation quality and interpretability.
+This objective has two terms:
+\begin{enumerate}
+    \item $- 2 \tr C(\theta)$: encourages correlated representations across views, similar to the invariance term in Barlow Twins and VICReg.
+    \item $\norm{V_\alpha(\theta)}_F^2$: involves individual covariance matrices, analogous to the variance and covariance terms in VICReg.
+\end{enumerate}
 
-In the next section, we will present experiments demonstrating the effectiveness of our method in both the Deep CCA and SSL settings.
+The main difference is that our method is based on canonical correlation principles, which may offer additional benefits in terms of representation quality and interpretability.
 
 \subsection{PyTorch Implementation}
 
-We provide PyTorch implementations of DCCA-EY and SSL-EY in Listings \ref{lst:pytorch-dcca} and \ref{lst:pytorch-ssl}, respectively.
+We provide a unified PyTorch implementation for both DCCA-EY and SSL-EY in Listing \ref{lst:pytorch-unified}. This implementation defines a single class that can be used for both methods, with the key difference being in how the encoders are initialized and used.
 
-The DCCA-EY implementation defines a class that takes a list of encoders as input and computes the loss function as described in Section 3.2. The forward method computes the representations of the input data using the encoders, while the loss method computes the loss function based on the representations. This implementation can be used to train DCCA-EY models on multi-view data.
+\begin{listing}[ht]
+    \begin{minted}{python}
+import torch
+import torch.nn as nn
 
-The SSL-EY implementation defines a class that takes a single encoder as input, which is used to transform both augmented views of the data. The forward method computes the representations of the input data using the shared encoder, while the loss method computes the loss function based on the representations and the ridge penalty hyperparameters. This implementation can be used to train SSL-EY models on augmented data.
+class UnifiedEY(nn.Module):
+    def __init__(self, encoders, ssl_mode=False):
+        super(UnifiedEY, self).__init__()
+        self.ssl_mode = ssl_mode
+        if ssl_mode:
+            assert len(encoders) == 1, "SSL mode requires a single encoder"
+            self.encoder = encoders[0]
+        else:
+            self.encoders = nn.ModuleList(encoders)
+
+    def forward(self, Xs):
+        if self.ssl_mode:
+            Zs = [self.encoder(X) for X in Xs]
+        else:
+            Zs = [encoder(X) for encoder, X in zip(self.encoders, Xs)]
+        return Zs
+
+    def loss(self, Zs, alphas=[0, 0]):
+        # Compute total between-view covariance matrix
+        C = torch.zeros(Zs[0].shape[1], Zs[0].shape[1])
+        for i in range(len(Zs)):
+            for j in range(i + 1, len(Zs)):
+                C += torch.matmul(Zs[i].T, Zs[j]) / Zs[i].shape[0]
+        
+        # Compute total within-view variance matrix
+        V = torch.zeros(Zs[0].shape[1], Zs[0].shape[1])
+        for i, alpha in enumerate(alphas):
+            Vi = torch.matmul(Zs[i].T, Zs[i]) / Zs[i].shape[0]
+            V += alpha * torch.eye(Vi.shape[0]) + (1 - alpha) * Vi
+        
+        # Compute loss
+        loss = -2 * torch.trace(C) + torch.norm(V, p='fro') ** 2
+        
+        return loss
+    \end{minted}
+    \caption{Unified PyTorch implementation for DCCA-EY and SSL-EY.}
+    \label{lst:pytorch-unified}
+\end{listing}
+
+This unified implementation can be used for both DCCA-EY and SSL-EY by setting the \texttt{ssl\_mode} parameter appropriately. When \texttt{ssl\_mode=True}, it uses a single shared encoder for both views (SSL-EY), and when \texttt{ssl\_mode=False}, it uses separate encoders for each view (DCCA-EY).
 
 In the next section, we will present experiments demonstrating the effectiveness of our DCCA-EY and SSL-EY methods in their respective settings.
-
-\begin{listing}[ht]
-    \begin{minted}{python}
-    import torch
-    import torch.nn as nn
-    
-    class DCCA_EY(nn.Module):
-    def init(self, encoders):
-    super(DCCA_EY, self).init()
-    self.encoders = nn.ModuleList(encoders)
-    def forward(self, Xs):
-    Zs = [encoder(X) for encoder, X in zip(self.encoders, Xs)]
-    return Zs
-
-    def loss(self, Zs):
-    # Compute total between-view covariance matrix
-    C = torch.zeros(Zs[0].shape[1], Zs[0].shape[1])
-    for i in range(len(Zs)):
-        for j in range(i + 1, len(Zs)):
-            C += torch.matmul(Zs[i].T, Zs[j]) / Zs[i].shape[0]
-    
-    # Compute total within-view variance matrix
-    V = torch.zeros(Zs[0].shape[1], Zs[0].shape[1])
-    for i in range(len(Zs)):
-        V += torch.matmul(Zs[i].T, Zs[i]) / Zs[i].shape[0]
-    
-    # Compute loss
-    loss = -2 * torch.trace(C) + torch.norm(V, p='fro') ** 2
-    
-    return loss
-    \end{minted}
-    \caption{PyTorch implementation of DCCA-EY.}
-    \label{lst:pytorch-dcca}
-\end{listing}
-
-We provide a PyTorch implementation of DCCA-EY in Listing \ref{lst:pytorch-dcca}. This implementation defines a DCCA-EY class that takes a list of encoders as input and computes the loss function as described in Section 3.2. The forward method computes the representations of the input data using the encoders, while the loss method computes the loss function based on the representations. This implementation can be used to train DCCA-EY models on multi-view data.
-
-\begin{listing}[ht]
-    \begin{minted}{python}
-    import torch
-    import torch.nn as nn
-class SSL_EY(nn.Module):
-def init(self, encoder):
-super(SSL_EY, self).init()
-self.encoder = encoder
-def forward(self, Xs):
-    Zs = [self.encoder(X) for X in Xs]
-    return Zs
-
-def loss(self, Zs, alphas=[0, 0]):
-    # Compute cross-covariance matrix
-    C = torch.matmul(Zs[0].T, Zs[1]) / Zs[0].shape[0]
-    
-    # Compute individual covariance matrices
-    V1 = torch.matmul(Zs[0].T, Zs[0]) / Zs[0].shape[0]
-    V2 = torch.matmul(Zs[1].T, Zs[1]) / Zs[1].shape[0]
-    
-    # Compute loss
-    V_alpha = alphas[0] * torch.eye(V1.shape[0]) + (1 - alphas[0]) * V1 + \
-              alphas[1] * torch.eye(V2.shape[0]) + (1 - alphas[1]) * V2
-    loss = -2 * torch.trace(C) + torch.norm(V_alpha, p='fro') ** 2
-    
-    return loss
-    \end{minted}
-    \caption{PyTorch implementation of SSL-EY.}
-    \label{lst:pytorch-ssl}
-\end{listing}
-
-
 
 \section{Experiments and Results}
 
@@ -384,7 +388,7 @@ We employ a multiview extension of the Total Correlation Captured (TCC) metric, 
 where \( Z_k^{(i)} \) represents the \( k \)-th dimension of the \( i \)-th view's representation.
 This metric effectively measures the extent to which our method captures correlations between different views in a multidimensional representation space.
 
-\subsubsection{Data} We choose the mfeat dataset for this purpose, which comprises 2,000 handwritten numeral patterns represented through six distinct feature sets, including Fourier coefficients, profile correlations, Karhunen-Love coefficients, pixel averages in \(2 \times 3\) windows, Zernike moments, and morphological features.
+\subsubsection{Data} We choose the mfeat dataset \citep{misc_multiple_features_72} for this purpose, which comprises 2,000 handwritten numeral patterns represented through six distinct feature sets, including Fourier coefficients, profile correlations, Karhunen-Love coefficients, pixel averages in \(2 \times 3\) windows, Zernike moments, and morphological features.
 These diverse features present an ideal testbed for evaluating the performance of multiview learning methods.
 
 \subsubsection{Parameters} For each method, we searched over a hyperparameter grid using \citet{wandb}.
@@ -436,6 +440,8 @@ CIFAR-10 contains 10 classes, while CIFAR-100 contains 100 classes.
 
 \begin{table}[H]
     \centering
+    \caption{Comparing the performance of SSL methods on CIFAR-10 and CIFAR-100.}
+    \resizebox{\textwidth}{!}{%
     \begin{tabular}{|l|c|c|c|c|}
         \hline
         Method          & CIFAR-10 Top-1 & CIFAR-10 Top-5 & CIFAR-100 Top-1 & CIFAR-100 Top-5 \\
@@ -447,7 +453,7 @@ CIFAR-10 contains 10 classes, while CIFAR-100 contains 100 classes.
         \textbf{SSL-EY} & 91.43          & \textbf{99.75} & 67.52           & 90.17           \\
         \hline
     \end{tabular}
-    \caption{Comparing the performance of SSL methods on CIFAR-10 and CIFAR-100.}
+    }
     \label{tab:selfsup}
 \end{table}
 

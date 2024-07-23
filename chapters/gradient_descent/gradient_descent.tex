@@ -217,7 +217,11 @@ This section introduces GEP-EY, a novel algorithm for solving Generalized Eigenv
 \subsection{A New Perspective: Eckhart-Young Inspired Objective for GEPs}
 
 \subsubsection{Formulation and Intuition}
-At the core of our approach is the reformulation of GEPs as an unconstrained optimization problem. We derive this formulation by applying the Eckhart-Young-Mirsky theorem to the eigen-decomposition of $B^{-\frac{1}{2}} A B^{-\frac{1}{2}}$, where $A$ and $B$ define the GEP. This leads to our key proposition:
+At the core of our approach is the reformulation of GEPs as an unconstrained optimization problem. This reformulation is inspired by the Eckhart-Young-Mirsky theorem, which is fundamental in matrix approximation theory.
+
+The Eckhart-Young-Mirsky theorem states that the best rank-$K$ approximation of a matrix \(M\) in the Frobenius norm is given by its truncated singular value decomposition (SVD). Specifically, if \(M = U \Sigma V^\top\) is the SVD of \(M\), then the optimal rank-$K$ approximation is \(M_K = U_K \Sigma_K V_K^\top\), where \(U_K\), \(\Sigma_K\), and \(V_K\) are the matrices containing the top $K$ singular vectors and singular values.
+
+We apply a similar approach to the generalized eigenvalue problem (GEP) defined by matrices \(A\) and \(B\). By considering the eigen-decomposition of \(B^{-\frac{1}{2}} A B^{-\frac{1}{2}}\), we can derive a new objective function for characterizing the top-$K$ subspace of the GEP.
 
 \begin{restatable}[Eckhart-Young inspired objective for GEPs]{proposition}{EYcharac}
     \label{prop:EY-charac}
@@ -229,6 +233,46 @@ At the core of our approach is the reformulation of GEPs as an unconstrained opt
 \end{restatable}
     
 This objective intuitively balances maximizing between-view correlations and minimizing within-view variances.
+
+\paragraph{Sketch of the Proof:}
+To provide some intuition, we sketch the key steps in the proof, with full details available in our supplementary material.
+
+\begin{enumerate}
+    \item \textbf{Matrix Approximation and SVD:} Begin with the Eckhart-Young-Mirsky theorem, which gives the best rank-$K$ approximation in the Frobenius norm for any matrix using its SVD. The theorem states that for a matrix \(M \in \R^{d \times d}\), the best rank-$K$ approximation \(M_K\) is obtained by truncating the SVD of \(M\).
+    
+    \item \textbf{Transformation of GEP:} For the GEP defined by matrices \(A\) and \(B\), consider the transformation \(M = B^{-\frac{1}{2}} A B^{-\frac{1}{2}}\). The eigenvalues and eigenvectors of \(M\) are related to the generalized eigenvalues and eigenvectors of \((A,B)\). This transformation simplifies the problem, as \(M\) is symmetric.
+
+    \item \textbf{Objective Reformulation:} By focusing on the top-$K$ eigenvalues and eigenvectors, we can reformulate the problem as an unconstrained optimization problem. Specifically, consider the objective function:
+    \[
+    \| M - \tilde{W} \tilde{W}^T \|_F^2.
+    \]
+    Since \(M\) is symmetric, the optimal \(\tilde{W}\) is of the form \(W = W_K \Lambda_K^{\frac{1}{2}} O_K\), where \(W_K\) contains the top-$K$ eigenvectors, \(\Lambda_K\) contains the corresponding eigenvalues on the diagonal, and \(O_K\) is an orthogonal matrix.
+
+    \item \textbf{Transformation under reparameterisation:} Consider how this expression transforms under the reparameterisation \(\tilde{W} = B^{\frac{1}{2}} \tilde{U}\). We get:
+    \[
+    \| M - \tilde{Z} \tilde{Z}^T \|_F^2 = \| B^{-\frac{1}{2}} A B^{-\frac{1}{2}} - B^{\frac{1}{2}} \tilde{U} \tilde{U}^T B^{\frac{1}{2}} \|_F^2.
+    \]
+
+    \item \textbf{Simplifying the Objective:} Simplifying the expression, we use the properties of the Frobenius norm and the cyclic property of the trace:
+    \begin{align*}
+        \| B^{-\frac{1}{2}} A B^{-\frac{1}{2}} - B^{\frac{1}{2}} \tilde{U} \tilde{U}^T B^{\frac{1}{2}} \|_F^2 &= \| B^{-\frac{1}{2}} A B^{-\frac{1}{2}} \|_F^2 - 2 \tr(B^{-\frac{1}{2}} A B^{-\frac{1}{2}} B^{\frac{1}{2}} \tilde{U} \tilde{U}^T B^{\frac{1}{2}}) \\
+        &\quad + \tr((B^{\frac{1}{2}} \tilde{U} \tilde{U}^T B^{\frac{1}{2}})^2) \\
+        &= \| B^{-\frac{1}{2}} A B^{-\frac{1}{2}} \|_F^2 - 2 \tr(\tilde{U}^T A \tilde{U}) + \tr((\tilde{U}^T B \tilde{U})^2).
+    \end{align*}
+
+    \item \textbf{Final Reformulation:} This leads to the final form of the objective function:
+    \[
+    \LEYGEP(U) \defeq \tr \left( - 2U^\top A U + \left(U^\top B U\right) \left(U^\top B U\right) \right),
+    \]
+    where \(U = \tilde{W}\).
+
+    This objective intuitively balances maximizing between-view correlations (captured by \(U^\top A U\)) and minimizing within-view variances (captured by \((U^\top B U)(U^\top B U)\)).
+\end{enumerate}
+
+
+For the full proof and additional technical details, we refer the reader to the supplementary material in \citet{chapman2023efficient}.
+
+This new perspective provides a more intuitive and computationally efficient way to approach GEPs, leveraging the well-established principles of the Eckhart-Young-Mirsky theorem.
 
 \subsubsection{Geometrical Properties and Optimization Guarantees}
 A crucial property of our objective is the absence of spurious local minima:
@@ -286,20 +330,69 @@ This algorithm can be implemented efficiently using automatic differentiation fr
 \end{listing}
 
 \subsubsection{Dimensionality Reduction for CCA and PLS}
-For CCA-type problems, we can significantly reduce the computational complexity by exploiting the structure of $A$ and $B$. Instead of working with the full $D \times D$ matrices, we introduce smaller matrices $C(\theta)$ and $V(\theta)$:
-
+For CCA-type problems, we can significantly reduce the computational complexity by exploiting the structure of $A$ and $B$. Instead of working with the full $D \times D$ matrices, we introduce smaller matrices $C(\theta)$ and $V_\alpha(\theta)$:
 \begin{align}\label{eq:def-C-V-matrices}
-C(\theta) = \sum_{i \neq j} \Cov(Z^{(i)}, Z^{(j)}), \quad
-V(\theta) = \sum_{i} \Var(Z^{(i)}).
+C(\theta) &= \sum_{i \neq j} \Cov(Z^{(i)}, Z^{(j)}), \
+V_\alpha(\theta) &= \sum_i \alpha_i U^{(i)\top} U^{(i)} + (1 - \alpha_i) \Var(Z^{(i)}),
 \end{align}
-
-where $Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})$ are learned \glspl{representations} of dimension $K \ll D_i$. This leads to our reduced Eckart-Young inspired objective:
-
+where $Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})$ are learned \glspl{representations} of dimension $K \ll D_i$, and $\alpha_i$ are ridge penalty parameters that allow us to interpolate between different methods in the CCA family.
+This leads to our reduced Eckart-Young inspired objective:
 \begin{align}\label{eq:EY-loss-def-C-V}
 \LEY(\theta) = -2 \tr C(\theta) + |V_\alpha(\theta)|_F^2.
 \end{align}
+To illustrate how $C(\theta)$ and $V_\alpha(\theta)$ relate to $U^\top A U$ and $U^\top B U$ respectively for various methods in the CCA family, we present Table \ref{tab:covariance-matrices}.
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Method & $A$ & $B$ & $C(\theta)$ & $V_\alpha(\theta)$ & $\alpha_i$ \\
+\hline
+CCA & $\begin{pmatrix}
+0 & \Sigma_{12} \\
+\Sigma_{21} & 0
+\end{pmatrix}$ & $\begin{pmatrix}
+\Sigma_{11} & 0 \\
+0 & \Sigma_{22}
+\end{pmatrix}$ & $\sum_{i \neq j} \Cov(Z^{(i)}, Z^{(j)})$ & $\sum_{i} \Var(Z^{(i)})$ & 0 \\
+\hline
+MCCA & $\begin{pmatrix}
+0 & \Sigma_{12} & \cdots \\
+\Sigma_{21} & 0 & \cdots \\
+\vdots & \vdots & \ddots
+\end{pmatrix}$ & $\begin{pmatrix}
+\Sigma_{11} & 0 & \cdots \\
+0 & \Sigma_{22} & \cdots \\
+\vdots & \vdots & \ddots
+\end{pmatrix}$ & $\sum_{i \neq j} \Cov(Z^{(i)}, Z^{(j)})$ & $\sum_{i} \Var(Z^{(i)})$ & 0 \\
+\hline
+PLS & $\begin{pmatrix}
+0 & \Sigma_{12} \\
+\Sigma_{21} & 0
+\end{pmatrix}$ & $I$ & $\sum_{i \neq j} \Cov(Z^{(i)}, Z^{(j)})$ & $\sum_{i} U^{(i)\top} U^{(i)}$ & 1 \\
+\hline
+Ridge CCA & $\begin{pmatrix}
+0 & \Sigma_{12} \\
+\Sigma_{21} & 0
+\end{pmatrix}$ & $\begin{pmatrix}
+\Sigma_{11} + \alpha_1 I & 0 \\
+0 & \Sigma_{22} + \alpha_2 I
+\end{pmatrix}$ & $\sum_{i \neq j} \Cov(Z^{(i)}, Z^{(j)})$ & $\sum_i \alpha_i U^{(i)\top} U^{(i)} + (1 - \alpha_i) \Var(Z^{(i)})$ & $0 < \alpha_i < 1$ \\
+\hline
+PCA & $\Sigma$ & $I$ & - & $U^\top U$ & 1 \\
+\hline
+\end{tabular}
+\caption{Covariance matrices $A$, $B$ and their low-rank equivalents $C(\theta)$, $V_\alpha(\theta)$ for different methods in the CCA family. The $\alpha_i$ values determine the ridge penalty for each method.}
+\label{tab:covariance-matrices}
+\end{table}
+The key advantage here is that we only need to operate on and store $K \times K$ matrices, which is much more efficient when $K \ll D_i$ for all $i$. This dimensionality reduction is crucial for the efficiency of our algorithm, as demonstrated in Algorithm \ref{alg:cca_pls} and the corresponding PyTorch-style pseudocode in Listing \ref{lst:low-rank-loss}.
+By working with $C(\theta)$ and $V_\alpha(\theta)$ instead of the full $A$ and $B$ matrices, we significantly reduce the computational complexity while still capturing the essential structure of the problem. The ridge penalty parameter $\alpha_i$ allows us to smoothly interpolate between different methods in the CCA family:
 
-The key advantage here is that we only need to operate on and store $K \times K$ matrices, which is much more efficient when $K \ll D_i$ for all $i$.
+For CCA and MCCA, $\alpha_i = 0$ for all $i$, focusing entirely on the variance of the learned representations.
+For PLS and PCA, $\alpha_i = 1$ for all $i$, focusing on the magnitude of the projection vectors.
+For Ridge CCA, $0 < \alpha_i < 1$, balancing between the variance of the representations and the magnitude of the projection vectors.
+
+This unified formulation allows our GEP-EY algorithm to efficiently handle a wide range of multi-view learning problems within a single framework.
 
 \subsubsection{Unbiased Stochastic Estimation}
 In practice, we of course work with sample estimates rather than true population covariances. We construct unbiased estimates of $C(\theta)$ and $V(\theta)$ from mini-batches:
@@ -383,218 +476,28 @@ GEP-EY offers several key benefits:
 
 In summary, GEP-EY provides a novel, efficient, and theoretically grounded approach to solving GEPs, particularly for CCA and PLS problems, by leveraging a new Eckhart-Young inspired objective and stochastic optimization techniques.
 
-
-
-% In this section, we introduce a novel approach to solving Generalized Eigenvalue Problems (GEPs) efficiently, with a focus on Canonical Correlation Analysis (CCA) and its related methods. Our approach is based on a new formulation of the GEP as an unconstrained optimization problem, inspired by the Eckhart-Young-Mirsky theorem \citep{stewart_matrix_1990}. This formulation leads to a simple and efficient algorithm that can be applied to a wide range of GEP problems, including CCA, Partial Least Squares (PLS), and their variants.
-
-% \subsection{Eckhart-Young Inspired Objective for GEPs}
-% \subsubsection{Formulation and Intuition}
-% The key idea behind our approach is to reformulate the GEP as an unconstrained optimization problem. We achieve this by applying the Eckhart-Young-Mirsky theorem, which characterizes the best low-rank approximation of a matrix in terms of its singular value decomposition, to the eigen-decomposition of $B^{-\frac{1}{2}} A B^{-\frac{1}{2}}$, where $A$ and $B$ are the matrices defining the GEP.
-% This leads to the following objective function for the top-$K$ subspace of the GEP:
-% \begin{restatable}[Eckhart-Young inspired objective for GEPs]{proposition}{EYcharac}
-% \label{prop:EY-charac}
-% The top-$K$ subspace of the GEP $(A,B)$ can be characterized by minimizing the following objective over $U \in \R^{D \times K}$:
-% \begin{align}\label{eq:EY-charac}
-% \LEYGEP(U) \defeq \tr \left( - 2U^\top A U + \left(U^\top B U\right) \left(U^\top B U\right) \right)
-% \end{align}
-% Moreover, the minimum value is precisely $- \sum_{k=1}^K \lambda_k^2$, where $(\lambda_k)$ are the generalized eigenvalues.
-% \end{restatable}
-% The objective in Equation \eqref{eq:EY-charac} has an intuitive interpretation. The first term, $-2 \tr(U^\top A U)$, acts as a reward for high covariance between the views, encouraging the learned subspace to capture the directions of maximum correlation.
-% The second term, $\tr((U^\top B U)(U^\top B U))$, serves as a penalty for high variance within each view and promotes orthogonality between the learned components.
-
-% By minimizing this objective, we aim to find a subspace that maximizes the correlation between views while ensuring the learned components are distinct and informative.
-
-% \subsubsection{Geometrical Properties and Optimization Guarantees}
-% One of the appealing properties of the proposed objective is that it has no spurious local minima, as stated in the following proposition:
-% \begin{restatable}{proposition}{NoSpuriousLocalMinima}\label{prop:no-spurious}
-% The objective $\LEYGEP$ has no spurious local minima.
-% That is, any matrix $\bar{U}$ that is a local minimum of $\LEYGEP$ must in fact be a global minimum.
-% \end{restatable}
-% This property implies that simple local search algorithms, such as stochastic gradient descent (SGD), should converge to a global optimum. Moreover, under certain conditions on the eigenvalues and generalized eigenvalues of $(A,B)$, it is possible to prove a stronger result:
-% \begin{corollary}[Informal: Polynomial-time Optimization]
-%     Under certain conditions on the eigenvalues and generalized eigenvalues of $(A,B)$, one can make quantitative the claim that:
-%     any $U_K \in \R^{D \times K}$ is either close to a global optimum, has a large gradient $\nabla \LEYGEP$, or has Hessian $\nabla^2 \LEYGEP$ with a large negative eigenvalue.
-    
-%     Therefore, for appropriate step-size sequences, certain local search algorithms, such as sufficiently noisy SGD, will converge in polynomial time with high probability.
-%     % still need to sort out - polynomial in what exactly!
-% \end{corollary}
-
-% The Eckhart-Young inspired objective for GEPs provides a general framework for solving eigenvalue problems. We now show how this formulation can be applied specifically to the \CCA family of problems, exploiting their particular structure to further simplify computations.
-
-% \subsection{Low-Rank Optimization for the CCA Family}
-
-% In the context of the CCA family, we can exploit the nature of the matrices \(A\) and \(B\) to significantly simplify computations. Instead of working directly with these high-dimensional matrices, we focus on constructing and working with the smaller matrices \(C(\theta)\) and \(V(\theta)\). This approach not only reduces computational complexity but also allows for more efficient optimization.
-
-% Let \(Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})\) be the learned representations for each view \(i\), where \(f^{(i)}\) are functions parametrized by \(\theta^{(i)}\), and \(X^{(i)}\) are the input views.
-
-% To construct the matrices \(C(\theta)\) and \(V(\theta)\), we define them as follows:
-
-% \begin{align}\label{eq:def-C-V-matrices}
-% \vphantom{\bigl(\bigr)} % increase vertical space
-% C(\theta) = \sum_{i \neq j} \Cov(Z^{(i)}, Z^{(j)}), \quad
-% V(\theta) = \sum_{i} \Var(Z^{(i)}).
-% \end{align}
-
-% For ridge CCA, we introduce a ridge penalty to the within-view variances:
-
-% \begin{align}\label{eq:v-alpha-ridge-definition}
-% V_\alpha(\theta) = \sum_i \alpha_i U^{(i)\top} U^{(i)} + (1 - \alpha_i) \Var(Z^{(i)}),
-% \end{align}
-
-% where \(\alpha_i\) are the ridge penalty parameters for each view.
-
-% Using these matrices, we define the following Eckhart-Young inspired objective for the CCA family:
-
-% \begin{definition}[CCA Family of EY Objectives]\label{def:EY-objectives}
-% Learn representations \(Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})\) by minimizing
-% \begin{align}\label{eq:EY-loss-def-C-V}
-% \LEY(\theta) = -2 \tr C(\theta) + \|V_\alpha(\theta)\|_F^2.
-% \end{align}
-% \end{definition}
-
-% This objective function has an intuitive interpretation:
-% - The first term, \(-2 \tr C(\theta)\), rewards high covariance between the learned representations of different views, encouraging the model to capture common information shared across views.
-% - The second term, \(\|V_\alpha(\theta)\|_F^2\), penalizes high within-view variance of the learned representations, promoting compact and informative representations for each view.
-
-% By minimizing this objective, we aim to learn representations that maximize the correlation between views while ensuring that the representations are meaningful and non-redundant.
-
-% The specific loss functions for different methods in the CCA family can be obtained by substituting the appropriate definitions of the matrices \(C(\theta)\) and \(V(\theta)\) into Equation \eqref{eq:EY-loss-def-C-V}. For example:
-
-% - \textbf{CCA}: \(\LEY(\theta) = -2 \sum_{i \neq j} \tr \Cov(Z^{(i)}, Z^{(j)}) + \left\|\sum_{i} \Var(Z^{(i)})\right\|_F^2\)
-% - \textbf{MCCA}: \(\LEY(\theta) = -2 \sum_{i \neq j} \tr \Cov(Z^{(i)}, Z^{(j)}) + \left\|\sum_{i} \Var(Z^{(i)})\right\|_F^2\)
-% - \textbf{PLS}: \(\LEY(\theta) = -2 \sum_{i \neq j} \tr \Cov(Z^{(i)}, Z^{(j)}) + \sum_{i} \|U^{(i)}\|_F^2\)
-% - \textbf{MPLS}: \(\LEY(\theta) = -2 \sum_{i \neq j} \tr \Cov(Z^{(i)}, Z^{(j)}) + \sum_{i} \|U^{(i)}\|_F^2\)
-% - \textbf{Ridge CCA}: \(\LEY(\theta) = -2 \sum_{i \neq j} \tr \Cov(Z^{(i)}, Z^{(j)}) + \sum_i \alpha_i \|U^{(i)}\|_F^2 + (1 - \alpha_i) \|\Var(Z^{(i)})\|_F^2\)
-% - \textbf{PCA}: \(\LEY(\theta) = \|U\|_F^2\)
-
-% This formulation provides a unified framework for learning correlated representations across various methods, leveraging the efficiency and simplicity of working with the smaller matrices \(C(\theta)\) and \(V(\theta)\) instead of the larger input covariance matrices \(A\) and \(B\).
-
-% Table \ref{tab:covariance-matrices} summarizes the definitions of the matrices $A$, $B$, $C$, and $V$ for different methods in the CCA family.
-
-% \begin{table}[h]
-%     \centering
-%     \small % Reduce the font size for the table
-%     \begin{tabular}{|c|c|c|c|c|}
-%     \hline
-%     Method & $A$ & $B$ & $C$ & $V$ \\
-%     \hline
-%     CCA & $\begin{pmatrix} 
-%     0 & \Sigma_{12} \\
-%     \Sigma_{21} & 0
-%     \end{pmatrix}$ & $\begin{pmatrix}
-%     \Sigma_{11} & 0 \\
-%     0 & \Sigma_{22}
-%     \end{pmatrix}$ & $\sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j})$ & $\sum_{i} \Var(Z\sps{i})$ \\
-%     \hline
-%     MCCA & $\begin{pmatrix}
-%     0 & \Sigma_{12} & \cdots & \Sigma_{1I} \\
-%     \Sigma_{21} & 0 & \cdots & \Sigma_{2I} \\
-%     \vdots & \vdots & \ddots & \vdots \\
-%     \Sigma_{I1} & \Sigma_{I2} & \cdots & 0
-%     \end{pmatrix}$ & $\begin{pmatrix}
-%     \Sigma_{11} & 0 & \cdots & 0 \\
-%     0 & \Sigma_{22} & \cdots & 0 \\
-%     \vdots & \vdots & \ddots & \vdots \\
-%     0 & 0 & \cdots & \Sigma_{II}
-%     \end{pmatrix}$ & $\sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j})$ & $\sum_{i} \Var(Z\sps{i})$ \\
-%     \hline
-%     PLS & $\begin{pmatrix}
-%     0 & \Sigma_{12} \\
-%     \Sigma_{21} & 0
-%     \end{pmatrix}$ & $I$ & $\sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j})$ & $\sum_{i} \|U\sps{i}\|_F^2$ \\
-%     \hline
-%     MPLS & $\begin{pmatrix}
-%     0 & \Sigma_{12} & \cdots & \Sigma_{1I} \\
-%     \Sigma_{21} & 0 & \cdots & \Sigma_{2I} \\
-%     \vdots & \vdots & \ddots & \vdots \\
-%     \Sigma_{I1} & \Sigma_{I2} & \cdots & 0
-%     \end{pmatrix}$ & $I$ & $\sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j})$ & $\sum_{i} \|U\sps{i}\|_F^2$ \\
-%     \hline
-%     Ridge CCA & $\begin{pmatrix} 
-%     0 & \Sigma_{12} \\
-%     \Sigma_{21} & 0
-%     \end{pmatrix}$ & $\begin{pmatrix}
-%     \Sigma_{11} + \alpha_1 I & 0 \\
-%     0 & \Sigma_{22} + \alpha_2 I
-%     \end{pmatrix}$ & $\sum_{i \neq j} \Cov(Z\sps{i}, Z\sps{j})$ & $\sum_i \alpha_i {U\spsT{i}} U\sps{i} +  (1 - \alpha_i) \Var(Z\sps{i})$ \\
-%     \hline
-%     PCA & $\Sigma$ & $I$ & - & $\Var(Z) + \|U\|_F^2$ \\
-%     \hline
-%     \end{tabular}
-%     \caption{Covariance matrices $A$, $B$, $C$, and $V$ for different methods in the CCA family.}
-%     \label{tab:covariance-matrices}
-%     \end{table}
-
-% \subsubsection{Unbiased Estimates and Stochastic Optimization}
-
-% In practice, we often do not have access to the true population covariance matrices and must rely on sample estimates. Since empirical covariance matrices are unbiased estimators of their population counterparts, we can construct unbiased estimates of $C(\theta)$ and $V(\theta)$ from a batch of transformed variables $\Z$:
-
-% \begin{align}\label{eq:def-C-V-matrices-empirical}
-% \hat{C}(\theta)[\Z] = \sum_{i \neq j} \empCov(\Z\sps{i}, \Z\sps{j}), \quad
-% \hat{V}(\theta)[\Z] = \sum_{i} \empVar(\Z\sps{i}).
-% \end{align}
-
-% In the linear case, we can construct $\hat{V}_\alpha(\theta)[\Z]$ analogously by plugging sample covariances into Equation \eqref{eq:v-alpha-ridge-definition}.
-
-% Given two independent batches of transformed variables $\Z$ and $\Z'$, we can define the following batch loss:
-
-% \begin{align}\label{eq:empirical-EY-loss-estimate-def}
-% \empLEY[\Z, \Z'] \defeq - 2 \tr \hat{C}[\Z] + \langle \hat{V}_\alpha[\Z], \hat{V}_\alpha[\Z'] \rangle_F,
-% \end{align}
-
-% which provides an unbiased estimate of $\LEY(\theta)$. This loss is a differentiable function of $\Z$, $\Z'$, and $\theta$, making it suitable for stochastic optimization.
-
-% By using these unbiased estimates, we can efficiently optimize the Eckhart-Young inspired objectives for the CCA family of problems using stochastic gradient-based methods, even when the true population covariance matrices are unknown or the datasets are too large to fit in memory.
-
-% \subsection{A Simple Algorithm: GEP-EY}
-
-% Based on the unbiased estimates and the stochastic optimization framework, we propose a simple and general algorithm for learning correlated representations, called \textbf{GEP-EY} (Algorithm \ref{alg:general}).
-
-% \begin{algorithm}
-% \caption{\textbf{GEP-EY}: General algorithm for learning correlated representations}
-% \label{alg:general}
-% \begin{algorithmic}
-% \STATE {\bfseries Input:} data stream of mini-batches $(\X(b))_{b=1}^\infty$ where each consists of $M$ samples from the original dataset. Learning rate $(\eta_t)_t$. Number of time steps $T$. Class of functions $f(\cdot; \theta)$ whose outputs are differentiable with respect to $\theta$.
-% \STATE {\bfseries Initialize:} $\hat{\theta}$ with suitably random entries
-% \FOR{$t=1$ {\bfseries to} $T$}
-% \STATE Obtain two independent mini-batches $( \X(b), \X(b') )$ by sampling $( b, b' )$ independently
-% \STATE Compute batches of transformed variables $\Z(b) = f(\X(b); \theta), \Z(b') = f(\X(b'); \theta)$
-% \STATE Estimate loss $\empLEY(\theta)$ using \cref{eq:empirical-EY-loss-estimate-def}
-% \STATE Obtain gradients by back-propagation and step with your favourite optimizer.
-% \ENDFOR
-% \end{algorithmic}
-% \end{algorithm}
-
-% The GEP-EY algorithm can be applied to various methods in the CCA family by defining the appropriate covariance matrices $C(\theta)$ and $V(\theta)$, as shown in Table \ref{tab:covariance-matrices}.
-
-% The key steps of the GEP-EY algorithm are:
-% 1. Initialize the parameters $\theta$ randomly.
-% 2. For each iteration $t$:
-%    - Sample two independent mini-batches of data $\X(b)$ and $\X(b')$.
-%    - Compute the transformed variables $\Z(b)$ and $\Z(b')$ using the current parameters $\theta$.
-%    - Estimate the loss $\empLEY(\theta)$ using the unbiased estimates of the relevant covariance matrices $\hat{C}$ and $\hat{V}_\alpha$.
-%    - Compute the gradients of the loss with respect to $\theta$ using back-propagation.
-%    - Update the parameters $\theta$ using a gradient-based optimizer (e.g., SGD, Adam).
-% 3. Repeat step 2 for a fixed number of iterations $T$.
-
-% By following this simple algorithm, we can efficiently learn correlated representations for various methods in the CCA family, even when dealing with high-dimensional data or large-scale datasets.
-
-% The GEP-EY algorithm provides a unified framework for solving a wide range of problems in the CCA family, including CCA, MCCA, PLS, MPLS, Ridge CCA, and PCA. By leveraging the Eckhart-Young inspired objectives and the stochastic optimization framework, GEP-EY offers a principled and efficient approach to learning meaningful and correlated representations from multi-view data.
-
-% \subsection{Advantages}
-% The proposed Eckhart-Young inspired objective and the corresponding GEP-EY algorithm offer several advantages over existing methods for solving GEPs and CCA problems:
-
-% Simplicity: The GEP-EY algorithm is based on a simple and intuitive objective function that can be easily optimized using standard gradient-based methods. The algorithm does not require complex initialization strategies or custom optimization techniques, making it easy to implement and use in practice.
-% Efficiency: The stochastic nature of the GEP-EY algorithm allows it to scale to large datasets by processing the data in mini-batches. The computational complexity per iteration depends on the mini-batch size and the number of components, rather than the full dimensionality of the data, making it efficient for high-dimensional problems.
-% Flexibility: The GEP-EY algorithm can be easily adapted to solve various problems in the CCA family, such as CCA, PLS, and their regularized variants, by specifying the appropriate covariance matrices and function classes. This provides a unified framework for solving a wide range of GEP problems.
-% Theoretical guarantees: The proposed objective function has appealing geometrical properties, such as the absence of spurious local minima, which provide theoretical guarantees for the convergence of the GEP-EY algorithm to a global optimum. Moreover, under certain conditions, it is possible to prove stronger results, such as polynomial-time convergence with high probability.
-
 \section{Experiments and Results}\label{sec:experiments}
 \subsection{Comparison with Standard Batch Solvers}
-In this experiment, we compare our CCA-EY method to solving the CCA Generalized Eigenvalue Problem using the \texttt{scipy.linalg.eigh} function \citep{virtanen2020scipy}, which is a widely used implementation for computing eigenvalues and eigenvectors of Hermitian or symmetric matrices.
+In this experiment, we compare our CCA-EY method to the traditional approach of solving the CCA Generalized Eigenvalue Problem (GEP) using the \texttt{scipy.linalg.eigh} function \citep{virtanen2020scipy}. This comparison aims to demonstrate the scalability advantages of our method, particularly for high-dimensional data.
+
 \subsubsection{Data and Experimental Setup}
-We simulate data with varying numbers of features, ranging from 10 to 5,000, while keeping the sample size fixed at 10,000. The data is generated from a multivariate Gaussian distribution with a prescribed covariance structure that ensures the existence of a true CCA solution.
-For each combination of feature sizes, we solve for the top-5 CCA subspace and repeat the experiment 5 times. We compare the time taken to solve the GEP using \texttt{scipy.linalg.eigh} to the time taken to train our CCA-EY method until the Frobenius norm of the change in successive weight matrices falls below a threshold of $10^{-5}$.
+We generate synthetic data with the following characteristics:
+\begin{itemize}
+    \item \textbf{Feature Range}: 10 to 5,000 features
+    \item \textbf{Sample Size}: Fixed at 10,000
+    \item \textbf{Distribution}: Multivariate Gaussian with a prescribed covariance structure ensuring a true CCA solution
+    \item \textbf{Repetitions}: 5 times for each feature size
+    \item \textbf{CCA Subspace}: Top-5 components
+\end{itemize}
+
+\subsubsection{Methodology}
+For each feature size:
+\begin{enumerate}
+    \item Solve GEP using \texttt{scipy.linalg.eigh}
+    \item Train CCA-EY until convergence (Frobenius norm of weight change < $10^{-5}$)
+    \item Record computation time for both methods
+\end{enumerate}
+
 \subsubsection{Results and Observations}
 Figure \ref{fig:cca-comparison} shows the results of this experiment. For feature sizes up to 1,000, our CCA-EY method is slower than \texttt{scipy.linalg.eigh}. However, beyond this point, CCA-EY significantly outperforms the baseline in terms of computation time.
 As the number of features increases, the time taken to solve the GEP using \texttt{scipy.linalg.eigh} scales quadratically, while our CCA-EY method exhibits a linear scaling. This is because CCA-EY scales linearly with both the number of samples and the number of features, whereas \texttt{scipy.linalg.eigh} has a quadratic dependence on the feature size.\footnote{When the number of features is greater than the number of samples as in ridge CCA and PLS, we can use the PCA or Kernel trikcs to scale CCA quadratically with the minimum of the number of features and samples, though this still requires a somewhat expensive PCA}.
@@ -607,39 +510,81 @@ As the number of features increases, the time taken to solve the GEP using \text
 \end{figure}
 
 \subsection{Stochastic CCA on Real-World Datasets}
-In this experiment, we evaluate the performance of our proposed CCA-EY method against two established baselines, $\gamma$-EigenGame \citep{gemp2022generalized} and SGHA \citep{chen2019constrained}, on real-world datasets. Our experimental setup follows the framework introduced by \citet{meng2021online} and \citet{gemp2022generalized}, with a key difference: we do not perform PCA on the data prior to applying the CCA methods. This choice allows us to assess the algorithms' ability to handle high-dimensional data efficiently and accurately, without the aid of dimensionality reduction.
-\subsubsection{Data}
-We use two datasets for this experiment:
+This experiment evaluates our CCA-EY method against two established baselines, $\gamma$-EigenGame \citep{gemp2022generalized} and SGHA \citep{chen2019constrained}, on real-world datasets. We aim to assess the algorithms' ability to handle high-dimensional data efficiently and accurately without prior dimensionality reduction.
 
-MediaMill \citep{gemert2008visual}: This dataset consists of paired features extracted from videos and their corresponding textual commentary. The goal is to learn joint representations that capture the correlation between the visual and textual modalities. The dataset includes 25,800 test instances, with 120 and 101 features for the video and commentary views, respectively.
-Split-CIFAR \citep{meng2021online}: This dataset is derived from the CIFAR-10 image classification dataset. Each RGB image is split in half, resulting in two views with 32x16x3 features each. The objective is to learn joint representations of the two halves that reveal correlations, which are expected to be high within the same class and low across different classes. The dataset contains 50,000 training and 10,000 test instances.
+\subsubsection{Datasets}
+We employ two diverse datasets:
 
-These datasets were chosen for their diverse nature and complexity, providing a comprehensive test bed for evaluating the performance of stochastic CCA methods.
-\subsubsection{Experimental Setup and Evaluation Metric}
-We train the CCA models on the MediaMill and Split-CIFAR datasets for a single epoch, using mini-batch sizes ranging from 5 to 100. These batch sizes were selected to assess the scalability and efficiency of the methods under varying computational loads.
-To evaluate the performance of the algorithms, we use the Proportion of Correlation Captured (PCC) metric, defined as:
+\begin{enumerate}
+    \item \textbf{MediaMill} \citep{gemert2008visual}:
+        \begin{itemize}
+            \item \textbf{Content}: Paired features from videos and textual commentary
+            \item \textbf{Objective}: Learn joint representations capturing visual-textual correlations
+            \item \textbf{Size}: 25,800 test instances
+            \item \textbf{Features}: 120 (video view) and 101 (commentary view)
+        \end{itemize}
+    
+    \item \textbf{Split-CIFAR} \citep{meng2021online}:
+        \begin{itemize}
+            \item \textbf{Derivation}: CIFAR-10 images split in half
+            \item \textbf{Objective}: Learn correlated representations of image halves
+            \item \textbf{Size}: 50,000 training and 10,000 test instances
+            \item \textbf{Features}: 32x16x3 for each view
+        \end{itemize}
+\end{enumerate}
+
+\subsubsection{Experimental Setup}
+\begin{itemize}
+    \item \textbf{Training Duration}: Single epoch
+    \item \textbf{Batch Sizes}: 5, 20, 50, 100
+    \item \textbf{Hyperparameter Tuning}: Grid search using Weights and Biases \citep{wandb}
+\end{itemize}
+
+Table \ref{tab:hyperparameters} details the hyperparameter ranges explored for each method.
+
+\begin{table}[h!]
+    \centering
+    \caption{Hyperparameter ranges for CCA methods}
+    \label{tab:hyperparameters}
+    \begin{tabular}{|l|l|}
+        \hline
+        Parameter             & Values              \\
+        \hline
+        Minibatch size        & 5, 20, 50, 100      \\
+        Components            & 5                   \\
+        Epochs                & 1                   \\
+        Seeds                 & 1, 2, 3, 4, 5       \\
+        Learning rate         & 0.01, 0.001, 0.0001 \\
+        $\gamma$*             & 0.01, 0.1, 1, 10    \\
+        \hline
+    \end{tabular}
+    \footnotesize{* $\gamma$ is only used for $\gamma$-EigenGame}
+\end{table}
+
+\subsubsection{Evaluation Metric}
+We use the Proportion of Correlation Captured (PCC) metric:
+
 \begin{equation}
 \text{PCC} = \frac{\sum_{k=1}^K \rho_k}{\sum_{k=1}^K \rho_k^*},
 \end{equation}
-where $K$ is the number of canonical components, $\rho_k$ represents the correlations of the estimated representations $Z\sps{i}=X^{(i)}\hat{U}^{(i)}$ with one another on the test set, while $\rho_k^*$ denotes the canonical correlations computed from the full batch covariance matrices.
-In other words, using our earlier notation, $\rho_k = \MCCA_K(\hat{Z}\sps{1}, \hat{Z}\sps{2})$ and $\rho_k^* = \MCCA_K(X\sps{1}, X\sps{2})$.
-Although $\rho_k^*$ are not strictly the ground-truth correlations, they serve as a reliable benchmark when computed from a large sample size. The PCC metric provides an efficient way to track the performance of the algorithms over time while minimizing computational overhead \citep{meng2021online, gemp2022generalized, ma2015finding, ge2016efficient}.
-For each method, we perform a grid search over the hyperparameters listed in Table \ref{tab:hyperparameters} using the Weights and Biases platform \citep{wandb}.
-\begin{table}[h!]
-    \centering
-    \begin{tabular}{|l|l|}
-        \hline Parameter             & Values              \\
-        \hline minibatch size        & 5,20,50,100         \\
-        \hline components            & 5                   \\
-        \hline epochs                & 1                   \\
-        \hline seed                  & 1, 2, 3, 4, 5       \\
-        \hline lr                    & 0.01, 0.001, 0.0001 \\
-        \hline $\gamma$\footnote{gamma is only used for $\gamma$-EigenGame} & 0.01,0.1,1,10       \\
-        \hline
-    \end{tabular}
-    \caption{Hyperparameter ranges explored for CCA methods.} 
-    \label{tab:hyperparameters}
-\end{table}
+
+where:
+\begin{itemize}
+    \item $K$: Number of canonical components
+    \item $\rho_k$: Correlations of estimated representations $Z\sps{i}=X^{(i)}\hat{U}^{(i)}$ on the test set
+    \item $\rho_k^*$: Canonical correlations from full batch covariance matrices
+\end{itemize}
+
+In our notation:
+\begin{itemize}
+    \item $\rho_k = \MCCA_K(\hat{Z}\sps{1}, \hat{Z}\sps{2})$
+    \item $\rho_k^* = \MCCA_K(X\sps{1}, X\sps{2})$
+\end{itemize}
+
+This metric efficiently tracks algorithm performance over time while minimizing computational overhead \citep{meng2021online, gemp2022generalized, ma2015finding, ge2016efficient}.
+
+By comparing CCA-EY with $\gamma$-EigenGame and SGHA across these real-world datasets and various batch sizes, we aim to demonstrate the robustness and efficiency of our method in handling high-dimensional, complex data without the need for prior dimensionality reduction.
+
 \subsubsection{Results and Observations}
 Figure \ref{fig:corr_mediamill} compares the learning curves of the algorithms on the MediaMill dataset for various mini-batch sizes. CCA-EY consistently outperforms the baselines across all batch sizes. Figure \ref{fig:learningcurve_mediamill} provides a more detailed view of the learning curves for batch sizes 5 and 100, highlighting the superior performance of CCA-EY over time.
 \begin{figure}

@@ -179,6 +179,7 @@ To summarize the key differences between the data generation methods discussed a
 \begin{table}[h]
     \centering
     \caption{Covariance Structures in Data Generation Methods}
+    \resizebox{\textwidth}{!}{%
     \begin{tabular}{|c|c|c|c|}
         \hline
         \textbf{}                                           & \textbf{Method}              & \textbf{Within-view Covariance} $\boldsymbol{\Sigma_{ii}}$ & \textbf{Between-view Covariance} $\boldsymbol{\Sigma_{12}}$ \\
@@ -192,6 +193,7 @@ To summarize the key differences between the data generation methods discussed a
         & Joint Covariance (Identity)  & $I$                                                        & $\rho u\sps{1}_1 u\spsT{2}_1$                       \\
         \hline
     \end{tabular}
+    }
     \label{tab:covariance-structures}
 \end{table}
 
@@ -205,6 +207,7 @@ For the explicit latent variable models, we can generate data with sparse loadin
 \begin{table}[h]
     \centering
     \caption{Relationship Between Weights and Loadings in Population and Sample Cases}
+    \resizebox{\textwidth}{!}{%
     \begin{tabular}{|c|c|c|c|c|}
         \hline
         \textbf{}                                           & \textbf{Method}                 & \textbf{Case} & \textbf{Weights}                            & \textbf{Loadings}                \\
@@ -222,6 +225,7 @@ For the explicit latent variable models, we can generate data with sparse loadin
         &                                 & Sample        & $U\sps{i}$                                   & $\hat{\Sigma_{ii}}\hat{U\sps{i}}$ \\
         \hline
     \end{tabular}
+    }
     \label{tab:weights-loadings-population-sample}
 \end{table}
 

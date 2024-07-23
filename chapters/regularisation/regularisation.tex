@@ -332,6 +332,7 @@ We compare the performance of Elastic Net FRALS with other CCA variants such as 
 \begin{table}[h]
     \centering
     \caption{Employed CCA Variants}
+    \resizebox{\textwidth}{!}{%
     \begin{tabular}{|l|l|l|l|}
         \hline
         \textbf{Model}               & \textbf{Abbreviation} & \textbf{Hyperparameters}                         & \textbf{Hyperparameter Range} \\
@@ -346,7 +347,9 @@ We compare the performance of Elastic Net FRALS with other CCA variants such as 
         \hline
         Sparse PLS                   & SPLS                  & \(\tau_1, \tau_2\)                               & 0-1 (log scaled)              \\
         \hline
-    \end{tabular}\label{tab:cca-variants}
+    \end{tabular}
+    }
+    \label{tab:cca-variants}
 \end{table}
 
 \subsubsection{Model Selection}
