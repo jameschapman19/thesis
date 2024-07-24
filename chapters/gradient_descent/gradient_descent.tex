@@ -31,29 +31,36 @@ The rest of this chapter is organized as follows: Section \ref{sec:background-un
 
 \section{Background: Efficient Solutions to GEPs}\label{sec:background-unified}
 \subsection{Solving High-Dimensional Generalized Eigenvalue Problems}
-Generalized Eigenvalue Problems (GEPs) play a crucial role in many machine learning algorithms, including Canonical Correlation Analysis (CCA), Partial Least Squares (PLS), Principal Component Analysis (PCA), Independent Component Analysis (ICA), and Linear Discriminant Analysis (LDA). A GEP is defined by two matrices $A$ and $B$, where the goal is to find a vector $u$ and a scalar $\lambda$ that satisfy the equation:
-\begin{equation}
-Au = \lambda Bu
-\end{equation}
-The vector $u$ is called the generalized eigenvector, and the scalar $\lambda$ is called the generalized eigenvalue. In the special case where $B$ is the identity matrix, the GEP reduces to a standard Eigenvalue Problem (EP).
-Solving GEPs becomes challenging when dealing with high-dimensional data, where the matrices $A$ and $B$ can be very large. The computational complexity of classical algorithms for solving GEPs, such as the power method, scales cubically with the size of the matrices, making them infeasible for large-scale problems. Moreover, when the matrices are ill-conditioned or nearly singular, these algorithms can suffer from numerical instability, leading to inaccurate or unreliable solutions.
+
+As introduced in Section \ref{sec:generalized-eigenvalue-problems-in-linear-algebra}, Generalized Eigenvalue Problems play a crucial role in many machine learning algorithms. While the formal definition and properties of GEPs were established earlier, it's important to highlight the challenges that arise when solving these problems in high-dimensional spaces.
+
+Solving GEPs becomes particularly challenging when dealing with high-dimensional data, where the matrices $A$ and $B$ can be very large. The computational complexity of classical algorithms for solving GEPs, such as the power method, scales cubically with the size of the matrices, making them infeasible for large-scale problems. Moreover, when the matrices are ill-conditioned or nearly singular, these algorithms can suffer from numerical instability, leading to inaccurate or unreliable solutions.
 
 \subsection{Unified GEP formulation for CCA, Ridge CCA, PLS, and PCA}
-As discussed in \ref{ch:background}\ref{sec:classical-subspace-learning-algorithms}, CCA, ridge-regularized CCA, PLS, and even PCA can be formulated as GEPs with specific structures. This unified formulation involves block matrices $A$ and $B_\alpha$ defined as:
+As discussed in Section \ref{sec:classical-subspace-learning-algorithms}, CCA, ridge-regularized CCA, PLS, and even PCA can be formulated as GEPs with specific structures. This unified formulation involves block matrices $A$ and $B_\alpha$ defined as:
 \begin{align}
-A^{(ij)} &= \Cov(X\sps{i}, X\sps{j}) \text{ for } i \neq j, \
+A^{(ij)} &= \Cov(X\sps{i}, X\sps{j}) \text{ for } i \neq j, \\
 B_\alpha^{(ii)} &= \alpha_i I_{D\sps{i}} + (1-\alpha_i) \Var(X\sps{i}),
 \end{align}
 where $\alpha \in [0,1]^I$ is a vector of ridge penalty parameters, $X\sps{i}$ represents the $i$-th view of the data, and $D\sps{i}$ is the dimensionality of the $i$-th view.
+
 By adjusting the values of $\alpha$, we can recover various subspace learning methods:
 
-Pure CCA: Setting $\alpha_i = 0 : \forall i$ recovers the classic CCA problem.
-Ridge Extensions: Smoothly transitioning to ridge-regularized CCA or PLS by selectively adjusting values within $\alpha$.
-PCA Subsumption: PCA emerges as a single-view form of ridge-regularized PLS.
+\begin{itemize}
+    \item Pure CCA: Setting $\alpha_i = 0 : \forall i$ recovers the classic CCA problem.
+    \item Ridge Extensions: Smoothly transitioning to ridge-regularized CCA or PLS by selectively adjusting values within $\alpha$.
+    \item PCA Subsumption: PCA emerges as a single-view form of ridge-regularized PLS.
+\end{itemize}
 
-This unified formulation allows us to focus on solving the core CCA problem, with the understanding that the insights and solutions developed will naturally generalize to the entire family of methods and GEPs more generally.
+This unified formulation allows us to focus on solving the core CCA problem, with the understanding that the insights and solutions developed will naturally generalize to the entire family of methods and GEPs more generally. The challenge, then, is to develop efficient methods for solving these high-dimensional GEPs, which is the focus of our proposed approach.
 
 \subsection{Classical Methods for Solving CCA}
+
+\subsubsection{Reminder of notations}
+
+Before discussing classical methods for solving CCA, let's recall some key notation and concepts from our unified GEP formulation. As established in Section \ref{sec:learning-representations-definitions-and-notation}, we use $d$ to denote the dimensionality of a view. For CCA and related problems like PLS, we typically work with two views, so we have $d_1$ and $d_2$.
+This means that the matrices $A$ and $B$ in the GEP have dimensions $(d_1 + d_2) \times (d_1 + d_2)$. The goal is to find the top $K$ generalized eigenvectors of $(A, B)$, where $K$ is the number of components we want to extract.
+
 \subsubsection{Eigendecomposition-based Solution}
 One common technique to solve the GEP for CCA is to transform it into a standard eigenvalue problem:
 \begin{equation}
@@ -65,16 +72,16 @@ An alternative approach is to solve the eigenvalue problem:
 B^{-1} A v = \lambda v
 \end{equation}
 However, this approach requires computing the inverse of $B$, which can be numerically unstable and computationally expensive, especially when $B$ is ill-conditioned or nearly singular. In contrast, the $B^{-\frac{1}{2}} A B^{-\frac{1}{2}}$ formulation only requires computing the square root of $B$, which can be done more efficiently and stably using techniques like the Cholesky decomposition.
-Nonetheless, both approaches have a computational complexity of $\mathcal{O}((d_1+d_2)^3)$ and may suffer from numerical instability, especially when $B$ is ill-conditioned or nearly singular.
+Nonetheless, both approaches have a computational complexity of $\mathcal{O}((d_1+d_2)^3)$ \citep{golub2013matrix}, which can be prohibitive for high-dimensional data, and may suffer from numerical instability, especially when $B$ is ill-conditioned or nearly singular.
 
 \subsubsection{Classical Iterative Algorithms}
-Classical iterative algorithms, such as the power method, Sanger's rule (Generalized Hebbian Algorithm), and Oja's rule, can be used to solve the GEP for CCA. These algorithms are based on the idea of iteratively updating the eigenvector estimates using matrix-vector multiplications.
+Classical iterative algorithms, such as the power method, Sanger's rule (which gives the Generalized Hebbian Algorithm) \citep{sanger1989optimal}, and Oja's rule \citep{oja1982simplified}, can be used to solve the GEP for CCA. These algorithms are based on the idea of iteratively updating the eigenvector estimates using matrix-vector multiplications.
 The power method is a simple iterative algorithm for finding the dominant eigenvector of a matrix $A$. The update rule for the power method is:
 \begin{align}
 u \leftarrow \frac{A u}{|A u|}
 \end{align}
 where $u$ is the current estimate of the dominant eigenvector. The power method converges to the dominant eigenvector of $A$ under mild conditions.
-Sanger's rule, also known as the Generalized Hebbian Algorithm (GHA), is an iterative learning rule for finding the principal components of a data set. It can be written as:
+The Generalized Hebbian Algorithm (GHA), is an iterative learning rule for finding the principal components of a data set. It can be written as:
 \begin{align}
 U \leftarrow U + \eta \left( A U - U \text{tril}(U^T A U) \right)
 \end{align}
@@ -85,7 +92,7 @@ U \leftarrow U + \eta \left( A U - U (U^T A U) \right)
 \end{align}
 To maintain orthogonality of the eigenvectors during the iterative updates, Oja's rule can be combined with a QR decomposition step:
 \begin{align}
-U \leftarrow U + \eta \left( A U - U (U^T A U) \right) \
+U \leftarrow U + \eta \left( A U - U (U^T A U) \right) \\
 U \leftarrow \text{qr}(U)
 \end{align}
 where $\text{qr}(\cdot)$ denotes the QR decomposition, which factorizes a matrix into an orthogonal matrix $Q$ and an upper triangular matrix $R$. By using only the orthogonal matrix $Q$, we ensure that the eigenvectors remain orthogonal throughout the iterative process. Alternatively, other orthogonalization techniques such as the Gram-Schmidt process can be employed.
@@ -97,7 +104,7 @@ which subsumes the original GHA as a special case when $B=I$.
 While these classical iterative algorithms can be computationally efficient, especially for sparse or structured matrices, they may suffer from slow convergence and sensitivity to initialization.
 
 \subsubsection{PCA-CCA}
-To reduce the computational complexity of solving the GEP for CCA, the PCA-CCA method first applies PCA to each view of the data separately and then solves the GEP in the reduced space. This approach has two main steps:
+To reduce the computational complexity of solving the GEP for CCA, the PCA-CCA method first applies PCA to each view of the data separately and then solves the GEP in the reduced space\cite{mihalik2022canonical}. This approach has two main steps:
 
 \begin{itemize}
     \item Apply PCA to each view: Compute the top $K_1$ and $K_2$ principal components for each view, with complexity $\mathcal{O}(d_1^3 + d_2^3)$.
@@ -110,8 +117,8 @@ However, it's important to note that even the PCA step can be computationally ex
 Kernel CCA (KCCA) is another approach that offers computational advantages for high-dimensional data. KCCA maps the original data to a high-dimensional feature space using a kernel function and then performs CCA in that space. The main advantage of KCCA is that its complexity scales with the number of samples $n$ rather than the dimensionalities $d_1$ and $d_2$.
 The optimization problem for KCCA can be written as:
 \begin{align}
-& \alpha_{\text{opt}} = \underset{\alpha}{\mathrm{argmax}} { \alpha\sps{1} K\spsT{1} K\sps{2} \alpha\sps{2} } \
-& \text{subject to:} \notag \
+& \alpha_{\text{opt}} = \underset{\alpha}{\mathrm{argmax}} { \alpha\sps{1} K\spsT{1} K\sps{2} \alpha\sps{2} } \\
+& \text{subject to:} \notag \\
 & \alpha\sps{1} K\spsT{1} K\sps{1} \alpha\sps{1} = 1 \notag \\
 & \alpha\sps{2} K\spsT{2} K\sps{2} \alpha\sps{2} = 1 \notag
 \end{align}
@@ -133,7 +140,7 @@ Traditionally, ERM algorithms process the entire dataset in a batch, updating th
 
 Stochastic methods offer several advantages. They allow us to handle large-scale datasets that may not fit in memory, provide implicit regularization through the noise in the stochastic updates, and often lead to better generalization by approximating the population objective rather than overfitting to the empirical risk.
 
-While stochastic optimization has proven highly effective for solving unconstrained objectives in machine learning, its application to Generalized Eigenvalue Problems (GEPs) and Canonical Correlation Analysis (CCA) presents unique challenges. The primary difficulty lies in handling the data-dependent constraint $U^\top B U = I$, which is essential for ensuring the orthogonality of the learned subspaces. This constraint is particularly challenging to address in the stochastic setting, as $B$ is not directly accessible and must be estimated from random samples, introducing additional uncertainty into the optimization process.
+While stochastic optimization has proven highly effective for solving unconstrained objectives in machine learning, its application to Generalized Eigenvalue Problems and Canonical Correlation Analysis presents unique challenges. The primary difficulty lies in handling the data-dependent constraint $U^\top B U = I$, which is essential for ensuring the orthogonality of the learned subspaces. This constraint is particularly challenging to address in the stochastic setting, as $B$ is not directly accessible and must be estimated from random samples, introducing additional uncertainty into the optimization process.
 
 \subsubsection{Stochastic Power Method for PLS}
 \citet{arora2016stochastic} demonstrate that PLS can be approximated by applying a stochastic power method. The stochastic power method is a simple iterative algorithm that updates the estimates of the left and right singular vectors $U^{(1)}$ and $U^{(2)}$ using the following rules:
@@ -168,12 +175,12 @@ Using Lagrange multipliers, this constrained problem can be transformed into an 
 \end{align}
 Differentiating with respect to $U$ and $\lambda$ and setting the derivatives to zero yields the stationary points:
 \begin{align}
-2 A U - 2 B U \lambda = 0 \quad \text{and} \quad U^T B U - I = 0 \
+2 A U - 2 B U \lambda = 0 \quad \text{and} \quad U^T B U - I = 0 \\
 \implies \lambda = U^T A U
 \end{align}
 Based on these stationary points, SGHA proposes a primal-dual update rule:
 \begin{align}
-U \leftarrow U - \eta \left( A U - B U \lambda \right) \
+U \leftarrow U - \eta \left( A U - B U \lambda \right) \\
 \lambda \leftarrow \left( U^T A U \right)
 \end{align}
 where $\eta$ is a learning rate.
@@ -187,7 +194,7 @@ The term $A U$ computes the correlation between the current estimate of the gene
 The term $B U \left( U^T A U \right)$ serves as a correction term that ensures the orthogonality of the eigenvectors with respect to the matrix $B$. The matrix $\left( U^T A U \right)$ can be interpreted as an estimate of the generalized eigenvalues.
 The difference between these two terms is then used to update the current estimate of the eigenvectors $U$ in the direction that maximizes the objective function.
 
-SGHA has a computational complexity of $\mathcal{O}(k^2(d_1+ d_2))$ per iteration, which is higher than that of the stochastic power method but still much lower than the batch methods.
+SGHA has a computational complexity of $\mathcal{O}(k^2(d_1+ d_2))$ per iteration, which is higher than that of the stochastic power method but still potentially much faster than batch methods.
 While SGHA is simple to implement, it relies on a heuristic primal-dual update rule rather than a principled optimization framework. This makes it difficult to integrate with more sophisticated optimizers like Adam \citep{kingma2014adam}, which have been shown to improve convergence speed and stability in many machine learning applications.
 \subsubsection{$\gamma$-EigenGame for CCA}
 The $\gamma$-EigenGame, proposed by \citet{gemp20,gemp2021}, is a stochastic algorithm for CCA inspired by the EigenGame algorithm for PCA. The key idea behind the $\gamma$-EigenGame is to view the generalized eigenvectors as competing players in a game, where each player tries to maximize its own utility function.
@@ -200,19 +207,14 @@ The $\gamma$-EigenGame proposes an update rule for each eigenvector $u_i$ based 
 While the $\gamma$-EigenGame has shown promising results in practice, it still requires the tuning of both the hyperparameter $\gamma$ and a learning rate, which can be challenging and may depend on the specific problem and data at hand.
 Moreover, the use of a rolling average of the matrix $B$ introduces additional approximation error and may not fully capture the uncertainty in the stochastic orthogonality constraint $U^\top B U = I$.
 
-\subsubsection{Benefits and Limitations of Stochastic Algorithms}
-Stochastic algorithms offer several benefits over batch methods for solving CCA problems, such as computational efficiency, implicit regularization, and online learning capabilities. However, they also have some limitations, particularly in the context of stochastic GEPs and stochastic CCA:
+\subsubsection{Limitations of Existing Stochastic Algorithms}
 
-Convergence: The convergence of stochastic algorithms can be slower than batch methods, especially in the presence of noise or when the data is highly correlated. The choice of learning rate and mini-batch size can have a significant impact on the convergence speed and stability.
-Hyperparameter tuning: Most stochastic algorithms require the tuning of several hyperparameters, such as the learning rate, mini-batch size, and regularization parameters. The optimal values of these hyperparameters can vary depending on the problem and the data, making it challenging to achieve consistent performance across different datasets.
-Stochastic orthogonality constraint: The data-dependent constraint $U^\top B U = I$ becomes stochastic when $B$ is replaced by a sample estimate, introducing additional uncertainty and approximation error. Existing stochastic algorithms may not fully account for this uncertainty, leading to suboptimal solutions or slower convergence.
-Theoretical guarantees: The theoretical guarantees for stochastic algorithms are often weaker than those for batch methods, particularly in terms of the rate of convergence and the quality of the solution. The analysis of their convergence properties can be complex and may depend on strong assumptions about the data distribution and the noise.
+In this section, we have highlighted some of the key challenges and limitations of existing stochastic algorithms for CCA: the need to tune hyperparameters like $\gamma$ and learning rates, the reliance on heuristic primal-dual update rules, and the difficulty of integrating with more sophisticated optimizers like Adam.
 
-Despite these limitations, stochastic algorithms have shown promising results in practice and have become increasingly popular for solving large-scale CCA problems. The development of more principled and theoretically grounded stochastic algorithms that can handle the stochastic orthogonality constraint remains an active area of research.
 In the next section, we will introduce a novel stochastic algorithm for CCA based on the Eckart-Young-Mirsky theorem, which aims to address some of the limitations of existing methods and provide a more principled and robust approach to solving high-dimensional CCA problems in the presence of stochastic constraints.
 
 \section{Methods: GEP-EY, An Efficient Algorithm for Generalized Eigenvalue Problems}\label{sec:contributions}
-This section introduces GEP-EY, a novel algorithm for solving Generalized Eigenvalue Problems (GEPs), with a particular focus on Canonical Correlation Analysis (CCA) and Partial Least Squares (PLS). The algorithm stems from a new perspective on GEPs: optimizing an Eckart-Young inspired objective that characterizes the GEP solution.
+This section introduces GEP-EY, a novel algorithm for solving Generalized Eigenvalue Problems, with a particular focus on Canonical Correlation Analysis and Partial Least Squares. The algorithm stems from a new perspective on GEPs: optimizing an Eckart-Young inspired objective that characterizes the GEP solution.
 
 \subsection{A New Perspective: Eckhart-Young Inspired Objective for GEPs}
 
@@ -264,8 +266,6 @@ To provide some intuition, we sketch the key steps in the proof, with full detai
     \[
     \LEYGEP(U) \defeq \tr \left( - 2U^\top A U + \left(U^\top B U\right) \left(U^\top B U\right) \right),
     \]
-
-    This objective intuitively balances maximizing between-view correlations (captured by \(U^\top A U\)) and minimizing within-view variances (captured by \((U^\top B U)(U^\top B U)\)).
 \end{enumerate}
 
 
@@ -273,11 +273,9 @@ For the full proof and additional technical details, we refer the reader to the 
 
 This new perspective provides a more intuitive and computationally efficient way to approach GEPs, leveraging the well-established principles of the Eckhart-Young-Mirsky theorem.
 
-We now introduce GEP-EY, a stochastic algorithm designed to solve Generalized Eigenvalue Problems (GEPs) efficiently. While applicable to a wide range of GEPs, we focus particularly on its application to CCA, PLS, and related methods.
-
 \subsection{GEP-EY: A Stochastic Algorithm for Generalized Eigenvalue Problems}
 
-We now introduce GEP-EY, a stochastic algorithm designed to solve Generalized Eigenvalue Problems (GEPs) efficiently. While applicable to a wide range of GEPs, we focus particularly on its application to Canonical Correlation Analysis (CCA), Partial Least Squares (PLS), and related methods.
+We now introduce GEP-EY, a stochastic algorithm designed to solve Generalized Eigenvalue Problems efficiently. While applicable to a wide range of GEPs, we focus particularly on its application to Canonical Correlation Analysis, Partial Least Squares, and related methods.
 
 \subsubsection{Batch GEP-EY Algorithm}
 
@@ -673,8 +671,8 @@ These results demonstrate the scalability of our PLS-EY method to extremely high
 
 \subsection{Limitations}
 
-This chapter presents a comprehensive exploration and development of novel algorithms for Canonical Correlation Analysis (CCA) and Partial Least Squares (PLS), focusing on scalability and efficiency in high-dimensional and large-scale datasets.
-Our approach introduces the Eckhart-Young (EY) inspired objectives for Generalized Eigenvalue Problems (GEPs) and their application in stochastic or data-streaming settings, paving the way for more efficient and scalable solutions to classical subspace learning problems.
+This chapter presents a comprehensive exploration and development of novel algorithms for Canonical Correlation Analysis and Partial Least Squares, focusing on scalability and efficiency in high-dimensional and large-scale datasets.
+Our approach introduces the Eckhart-Young (EY) inspired objectives for Generalized Eigenvalue Problems and their application in stochastic or data-streaming settings, paving the way for more efficient and scalable solutions to classical subspace learning problems.
 
 Our proposed CCA-EY and PLS-EY methods demonstrate significant advancements over traditional approaches in handling the computational complexity and scalability issues inherent in high-dimensional data.
 By reformulating the CCA and PLS objectives, we provide a path to efficiently analyze large datasets, which was previously infeasible due to computational limitations.

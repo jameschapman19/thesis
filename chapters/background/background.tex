@@ -151,7 +151,7 @@ We will also use $\Sigma_{ii}= \Cov(X\sps{i})$ for the population \gls{covarianc
 
 Many classical subspace learning algorithms can be formulated as Generalized Eigenvalue Problems \acrshort{gep}s constructed from \glspl{covariance matrix}. In the following subsection, we introduce the concept of \acrshort{gep}s and discuss their properties, which will be useful for understanding the optimization problems and solutions of these algorithms.
 
-\subsection{Generalized Eigenvalue Problems in linear algebra}
+\subsection{Generalized Eigenvalue Problems in linear algebra}\label{sec:generalized-eigenvalue-problems-in-linear-algebra}
 A Generalized Eigenvalue Problem is defined by two symmetric matrices $A,B\in \mathbb{R}^{D\times D}$ \citep{stewart_matrix_1990}\footnote{more generally, $A,B$ can be Hermitian, but we are only interested in the real case}.
 They are usually characterized by the set of solutions to the equation:
 \begin{align}
@@ -241,7 +241,7 @@ Nevertheless, \acrshort{pca} remains a popular tool in practice \citep{greenacre
 
 Given the inherent limitations of \acrshort{pca}, especially in handling multiview datasets where capturing interactive and complementary information between different data sources is crucial, Partial Least Squares (PLS) emerges as a potent alternative. PLS extends the principles of PCA to analyze two correlated \gls{views} simultaneously, optimizing for the shared covariance rather than variance within a single dataset. This approach makes PLS particularly valuable in multiview settings where the goal is to uncover the latent structures that explain the relationships between views.
 
-Partial Least Squares (PLS) \citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as \gls{views}. \acrshort{pls} can be seen as a generalization of \acrshort{pca}, where \acrshort{pca} becomes a special case when the two \gls{views} are identical.
+Partial Least Squares \citep{wold1975path} aims to maximize the shared covariance between two paired sets of data, referred to as \gls{views}. \acrshort{pls} can be seen as a generalization of \acrshort{pca}, where \acrshort{pca} becomes a special case when the two \gls{views} are identical.
 
 \acrshort{pls} optimizes for the dot product between the \gls{representations} of two views, a measure of similarity.
 
@@ -342,7 +342,7 @@ Despite the advantages of \acrshort{pls} over \acrshort{pca} in handling multivi
 
 \subsection{Canonical Correlation Analysis}\label{sec:cca}
 
-Canonical Correlation Analysis (\acrshort{cca}) is introduced as an advancement over \acrshort{pls}, designed to maximize the correlation instead of covariance between representations. This focus on correlation allows for a more nuanced understanding of the relationships between views, making \acrshort{cca} particularly useful in scenarios where the goal is to explore how \gls{views} relate on a normalized scale.
+Canonical Correlation Analysis (\acrshort{cca}) is a close relative of \acrshort{pls}, designed to maximize the correlation instead of covariance between representations. This focus on correlation allows for a more nuanced understanding of the relationships between views, making \acrshort{cca} particularly useful in scenarios where the goal is to explore how \gls{views} relate on a normalized scale.
 
 \acrshort{cca} achieves this by optimizing the cosine of the angle between the representations, thus normalizing the effect of the scale of the data:
 
@@ -505,7 +505,7 @@ where $\lambda_1, \dots, \lambda_K$ are the top-$K$ generalized eigenvalues. The
 
 \subsection{Linear Discriminant Analysis LDA}
 
-Linear Discriminant Analysis (LDA) can be viewed as a special case of Canonical Correlation Analysis (CCA) where \(X^{(2)}\) is a one-hot encoded matrix representing the class labels.
+Linear Discriminant Analysis (LDA) can be viewed as a special case of Canonical Correlation Analysis where \(X^{(2)}\) is a one-hot encoded matrix representing the class labels.
 This allows us to draw a connection between the unsupervised learning framework of \acrshort{cca} and the supervised framework of LDA\citep{balakrishnama1998linear,riffenburgh1957linear}, thus expanding the understanding of both algorithms.
 
 \textbf{Intuition:} In LDA, the aim is to find a lower-dimensional subspace where the classes are maximally separated. This objective can be viewed through the lens of \acrshort{cca}, where the optimal directions \(u^{(1)}\) and \(u^{(2)}\) in the original and one-hot encoded spaces aim to maximize correlation. In the LDA context, \(u^{(1)}\) would maximize the separation between classes.
@@ -636,7 +636,7 @@ Both involve the integration of data from multiple sources, offering rich insigh
 Brain-behavior studies typically involve pairing neuroimaging data, such as that obtained from Structural MRI (sMRI) or Functional MRI (fMRI), with non-imaging data like responses from questionnaires, cognitive test results, and other behavioral assessments.
 sMRI provides detailed anatomical brain images, essential for understanding brain structure and neurological disorders \citep{kanai2011structural}, while fMRI focuses on brain function by mapping activity during cognitive tasks \citep{miranda2021systematic}.
 
-In addition to task-based fMRI, resting-state fMRI (rs-fMRI) is frequently used to extract functional connectivity, reflecting the brain's functional organization during rest. This approach has been widely applied in Canonical Correlation Analysis (CCA) and Partial Least Squares (PLS) studies. For instance, \citet{smith2015cca} applied CCA to rs-fMRI data alongside non-imaging features, demonstrating the utility of rs-fMRI in understanding intrinsic brain connectivity.
+In addition to task-based fMRI, resting-state fMRI (rs-fMRI) is frequently used to extract functional connectivity, reflecting the brain's functional organization during rest. This approach has been widely applied in Canonical Correlation Analysis and Partial Least Squares studies. For instance, \citet{smith2015cca} applied CCA to rs-fMRI data alongside non-imaging features, demonstrating the utility of rs-fMRI in understanding intrinsic brain connectivity.
 
 The integration of these imaging techniques with behavioral data offers a comprehensive view of how brain structures and functions correlate with behavioral and cognitive patterns \citep{rypma2001age,genon2022linking}.
 
@@ -662,7 +662,7 @@ Deep \acrshort{cca} has recently been used to extract features for the diagnosis
 
 \section{Conclusion}
 
-In this chapter, we have provided a comprehensive overview of multiview learning, with a particular focus on its applications in neuroimaging and genetics. We have discussed the fundamental concepts and methods in multiview learning, such as Canonical Correlation Analysis (CCA), Partial Least Squares (PLS), and their variants, highlighting their strengths and limitations.
+In this chapter, we have provided a comprehensive overview of multiview learning, with a particular focus on its applications in neuroimaging and genetics. We have discussed the fundamental concepts and methods in multiview learning, such as Canonical Correlation Analysis, Partial Least Squares, and their variants, highlighting their strengths and limitations.
 
 The review has emphasized the importance of regularization techniques in high-dimensional settings, as well as the challenges associated with interpreting the resulting components. We have also touched upon the need for efficient algorithms that can handle large-scale datasets, and the potential of non-linear extensions of CCA and joint embedding self-supervised learning approaches.
 

@@ -2,7 +2,6 @@
 
 This chapter provides a summary of the findings of this thesis, discusses their implications, and outlines potential directions for future work. 
 
-
 \section{Summary of Contributions}
 
 \subsection{Regularisation of CCA Models:
@@ -24,14 +23,14 @@ Focusing on scaling challenges for CCA and PLS in the context of large-scale bio
 Learning}
 This chapter introduces a novel formulation of Deep CCA optimized for the stochastic minibatch setting and proposes SSL-EY, a new competitive SSL method. Grounded in findings from \citep{chapman2023cca} and \citep{chapman2023efficient}, the chapter demonstrates the robustness of these methods against hyperparameter sensitivity and elucidates connections between CCA-based SSL methods and other contemporary SSL approaches.
 
-\subsection{CCA-Zoo: A collection of
-Regularized, Deep
-Learning-based, Kernel, and
-Probabilistic methods in a
-scikit-learn style framework}
+\subsection{CCA-Zoo: A collection of Regularized, Deep Learning-based, Kernel, and Probabilistic methods in a scikit-learn style framework}
 Presenting \texttt{CCA-Zoo}, a Python library that consolidates and enhances the accessibility of multiview learning methods, this chapter details the development and capabilities of the library, which implements a variety of CCA, PLS, and related techniques. As detailed in \citep{chapman2021cca}, \texttt{CCA-Zoo} addresses gaps in existing software offerings and facilitates broader adoption and innovation within the research community.
 
 In summary, we have demonstrated novel ways to introduce structured priors into CCA models, developed efficient algorithms for large-scale CCA, extended CCA to deep learning, and provide a unified interface for various CCA methods. Finally, we have made software implementations of these methods available to the research community through the \texttt{CCA-Zoo} package which have already been well-received by the community.
+
+\section{Limitations and Challenges}
+
+It is important to note that while this thesis presents significant methodological advancements and software contributions, the new applied results are somewhat limited. This limitation was largely due to unforeseen circumstances, including significant bureaucratic challenges in accessing the UK Biobank dataset and the global impact of the COVID-19 pandemic. These factors restricted our ability to conduct extensive applied research as initially planned. However, this limitation has been partially offset by the broad adoption and application of our software tools by other researchers in various fields, extending the impact of our work beyond our own direct applications.
 
 \section{Future Work}
 
@@ -53,14 +52,14 @@ Preliminary experiments suggest that the proximal gradient descent approach disc
 
 \section{Closing Remarks}
 
-My PhD journey has been a fascinating exploration of the world of multiview learning, with Canonical Correlation Analysis (CCA) at its core. What began as an endeavor to apply deep learning to uncover brain-behavior associations evolved into a multifaceted exploration, leading to the development of scalable algorithms for linear CCA and the investigation of connections between CCA and self-supervised learning.
+My PhD journey has been a fascinating exploration of the world of multiview learning, with Canonical Correlation Analysis at its core. What began as an endeavor to apply deep learning to uncover brain-behavior associations evolved into a multifaceted exploration, leading to the development of scalable algorithms for linear CCA and the investigation of connections between CCA and self-supervised learning.
 
-Initially, I sought to apply Deep CCA to high-dimensional neuroimaging data, aiming to gain insights into the complex brain-mental health relationship. However, the computational infeasibility of existing Deep CCA methods for such datasets prompted a shift in focus towards developing efficient regularization techniques for CCA models. Confronting the scalability bottleneck head-on, I developed efficient algorithms for CCA and Partial Least Squares (PLS), pushing the boundaries of these methods. This exploration also led to investigating the connections between CCA and Deep and self-supervised learning, bringing the journey full circle.
+Confronting the scalability bottleneck head-on led me to develop these efficient algorithms, pushing the boundaries of CCA and PLS methods. This exploration also unveiled intriguing connections between CCA and self-supervised learning, bringing the journey full circle.
 
-Witnessing the rapid growth and evolution of multiview learning during my PhD has been really exciting. From the emergence of powerful multimodal language models to the increasing adoption of self-supervised learning techniques, being a part of this dynamic field has been a privilege.
+Witnessing the rapid growth and evolution of multiview learning during my PhD has been incredibly stimulating. From the emergence of powerful multimodal language models to the increasing adoption of self-supervised learning techniques, being part of this dynamic field has been a privilege. This journey has transformed me as a researcher, honing my skills in algorithm development, software engineering, and bridging theoretical concepts with practical applications.
 
-One of the most rewarding aspects of this journey has been the impact of our developed software, such as the CCA-Zoo package. Seeing researchers across various fields use my tools to tackle a wide range of problems has been immensely gratifying, underscoring the importance of accessible method implementations.
+One of the most rewarding aspects of this work has been its impact, particularly through the CCA-Zoo package. Seeing researchers across various fields use these tools to tackle diverse problems has been immensely gratifying, underscoring the importance of accessible method implementations. Moreover, the potential applications of these methods in areas like large-scale neuroimaging studies and wearable device data analysis hint at broader impacts on our understanding of human health and behavior.
 
-I believe that the future of multiview learning holds immense promise, with the integration of deep learning with CCA and the application of these methods to ever-larger and more diverse datasets. I believe that the work presented in this thesis has laid a foundation for further advancements, and I am eager to see how others will build upon it.
+Looking ahead, I believe the future of multiview learning holds immense promise. The integration of deep learning with CCA and the application of these methods to ever-larger and more diverse datasets open exciting avenues for research. Particularly promising are the applications to large-scale neuroimaging datasets and the analysis of multimodal data from wearable devices for personalized healthcare.
 
 Thank you for reading.

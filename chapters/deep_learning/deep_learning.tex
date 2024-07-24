@@ -14,8 +14,8 @@ Deep CCA \citep{andrew2013deep} secured a runner-up position for the test-of-tim
 However, its direct application has been limited in large datasets due to biased gradients in the stochastic minibatch setting.
 There have since been proposals to scale-up Deep CCA in the stochastic case with adaptive whitening \citep{wang2015stochastic} and regularization \citep{chang2018scalable}, but these techniques are highly sensitive to hyperparameter tuning.
 
-Self-Supervised Learning (SSL) methods have reached the state-of-the-art in tasks such as image classification \citep{balestriero2023cookbook}, learning representations without labels that capture salient features so that they can be used for general downstream tasks.
-A family of SSL methods that are closely aligned with Canonical Correlation Analysis (CCA) has garnered particular interest.
+Self-Supervised Learning (SSL) methods have reached state-of-the-art in tasks such as image classification \citep{balestriero2023cookbook}, learning representations without labels that capture salient features so that they can be used for general downstream tasks.
+A family of SSL methods that are closely aligned with Canonical Correlation Analysis has garnered particular interest.
 This family notably includes Barlow Twins \citep{zbontar2021barlow}, VICReg \citep{bardes2021vicreg}, and W-MSE \citep{ermolov2021whitening} and they aim to transform a pair of data views into similar representations, similar to the objective of CCA. Similarly, some generative approaches to SSL\citep{sansone2022gedi} bear a striking resemblance to Probabilistic CCA\citep{bach2005probabilistic}.
 These connections have started to be explored in \citet{balestriero2022contrastive}.
 
@@ -173,7 +173,7 @@ SSL methods often employ an encoder-projector model:
 
 \subsubsection{CCA-based SSL Methods: Barlow Twins and VICReg}
 
-Two prominent self-supervised learning (SSL) methods, Barlow Twins and VICReg (Variance-Invariance-Covariance Regularization), utilize objectives that share similarities with Canonical Correlation Analysis (CCA) principles. These methods aim to learn representations that are invariant to data augmentations while maintaining informative and decorrelated features.
+Two prominent self-supervised learning (SSL) methods, Barlow Twins and VICReg (Variance-Invariance-Covariance Regularization), utilize objectives that share similarities with Canonical Correlation Analysis principles. These methods aim to learn representations that are invariant to data augmentations while maintaining informative and decorrelated features.
 
 \paragraph{Barlow Twins}
 Introduced by \citet{zbontar2021barlow}, Barlow Twins is inspired by the redundancy reduction principle in neuroscience \citep{barlow1961possible}. The method aims to create embeddings that are invariant to distortions of the input sample while avoiding the collapse of the learned representations.
@@ -500,7 +500,7 @@ Key aspects of the setup include:
     \item \textbf{SSL-EY Hyperparameters}: Adopted from Barlow Twins optimization
 \end{itemize}
 
-For SSL-EY, we intentionally use hyperparameters optimized for Barlow Twins. This choice aims to demonstrate SSL-EY's robustness and adaptability rather than seeking to outperform existing methods through extensive tuning.
+For SSL-EY, we intentionally use the hyperparameters that were optimized for Barlow Twins. This choice aims to demonstrate SSL-EY's robustness and adaptability rather than seeking to outperform existing methods through extensive tuning.
 
 \subsubsection{Evaluation Methodology}
 To assess the quality of the learned representations, we employ a linear probe approach:
@@ -516,6 +516,7 @@ To assess the quality of the learned representations, we employ a linear probe a
 \end{enumerate}
 
 This approach allows us to gauge how well the self-supervised methods capture meaningful and discriminative features from the unlabeled data.
+It is important to note that in our figures, we actually present log accuracy rather than raw accuracy. Log accuracy provides a more revealing representation of performance differences, especially when comparing models with high accuracy scores. This is because small improvements in raw accuracy at higher levels can represent significant performance gains, which are more clearly visible on a logarithmic scale.
 
 By comparing SSL-EY against Barlow Twins and VICReg under these controlled conditions, we aim to provide insights into its effectiveness as a self-supervised learning algorithm, particularly its ability to learn robust and transferable representations across different datasets and task complexities.
 
@@ -523,7 +524,7 @@ By comparing SSL-EY against Barlow Twins and VICReg under these controlled condi
 
 \begin{table}[H]
     \centering
-    \caption{Comparing the performance of SSL methods on CIFAR-10 and CIFAR-100.}
+    \caption{Comparison of SSL method performance on CIFAR-10 and CIFAR-100 datasets.}
     \resizebox{\textwidth}{!}{%
     \begin{tabular}{|l|c|c|c|c|}
         \hline
@@ -541,7 +542,7 @@ By comparing SSL-EY against Barlow Twins and VICReg under these controlled condi
 \end{table}
 
 \subsubsection{Model Convergence}
-Figures \ref{fig:ssl_learning_curve} and \ref{fig:ssl_projector} illustrate the learning curves and projector analysis for both CIFAR-10 and CIFAR-100 datasets.
+Figure \ref{fig:ssl_learning_curve} illustrates the learning curve analysis for both CIFAR-10 and CIFAR-100 datasets.
 
 \begin{figure}[H]
     \begin{subfigure}[b]{0.48\textwidth}
@@ -565,8 +566,8 @@ The learning curves in Figure \ref{fig:ssl_learning_curve} reveal a crucial insi
 
 The performance variations at 1,000 epochs, as shown in Table \ref{tab:selfsup}, primarily stem from optimization noise, with convergence speeds being comparable among methods. This slow convergence underscores the importance of SSL-EY's robustness to hyperparameter choices, as it can achieve competitive results without the need for time-consuming fine-tuning.
 
-\subsubsection{Projector Size Variation}
-We hypothesized that SSL-EY's robustness to projector size might allow for efficient performance even with smaller projectors or without one. Figure \ref{fig:ssl_projector_dim} presents our findings on this aspect.
+\subsubsection{Projector Size Variation and No-Projector Performance}
+We hypothesized that SSL-EY's architecture might exhibit robustness to projector size, potentially allowing for efficient performance even with smaller projectors or without one entirely. To investigate this, we conducted experiments varying the projector dimensions across SSL-EY, Barlow Twins, and VICReg, including a scenario with no projector. Figure \ref{fig:ssl_projector_dim} presents our findings on both CIFAR-100 and CIFAR-10 datasets.
 
 \begin{figure}[H]
     \begin{subfigure}[b]{0.48\textwidth}
@@ -582,14 +583,54 @@ We hypothesized that SSL-EY's robustness to projector size might allow for effic
         \caption{CIFAR-10}
         \label{fig:ssl_projector_dimensions_10}
     \end{subfigure}
-    \caption{Impact of projector size on SSL-EY's performance for CIFAR-100 and CIFAR-10 datasets.}
+    \caption{Impact of projector size on SSL-EY, Barlow Twins, and VICReg performance for CIFAR-100 and CIFAR-10 datasets. The y-axis shows log error (inversely related to log accuracy), while the x-axis represents projector dimensions.}
     \label{fig:ssl_projector_dim}
 \end{figure}
 
-Figure \ref{fig:ssl_projector_dim} demonstrates SSL-EY's sustained performance with reduced projector size, indicating more efficient representations compared to Barlow Twins and VICReg. Furthermore, SSL-EY performs consistently well even without a projector, underlining its reduced reliance on this architectural component.
+Figure \ref{fig:ssl_projector_dim} reveals that SSL-EY demonstrates remarkable stability across various projector sizes, maintaining high performance even as dimensions are reduced. In contrast, Barlow Twins and VICReg show more significant performance degradation with smaller projector sizes, particularly on the more complex CIFAR-100 dataset.
+
+To further investigate the impact of removing the projector entirely, we conducted additional experiments applying the linear probe directly to the encoder outputs. Table \ref{tab:noprojector} presents these results alongside the projector-based performance for all three methods.
+
+\begin{table}[H]
+    \centering
+    \caption{Comparison of SSL method performance with and without projector on CIFAR-10 and CIFAR-100 datasets.}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{|l|c|c|c|c|c|}
+        \hline
+        Method          & Projector & CIFAR-10 Top-1 & CIFAR-10 Top-5 & CIFAR-100 Top-1 & CIFAR-100 Top-5 \\
+        \hline
+        Barlow Twins    & Yes       & \textbf{92.1}  & 99.73          & \textbf{71.38}  & \textbf{92.32}  \\
+        Barlow Twins    & No        & 89.99          & 99.21          & 63.51           & 86.99           \\
+        \hline
+        VICReg          & Yes       & 91.68          & 99.66          & 68.56           & 90.76           \\
+        VICReg          & No        & \textbf{90.99} & 99.46          & 63.82           & 86.39           \\
+        \hline
+        \textbf{SSL-EY} & Yes       & 91.43          & \textbf{99.75} & 67.52           & 90.17           \\
+        \textbf{SSL-EY} & No        & 90.98          & 99.69          & \textbf{65.21}  & \textbf{88.09}  \\
+        \hline
+    \end{tabular}
+    }
+    \label{tab:noprojector}
+\end{table}
+
+The results in Table \ref{tab:noprojector} provide several key insights:
+
+\begin{itemize}
+    \item Both Barlow Twins and VICReg show a notable drop in performance when the projector is removed, particularly on the more complex CIFAR-100 dataset.
+    \item SSL-EY demonstrates remarkable resilience, maintaining competitive performance even without a projector. This is especially evident on CIFAR-100, where SSL-EY's no-projector performance surpasses that of Barlow Twins and VICReg.
+    \item On CIFAR-10, all methods show less dramatic changes when the projector is removed, likely due to the dataset's lower complexity.
+\end{itemize}
+
+These findings strongly support our initial hypothesis, highlighting SSL-EY's unique capacity to learn robust and efficient representations with minimal architectural overhead. The method's consistent performance across datasets of varying complexity and its resilience to projector removal underscore its versatility and potential for broad applicability in self-supervised learning tasks.
+
+Despite the similarities in the underlying motivations across all three methods, our results suggest that a projector may not be a mandatory component for correlation-based models, at least in the context of our proposed method. By achieving competitive results with reduced architectural requirements, SSL-EY not only offers computational advantages but also suggests a more fundamental efficiency in its approach to representation learning.
 
 \subsubsection{$\LEY$ as an Informative Metric}
-We investigated the relationship between EY loss and classification accuracy to assess the potential of $\LEY$ as a monitoring metric for SSL training. Figure \ref{fig:ssl_ey_vs_acc} illustrates our findings.
+A significant challenge in self-supervised learning (SSL) is tuning models to ensure their learned representations are robust and generalizable across various potential downstream tasks. Traditionally, SSL methods are often tuned using classification accuracy as a proxy metric. However, this approach risks overfitting the model to the specific classification task, potentially compromising its versatility for other applications. This practice contradicts the fundamental goal of SSL: to create representations that are adaptable to a wide range of unforeseen challenges.
+
+To address this issue, we propose that our EY loss ($\LEY$) could serve as a more appropriate surrogate metric for tuning and monitoring SSL models. By using $\LEY$ instead of classification accuracy, we aim to maintain the model's generality while still providing a meaningful measure of representational quality. This approach aligns more closely with the core principles of SSL, potentially leading to more versatile and robust learned representations.
+
+To explore this possibility, we investigated the relationship between EY loss and classification accuracy. Our findings, presented in Figure \ref{fig:ssl_ey_vs_acc}, offer compelling evidence for the potential of $\LEY$ as an informative metric in SSL training.
 
 \begin{figure}[H]
     \begin{subfigure}[b]{0.48\textwidth}
@@ -616,10 +657,9 @@ The correlation between EY loss and classification accuracy, shown in Figure \re
     \item The sustained increase in correlation over 1,000 epochs suggests that even with reduced projector dimensionality, SSL-EY does not reach full capacity, indicating untapped potential in its representation capacity.
 \end{enumerate}
 
-The evolution of the correlation, measured by $\LEY$, suggests a new avenue for monitoring model training, potentially eliminating the need for a separate validation task.
+The evolution of the correlation, measured by $\LEY$, suggests a new avenue for monitoring model training, potentially eliminating the need for a separate validation task. These results collectively demonstrate SSL-EY's robustness, efficiency, and potential for simplifying the self-supervised learning process across different dataset complexities.
 
-These results collectively demonstrate SSL-EY's robustness, efficiency, and potential for simplifying the self-supervised learning process across different dataset complexities.
-
+This analysis not only supports the use of $\LEY$ as a valuable monitoring tool for SSL training but also highlights its potential to streamline the development process. By providing a metric that correlates strongly with downstream performance without being tied to a specific task, $\LEY$ could offer a more principled approach to model tuning in self-supervised learning contexts.
 
 \section{Discussion and Limitations}
 
@@ -645,4 +685,4 @@ While our methods improve performance, further work on enhancing the interpretab
 
 \section*{Conclusion}
 
-In conclusion, DCCA-EY and SSL-EY represent significant advancements in Deep CCA and Self-Supervised Learning, offering improved scalability, faster convergence, and robustness to hyperparameter choices. These qualities make them valuable tools for researchers and practitioners working with complex, high-dimensional data. The strong performance of our methods, even without extensive tuning, suggests that they capture fundamental aspects of correlation and representation learning. This not only enhances their practical utility but also opens new avenues for theoretical exploration in the fields of multiview learning and self-supervised learning.
+In conclusion, DCCA-EY and SSL-EY represent significant advancements in Deep CCA and Self-Supervised Learning, offering improved scalability, faster convergence, and robustness to hyperparameter choices. These qualities make them valuable tools for researchers and practitioners working with complex, high-dimensional data. The strong performance of our methods, even without extensive tuning, suggests that they capture fundamental aspects of correlation and representation learning. This not only enhances their practical utility but also opens up new avenues for theoretical exploration in the fields of multiview learning and self-supervised learning.
