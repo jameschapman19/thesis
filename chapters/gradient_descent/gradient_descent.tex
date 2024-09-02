@@ -18,7 +18,7 @@ Generalized Eigenvalue Problems (GEPs) are fundamental to a wide range of machin
 Stochastic algorithms for simple Eigenvalue Problems (EPs), where the matrix $B$ in the GEP is the identity matrix, have been extensively studied and have shown promising results \citep{arora2012stochastic,arora2016stochastic}. These algorithms not only offer computational advantages but also introduce a form of implicit regularization through the noise in the stochastic updates, which can be particularly beneficial in high-dimensional settings. The regularizing effect of stochastic algorithms has been shown to improve generalization performance and robustness to noise, making them an attractive alternative to batch learning algorithms.
 However, when it comes to solving more complex GEPs, such as those arising in CCA and PLS, the existing stochastic algorithms have some limitations that hinder their practical applicability. For instance, the $\gamma$-EigenGame algorithm \citep{gemp20,gemp2021} requires the tuning of a hyperparameter $\gamma$ that controls the trade-off between computational efficiency and the accuracy of the stochastic updates. Finding the optimal value of this hyperparameter can be challenging and may vary depending on the problem and the data, making the algorithm less convenient to use in practice.
 Another limitation is that some stochastic algorithms, like the Stochastic Generalized Hebbian Algorithm (SGHA) \citep{chen2019constrained}, rely on heuristic primal-dual update rules rather than a principled optimization framework. This makes it difficult to integrate these algorithms with more sophisticated optimizers like Adam \citep{kingma2014adam}, which have been shown to improve convergence speed and stability in many machine learning applications.
-To address these limitations and provide a more principled and robust approach to solving GEPs in the stochastic setting, we propose a novel formulation of the CCA problem based on the Eckhart--Young--Minsky inequality \citep{stewart_matrix_1990}. Our formulation leads to a new objective function that characterizes the top-$K$ subspace of GEPs, including CCA as a special case. Importantly, this objective function is unconstrained and can be optimized using standard stochastic gradient descent or batch gradient descent methods, making it compatible with modern optimization techniques.
+To address these limitations and provide a more principled and robust approach to solving GEPs in the stochastic setting, we propose a novel formulation of the CCA problem based on the Eckhart--Young--Mirsky inequality \citep{stewart_matrix_1990, eckart1936approximation,mirsky1960symmetric }. Our formulation leads to a new objective function that characterizes the top-$K$ subspace of GEPs, including CCA as a special case. Importantly, this objective function is unconstrained and can be optimized using standard stochastic gradient descent or batch gradient descent methods, making it compatible with modern optimization techniques.
 The key advantages of our proposed approach are:
 \begin{itemize}
     \item It provides a unified framework for solving a wide range of GEPs using a single unconstrained objective function, making it applicable to CCA, PLS, PCA, ICA, LDA, and other problems that can be formulated as GEPs.
@@ -279,7 +279,7 @@ We now introduce GEP-EY, a stochastic algorithm designed to solve Generalized Ei
 
 \subsubsection{Batch GEP-EY Algorithm}
 
-We first present the batch version of the GEP-EY algorithm in Algorithm \ref{alg:batch_gep}. This algorithm optimizes the Eckart-Young inspired objective for GEPs using full-batch gradient descent. While it provides an unbiased estimate of the gradient, it may be computationally expensive for large datasets.
+We first present the batch version of the GEP-EY algorithm in Algorithm \ref{alg:batch-gep}. This algorithm optimizes the Eckart-Young inspired objective for GEPs using full-batch gradient descent. While it provides an unbiased estimate of the gradient, it may be computationally expensive for large datasets.
 
 \begin{algorithm}
 \caption{\textbf{GEP-EY}: Batch algorithm for General GEPs}
@@ -399,7 +399,7 @@ PCA & $\Sigma$ & $I$ & $\Cov(Z, Z)$ & $U^\top U$ & 1 \\
 }
 \label{tab:covariance-matrices}
 \end{table}
-The key advantage here is that we only need to operate on and store $K \times K$ matrices, which is much more efficient when $K \ll D_i$ for all $i$. This dimensionality reduction is crucial for the efficiency of our algorithm, as demonstrated in Algorithm \ref{alg:cca_pls} and the corresponding PyTorch-style pseudocode in Listing \ref{lst:low-rank-loss}.
+The key advantage here is that we only need to operate on and store $K \times K$ matrices, which is much more efficient when $K \ll D_i$ for all $i$. This dimensionality reduction is crucial for the efficiency of our algorithm, as demonstrated in Algorithm \ref{alg:cca_pls} and the corresponding PyTorch-style pseudocode in Listing \ref{lst:unbiased-stochastic-gep-ey}.
 By working with $C(\theta)$ and $V_\alpha(\theta)$ instead of the full $A$ and $B$ matrices, we significantly reduce the computational complexity while still capturing the essential structure of the problem. The ridge penalty parameter $\alpha_i$ allows us to smoothly interpolate between different methods in the CCA family:
 
 For CCA and MCCA, $\alpha_i = 0$ for all $i$, focusing entirely on the variance of the learned representations.
@@ -504,25 +504,27 @@ In summary, GEP-EY provides a novel, efficient, and theoretically grounded appro
 
 \section{Experiments and Results}\label{sec:experiments}
 \subsection{Comparison with Standard Batch Solvers}
-In this experiment, we compare our CCA-EY method to the traditional approach of solving the CCA Generalized Eigenvalue Problem (GEP) using the \texttt{scipy.linalg.eigh} function \citep{virtanen2020scipy}. This comparison aims to demonstrate the scalability advantages of our method, particularly for high-dimensional data.
+In this experiment, we compare our CCA-EY method in the full batch setting to the traditional approach of solving the CCA Generalized Eigenvalue Problem (GEP) using the \texttt{scipy.linalg.eigh} function \citep{virtanen2020scipy}. This comparison aims to demonstrate the scalability advantages of our method, particularly for high-dimensional data.
 
-\subsubsection{Data and Experimental Setup}
-We generate synthetic data with the following characteristics:
+\subsubsection{Data Generation and Experimental Design}
+
+Our experimental framework employs carefully constructed synthetic datasets, designed to challenge both methods across a spectrum of dimensionalities while maintaining consistent statistical properties. The key characteristics of our data generation process are as follows:
+
+We generate multivariate Gaussian datasets with a prescribed covariance structure, ensuring the existence of a true CCA solution. The dimensionality of these datasets ranges from low to high, specifically from 10 to 5,000 features, allowing us to assess performance across a broad spectrum of problem sizes. To isolate the effect of dimensionality, we maintain a constant sample size of 10,000 instances across all datasets.
+
+To ensure robust results and account for statistical variations, we repeat the data generation and evaluation process five times for each feature size. This repetition allows us to compute average performance metrics and their associated variances, providing a more reliable basis for comparison.
+
+In our analysis, we focus on the top-5 components of the CCA subspace. This choice reflects a common practical scenario where the primary interest lies in the most significant correlations between the two views of the data.
+
+\subsubsection{Evaluation Methodology}
+
+Our evaluation methodology is designed to provide a fair and informative comparison between the traditional GEP solver and our CCA-EY method. For each generated dataset:
+
 \begin{itemize}
-    \item \textbf{Feature Range}: 10 to 5,000 features
-    \item \textbf{Sample Size}: Fixed at 10,000
-    \item \textbf{Distribution}: Multivariate Gaussian with a prescribed covariance structure ensuring a true CCA solution
-    \item \textbf{Repetitions}: 5 times for each feature size
-    \item \textbf{CCA Subspace}: Top-5 components
+    \item We first apply the \texttt{scipy.linalg.eigh} function to solve the GEP, recording the computation time required to obtain the CCA solution.
+    \item We then train our CCA-EY method on the same dataset. To ensure a fair comparison with \texttt{scipy.linalg.eigh}, we allow CCA-EY to iterate until convergence, defined as the point where the Frobenius norm of the weight change between iterations falls below a threshold of $10^{-5}$. This criterion ensures that CCA-EY achieves a solution quality comparable to the batch method.
+    \item We  record the computation time for both methods, providing a direct comparison of their efficiency across different data dimensionalities.
 \end{itemize}
-
-\subsubsection{Methodology}
-For each feature size:
-\begin{enumerate}
-    \item Solve GEP using \texttt{scipy.linalg.eigh}
-    \item Train CCA-EY until convergence (Frobenius norm of weight change < $10^{-5}$)
-    \item Record computation time for both methods
-\end{enumerate}
 
 \subsubsection{Results and Observations}
 Figure \ref{fig:cca-comparison} shows the results of this experiment. For feature sizes up to 1,000, our CCA-EY method is slower than \texttt{scipy.linalg.eigh}. However, beyond this point, CCA-EY significantly outperforms the baseline in terms of computation time.
@@ -539,34 +541,20 @@ As the number of features increases, the time taken to solve the GEP using \text
 This experiment evaluates our CCA-EY method against two established baselines, $\gamma$-EigenGame \citep{gemp2022generalized} and SGHA \citep{chen2019constrained}, on real-world datasets. We aim to assess the algorithms' ability to handle high-dimensional data efficiently and accurately without prior dimensionality reduction.
 
 \subsubsection{Datasets}
-We employ two diverse datasets:
+We evaluate our CCA-EY method on two diverse datasets: MediaMill and Split-CIFAR.
 
-\begin{enumerate}
-    \item \textbf{MediaMill} \citep{gemert2008visual}:
-        \begin{itemize}
-            \item \textbf{Content}: Paired features from videos and textual commentary
-            \item \textbf{Objective}: Learn joint representations capturing visual-textual correlations
-            \item \textbf{Size}: 25,800 test instances
-            \item \textbf{Features}: 120 (video view) and 101 (commentary view)
-        \end{itemize}
-    
-    \item \textbf{Split-CIFAR} \citep{meng2021online}:
-        \begin{itemize}
-            \item \textbf{Derivation}: CIFAR-10 images split in half
-            \item \textbf{Objective}: Learn correlated representations of image halves
-            \item \textbf{Size}: 50,000 training and 10,000 test instances
-            \item \textbf{Features}: 32x16x3 for each view
-        \end{itemize}
-\end{enumerate}
+The MediaMill dataset \citep{gemert2008visual} offers a multimodal challenge in the domain of video analysis. It comprises 25,800 test instances, each represented by two views: 120-dimensional visual features extracted from video frames and 101-dimensional textual features derived from accompanying commentary. This dataset tests the model's ability to learn correlated representations across different modalities, bridging the gap between visual and textual information in video content.
+
+The Split-CIFAR dataset \citep{meng2021online} presents a novel approach to evaluating CCA methods using image data. Derived from the CIFAR-10 dataset, it splits each image into two halves, creating two distinct views. The dataset consists of 50,000 training instances and 10,000 test instances. Each view (half-image) is represented by features of dimension 32x16x3. This splitting mechanism challenges the model to learn correlated representations from partial image information, effectively reconstructing the original image content. The high dimensionality and inherent correlations between image halves make Split-CIFAR an excellent testbed for assessing the efficiency and accuracy of CCA methods in processing visual data.
 
 \subsubsection{Experimental Setup}
-\begin{itemize}
-    \item \textbf{Training Duration}: Single epoch
-    \item \textbf{Batch Sizes}: 5, 20, 50, 100
-    \item \textbf{Hyperparameter Tuning}: Grid search using Weights and Biases (WandB) \citep{wandb}
-\end{itemize}
+Our experimental framework is designed to rigorously evaluate the performance of our proposed method, CCA-EY, against two established baselines: $\gamma$-EigenGame and SGHA. We have carefully crafted this setup to align closely with the methodologies employed by \citet{meng2021online} and \citet{gemp2022generalized}, ensuring comparability with existing literature while introducing key innovations.
 
-Table \ref{tab:hyperparameters} details the hyperparameter ranges explored for each method.
+At the core of our experiment is a direct comparison between CCA-EY and the aforementioned baselines, allowing us to assess the relative strengths and potential advantages of our approach in the context of stochastic CCA. Notably, our methodology diverges from that of \citet{gemp2022generalized} in one crucial aspect: we eschew the simplification of performing Principal Component Analysis (PCA) on the data before applying the CCA methods. This decision to work with raw, high-dimensional data presents a more challenging and realistic scenario, which may account for any observed decrease in the performance of $\gamma$-EigenGame compared to their reported results.
+
+To evaluate the efficiency and rapid learning capabilities of each method, we constrain the training process to a single epoch. This design choice challenges the algorithms to extract meaningful canonical correlations from limited exposure to the data. Within this single-epoch framework, we explore the impact of stochasticity by implementing a range of mini-batch sizes, specifically from 5 to 100. This spectrum allows us to observe how each method performs under varying degrees of sample randomness, from highly stochastic scenarios with small batches to more stable conditions with larger batches.
+
+Table \ref{tab:hyperparameters} details the hyperparameter ranges explored for each method, replicating those in prior work for consistency and comparability.
 
 \begin{table}[h!]
     \centering
@@ -581,35 +569,27 @@ Table \ref{tab:hyperparameters} details the hyperparameter ranges explored for e
         Epochs                & 1                   \\
         Seeds                 & 1, 2, 3, 4, 5       \\
         Learning rate         & 0.01, 0.001, 0.0001 \\
-        $\gamma$*             & 0.01, 0.1, 1, 10    \\
+        $\gamma$\footnote{gamma is only used for $\gamma$-EigenGame} & 0.01, 0.1, 1, 10    \\
         \hline
     \end{tabular}
-    \footnotesize{* $\gamma$ is only used for $\gamma$-EigenGame}
 \end{table}
 
-\subsubsection{Evaluation Metric}
-We use the Proportion of Correlation Captured (PCC) metric:
+\subsubsection{Evaluation Metric: Proportion of Correlation Captured (PCC)}
+We employ the Proportion of Correlation Captured (PCC) metric for evaluation:
 
-\begin{equation}
-\text{PCC} = \frac{\sum_{k=1}^K \rho_k}{\sum_{k=1}^K \rho_k^*},
-\end{equation}
+\[
+    \text{PCC} = \frac{\sum_{k=1}^K \rho_k}{\sum_{k=1}^K \rho_k^*}
+\]
 
-where:
-\begin{itemize}
-    \item $K$: Number of canonical components
-    \item $\rho_k$: Correlations of estimated representations $Z\sps{i}=X^{(i)}\hat{U}^{(i)}$ on the test set
-    \item $\rho_k^*$: Canonical correlations from full batch covariance matrices
-\end{itemize}
+where $\rho_k$ are the empirical correlations between the estimated representations $Z^{(i)} = X^{(i)}\hat{U}^{(i)}$ on the test set, and $\rho_k^*$ are the canonical correlations computed from full batch covariance matrices. $K$ denotes the number of canonical components considered.
 
-In our notation:
-\begin{itemize}
-    \item $\rho_k = \MCCA_K(\hat{Z}\sps{1}, \hat{Z}\sps{2})$
-    \item $\rho_k^* = \MCCA_K(X\sps{1}, X\sps{2})$
-\end{itemize}
+The PCC metric offers several advantages for evaluating CCA methods. By comparing the correlations of the estimated representations to the true canonical correlations, PCC provides a normalized measure of how well a method captures the underlying correlations in the data. This normalization allows for fair comparisons across different datasets and experimental settings.
 
-This metric efficiently tracks algorithm performance over time while minimizing computational overhead \citep{meng2021online, gemp2022generalized, ma2015finding, ge2016efficient}.
+Interpreting PCC is intuitive: a value closer to 1 indicates that the method captures a higher proportion of the true correlations, with 1 representing perfect correlation capture. This directness enables easy comparison between different algorithms and across various experimental conditions.
 
-By comparing CCA-EY with $\gamma$-EigenGame and SGHA across these real-world datasets and various batch sizes, we aim to demonstrate the robustness and efficiency of our method in handling high-dimensional, complex data without the need for prior dimensionality reduction.
+Moreover, PCC efficiently tracks algorithm performance over time while minimizing computational overhead. This makes it particularly suitable for evaluating online or iterative CCA methods, where performance may evolve during the learning process.
+
+The widespread use of PCC in the literature \citep{meng2021online, gemp2022generalized, ma2015finding, ge2016efficient} also facilitates comparisons with existing work, providing a standardized benchmark for assessing the performance of our CCA-EY method against established baselines.
 
 \subsubsection{Results and Observations}
 Figure \ref{fig:corr_mediamill} compares the learning curves of the algorithms on the MediaMill dataset for various mini-batch sizes. CCA-EY consistently outperforms the baselines across all batch sizes. Figure \ref{fig:learningcurve_mediamill} provides a more detailed view of the learning curves for batch sizes 5 and 100, highlighting the superior performance of CCA-EY over time.
@@ -642,7 +622,7 @@ These experiments demonstrate that our proposed CCA-EY method can achieve faster
 
 \subsection{Stochastic PLS on UK Biobank Data}
 In this experiment, we showcase the scalability and efficiency of our Stochastic PLS method, PLS-EY, on an extremely high-dimensional imaging genetics dataset from the UK Biobank \citep{sudlow2015uk}.
-\subsubsection{Data}
+\subsubsection{Dataset}
 The UK Biobank is a large-scale biomedical database containing genetic and phenotypic data from over 500,000 participants. For this experiment, we use a subset of the data consisting of brain imaging features (82 regional volumes) and genetic variants (582,565 SNPs) for 33,333 subjects.
 The brain imaging data was preprocessed using FreeSurfer \citep{Fischl2012} to extract gray-matter volumes for 66 cortical regions (based on the Desikan-Killiany atlas) and 16 subcortical regions. The effects of age, age squared, intracranial volume, sex, and the first 20 genetic principal components (to account for population structure) were regressed out from the brain features. Each brain region of interest (ROI) was then normalized by removing the mean and dividing by the standard deviation.
 The genetic data was processed using PLINK \citep{Purcell2007}, retaining genetic variants with a minor allele frequency of at least 1% and a maximum missingness rate of 2%. Mean imputation was used to fill in missing values, and each variant was centered.

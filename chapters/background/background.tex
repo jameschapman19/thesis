@@ -111,7 +111,7 @@ The \textit{Wisdom of Crowds} phenomenon, where the collective average of multip
 
 In this thesis, we will explore Canonical Correlation Analysis, a multiview learning method predicated on the assumption that different \gls{views} provide complementary information about latent variables. The following sections will establish a formal framework for representation learning and motivate the use of Canonical Correlation Analysis in harnessing complementary information from multiview data.
 
-\section{Learning Representations: Definitions and Notation}
+\section{Learning Representations: Definitions and Notation}\label{sec:learning-representations-definitions-and-notation}
 
 Suppose we have a sequence of vector-valued random variables $X\sps{i} \in \R^{D_i}$ for $i \in \{1, \dots, I \}$
 We want to learn meaningful $K$-dimensional \gls{representations}
@@ -235,7 +235,7 @@ There are three major limitations of \acrshort{pca} that are relevant to this th
     \item \textbf{Multiview Data}: \acrshort{pca} is primarily designed for analyzing a single dataset and does not naturally accommodate multiview data, where multiple independent sets of variables (views) describe the data. While it is possible to concatenate these \gls{views} into a single dataset prior to analysis, this approach does not take advantage of the potential interactions and complementary information across the views, which can be critical for more insightful analysis in applications such as image processing, bioinformatics, and social sciences.
 \end{enumerate}
 
-Nevertheless, \acrshort{pca} remains a popular tool in practice \citep{greenacre2022principal} and is a useful baseline for multiview learning methods, and we will use it as a point of comparison throughout this thesis.
+Nevertheless, \acrshort{pca} remains a popular tool in practice \citep{greenacre2022principal} and is a useful baseline for multiview learning methods, and we will use it as a point of comparison in this thesis.
 
 \subsection{Partial Least Squares}
 

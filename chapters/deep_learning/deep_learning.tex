@@ -60,7 +60,9 @@ Variational Autoencoders (VAEs) \citep{kingma2013auto} extend the autoencoder fr
 where $q_{\phi}(z|x)$ is the encoder (or inference) network, $p_{\theta}(x|z)$ is the decoder (or generative) network, and $p(z)$ is a prior distribution over the latent space.
 VAEs provide a principled way to generate new samples and perform probabilistic inference, making them useful for both representation learning and generative modeling.
 
-Given the connection between Autoencoders and PCA, it is natural to consider the extension of CCA to the deep learning setting. This leads to the development of Deep CCA, which aims to learn nonlinear representations that are maximally correlated across different views.
+Research has extended Autoencoders to multiview settings, such as Multiview Autoencoders \citep{ngiam2011multimodal} which regularise autoencoders for each view to be somewhat similar to each other. Contributions of my own to this area include applications to neuroscience data \citep{lawry2023multi} and the development of a software package for multiview autoencoders \citep{florence_townend_2023_10228564}. 
+
+However given the deep connection between Autoencoders and PCA, it is natural to consider the extension of CCA to the deep learning setting. This leads to the development of Deep CCA, which aims to learn nonlinear representations that are maximally correlated across different views.
 
 \subsection{From Autoencoders to Deep CCA}
 
@@ -337,7 +339,7 @@ In the next section, we will present experiments demonstrating the effectiveness
 \section{Experiments and Results}
 
 \subsection{Deep CCA}\label{sec:experiments-DCCA}
-This experiment aims to demonstrate the effectiveness of our DCCA-EY method compared to existing Deep Canonical Correlation Analysis approaches. We focus on three key aspects: correlation capture, convergence speed, and ease of hyperparameter tuning. Our experimental setup closely follows that of \citet{wang2015stochastic}, enabling a direct and fair comparison.
+This experiment aims to demonstrate the effectiveness of our DCCA-EY method compared to existing Deep Canonical Correlation Analysis approaches including DCCA-STOL and DCCA-NOI. We focus on three key aspects: correlation capture, convergence speed, and ease of hyperparameter tuning. Our experimental setup closely follows that of \citet{wang2015stochastic}, enabling a direct and fair comparison.
 
 \subsubsection{Datasets}
 We evaluate our method on two diverse datasets: Split MNIST and the X-Ray Microbeam Speech Production Database (XRMB).
@@ -347,17 +349,18 @@ The Split MNIST dataset is a modified version of the original MNIST dataset, des
 The XRMB dataset provides a more complex, real-world challenge in the domain of speech production. It comprises approximately 40,000 spoken utterances from 47 American English speakers, offering a rich multiview perspective on articulatory speech data. The dataset presents two views: acoustic features and articulatory measurements. The acoustic features are represented by 273-dimensional vectors capturing spectral characteristics, while the articulatory measurements are 112-dimensional vectors describing the position and movement of speech articulators. The high dimensionality and complexity of XRMB make it an excellent testbed for assessing the scalability and robustness of DCCA methods.
 
 \subsubsection{Experimental Setup}
-Key aspects of the setup include:
-\begin{itemize}
-    \item \textbf{Network Architecture}: Multilayer perceptrons with two hidden layers (size 800) and an output layer (size 50), using ReLU activations
-    \item \textbf{Training Duration}: 50 epochs
-    \item \textbf{Representation Dimensionality}: K = 50
-    \item \textbf{Batch Sizes}: 20, 50, 100
-    \item \textbf{Learning Rates}: 1e-3, 1e-4, 1e-5
-    \item \textbf{$\rho$ values} (for DCCA-NOI only): 0.6, 0.8, 0.9
-\end{itemize}
 
-We use Weights and Biases \citep{wandb} for hyperparameter tuning, conducting a grid search over the specified ranges for each method.
+Our experimental design is crafted to rigorously evaluate DCCA-EY against existing methods across a range of operational conditions. We employ a network architecture consisting of multilayer perceptrons with two hidden layers, each containing 800 units, followed by an output layer of 50 units. ReLU activations are used throughout the network, closely aligning with the architecture used by \citet{wang2015stochastic}. This architectural choice ensures a fair comparison with previous work while providing sufficient model capacity to capture complex correlations between views.
+
+To thoroughly assess both the initial convergence behavior and long-term performance stability of each method, we train each model for 50 epochs. This extended training period allows us to observe how different approaches perform over time, particularly in terms of their ability to maintain and refine learned correlations.
+
+The dimensionality of the learned representations (K) is set to 50, matching the output layer size. This choice facilitates direct comparison with previous work and ensures that we are evaluating each method's ability to capture a consistent number of canonical components.
+
+To evaluate performance across different levels of stochasticity, we experiment with batch sizes of 20, 50, and 100. This range allows us to assess each method's robustness to varying degrees of sample randomness, with a particular focus on how well they perform with smaller batch sizes that introduce more stochasticity into the training process.
+
+Our hyperparameter tuning process involves a comprehensive grid search over learning rates (1e-3, 1e-4, 1e-5) for all methods, and additionally, for DCCA-NOI, we explore $\rho$ values of 0.6, 0.8, and 0.9. This thorough exploration of the hyperparameter space ensures that each method is evaluated at its optimal performance point, providing a fair basis for comparison.
+
+Through this carefully designed experimental setup, we aim to systematically evaluate DCCA-EY against existing methods, with a particular focus on its performance across different batch sizes. By closely following the methodology of \citet{wang2015stochastic} while introducing our own innovations, we strive to provide a fair and comprehensive comparison that highlights the strengths of our approach, especially in terms of correlation capture, convergence speed, and ease of hyperparameter tuning.
 
 \subsubsection{Evaluation Metric: Total Correlation Captured (TCC)}
 We introduce the Total Correlation Captured (TCC) metric for evaluation:
@@ -367,17 +370,13 @@ We introduce the Total Correlation Captured (TCC) metric for evaluation:
 \]
 
 where $\rho_k$ are the empirical correlations between the neural network-based representations $Z^{(i)} = f^{(i)}(X^{(i)})$ on a validation set.
+The TCC metric offers several advantages over previously used measures such as the Proportion of Correlation Captured (PCC). Unlike PCC, TCC does not require ground truth correlations for its computation, making it more versatile and applicable to a wider range of datasets where such ground truth may not be available. Furthermore, by evaluating on a validation set, TCC provides a measure of each method's generalization capability, offering insights into how well the learned correlations extend to unseen data.
 
-Key features of TCC:
-\begin{itemize}
-    \item Unlike PCC (used in previous experiments), TCC doesn't require ground truth for computation
-    \item Evaluates on a validation set, offering a measure of generalization capability
-    \item Higher TCC indicates better capture of correlations across views
-\end{itemize}
+Interpreting TCC is straightforward: a higher TCC value indicates a better capture of correlations across views. This directness allows for easy comparison between different methods and across various experimental conditions. By using TCC, we can effectively quantify each method's ability to discover and represent the underlying correlations in the data, providing a clear and intuitive measure of performance in the context of Deep CCA.
 
 \subsubsection{Objectives}
 
-Our experiment is designed with multiple objectives to thoroughly evaluate the performance and characteristics of DCCA-EY in comparison to existing DCCA methods. Primarily, we aim to assess DCCA-EY's ability to capture cross-view correlations, its convergence speed across various batch sizes, and its sensitivity to hyperparameter choices. Through these comparisons, we seek to demonstrate DCCA-EY's robustness and scalability across different batch sizes and dataset complexities.
+Our experiment is designed to thoroughly evaluate the performance and characteristics of DCCA-EY in comparison to existing DCCA methods. Primarily, we aim to assess DCCA-EY's ability to capture cross-view correlations, its convergence speed across various batch sizes, and its sensitivity to hyperparameter choices. Through these comparisons, we seek to demonstrate DCCA-EY's robustness and scalability across different batch sizes and dataset complexities.
 
 The analysis focuses on several key aspects of performance. By examining the Total Correlation Captured (TCC) scores, we can directly compare each method's effectiveness in learning correlated representations across views. The convergence rates provide insights into the efficiency of each method, particularly important in large-scale applications where training time is a critical factor. Additionally, by varying batch sizes, we can assess each method's adaptability to different computational constraints, a crucial consideration in practical deployments.
 
@@ -422,7 +421,7 @@ DCCA-STOL struggles with smaller mini-batch sizes, while DCCA-NOI, though compar
 
 \subsection{Deep Multiview CCA: Robustness Across Different Batch Sizes}
 
-In this experiment, we evaluate the performance and adaptability of our DCCA-EY method in a multiview context, comparing it against established methods such as Deep MCCA and Deep GCCA. Our primary goal is to assess how these methods perform across various batch sizes, with a particular focus on their ability to capture correlations between multiple views.
+In this experiment, we evaluate the performance and adaptability of our DCCA-EY method in a multiview context, comparing it against established multiview DCCA methods including Deep MCCA and Deep GCCA. Our primary goal is to assess how these methods perform across various batch sizes, with a particular focus on their ability to capture correlations between multiple views.
 
 \subsubsection{Dataset: mfeat}
 
@@ -431,15 +430,34 @@ For this experiment, we utilize the mfeat dataset \citep{misc_multiple_features_
 The mfeat dataset is particularly valuable for our study due to its diverse feature types, which challenge the algorithms' ability to find correlations across heterogeneous data representations. This diversity allows us to assess the robustness and flexibility of our DCCA-EY method in dealing with varied data characteristics, a crucial aspect in real-world multiview learning scenarios.
 
 \subsubsection{Experimental Setup}
-Key aspects of the setup include:
-\begin{itemize}
-    \item \textbf{Representation Dimensionality}: K = 50
-    \item \textbf{Training Duration}: 100 epochs
-    \item \textbf{Batch Sizes}: 5, 10, 20, 50, 100, 200
-    \item \textbf{Learning Rates}: 0.01, 0.001, 0.0001, 0.00001
-\end{itemize}
 
-We use Weights and Biases \citep{wandb} for hyperparameter tuning, conducting a grid search over the specified ranges for each method.
+Our experimental design aims to comprehensively evaluate the performance of various multiview Deep CCA methods across a range of batch sizes, with a particular focus on small batch scenarios. We hypothesize that our method will demonstrate superior performance across all batch sizes, but with a marked advantage in smaller batch conditions where existing methods are expected to struggle.
+
+The core of our experiment involves training each Deep CCA variant to learn a shared representation space of 50 dimensions (K = 50). To ensure a thorough assessment of each method's convergence properties and final performance, we extend the training process over 100 epochs. This duration allows us to observe both the initial learning dynamics and the long-term stability of the learned representations.
+
+A key aspect of our experimental design is the variation in batch sizes. We explore a wide spectrum, ranging from very small batches of 5 samples to larger batches of 200 samples. Specifically, we test batch sizes of 5, 10, 20, 50, 100, and 200. This range enables us to closely examine how each method's performance scales with increasing batch size, with particular attention to the challenging small-batch regime.
+
+To ensure a fair comparison and to optimize each method's performance, we conduct a comprehensive hyperparameter search. The key hyperparameters and their ranges are summarized in Table \ref{tab:hyperparameters}.
+
+\begin{table}[h!]
+    \centering
+    \caption{Hyperparameter ranges for Deep CCA methods}
+    \label{tab:hyperparameters}
+    \begin{tabular}{|l|l|}
+        \hline
+        Parameter                   & Values                    \\
+        \hline
+        Representation Dimensionality & 50                        \\
+        Training Epochs             & 100                       \\
+        Batch Sizes                 & 5, 10, 20, 50, 100, 200   \\
+        Learning Rates              & 0.01, 0.001, 0.0001, 0.00001 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+By systematically varying these parameters, particularly the batch size, we aim to provide a nuanced understanding of each method's strengths and limitations. Our analysis will focus on how performance metrics evolve across different batch sizes, with special attention to the small-batch scenarios where we anticipate our method to show significant advantages.
+
+This experimental setup allows us to rigorously test our hypothesis that our proposed Deep CCA variant offers superior performance across a range of operational conditions, with a particular emphasis on its robustness in challenging small-batch scenarios. Through this comprehensive evaluation, we seek to demonstrate the practical advantages of our approach in real-world applications where small batch processing is often necessary due to computational or data streaming constraints.
 
 \subsubsection{Evaluation Metric}
 
