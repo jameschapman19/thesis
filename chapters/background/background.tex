@@ -23,6 +23,7 @@ While the distinction between unsupervised and self-supervised learning is somet
 
 \subsection{Multiview Machine Learning}
 This thesis is focussed on multiview machine learning.
+Practically, our results will mostly focus on the two-view case, but the methods we develop are generalizable to more than two views.
 Here, data from different sources or modalities, referred to as \gls{views}, such as neuroimaging, genomics, and clinical records, are analyzed collectively to unveil underlying patterns.
 Multiview machine learning encompasses a variety of techniques aimed at learning from data that have multiple sources or modalities, also known as \gls{views}.
 These techniques broadly fall into categories of supervised and self-supervised multiview learning, with some algorithms straddling the boundary between the two.
@@ -636,7 +637,7 @@ Both involve the integration of data from multiple sources, offering rich insigh
 Brain-behavior studies typically involve pairing neuroimaging data, such as that obtained from Structural MRI (sMRI) or Functional MRI (fMRI), with non-imaging data like responses from questionnaires, cognitive test results, and other behavioral assessments.
 sMRI provides detailed anatomical brain images, essential for understanding brain structure and neurological disorders \citep{kanai2011structural}, while fMRI focuses on brain function by mapping activity during cognitive tasks \citep{miranda2021systematic}.
 
-In addition to task-based fMRI, resting-state fMRI (rs-fMRI) is frequently used to extract functional connectivity, reflecting the brain's functional organization during rest. This approach has been widely applied in Canonical Correlation Analysis and Partial Least Squares studies. For instance, \citet{smith2015cca} applied CCA to rs-fMRI data alongside non-imaging features, demonstrating the utility of rs-fMRI in understanding intrinsic brain connectivity.
+In addition to task-based fMRI, resting-state fMRI (rs-fMRI) is frequently used to extract functional connectivity, reflecting the brain's functional organization during rest. This approach has been widely applied in Canonical Correlation Analysis and Partial Least Squares studies. For instance, \citet{smith2015positive} applied CCA to rs-fMRI data alongside non-imaging features, demonstrating the utility of rs-fMRI in understanding intrinsic brain connectivity.
 
 The integration of these imaging techniques with behavioral data offers a comprehensive view of how brain structures and functions correlate with behavioral and cognitive patterns \citep{rypma2001age,genon2022linking}.
 

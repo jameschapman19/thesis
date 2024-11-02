@@ -98,7 +98,7 @@ The key idea behind PCCA is that the shared latent variable $z$ captures the com
 W\sps{i} &= \Sigma_{ii} U\sps{i} R\\
 U\sps{i} R &= \Sigma_{ii}^{-1} W\sps{i}
 \end{align}
-where $R$ is an arbitrary rotation matrix. This result provides a link between the probabilistic and non-probabilistic formulations of CCA, and suggests that the classical CCA weights can be interpreted as estimates of the true loadings, up to a rotation.
+where $R$ is an arbitrary rotation matrix. While this provides a mathematical link between the probabilistic and non-probabilistic formulations of CCA, the correlation structure within each view ($\Sigma_{ii}$) means that the weights and loadings can be quite different in practice. The weights $U\sps{i}$ and loadings $W\sps{i}$ capture different aspects of the relationship between the views, with the loadings directly modeling how the latent variables manifest in each view's observations.
 \subsubsection{Group Factor Analysis}
 Group Factor Analysis (GFA) \citep{klami2014group} is another explicit latent variable model that extends PCCA by assuming isotropic (i.e., spherical) noise in each view:
 \begin{align}
@@ -129,7 +129,7 @@ x &\sim \mathcal{N}(W z + \mu, \sigma^2 I)
 Like GFA, PPCA assumes isotropic noise and seeks to identify a lower-dimensional latent space that captures the structure in the observed data. The key difference is that PPCA does not model multiple views or the relationships between them.
 However, the connection between GFA and PPCA provides an important insight: when the noise in each view is low and isotropic, the shared latent structure dominates the view-specific noise. In this scenario, applying PPCA to a single view should recover latent variables that are very similar to those obtained by applying GFA to multiple views.
 This suggests that, in low-noise settings, it may be possible to uncover meaningful latent structure using just a single view of the data. Consequently, PPCA can serve as a useful baseline for evaluating the performance of multi-view models like GFA. Likewise in the discriminative setting, if a multi-view model does not significantly outperform PCA applied to a single view, it may indicate that the additional complexity of the multi-view approach is not justified for that particular dataset.
-For this reason, it is always my reccomendation to compare the performance of multi-view models to that of PCA applied to each individual view\footnote{In the growing Deep Multiview Learning literature this is analagous to comparing to separate autoencoders applied to each view}. This can help assess whether the multi-view approach is truly leveraging complementary information across views, or if the observed performance gains are due to other factors, such as noise reduction or increased model capacity.
+For this reason, it is always my recommendation to compare the performance of multi-view models to that of PCA applied to each individual view\footnote{In the growing Deep Multiview Learning literature this is analagous to comparing to separate autoencoders applied to each view}. This can help assess whether the multi-view approach is truly leveraging complementary information across views, or if the observed performance gains are due to other factors, such as noise reduction or increased model capacity.
 By understanding the relationships between these explicit latent variable models, researchers can make more informed decisions about when and how to apply them to real-world datasets, and can better interpret the results obtained from multi-view analyses.
 
 \subsection{Implicit Latent Variable Models: The Joint Covariance Matrix Perspective}
@@ -508,10 +508,9 @@ We summarize the parameters of these experiments in table \ref{tab:simulated-dat
 \end{table}
 
 \subsection{Assessing Information Recovery in CCA and PLS Models Under Varying Signal-to-Noise Ratios}
-
 Our next experiment was motivated by the observation that \acrshort{pls} models (including sparse PLS) often exhibit low but non-zero out of sample correlations in real high-dimensional data.
 We want to understand how much of this is due to the fact that PLS models optimize covariance rather than correlation, and how much is due to the fact that the signal-to-noise ratio is too low.
-In order to understand this, we simulated data with varying signal-to-noise ratios and compared the out of sample correlations of \acrshort{pls} models with the out of sample correlations of Ridge \acrshort{cca} models with varying regularization.
+For brain-behavior relationships specifically, we can estimate likely SNR ranges based on domain knowledge. Measurement noise comes from scanner artifacts, physiological noise, and behavioral measurement error, while signal strength can be bounded using prior studies; for instance, heritability studies suggest upper bounds on brain-behavior relationships, as shared variance cannot exceed heritability estimates. These considerations suggest operating in the lower SNR regime of our simulations.
 Since we are interested in studying these effects in high-dimensional data, we aimed to simulate data with similar numbers of features to real brain-behavior datasets.
 This means that we are only able to use our memory-efficient sampling methods for the explicit latent variable model.
 
@@ -568,7 +567,7 @@ This means that the estimated model loadings may not be sparse even when the est
 We can also quantify the similarity between the true and estimated weights and \gls{loadings} using the cosine similarity; a measure of the similarity between two vectors that is invariant to the scale of the vectors.
 The cosine similarity between two vectors is defined as the cosine of the angle between them \citep{luo2018cosine}.
 Since we are indifferent to the direction of the vectors, we take the absolute value of the cosine similarity.
-The absolute cosine similarity between two vectors is 1 if they are identical (up top a sign) and 0 if they are orthogonal.
+The absolute cosine similarity between two vectors is 1 if they are identical (up to a sign) and 0 if they are orthogonal.
 
 \subsubsection{Implicit Latent Variables (Sparse Weights)}
 
@@ -588,7 +587,7 @@ This is likely because the multicollinearity introduced makes the learnt weights
 \centering
 \includegraphics[width=\linewidth]{figures/simulated/implicit/Combined_Weights_Loadings_with_Error_Bars_Correlated}
 \end{subfigure}
-\caption{Bar plots of the true and estimated weights and \gls{loadings} for data generated from the implicit latent variable models with sparse weights. The left column shows the results for the identity covariance matrices, while the right column shows the results for the correlated covariance matrices.}\label{fig:implicit-weights-loadings}
+\caption{Bar plots of the true and estimated weights and \gls{loadings} for the $X$ data generated from the implicit latent variable models with sparse weights. The left column shows the results for the identity covariance matrices, while the right column shows the results for the correlated covariance matrices.}\label{fig:implicit-weights-loadings}
 \end{figure}
 
 We plot the cosine similarity between the true and estimated weights and \gls{loadings} for data generated from the implicit latent variable models with sparse weights in figure \ref{fig:implicit-weights-loadings-cosine}.
@@ -620,7 +619,7 @@ Once again, the Elastic Net CCA model exhibits no false negatives (i.e. where th
 \centering
 \includegraphics[width=\linewidth]{figures/simulated/explicit/Combined_Weights_Loadings_with_Error_Bars_Correlated}
 \end{subfigure}
-\caption{Bar plots of the true and estimated weights and \gls{loadings} for data generated from the explicit latent variable models with sparse loadings. The left column shows the results for the identity covariance matrices, while the right column shows the results for the correlated covariance matrices.}\label{fig:explicit-weights-loadings}
+\caption{Bar plots of the true and estimated weights and \gls{loadings} for the $X$ data generated from the explicit latent variable models with sparse loadings. The left column shows the results for the identity covariance matrices, while the right column shows the results for the correlated covariance matrices.}\label{fig:explicit-weights-loadings}
 \end{figure}
 
 Once again, we can quantify the similarity between the true and estimated weights and \gls{loadings} using the cosine similarity (Figure \ref{fig:explicit-weights-loadings-cosine}).
@@ -639,7 +638,7 @@ Suprisingly, when the noise covariance matrix is identity, the PLS and PCA model
 In Figures \ref{fig:snr-scores-identity} and \ref{fig:snr-scores-random} we plot the test correlation (score) varying the signal-to-noise ratio and the number of features under the identity and correlated noise covariance matrices respectively.
 
 In figure \ref{fig:snr-scores-identity}, we can see that the PLS model outperforms all of the Ridge CCA models for all values of the signal-to-noise ratio and dimensionality, though only by a small margin.
-The unregeularized CCA model is much worse than even the Ridge CCA model with the smallest regularization.
+The unregularized CCA model is much worse than even the Ridge CCA model with the smallest regularization.
 In this experiment the performance of PLS is directly related to the signal-to-noise ratio.
 
 \begin{figure}
@@ -692,6 +691,6 @@ In this chapter, we explored the relationship between weights and loadings in CC
 
 Through a rigorous mathematical argument, we demonstrated that loadings are invariant to columnwise transformations of the data matrix, while weights are not. This invariance property makes loadings a more reliable choice for interpreting CCA models, as the weights can be arbitrarily set by scaling the data matrix or adding linear combinations of columns.
 
-Our experiments using simulated data provided empirical evidence supporting the theoretical findings. We showed that the recovery of true weights and loadings depends on the underlying covariance structure and the choice of regularization. The results highlighted the importance of considering the signal-to-noise ratio and dimensionality when applying CCA and PLS models to real-world datasets.
+Our experiments using simulated data provided empirical evidence supporting the theoretical findings. We showed that the recovery of true weights and loadings depends on the underlying covariance structure and the choice of regularization. The results highlighted the importance of considering the signal-to-noise ratio and dimensionality when applying CCA and PLS models to real-world datasets. In neuroimaging-behavior applications, for example, we expect relatively weak signals against substantial measurement noise, suggesting an SNR regime where Ridge CCA may be more appropriate than PLS, particularly if brain regions are known to have correlated noise structure.
 
 Overall, this chapter contributes to a better understanding of the behavior and interpretation of CCA models, providing valuable insights for researchers and practitioners working with multiview data. The findings emphasize the importance of considering the invariance properties of loadings and the impact of covariance structure and regularization on model performance. Future research could explore the extension of these insights to more complex data scenarios and the development of efficient algorithms for imposing sparsity on loadings in CCA models.

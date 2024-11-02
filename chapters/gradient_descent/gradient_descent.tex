@@ -71,7 +71,7 @@ An alternative approach is to solve the eigenvalue problem:
 \begin{equation}
 B^{-1} A v = \lambda v
 \end{equation}
-However, this approach requires computing the inverse of $B$, which can be numerically unstable and computationally expensive, especially when $B$ is ill-conditioned or nearly singular. In contrast, the $B^{-\frac{1}{2}} A B^{-\frac{1}{2}}$ formulation only requires computing the square root of $B$, which can be done more efficiently and stably using techniques like the Cholesky decomposition.
+However, this approach requires computing the inverse of $B$, which can be numerically unstable and computationally expensive, especially when $B$ is ill-conditioned or nearly singular. While the $B^{-\frac{1}{2}} A B^{-\frac{1}{2}}$ formulation still requires computing the inverse of the square root of $B$, this operation can be somewhat more stable when combined with techniques like the Cholesky decomposition, though numerical issues may still arise.
 Nonetheless, both approaches have a computational complexity of $\mathcal{O}((d_1+d_2)^3)$ \citep{golub2013matrix}, which can be prohibitive for high-dimensional data, and may suffer from numerical instability, especially when $B$ is ill-conditioned or nearly singular.
 
 \subsubsection{Classical Iterative Algorithms}
@@ -621,31 +621,49 @@ For the Split-CIFAR dataset, Figure \ref{fig:corr_cifar} shows the performance c
 These experiments demonstrate that our proposed CCA-EY method can achieve faster convergence with less hyperparameter tuning compared to the established baselines, making it a promising approach for practical applications involving high-dimensional data.
 
 \subsection{Stochastic PLS on UK Biobank Data}
-In this experiment, we showcase the scalability and efficiency of our Stochastic PLS method, PLS-EY, on an extremely high-dimensional imaging genetics dataset from the UK Biobank \citep{sudlow2015uk}.
+In this experiment, we showcase the scalability and efficiency of our Stochastic PLS method, PLS-EY, on an extremely high-dimensional imaging genetics dataset from the UK Biobank \citep{sudlow2015uk}. The primary aim of this experiment is to demonstrate computational feasibility rather than to establish generalizable biological findings.
+
 \subsubsection{Dataset}
 The UK Biobank is a large-scale biomedical database containing genetic and phenotypic data from over 500,000 participants. For this experiment, we use a subset of the data consisting of brain imaging features (82 regional volumes) and genetic variants (582,565 SNPs) for 33,333 subjects.
-The brain imaging data was preprocessed using FreeSurfer \citep{Fischl2012} to extract gray-matter volumes for 66 cortical regions (based on the Desikan-Killiany atlas) and 16 subcortical regions. The effects of age, age squared, intracranial volume, sex, and the first 20 genetic principal components (to account for population structure) were regressed out from the brain features. Each brain region of interest (ROI) was then normalized by removing the mean and dividing by the standard deviation.
-The genetic data was processed using PLINK \citep{Purcell2007}, retaining genetic variants with a minor allele frequency of at least 1% and a maximum missingness rate of 2%. Mean imputation was used to fill in missing values, and each variant was centered.
+
+The brain imaging data was preprocessed using FreeSurfer \citep{Fischl2012} to extract gray-matter volumes for 66 cortical regions (based on the Desikan-Killiany atlas) and 16 subcortical regions. To isolate disease-relevant signals in brain structure, we regressed out several key confounding variables from the brain features:
+\begin{itemize}
+    \item Age and age squared: to account for both linear and nonlinear effects of aging on brain volume, as brain structure naturally changes across the lifespan \citep{fjell2009high}
+    \item Intracranial volume: to control for differences in overall head size, which can mask or confound regional volume variations \citep{voevodskaya2014effects}
+    \item Sex: to account for systematic differences in brain structure between males and females \citep{ruigrok2014meta}
+    \item The first 20 genetic principal components: to control for population stratification effects, which could create spurious correlations between genetic variants and brain structure due to shared ancestry rather than true biological relationships \citep{price2006principal}
+\end{itemize}
+
+After regressing out these confounders, each brain region of interest (ROI) was normalized by removing the mean and dividing by the standard deviation to ensure comparability across regions.
+
+The genetic data was processed using PLINK \citep{Purcell2007}, retaining genetic variants with a minor allele frequency of at least 1\% and a maximum missingness rate of 2\%. Mean imputation was used to fill in missing values, and each variant was centered.
+
 To generate measures of genetic disease risk, we calculated polygenic risk scores using PRSice \citep{PRSice2014}. Scores were computed with a p-value threshold of 0.05 using GWAS summary statistics for the following diseases: Alzheimer's \citep{Lambert2013}, Schizophrenia \citep{Trubetskoy2022}, Bipolar disorder \citep{Mullins2021}, ADHD \citep{Demontis2023}, ALS \citep{Van_Rheenen2021}, Parkinson's disease \citep{Nalls2019}, and Epilepsy \citep{International_League_Against_Epilepsy_Consortium_on_Complex_Epilepsies2018}.
 \subsubsection{Experimental Setup}
 We apply our PLS-EY method to the UK Biobank dataset, using a mini-batch size of 500 and training for 100 epochs with a learning rate of 0.0001. A key computational challenge in this experiment is maintaining orthogonality between the weight vectors $u_k$ in the PLS model, which is crucial for the method's effectiveness.
 This approach allows us to handle the high-dimensional nature of the data while preserving the interpretability of the learned representations. To the best of our knowledge, this experiment represents the largest-scale PLS analysis of biomedical data to date, demonstrating the potential of our method to facilitate discoveries in extremely large datasets.
 \subsubsection{Results and Observations}
-Figure \ref{fig:UKBB_corr} shows the Pearson correlations among the PLS latent variables $Z_k$ derived from the UK Biobank data. We observe strong correlations between corresponding pairs of representations $Z^{(1)}_k$ and $Z^{(2)}_k$, and weak cross-correlations between $Z^{(1)}_k$ and $Z^{(2)}_i$ for $i \neq k$. This indicates that our PLS-EY model learns a coherent and orthogonal subspace.
+Figure \ref{fig:UKBB_corr} shows the Pearson correlations among the PLS latent variables $Z_k$ derived from the UK Biobank data. We observe strong correlations between corresponding pairs of representations $Z^{(1)}_k$ and $Z^{(2)}_k$, and weak cross-correlations between $Z^{(1)}_k$ and $Z^{(2)}_i$ for $i \neq k$. This indicates that our PLS-EY model learns a coherent and orthogonal subspace. While these results are shown on the training data and not cross-validated, two technical points are noteworthy: first, previous theoretical results in this thesis suggest that PLS tends to be biased towards the largest principal components, which are typically stable in datasets with power-law eigenvalue distributions common in biomedical applications. Second, while our method optimizes for covariance, we observe strong correlations in the learned representations - suggesting we may be detecting genuine structure rather than merely overfitting to spurious covariance patterns.
+
 \begin{figure}
-\centering
-\includegraphics[width=0.6\textwidth,trim={0.8cm 0cm 0.3cm 0cm}]{figures/UKBB/cross_corr.png}
-\caption{Pearson correlations among PLS latent variables $Z_k$ derived from UK Biobank data.}
-\label{fig:UKBB_corr}
-\end{figure}
-Furthermore, we investigate the associations between the PLS brain representations $Z$ and the polygenic risk scores for various disorders, as shown in Figure \ref{fig:genetic_risk}. The results reveal significant correlations between the learned representations and genetic risk measures for several disorders, suggesting that the PLS subspace captures relevant information for genetic disease risk. This finding has important implications for biomedical research, as it demonstrates the ability of our method to uncover meaningful relationships in high-dimensional data.
+    \centering
+    \includegraphics[width=0.6\textwidth,trim={0.8cm 0cm 0.3cm 0cm}]{figures/UKBB/cross_corr.png}
+    \caption{Pearson correlations among PLS latent variables $Z_k$ derived from UK Biobank data.}
+    \label{fig:UKBB_corr}
+    \end{figure}
+
+Furthermore, we investigate the associations between the PLS brain representations $Z$ and the polygenic risk scores for various disorders, as shown in Figure \ref{fig:genetic_risk}. The results reveal correlations between the learned representations and genetic risk measures for several disorders. While these associations would need to be validated in independent samples for biological inference, they demonstrate our method's ability to capture potential structure in high-dimensional data.
+
 \begin{figure}
-\centering
-\includegraphics[width=0.99\textwidth,trim={0.5cm 0cm 0.7cm 0cm}]{figures/UKBB/prs_correlations.png}
-\caption{Correlation between PLS brain representations $Z$ and genetic risk scores for various disorders. AD=Alzheimer's disease, SCZ=Schizophrenia, BP=Bipolar disorder, ADHD=Attention deficit hyperactivity disorder, ALS=Amyotrophic lateral sclerosis, PD=Parkinson's disease, EPI=Epilepsy. $\text{ns}: 0.05 < p \leq 1, \ast: 0.01 < p \leq 0.05, \ast\ast: 0.001 < p \leq 0.01, \ast\ast\ast: 0.0001 < p \leq 0.001$.}
-\label{fig:genetic_risk}
-\end{figure}
-These results demonstrate the scalability of our PLS-EY method to extremely high-dimensional data and its ability to learn interpretable representations that capture biologically relevant information. The successful application of our method to the UK Biobank dataset highlights its potential to facilitate discoveries in large-scale biomedical studies.
+    \centering
+    \includegraphics[width=0.99\textwidth,trim={0.5cm 0cm 0.7cm 0cm}]{figures/UKBB/prs_correlations.png}
+    \caption{Correlation between PLS brain representations $Z$ and genetic risk scores for various disorders. AD=Alzheimer's disease, SCZ=Schizophrenia, BP=Bipolar disorder, ADHD=Attention deficit hyperactivity disorder, ALS=Amyotrophic lateral sclerosis, PD=Parkinson's disease, EPI=Epilepsy. $\text{ns}: 0.05 < p \leq 1, \ast: 0.01 < p \leq 0.05, \ast\ast: 0.001 < p \leq 0.01, \ast\ast\ast: 0.0001 < p \leq 0.001$.}
+    \label{fig:genetic_risk}
+    \end{figure}
+
+We note that while the imaging weights learned by the model could provide insights into the neuroanatomical patterns associated with genetic variation, a detailed analysis of these components is beyond the scope of this computational feasibility study. Future work could examine the biological interpretability of these patterns through rigorous cross-validation and replication in independent cohorts.
+
+These results primarily demonstrate the scalability of our PLS-EY method to extremely high-dimensional data and its ability to extract coherent patterns. The successful application of our method to the UK Biobank dataset highlights its potential as a computational tool for large-scale biomedical studies, though careful validation would be needed for any biological conclusions.
 
 \section{Discussion and Limitations}\label{sec:discussion}
 

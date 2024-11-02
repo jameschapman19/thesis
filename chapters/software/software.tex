@@ -80,6 +80,10 @@ This modular structure makes the codebase more maintainable and easier to naviga
 
 Furthermore, the use of well-established libraries like \texttt{PyTorch}, \texttt{PyTorch Lightning}, and \texttt{NumPyro} for the deep learning and probabilistic modules ensures that \texttt{CCA-Zoo} can benefit from the latest advancements in these rapidly evolving fields. Developers can easily experiment with new architectures, loss functions, and inference techniques, while still leveraging the data handling and model evaluation capabilities of the core \texttt{CCA-Zoo} framework.
 
+\subsection{New methods included from this thesis}
+
+\texttt{CCA-Zoo} includes all of the methods we have described in this thesis, including the Elastic Net regularized CCA, methods for simulating data, as well as gradient descent based CCA and DCCA-EY. We also include all of the relevant baselines.
+
 \subsection{Flexibility and Ease of Use}
 
 \texttt{CCA-Zoo} is designed to be flexible and easy to use for a wide range of multiview learning tasks. The library provides a unified interface for working with both linear and nonlinear methods, unsupervised and semi-supervised settings, and two-view and multi-view scenarios.
@@ -229,6 +233,8 @@ In addition to the synthetic benchmarking experiments, \texttt{CCA-Zoo} has been
 \subsection{Contributions and Impact}
 
 The development of \texttt{CCA-Zoo} represents a significant contribution to the field of multiview learning, particularly within the Python ecosystem. By providing a comprehensive and user-friendly library that integrates seamlessly with existing tools like scikit-learn and PyTorch, \texttt{CCA-Zoo} has the potential to greatly accelerate research and application of multiview methods.
+
+By being fully compatible with \texttt{sklearn} pipelines, we believe that \texttt{CCA-Zoo} also ensures that deconfounding parameters can be estimated as part of the model fitting process rather than separate steps which introduce a subtle form of leakage. While we did not include this in the package itself to avoid feature creep, we recommend using {sklearn} pipelines for deconfounding such as \citet{pradeep_reddy_raamana} which I was able to contribute to in a small way. This allows users to automatically identify and remove confounding factors from their data, improving the interpretability and generalization of multiview models. This is particularly important in applications like genomics and neuroimaging, where confounding variables can significantly impact the results.
 
 Throughout this thesis, \texttt{CCA-Zoo} has played a central role in enabling the empirical studies and method development presented in the previous chapters. The library's efficient implementations of both classical and state-of-the-art multiview algorithms allowed us to conduct extensive experiments on real-world datasets, comparing the performance of different methods and gaining new insights into their behavior. Moreover, the modular design of \texttt{CCA-Zoo} facilitated rapid prototyping and testing of novel extensions and refinements to existing techniques.
 

@@ -66,7 +66,7 @@ However given the deep connection between Autoencoders and PCA, it is natural to
 
 \subsection{From Autoencoders to Deep CCA}
 
-The objective of Deep CCA is to maximize the correlation between learned representations of different views:
+A natural objective of Deep CCA is to maximize the correlation between learned \textit{representations} of different views:
 \begin{align}
 \label{eq:DMCCA-def}
 \norm{\MCCA_K\left(Z^{(1)}, \ldots, Z^{(I)}\right)}_2
@@ -81,14 +81,14 @@ where $Z^{(i)} = f^{(i)}(X^{(i)}; \theta^{(i)})$ are the learned representations
 Figure \ref{fig:dcca_schematic} illustrates how Deep CCA transforms data from different views through neural networks to achieve correlated representations. This approach allows for capturing complex, nonlinear relationships between views that linear methods might miss.
 
 \subsubsection{Full-batch Deep CCA}
-The full-batch approach of Deep CCA, formulated by \citet{andrew2013deep}, maximizes correlation using the following loss function:
+The full-batch approach of Deep CCA, formulated by \citet{andrew2013deep} has been the foundation for subsequent work in this area and won the ICML 2023 test-of-time award. This method maximizes the correlation between learned representations using the following loss function:
 
 \begin{align}\label{eq:T_definition}
     T          & = \left(\text{cov}(Z^{(1)})\right)^{-\frac{1}{2}} Z^{(1)\top} Z^{(2)} \left(\text{cov}(Z^{(2)})\right)^{-\frac{1}{2}} \\
     \LRayleigh & = -\Tr(T)
 \end{align}
 
-We refer to this as the Rayleigh loss because it effectively maximizes the Generalized Rayleigh Quotient associated with the canonical correlation problem. While theoretically sound, this approach faces significant scalability issues with large datasets.
+We refer to this as the Rayleigh loss because it effectively maximizes the Generalized Rayleigh Quotient associated with the canonical correlation problem. While theoretically sound, this approach faces substantial scalability issues with large datasets.
 
 The Rayleigh loss is only valid for full batch gradient descent, which becomes computationally infeasible for large datasets. This limitation has led to numerous issues reported on the GitHub implementation, with users experiencing problems with ill-conditioned matrices and exploding gradients. These problems arise because the covariance matrices can become singular or nearly singular when working with small batches or high-dimensional data, leading to instability in the matrix inversions required by the loss function.
 
@@ -358,7 +358,7 @@ The dimensionality of the learned representations (K) is set to 50, matching the
 
 To evaluate performance across different levels of stochasticity, we experiment with batch sizes of 20, 50, and 100. This range allows us to assess each method's robustness to varying degrees of sample randomness, with a particular focus on how well they perform with smaller batch sizes that introduce more stochasticity into the training process.
 
-Our hyperparameter tuning process involves a comprehensive grid search over learning rates (1e-3, 1e-4, 1e-5) for all methods, and additionally, for DCCA-NOI, we explore $\rho$ values of 0.6, 0.8, and 0.9. This thorough exploration of the hyperparameter space ensures that each method is evaluated at its optimal performance point, providing a fair basis for comparison.
+Our hyperparameter tuning process includes a grid search over learning rates (1e-3, 1e-4, 1e-5) for all methods, with additional tuning of $\rho$ values (0.6, 0.8, 0.9) for DCCA-NOI. By exploring more hyperparameters for the benchmark DCCA-NOI method compared to our approach, we ensure a fair comparison that, if anything, favors the baseline method.
 
 Through this carefully designed experimental setup, we aim to systematically evaluate DCCA-EY against existing methods, with a particular focus on its performance across different batch sizes. By closely following the methodology of \citet{wang2015stochastic} while introducing our own innovations, we strive to provide a fair and comprehensive comparison that highlights the strengths of our approach, especially in terms of correlation capture, convergence speed, and ease of hyperparameter tuning.
 
@@ -370,21 +370,17 @@ We introduce the Total Correlation Captured (TCC) metric for evaluation:
 \]
 
 where $\rho_k$ are the empirical correlations between the neural network-based representations $Z^{(i)} = f^{(i)}(X^{(i)})$ on a validation set.
-The TCC metric offers several advantages over previously used measures such as the Proportion of Correlation Captured (PCC). Unlike PCC, TCC does not require ground truth correlations for its computation, making it more versatile and applicable to a wider range of datasets where such ground truth may not be available. Furthermore, by evaluating on a validation set, TCC provides a measure of each method's generalization capability, offering insights into how well the learned correlations extend to unseen data.
+The TCC metric differs from previously used measures such as the Proportion of Correlation Captured (PCC) in that it does not require ground truth correlations for its computation, making it applicable to datasets where such ground truth is unavailable. By evaluating on a validation set, TCC measures how well the learned correlations generalize to unseen data.
 
-Interpreting TCC is straightforward: a higher TCC value indicates a better capture of correlations across views. This directness allows for easy comparison between different methods and across various experimental conditions. By using TCC, we can effectively quantify each method's ability to discover and represent the underlying correlations in the data, providing a clear and intuitive measure of performance in the context of Deep CCA.
+TCC provides a sum of the estimated correlations across views: a higher TCC value indicates stronger correlations between the learned representations in the validation set. This allows for quantitative comparison between different methods and across various experimental conditions.
 
 \subsubsection{Objectives}
 
-Our experiment is designed to thoroughly evaluate the performance and characteristics of DCCA-EY in comparison to existing DCCA methods. Primarily, we aim to assess DCCA-EY's ability to capture cross-view correlations, its convergence speed across various batch sizes, and its sensitivity to hyperparameter choices. Through these comparisons, we seek to demonstrate DCCA-EY's robustness and scalability across different batch sizes and dataset complexities.
-
-The analysis focuses on several key aspects of performance. By examining the Total Correlation Captured (TCC) scores, we can directly compare each method's effectiveness in learning correlated representations across views. The convergence rates provide insights into the efficiency of each method, particularly important in large-scale applications where training time is a critical factor. Additionally, by varying batch sizes, we can assess each method's adaptability to different computational constraints, a crucial consideration in practical deployments.
-
-Through this experiment, we expect to gain a thorough understanding of DCCA-EY's capabilities and potential advantages over existing DCCA approaches. We anticipate that this evaluation will not only highlight DCCA-EY's performance in terms of correlation capture but also its efficiency, ease of use, and robustness across different computational constraints and data complexities. Such insights are invaluable for assessing the method's suitability for real-world deep multiview learning scenarios, where adaptability and scalability are often as crucial as raw performance.
+This experiment compares DCCA-EY with existing DCCA methods across three dimensions: correlation capture (measured by TCC scores), convergence speed, and behavior across varying batch sizes. We examine how each method performs under different computational constraints, focusing particularly on scalability and stability during training. Through these comparisons, we aim to understand the practical trade-offs between DCCA-EY and current approaches when applied to different dataset sizes and computational settings.
 
 \subsubsection{Observations on SplitMNIST}
 For the SplitMNIST dataset, Figure~\ref{fig:corr_mnist} shows the comparison of methods across different batch sizes.
-We observe that DCCA-STOL captures significantly less correlation than the other methods and breaks down when the mini-batch size is smaller than the dimension $K=50$.
+We observe that DCCA-STOL captures substantially less correlation than the other methods and breaks down when the mini-batch size is smaller than the dimension $K=50$.
 Figure~\ref{fig:lr_mnist} illustrates the learning progress over 50 epochs, where DCCA-NOI, despite performing similarly to DCCA-EY, requires more careful hyperparameter tuning and demonstrates a slower convergence speed.
 
 \subsubsection{Observations on XRMB}
@@ -476,9 +472,9 @@ Our experiment is designed with several key objectives. First, we aim to evaluat
 \subsubsection{Observations}
 Figure~\ref{fig:dmcca_corr} illustrates the comparison of DCCA-EY with Deep GCCA and Deep MCCA across different mini-batch sizes, using the validation TMCC metric.
 DCCA-EY consistently outperforms both Deep GCCA and Deep MCCA, showcasing its superior ability to capture validation TMCC. Notably, Deep MCCA encounters issues when the batch size is smaller than $K=50$, likely due to singular empirical covariances.
-Deep GCCA, while not breaking down, significantly underperforms with smaller batch sizes, highlighting limitations in scalability and efficiency for large-scale data applications.
+Deep GCCA, while not breaking down, underperforms with smaller batch sizes, highlighting limitations in scalability and efficiency for large-scale data applications.
 
-In Figure~\ref{fig:dmcca_lr}, we observe the learning curves for batch sizes 50 and 100. Both Deep MCCA and Deep GCCA demonstrate rapid initial learning of significant correlations but reach a plateau relatively quickly. In contrast, DCCA-EY exhibits a consistent improvement over time and notably outperforms the other methods by the end of the training period. This behavior underscores the enhanced learning capability and efficiency of DCCA-EY, especially in the context of large-scale, high-dimensional data.
+In Figure~\ref{fig:dmcca_lr}, we observe the learning curves for batch sizes 50 and 100. Both Deep MCCA and Deep GCCA demonstrate rapid initial learning of correlations but reach a plateau relatively quickly. In contrast, DCCA-EY exhibits a consistent improvement over time and notably outperforms the other methods by the end of the training period. This behavior underscores the enhanced learning capability and efficiency of DCCA-EY, especially in the context of large-scale, high-dimensional data.
 
 \begin{figure}
     \centering
@@ -534,7 +530,7 @@ To assess the quality of the learned representations, we employ a linear probe a
 \end{enumerate}
 
 This approach allows us to gauge how well the self-supervised methods capture meaningful and discriminative features from the unlabeled data.
-It is important to note that in our figures, we actually present log accuracy rather than raw accuracy. Log accuracy provides a more revealing representation of performance differences, especially when comparing models with high accuracy scores. This is because small improvements in raw accuracy at higher levels can represent significant performance gains, which are more clearly visible on a logarithmic scale.
+It is important to note that in our figures, we actually present log accuracy rather than raw accuracy. Log accuracy provides a more revealing representation of performance differences, especially when comparing models with high accuracy scores. This is because small improvements in raw accuracy at higher levels can represent substantial performance gains, which are more clearly visible on a logarithmic scale.
 
 By comparing SSL-EY against Barlow Twins and VICReg under these controlled conditions, we aim to provide insights into its effectiveness as a self-supervised learning algorithm, particularly its ability to learn robust and transferable representations across different datasets and task complexities.
 
@@ -580,7 +576,7 @@ Figure \ref{fig:ssl_learning_curve} illustrates the learning curve analysis for 
     \label{fig:ssl_learning_curve}
 \end{figure}
 
-The learning curves in Figure \ref{fig:ssl_learning_curve} reveal a crucial insight: all compared SSL methods converge at remarkably slow rates, with hundreds of epochs required for significant performance improvements. Even after 1,000 epochs, the models continue to learn. This observation highlights a significant advantage of SSL-EY: its ability to achieve competitive performance without extensive hyperparameter tuning.
+The learning curves in Figure \ref{fig:ssl_learning_curve} reveal a crucial insight: all compared SSL methods converge at remarkably slow rates, with hundreds of epochs required for substantial performance improvements. Even after 1,000 epochs, the models continue to learn. This observation highlights an important advantage of SSL-EY: its ability to achieve competitive performance without extensive hyperparameter tuning.
 
 The performance variations at 1,000 epochs, as shown in Table \ref{tab:selfsup}, primarily stem from optimization noise, with convergence speeds being comparable among methods. This slow convergence underscores the importance of SSL-EY's robustness to hyperparameter choices, as it can achieve competitive results without the need for time-consuming fine-tuning.
 
@@ -605,7 +601,7 @@ We hypothesized that SSL-EY's architecture might exhibit robustness to projector
     \label{fig:ssl_projector_dim}
 \end{figure}
 
-Figure \ref{fig:ssl_projector_dim} reveals that SSL-EY demonstrates remarkable stability across various projector sizes, maintaining high performance even as dimensions are reduced. In contrast, Barlow Twins and VICReg show more significant performance degradation with smaller projector sizes, particularly on the more complex CIFAR-100 dataset.
+Figure \ref{fig:ssl_projector_dim} reveals that SSL-EY demonstrates remarkable stability across various projector sizes, maintaining high performance even as dimensions are reduced. In contrast, Barlow Twins and VICReg show more substantial performance degradation with smaller projector sizes, particularly on the more complex CIFAR-100 dataset.
 
 To further investigate the impact of removing the projector entirely, we conducted additional experiments applying the linear probe directly to the encoder outputs. Table \ref{tab:noprojector} presents these results alongside the projector-based performance for all three methods.
 
@@ -644,7 +640,7 @@ These findings strongly support our initial hypothesis, highlighting SSL-EY's un
 Despite the similarities in the underlying motivations across all three methods, our results suggest that a projector may not be a mandatory component for correlation-based models, at least in the context of our proposed method. By achieving competitive results with reduced architectural requirements, SSL-EY not only offers computational advantages but also suggests a more fundamental efficiency in its approach to representation learning.
 
 \subsubsection{$\LEY$ as an Informative Metric}
-A significant challenge in self-supervised learning (SSL) is tuning models to ensure their learned representations are robust and generalizable across various potential downstream tasks. Traditionally, SSL methods are often tuned using classification accuracy as a proxy metric. However, this approach risks overfitting the model to the specific classification task, potentially compromising its versatility for other applications. This practice contradicts the fundamental goal of SSL: to create representations that are adaptable to a wide range of unforeseen challenges.
+An important challenge in self-supervised learning (SSL) is tuning models to ensure their learned representations are robust and generalizable across various potential downstream tasks. Traditionally, SSL methods are often tuned using classification accuracy as a proxy metric. However, this approach risks overfitting the model to the specific classification task, potentially compromising its versatility for other applications. This practice contradicts the fundamental goal of SSL: to create representations that are adaptable to a wide range of unforeseen challenges.
 
 To address this issue, we propose that our EY loss ($\LEY$) could serve as a more appropriate surrogate metric for tuning and monitoring SSL models. By using $\LEY$ instead of classification accuracy, we aim to maintain the model's generality while still providing a meaningful measure of representational quality. This approach aligns more closely with the core principles of SSL, potentially leading to more versatile and robust learned representations.
 
@@ -683,11 +679,11 @@ This analysis not only supports the use of $\LEY$ as a valuable monitoring tool 
 
 \subsection{Discussion}
 
-This chapter introduces DCCA-EY and SSL-EY, novel approaches that address key limitations in Deep CCA and Self-Supervised Learning methods. These innovations offer significant advantages in terms of scalability, convergence speed, and robustness to hyperparameter tuning, making them valuable tools for practitioners in representation learning.
+This chapter introduces DCCA-EY and SSL-EY, novel approaches that address key limitations in Deep CCA and Self-Supervised Learning methods. These innovations offer substantial advantages in terms of scalability, convergence speed, and robustness to hyperparameter tuning, making them valuable tools for practitioners in representation learning.
 
 One of the most notable strengths of DCCA-EY is its superior performance across various mini-batch sizes, as evidenced by our experiments on the Split MNIST and XRMB datasets. This scalability is crucial for handling large-scale datasets and diverse computational environments, a common challenge in modern machine learning applications. Moreover, both DCCA-EY and SSL-EY demonstrate faster convergence compared to existing methods, a particularly valuable trait in SSL tasks where training often requires a large number of epochs.
 
-The reduced sensitivity to hyperparameter choices shown by our methods is another significant advantage. In practical applications, where extensive tuning can be prohibitively time-consuming or computationally expensive, this robustness can greatly streamline the deployment process. SSL-EY's ability to maintain performance with reduced or absent projectors suggests more efficient representation learning, potentially leading to simpler architectures and reduced computational requirements.
+The reduced sensitivity to hyperparameter choices shown by our methods is another advantage. In practical applications, where extensive tuning can be prohibitively time-consuming or computationally expensive, this robustness can greatly streamline the deployment process. SSL-EY's ability to maintain performance with reduced or absent projectors suggests more efficient representation learning, potentially leading to simpler architectures and reduced computational requirements.
 
 Furthermore, the observed correlation between EY loss and classification accuracy in SSL-EY provides a novel way to monitor training progress without relying on labeled validation data. This insight opens up new possibilities for unsupervised learning scenarios and could lead to more efficient training protocols.
 
@@ -703,4 +699,4 @@ While our methods improve performance, further work on enhancing the interpretab
 
 \section*{Conclusion}
 
-In conclusion, DCCA-EY and SSL-EY represent significant advancements in Deep CCA and Self-Supervised Learning, offering improved scalability, faster convergence, and robustness to hyperparameter choices. These qualities make them valuable tools for researchers and practitioners working with complex, high-dimensional data. The strong performance of our methods, even without extensive tuning, suggests that they capture fundamental aspects of correlation and representation learning. This not only enhances their practical utility but also opens up new avenues for theoretical exploration in the fields of multiview learning and self-supervised learning.
+In conclusion, DCCA-EY and SSL-EY represent advancements in Deep CCA and Self-Supervised Learning, offering improved scalability, faster convergence, and robustness to hyperparameter choices. These qualities make them valuable tools for researchers and practitioners working with complex, high-dimensional data. The strong performance of our methods, even without extensive tuning, suggests that they capture fundamental aspects of correlation and representation learning. This not only enhances their practical utility but also opens up new avenues for theoretical exploration in the fields of multiview learning and self-supervised learning.
